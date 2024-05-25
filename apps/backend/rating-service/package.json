@@ -1,0 +1,19 @@
+{
+  "name": "rating-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "build": "esbuild src/index.ts --platform=node --bundle --outdir=dist",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "esbuild": "^0.21.4",
+    "express": "^4.19.2",
+    "prisma": "^5.14.0",
+    "ts-node": "^10.9.2"
+  }
+}
