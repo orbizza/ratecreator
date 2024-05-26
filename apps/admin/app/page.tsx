@@ -1,4 +1,4 @@
-import { Button } from "@repo/ui";
+import { Button } from "@ratecreator/ui";
 
 export default function Page(): JSX.Element {
   return (

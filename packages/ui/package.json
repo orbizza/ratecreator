@@ -1,5 +1,5 @@
 {
-  "name": "@repo/ui",
+  "name": "@ratecreator/ui",
   "version": "0.0.0",
   "sideEffects": [
     "**/*.css"
@@ -21,9 +21,9 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/tailwind-config": "*",
-    "@repo/typescript-config": "*",
+    "@ratecreator/eslint-config": "*",
+    "@ratecreator/tailwind-config": "*",
+    "@ratecreator/typescript-config": "*",
     "@types/react": "^18.2.61",
     "autoprefixer": "^10.4.18",
     "postcss": "^8.4.35",
