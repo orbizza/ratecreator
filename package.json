@@ -3,6 +3,8 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
@@ -18,7 +20,8 @@
     "husky": "^9.0.11",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "turbo": "latest"
+    "turbo": "latest",
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=18"
@@ -29,6 +32,8 @@
     "packages/*"
   ],
   "dependencies": {
-    "@changesets/cli": "^2.27.6"
+    "@changesets/cli": "^2.27.6",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0"
   }
 }
