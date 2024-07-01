@@ -3,17 +3,25 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "devDependencies": {
+    "@ratecreator/typescript-config": "*",
     "eslint": "^8.57.0",
+    "husky": "^9.0.11",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "@repo/typescript-config": "*",
-    "turbo": "latest"
+    "turbo": "latest",
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=18"
@@ -22,5 +30,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@changesets/cli": "^2.27.6",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0"
+  }
 }

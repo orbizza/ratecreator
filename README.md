@@ -1,54 +1,118 @@
-# Turborepo Tailwind CSS  with Prisma Shadcn Recoil NextAuth
+# Rate Creator
 
+## Built With
 
-## Using this example
+- [Next.js](https://nextjs.org/?ref=ratecreator.com)
+- [React.js](https://reactjs.org/?ref=ratecreator.com)
+- [Express.js](https://expressjs.com/?ref=ratecreator.com)
+- [Hono.js](https://hono.dev/?ref=ratecreator.com)
+- [Tailwind CSS](https://tailwindcss.com/?ref=ratecreator.com)
+- [Shadcn-UI](https://ui.shadcn.com/?ref=ratecreator.com)
+- [MagicUI](https://magicui.design/?ref=ratecreator.com)
+- [Aceternity](https://ui.aceternity.com/?ref=ratecreator.com)
+- [Prisma.io](https://prisma.io/?ref=ratecreator.com)
+- [MongoDB](https://www.mongodb.com/?ref=ratecreator.com)
+- [AWS SES](https://aws.amazon.com/?ref=ratecreator.com)
+- [AWS SNS](https://aws.amazon.com/?ref=ratecreator.com)
+- [Auth.js](https://authjs.dev/?ref=ratecreator.com)
+- [AWS ElastiCache](https://aws.amazon.com/?ref=ratecreator.com)
+- [AWS Cloudfront](https://aws.amazon.com/?ref=ratecreator.com)
+- [AWS OpenSearch](https://aws.amazon.com/?ref=ratecreator.com)
+- [Posthog](https://posthog.com/?ref=ratecreator.com)
+- [Vercel](https://vercel.com/?ref=ratecreator.com)
+- [TurboRepo](https://turbo.build//?ref=ratecreator.com)
+- [HarnessIO](https://harness.io/?ref=ratecreator.com)
 
+### Contact us
 
-## What's inside?
+<a href="https://ratecreator.com/contact" style="text-decoration: none; display: flex; align-items: center;">
+  <img src="https://www.orbizza.com/logos/ratecreator-logo.svg" style="width: 27px; height: 27px;" width="27" height="27" alt="Join the waitlist ratecreator.com">
+  <span style="text-decoration: none; color:#F5F5F5;  font-size: 27px; line-height: 27px; margin-left: 8px;">Rate Creator</span>
+</a>
 
-This Turborepo includes the following packages/apps:
+##
 
-### Apps and Packages
+<span style="text-decoration: none; color:#F5F5F5;  font-size: 48px; line-height: 48px; margin-top: 54px;">Sites
+& Services</span>
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Monorepos - /apps
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Admin Site
 
-### Building packages/ui
+- NextJS application to for the Admin site of the platform
+- Platform Management
+- Analytics
+- Customer User Management
+- Pricing
+- Publishing Blogs, Newsletters, Glossary
+- User Management
+- Dashboard Page
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.js`. This was chosen for several reasons:
+### Backend Services - Express.js/Hono.js
 
-- Make sharing one `tailwind.config.js` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
+- Recommendation Service
+- YouTube Service
+- Instagram Service
+- Twitter Service
+- Reddit Service
+- Review and Comments
+- User Management
+- Email Service
+- Newsletter Service
+- Notification Service
+- API Gateway
+- Search Service
+- Queuing Service
+- Monitoring Service
+- Data Streaming service
+- Moderation Service
+- Social Sharing Service
+- Polling Service
 
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.js` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
+### Creator Site
 
-For example, in [tailwind.config.js](packages/tailwind-config/tailwind.config.js):
+- NextJS application to for the Creator site of the platform
+- User Management
+- Profile Management
+- Dashboard
+- Analytics
+- Reply to review
+- Flagging Review
+- Report Users
+- Create invite link
+- Settings
+- Account Management
+- FAQs
+- Blogs
+- Pricing
+- License Page
 
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
+### Review Site
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+- NextJS application to for the Review site of the platform
+- Profile Management
+- Following Page
+- User Profile
+- Reviews Done
+- Creator Profile
+- Comments & Discussion
+- Blogs
+- Newsletter
+- FAQs
+- Glossary
+- Landing Page
+- Search Page
+- Categories Page
+- Filter
 
-### Utilities
+## Monorepos - /packages
 
-This Turborepo has some additional tools already setup for you:
+### DB
 
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-# boilerplate
-# ratecreator
+### Features
+
+### Store
+
+### UI
+
+## Deployment

@@ -1,8 +1,8 @@
-import { Button } from "@repo/ui";
+import { Button } from "@ratecreator/ui";
 
 export default function Page(): JSX.Element {
   return (
-    <div className='bg-green-400'>
+    <div className="bg-green-400">
       <Button variant={"destructive"}>Click me - Admin</Button>
     </div>
   );

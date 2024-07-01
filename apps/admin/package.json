@@ -1,9 +1,9 @@
 {
-  "name": "web",
+  "name": "admin",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,7 +13,7 @@
     "next": "^14.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@repo/ui": "*"
+    "@ratecreator/ui": "*"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.1",
@@ -21,11 +21,11 @@
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.18",
-    "@repo/eslint-config": "*",
+    "@ratecreator/eslint-config": "*",
     "postcss": "^8.4.35",
-    "@repo/tailwind-config": "*",
+    "@ratecreator/tailwind-config": "*",
     "tailwindcss": "^3.4.1",
-    "@repo/typescript-config": "*",
+    "@ratecreator/typescript-config": "*",
     "typescript": "^5.3.3"
   }
 }
