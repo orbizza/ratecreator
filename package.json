@@ -12,15 +12,17 @@
     "prepare": "husky",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "prisma-generate": " npx dotenv -e .env -- npx prisma generate --schema=packages/db/prisma/schema.prisma"
   },
   "devDependencies": {
     "@ratecreator/typescript-config": "*",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "turbo": "latest",
+    "turbo": "^2.0.14",
     "vitest": "^1.6.0"
   },
   "engines": {
@@ -33,7 +35,11 @@
   ],
   "dependencies": {
     "@changesets/cli": "^2.27.6",
+    "@types/node": "^22.4.2",
     "@types/supertest": "^6.0.2",
-    "supertest": "^7.0.0"
-  }
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "name": "ratecreator"
 }
