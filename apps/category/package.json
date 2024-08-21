@@ -3,17 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "esbuild src/* --platform=node --bundle --outdir=dist",
+    "dev": "esbuild src/index.ts --platform=node --bundle --outdir=dist && node dist/index.js",
+    "start": "node dist/index.js",
+    "insert-categories": "esbuild src/insert-categories.ts --platform=node --bundle --outdir=dist && node dist/insert-categories.js"
+  },
   "dependencies": {
-    "@prisma/client": "5.13.0",
+    "@ratecreator/db": "*",
+    "@ratecreator/store": "*",
+    "@types/express": "^4.17.21",
     "@types/node": "^22.4.2",
-    "prisma": "5.13.0",
+    "esbuild": "^0.23.1",
+    "express": "^4.19.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
-  "exports": {
-    "./client": "./src/prisma-client.ts"
-  },
   "devDependencies": {
-    "prisma": "5.13.0"
+    "@types/node": "^22.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   }
 }

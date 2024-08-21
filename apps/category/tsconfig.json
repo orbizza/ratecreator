@@ -1,8 +1,9 @@
 {
-  "extends": "@ratecreator/typescript-config/nextjs.json",
+  "extends": "@ratecreator/typescript-config/base.json",
   "compilerOptions": {
-    "plugins": [{ "name": "next" }]
+    "outDir": "./dist",
+    "module": "es2015"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["dist", "build", "node_modules"],
+  "include": ["."]
 }

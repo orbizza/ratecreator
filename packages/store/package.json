@@ -6,6 +6,9 @@
   "devDependencies": {
     "typescript": "^5.4.5"
   },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
     "recoil": "^0.7.7"
   }

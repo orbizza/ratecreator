@@ -1,6 +1,6 @@
 {
-  "name": "@ratecreator/admin",
-  "version": "1.0.0",
+  "name": "@ratecreator/creator",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,9 +13,7 @@
     "next": "^14.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@ratecreator/ui": "*",
-    "@ratecreator/store": "*",
-    "@ratecreator/db": "*"
+    "@ratecreator/ui": "*"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.1",
