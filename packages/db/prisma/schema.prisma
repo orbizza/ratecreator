@@ -1,14 +1,69 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+model Category {
+  id           String     @id @default(cuid()) @map("_id")
+  name         String
+  description  String?
+  parentId     String?
+  parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subcategories Category[] @relation("CategoryHierarchy")
+  accounts     CategoryMapping[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([name])
+  @@index([parentId])
+  @@index([description])
 }
+
+model Account {
+  id              String     @id @default(cuid()) @map("_id")
+  platform        Platform
+  accountId       String
+  handle          String?
+  name            String?
+  followerCount   Int?
+  categories      CategoryMapping[]
+  details         Json?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@unique([platform, handle])
+  @@unique([platform, accountId])
+  @@index([platform])
+  @@index([accountId])
+  @@index([handle])
+  @@index([followerCount])
+}
+
+model CategoryMapping {
+  id         String   @id @default(cuid()) @map("_id")
+  accountId  String
+  categoryId String
+  account    Account  @relation(fields: [accountId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([accountId, categoryId])
+  @@index([accountId])
+  @@index([categoryId])
+}
+
+enum Platform {
+  YOUTUBE
+  TWITTER
+  INSTAGRAM
+  X
+  REDDIT
+  TIKTOK
+  TWITCH
+}
+

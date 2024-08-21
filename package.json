@@ -13,7 +13,10 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "prisma-generate": " npx dotenv -e .env -- npx prisma generate --schema=packages/db/prisma/schema.prisma"
+    "prisma-generate": "npx dotenv -e .env -- npx prisma generate --schema=packages/db/prisma/schema.prisma",
+    "category-dev": "yarn workspace @ratecreator/category dev",
+    "category-build": "yarn workspace @ratecreator/category build",
+    "category-start": "yarn workspace @ratecreator/category start"
   },
   "devDependencies": {
     "@ratecreator/typescript-config": "*",
@@ -37,6 +40,7 @@
     "@changesets/cli": "^2.27.6",
     "@types/node": "^22.4.2",
     "@types/supertest": "^6.0.2",
+    "mongodb": "^6.8.0",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
