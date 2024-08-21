@@ -32,11 +32,15 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-slot": "^1.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.379.0",
-    "tailwind-merge": "^2.3.0",
+    "cobe": "^0.6.3",
+    "framer-motion": "^11.3.28",
+    "lucide-react": "^0.428.0",
+    "react-spring": "^9.7.4",
+    "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"
   }
 }
