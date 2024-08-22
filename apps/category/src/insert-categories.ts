@@ -1435,7 +1435,7 @@ const CategoriesData = [
 async function insertCategory(
   db: any,
   category: any,
-  parentId: string | null = null
+  parentId: string | null = null,
 ): Promise<string> {
   const { name, subcategories } = category;
 
