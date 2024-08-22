@@ -9,19 +9,23 @@ generator client {
 
 model Category {
   id           String     @id @default(cuid()) @map("_id")
-  name         String
+  name         String   
   description  String?
   parentId     String?
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subcategories Category[] @relation("CategoryHierarchy")
   accounts     CategoryMapping[]
+  depth        Int        @default(0)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
 
+  @@unique([name, parentId])
   @@index([name])
   @@index([parentId])
   @@index([description])
 }
+
 
 model Account {
   id              String     @id @default(cuid()) @map("_id")
@@ -30,12 +34,12 @@ model Account {
   handle          String?
   name            String?
   followerCount   Int?
+  imageUrl        String?
   categories      CategoryMapping[]
   details         Json?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  @@unique([platform, handle])
   @@unique([platform, accountId])
   @@index([platform])
   @@index([accountId])
@@ -61,7 +65,6 @@ enum Platform {
   YOUTUBE
   TWITTER
   INSTAGRAM
-  X
   REDDIT
   TIKTOK
   TWITCH
