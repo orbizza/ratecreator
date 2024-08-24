@@ -11,6 +11,7 @@ model Category {
   id           String     @id @default(cuid()) @map("_id")
   name         String   
   description  String?
+  longDescription String?
   parentId     String?
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subcategories Category[] @relation("CategoryHierarchy")
@@ -24,6 +25,7 @@ model Category {
   @@index([name])
   @@index([parentId])
   @@index([description])
+  @@index([longDescription])
 }
 
 
@@ -35,8 +37,14 @@ model Account {
   name            String?
   followerCount   Int?
   imageUrl        String?
+  country         String?   
+  description     String?
+  keywords        String?
   categories      CategoryMapping[]
-  details         Json?
+  ytData          Json?
+  isSeeded        Boolean    @default(false)
+  isSuspended     Boolean    @default(false)
+  ranking         Json?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
@@ -44,7 +52,12 @@ model Account {
   @@index([platform])
   @@index([accountId])
   @@index([handle])
+  @@index([name])
+  @@index([country])
   @@index([followerCount])
+  @@index([description])
+  @@index([keywords])
+  @@index([isSuspended])
 }
 
 model CategoryMapping {
