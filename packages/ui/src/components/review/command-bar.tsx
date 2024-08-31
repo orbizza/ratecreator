@@ -45,7 +45,7 @@ export const CommandBar = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const displayToast = () => {
-      <div className='fixed bottom-5 right-5'>
+      <div className="fixed bottom-5 right-5">
         {/* {toast("Link copied to clipboard!", {
           action: {
             label: "Close",
@@ -188,17 +188,17 @@ export const CommandBar = ({ children }: { children: React.ReactNode }) => {
     <>
       <KBarProvider actions={actions}>
         <KBarPortal>
-          <KBarPositioner className='fixed flex items-start justify-center w-full inset-0 py-[14vh] px-4 bg-black bg-opacity-80 box-border'>
-            <KBarAnimator className='bg-[#1a1c1e] max-w-[600px] w-full text-primary rounded-lg overflow-hidden support:backdrop-blur support:backdrop-saturate-300 support:backdrop-filter-blur-25 '>
-              <div className='overflow-hidden scrollbar-hide'>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
-                    <Search className='w-5 h-5 text-gray-400' />{" "}
+          <KBarPositioner className="fixed flex items-start justify-center w-full inset-0 py-[14vh] px-4 bg-black bg-opacity-80 box-border">
+            <KBarAnimator className="bg-[#1a1c1e] max-w-[600px] w-full text-primary rounded-lg overflow-hidden support:backdrop-blur support:backdrop-saturate-300 support:backdrop-filter-blur-25 ">
+              <div className="overflow-hidden scrollbar-hide">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400" />{" "}
                   </div>
 
                   <KBarSearch
-                    placeholder='Type a command or search…'
-                    className='pl-10 pr-4 py-2 w-full outline-none border-none m-0 text-primary bg-[#1a1c1e]'
+                    placeholder="Type a command or search…"
+                    className="pl-10 pr-4 py-2 w-full outline-none border-none m-0 text-primary bg-[#1a1c1e]"
                   />
                 </div>
                 <RenderResults />
@@ -217,7 +217,7 @@ function RenderResults() {
 
   if (results.length === 0) {
     return (
-      <div className='p-4 text-neutral-500 text-center'>No results found.</div>
+      <div className="p-4 text-neutral-500 text-center">No results found.</div>
     );
   }
 
@@ -226,7 +226,7 @@ function RenderResults() {
       items={results}
       onRender={({ item, active }) =>
         typeof item === "string" ? (
-          <div className='p-4 text-xs uppercase tracking-wider '>{item}</div>
+          <div className="p-4 text-xs uppercase tracking-wider ">{item}</div>
         ) : (
           <ResultItem action={item} active={active} />
         )
@@ -249,17 +249,17 @@ const ResultItem: React.FC<ResultItemProps> = ({ action, active }) => {
           : " "
       }`}
     >
-      <div className='flex gap-2 items-center'>
+      <div className="flex gap-2 items-center">
         {action.icon}
-        <div className='flex flex-col '>
+        <div className="flex flex-col ">
           <span>{action.name}</span>
         </div>
       </div>
       {action.shortcut?.length ? (
-        <div className='grid grid-flow-col gap-1'>
+        <div className="grid grid-flow-col gap-1">
           {action.shortcut.map((shortcut: string) => (
             <div
-              className='bg-white bg-opacity-10 text-primary-foreground p-1 uppercase rounded-sm text-sm w-6 text-center'
+              className="bg-white bg-opacity-10 text-primary-foreground p-1 uppercase rounded-sm text-sm w-6 text-center"
               key={shortcut}
             >
               {shortcut}

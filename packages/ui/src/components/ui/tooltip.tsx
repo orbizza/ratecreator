@@ -19,7 +19,7 @@ const tooltipVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const TooltipProvider = TooltipPrimitive.Provider;
