@@ -6,9 +6,9 @@
   ],
   "exports": {
     "./styles.css": "./dist/index.css",
-    "./card": "./src/card.tsx",
     ".": "./src/index.ts",
-    "./utils": "./lib/utils.ts"
+    "./utils": "./lib/utils.ts",
+    "./review": "./src/components/review/index.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -34,12 +34,17 @@
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-toast": "^1.2.1",
+    "@radix-ui/react-tooltip": "^1.1.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cobe": "^0.6.3",
     "framer-motion": "^11.3.28",
+    "kbar": "^0.1.0-beta.45",
     "lucide-react": "^0.428.0",
+    "next-themes": "^0.3.0",
     "react-spring": "^9.7.4",
+    "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"
   }

@@ -35,11 +35,14 @@ model Account {
   accountId       String
   handle          String?
   name            String?
+  name_en         String?
   followerCount   Int?
   imageUrl        String?
   country         String?   
   description     String?
+  description_en  String?
   keywords        String?
+  keywords_en     String?
   categories      CategoryMapping[]
   ytData          Json?
   isSeeded        Boolean    @default(false)
@@ -53,10 +56,13 @@ model Account {
   @@index([accountId])
   @@index([handle])
   @@index([name])
+  @@index([name_en])
   @@index([country])
   @@index([followerCount])
   @@index([description])
   @@index([keywords])
+  @@index([description_en])
+  @@index([keywords_en])
   @@index([isSuspended])
 }
 
