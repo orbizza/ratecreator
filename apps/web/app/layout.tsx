@@ -5,6 +5,7 @@ import "@ratecreator/ui/styles.css";
 
 import "./globals.css";
 import { Providers } from "./providers";
+import { Appbar } from "@ratecreator/ui/review";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Appbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
