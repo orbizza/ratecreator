@@ -5,15 +5,8 @@ import { Search, SquareMenu } from "lucide-react";
 
 import {
   Button,
-  Input,
-  Label,
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
   Separator,
 } from "@ratecreator/ui";

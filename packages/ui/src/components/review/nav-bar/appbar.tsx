@@ -19,7 +19,7 @@ export function Appbar() {
     <header className="px-4 py-2">
       <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div
-          className="w-full border-b-[1px] backdrop-blur-md"
+          className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
           style={navBarStyle}
         >
           <div className="w-full flex items-center justify-between m-2">
@@ -49,7 +49,7 @@ export function Appbar() {
                   <input
                     id="SearchMD"
                     type="text"
-                    placeholder="Search creators..."
+                    placeholder="Search creators or categories ..."
                     className="flex h-8 w-[120px]  xl:w-[340px] 2xl:w-[512px] rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </Button>
