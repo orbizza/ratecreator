@@ -5,9 +5,9 @@ import { Button, Separator } from "@ratecreator/ui";
 
 export function MainMenu() {
   return (
-    <div className='flex items-center h-8 gap-3'>
+    <div className="flex items-center h-8 gap-3">
       <Button>For Creators</Button>
-      <Separator orientation='vertical' />
+      <Separator orientation="vertical" />
       <Button variant={"ghost"}>Categories</Button>
       <Button variant={"ghost"}>Blog</Button>
       <Button variant={"ghost"}>Login</Button>
