@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "esbuild src/* --platform=node --bundle --outdir=dist",
-    "dev": "esbuild src/index.ts --platform=node --bundle --outdir=dist && node dist/index.js",
+    "dev": "esbuild src/index.ts --platform=node --bundle --outdir=dist && node dist/index.js -p 3005",
     "start": "node dist/index.js",
     "insert-categories": "esbuild src/insert-categories.ts --platform=node --bundle --outdir=dist && node dist/insert-categories.js"
   },
