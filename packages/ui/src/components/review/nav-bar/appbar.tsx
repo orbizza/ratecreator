@@ -16,72 +16,72 @@ export function Appbar() {
   };
 
   return (
-    <header className='px-4 py-2'>
-      <div className='max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm'>
+    <header className="px-4 py-2">
+      <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div
-          className='w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md'
+          className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
           style={navBarStyle}
         >
-          <div className='w-full flex items-center justify-between  p-2'>
-            <div className='flex flex-row items-center mx-2'>
+          <div className="w-full flex items-center justify-between  p-2">
+            <div className="flex flex-row items-center mx-2">
               <Link
-                href='/'
+                href="/"
                 passHref
-                className='flex flex-row items-center gap-1'
+                className="flex flex-row items-center gap-1"
               >
                 <Image
-                  src='/logo.svg'
-                  alt='Rate Creator'
+                  src="/logo.svg"
+                  alt="Rate Creator"
                   width={40}
                   height={40}
-                  className='w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10'
+                  className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
                 />
-                <div className='text-sm md:text-lg lg:text-2xl font-semibold'>
-                  RATE<span className='text-[#ff3131]'> CREATOR</span>
+                <div className="text-sm md:text-lg lg:text-2xl font-semibold">
+                  RATE<span className="text-[#ff3131]"> CREATOR</span>
                 </div>
               </Link>
-              <div className='hidden lg:block xl:mx-10'>
+              <div className="hidden lg:block xl:mx-10">
                 <Button
-                  variant='ghost'
-                  className='items-center border-2 border-transparent rounded-md'
+                  variant="ghost"
+                  className="items-center border-2 border-transparent rounded-md"
                 >
                   <Search />
                   <input
-                    id='SearchMD'
-                    type='text'
-                    placeholder='Search creators or categories ...'
-                    className='flex h-8 w-[120px]  xl:w-[340px] 2xl:w-[512px] rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50'
+                    id="SearchMD"
+                    type="text"
+                    placeholder="Search creators or categories ..."
+                    className="flex h-8 w-[120px]  xl:w-[340px] 2xl:w-[512px] rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </Button>
               </div>
             </div>
 
             {/* Main menu and right-side components */}
-            <div className='flex items-center space-x-4 mr-4 '>
+            <div className="flex items-center space-x-4 mr-4 ">
               {/* Main menu (visible on lg screens) */}
-              <div className='hidden lg:flex items-center gap-4'>
+              <div className="hidden lg:flex items-center gap-4">
                 <MainMenu />
               </div>
 
               {/* Search (visible on md and larger screens) */}
-              <div className='hidden md:block lg:hidden'>
+              <div className="hidden md:block lg:hidden">
                 <Button
-                  variant='ghost'
-                  className='items-center border-2 border-transparent rounded-md'
+                  variant="ghost"
+                  className="items-center border-2 border-transparent rounded-md"
                 >
                   <Search />
                   <input
-                    id='SearchMD'
-                    type='text'
-                    placeholder='Search creators ...'
-                    className='flex h-8 w-full rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50'
+                    id="SearchMD"
+                    type="text"
+                    placeholder="Search creators ..."
+                    className="flex h-8 w-full rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </Button>
               </div>
 
               {/* Search icon (visible only on sm screens) */}
-              <div className='block md:hidden'>
-                <Button variant='ghost'>
+              <div className="block md:hidden">
+                <Button variant="ghost">
                   <Search />
                 </Button>
               </div>
@@ -91,7 +91,7 @@ export function Appbar() {
               <ModeToggle />
 
               {/* Mobile side nav (visible on lg screens and smaller) */}
-              <div className='block lg:hidden'>
+              <div className="block lg:hidden">
                 <MobileSideNav />
               </div>
             </div>
