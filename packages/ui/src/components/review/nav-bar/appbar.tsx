@@ -22,7 +22,7 @@ export function Appbar() {
           className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
           style={navBarStyle}
         >
-          <div className="w-full flex items-center justify-between m-2">
+          <div className="w-full flex items-center justify-between  p-2">
             <div className="flex flex-row items-center mx-2">
               <Link
                 href="/"

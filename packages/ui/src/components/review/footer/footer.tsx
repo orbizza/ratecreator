@@ -10,6 +10,7 @@ import {
   SiLinkedin,
   SiDiscord,
 } from "@icons-pack/react-simple-icons";
+import { SphereMask } from "../../ui/sphere-mask";
 
 export const Footer = () => {
   return (
@@ -18,10 +19,14 @@ export const Footer = () => {
         <div className="flex flex-col lg:flex-row">
           {/* Logo, company name, and social icons */}
           <div className="flex justify-between items-start lg:flex-col lg:justify-between mb-8 lg:mb-0 lg:mr-44">
-            <div className="flex items-center">
+            <Link
+              className="flex items-center"
+              href={"#"}
+              aria-label="RateCreator Logo"
+            >
               <Image
                 src="/logo.svg"
-                alt="Linear Logo"
+                alt="RateCreator Logo"
                 width={32}
                 height={32}
                 className="mr-2"
@@ -33,7 +38,7 @@ export const Footer = () => {
                   - Reviewing the Influencers
                 </span> */}
               </div>
-            </div>
+            </Link>
             {/* Social icons now on the same row for md and sm, at the bottom for lg */}
             <div className="flex space-x-4  lg:mt-auto">
               <Link
