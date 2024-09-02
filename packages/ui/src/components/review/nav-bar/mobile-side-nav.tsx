@@ -16,7 +16,7 @@ export function MobileSideNav() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" className="mr-4">
-          <SquareMenu size="20" />
+          <SquareMenu size="30" />
         </Button>
       </SheetTrigger>
       <SheetContent>

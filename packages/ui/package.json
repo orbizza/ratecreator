@@ -47,6 +47,7 @@
     "kbar": "^0.1.0-beta.45",
     "lucide-react": "^0.428.0",
     "next-themes": "^0.3.0",
+    "react-icon-cloud": "^4.1.4",
     "react-spring": "^9.7.4",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
