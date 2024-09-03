@@ -25,24 +25,24 @@ export const HeroText = () => {
   };
 
   return (
-    <div className='flex flex-col items-start gap-y-8 mx-auto w-full max-w-3xl'>
-      <div className='flex flex-col items-start gap-y-2 w-full'>
+    <div className="flex flex-col items-start gap-y-8 mx-auto w-full max-w-3xl">
+      <div className="flex flex-col items-start gap-y-2 w-full">
         <TextGenerateEffect
           words={headingWords}
-          textClassName='text-3xl md:text-3xl lg:text-5xl'
+          textClassName="text-3xl md:text-3xl lg:text-5xl"
         />
         <TextGenerateEffect
           words={subHeadingWords}
-          className='text-[#ff3131]'
-          textClassName='font-semibold text-[17px] md:text-[16px]'
+          className="text-[#ff3131]"
+          textClassName="font-semibold text-[17px] md:text-[16px]"
         />
       </div>
-      <div className='w-full relative mt-3 flex lg:justify-start justify-center'>
+      <div className="w-full relative mt-3 flex lg:justify-start justify-center">
         <PlaceholdersAndVanishInput
           placeholders={placeholders}
           onSubmit={onSubmit}
         />
-        <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5' />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
       </div>
     </div>
   );
