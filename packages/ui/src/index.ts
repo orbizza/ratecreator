@@ -10,8 +10,14 @@ export { IconCloud };
 export * from "./components/ui/sphere-mask";
 export * from "./components/ui/text-generate-effect";
 export * from "./components/ui/placeholders-and-vanish-input";
-export * from "./components/ui/linear-gradient";
-export * from "./components/ui/radial-gradient";
+import LinearGradient from "./components/ui/linear-gradient";
+export { LinearGradient };
+import RadialGradient from "./components/ui/radial-gradient";
+export { RadialGradient };
+export * from "./components/ui/animated-gradient-text";
+export * from "./components/ui/text-hover-effect";
+export * from "./components/ui/sparkles-text";
+export * from "./components/ui/marquee";
 
 export * from "./components/themes/theme-provider";
 export * from "./components/themes/toggle-theme";
