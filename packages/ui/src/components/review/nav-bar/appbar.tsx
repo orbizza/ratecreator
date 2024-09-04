@@ -43,50 +43,50 @@ export function Appbar() {
   const placeholders = SearchPlaceholders;
 
   return (
-    <header className='px-4 py-2'>
-      <div className='max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm'>
+    <header className="px-4 py-2">
+      <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div
-          className='w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md'
+          className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
           style={navBarStyle}
         >
-          <div className='w-full flex flex-row items-center justify-between p-2'>
+          <div className="w-full flex flex-row items-center justify-between p-2">
             {/* Logo */}
-            <div className='flex flex-row items-center gap-2 mx-2 mr-4'>
-              <Link href='/' passHref className='flex items-center gap-1'>
+            <div className="flex flex-row items-center gap-2 mx-2 mr-4">
+              <Link href="/" passHref className="flex items-center gap-1">
                 <Image
-                  src='/logo.svg'
-                  alt='Rate Creator'
+                  src="/logo.svg"
+                  alt="Rate Creator"
                   width={40}
                   height={40}
-                  className='w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10'
+                  className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
                 />
                 {/* Text visible only on md and larger screens */}
-                <span className='text-lg  xl:text-2xl font-semibold whitespace-nowrap'>
-                  RATE<span className='text-[#ff3131]'> CREATOR</span>
+                <span className="text-lg  xl:text-2xl font-semibold whitespace-nowrap">
+                  RATE<span className="text-[#ff3131]"> CREATOR</span>
                 </span>
               </Link>
             </div>
 
             {/* Search Bar - visible only when hero-text is not visible */}
             {!isHeroVisible && (
-              <div className='hidden lg:block  mx-[50px] xl:mx-20 w-full relative  items-center justify-center'>
+              <div className="hidden lg:block  mx-[50px] xl:mx-20 w-full relative  items-center justify-center">
                 <PlaceholdersAndVanishInput placeholders={placeholders} />
-                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5' />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
               </div>
             )}
 
             {/* Search icon (visible only on sm screens) */}
 
             {/* Additional Components */}
-            <div className='flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2'>
+            <div className="flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2">
               {/* Main Menu for large screens */}
-              <div className='hidden lg:flex items-center'>
+              <div className="hidden lg:flex items-center">
                 <MainMenu />
               </div>
               {!isHeroVisible && (
-                <div className='block lg:hidden '>
+                <div className="block lg:hidden ">
                   <Button
-                    variant='ghost'
+                    variant="ghost"
                     // className='bg-secondary'
                     size={"icon"}
                   >
@@ -99,7 +99,7 @@ export function Appbar() {
               <ModeToggle />
 
               {/* Mobile side navigation for smaller screens */}
-              <div className='block lg:hidden'>
+              <div className="block lg:hidden">
                 <MobileSideNav />
               </div>
             </div>
