@@ -1,124 +1,105 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
-
 import {
   Button,
   ModeToggle,
-  Input,
-  Separator,
   PlaceholdersAndVanishInput,
 } from "@ratecreator/ui";
 import { MobileSideNav } from "./mobile-side-nav";
 import { MainMenu } from "./main-menu";
 
+import { SearchPlaceholders } from "@ratecreator/store";
+
 export function Appbar() {
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = (entries: IntersectionObserverEntry[]) => {
+      const heroEntry = entries[0];
+      setIsHeroVisible(heroEntry.isIntersecting);
+    };
+
+    const observer = new IntersectionObserver(handleScroll, {
+      threshold: 0.1,
+    });
+
+    const heroSection = document.querySelector("#hero-search-bar");
+    if (heroSection) observer.observe(heroSection);
+
+    return () => {
+      if (heroSection) observer.unobserve(heroSection);
+    };
+  }, []);
+
   const navBarStyle: React.CSSProperties = {
     backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)", // This is for Safari compatibility
+    WebkitBackdropFilter: "blur(10px)", // For Safari compatibility
   };
 
-  const placeholders = [
-    "Find the best content creators",
-    "Search based on categories",
-    "Find influencers on Instagram",
-    "Who is the best Youtuber?",
-    "X accounts with largest following?",
-  ];
-
-  //  Add the action to open the command search bar
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("submitted");
-  };
+  const placeholders = SearchPlaceholders;
 
   return (
-    <header className="px-4 py-2">
-      <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
+    <header className='px-4 py-2'>
+      <div className='max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm'>
         <div
-          className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
+          className='w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md'
           style={navBarStyle}
         >
-          <div className="w-full flex items-center justify-between  p-2">
-            <div className="flex flex-row items-center justify-between mx-2 gap-x-2 ">
-              <Link
-                href="/"
-                passHref
-                className="flex flex-row items-center gap-1"
-              >
+          <div className='w-full flex flex-row items-center justify-between p-2'>
+            {/* Logo */}
+            <div className='flex flex-row items-center gap-2 mx-2 mr-4'>
+              <Link href='/' passHref className='flex items-center gap-1'>
                 <Image
-                  src="/logo.svg"
-                  alt="Rate Creator"
+                  src='/logo.svg'
+                  alt='Rate Creator'
                   width={40}
                   height={40}
-                  className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+                  className='w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10'
                 />
-                <div className="text-sm md:text-lg lg:text-2xl font-semibold">
-                  RATE<span className="text-[#ff3131]"> CREATOR</span>
-                </div>
+                {/* Text visible only on md and larger screens */}
+                <span className='text-lg  xl:text-2xl font-semibold whitespace-nowrap'>
+                  RATE<span className='text-[#ff3131]'> CREATOR</span>
+                </span>
               </Link>
-              {/* <div className='w-full relative flex '>
-                <PlaceholdersAndVanishInput
-                  placeholders={placeholders}
-                  onSubmit={onSubmit}
-                />
-                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5' />
-              </div> */}
-              <div className="hidden lg:block xl:mx-10">
-                <Button
-                  variant="ghost"
-                  className="items-center border-2 border-transparent rounded-md bg-secondary"
-                >
-                  <Search />
-                  <input
-                    id="SearchMD"
-                    type="text"
-                    placeholder="Search creators or categories ..."
-                    className="flex h-8 w-[110px]  xl:w-[280px] 2xl:w-[512px] rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </Button>
-              </div>
             </div>
 
-            {/* Main menu and right-side components */}
-            <div className="flex items-center space-x-2 lg:space-x-4 mr-0 md:mr-2 ">
-              {/* Main menu (visible on lg screens) */}
-              <div className="hidden lg:flex items-center gap-4">
+            {/* Search Bar - visible only when hero-text is not visible */}
+            {!isHeroVisible && (
+              <div className='hidden lg:block  mx-[50px] xl:mx-20 w-full relative  items-center justify-center'>
+                <PlaceholdersAndVanishInput placeholders={placeholders} />
+                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5' />
+              </div>
+            )}
+
+            {/* Search icon (visible only on sm screens) */}
+
+            {/* Additional Components */}
+            <div className='flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2'>
+              {/* Main Menu for large screens */}
+              <div className='hidden lg:flex items-center'>
                 <MainMenu />
               </div>
+              {!isHeroVisible && (
+                <div className='block lg:hidden '>
+                  <Button
+                    variant='ghost'
+                    // className='bg-secondary'
+                    size={"icon"}
+                  >
+                    <Search />
+                  </Button>
+                </div>
+              )}
 
-              {/* Search (visible on md and larger screens) */}
-              <div className="hidden md:block lg:hidden">
-                <Button
-                  variant="ghost"
-                  className="items-center border-2 border-transparent rounded-md bg-secondary"
-                >
-                  <Search />
-                  <input
-                    id="SearchMD"
-                    type="text"
-                    placeholder="Search creators ..."
-                    className="flex h-8 w-full rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </Button>
-              </div>
-
-              {/* Search icon (visible only on sm screens) */}
-              <div className="block md:hidden">
-                <Button variant="ghost" className="bg-secondary">
-                  <Search />
-                </Button>
-              </div>
-
-              {/* Mode toggle (always visible) */}
-
+              {/* Mode toggle for dark/light theme */}
               <ModeToggle />
 
-              {/* Mobile side nav (visible on lg screens and smaller) */}
-              <div className="block lg:hidden">
+              {/* Mobile side navigation for smaller screens */}
+              <div className='block lg:hidden'>
                 <MobileSideNav />
               </div>
             </div>
@@ -128,3 +109,5 @@ export function Appbar() {
     </header>
   );
 }
+
+export default Appbar;
