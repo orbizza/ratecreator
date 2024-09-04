@@ -50,6 +50,9 @@ model Account {
   ranking         Json?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  language_code   String?
+  lang_confidence_score Float?
+  
 
   @@unique([platform, accountId])
   @@index([platform])
@@ -64,6 +67,7 @@ model Account {
   @@index([description_en])
   @@index([keywords_en])
   @@index([isSuspended])
+  @@index([language_code])
 }
 
 model CategoryMapping {

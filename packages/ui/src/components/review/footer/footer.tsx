@@ -10,11 +10,10 @@ import {
   SiLinkedin,
   SiDiscord,
 } from "@icons-pack/react-simple-icons";
-import { SphereMask } from "../../ui/sphere-mask";
 
 export const Footer = () => {
   return (
-    <footer className="bg-black text-white py-16">
+    <footer className="z-50 bg-black text-white py-16">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row">
           {/* Logo, company name, and social icons */}

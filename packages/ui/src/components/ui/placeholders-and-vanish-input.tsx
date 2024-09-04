@@ -8,10 +8,12 @@ export function PlaceholdersAndVanishInput({
   placeholders,
   onChange,
   onSubmit,
+  onClick,
 }: {
   placeholders: string[];
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLFormElement>) => void;
 }) {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
@@ -188,6 +190,7 @@ export function PlaceholdersAndVanishInput({
         value && "bg-gray-50",
       )}
       onSubmit={handleSubmit}
+      onClick={onClick}
     >
       <canvas
         className={cn(
