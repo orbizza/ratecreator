@@ -45,13 +45,13 @@ export const HeroText = () => {
   };
 
   return (
-    <div className='flex flex-col items-start m-2 md:m-10 gap-y-8 mx-auto w-full max-w-3xl'>
-      <div className='flex flex-col items-start gap-y-2 w-full'>
+    <div className="flex flex-col items-start m-2 md:m-10 gap-y-8 mx-auto w-full max-w-3xl">
+      <div className="flex flex-col items-start gap-y-2 w-full">
         {/* Render heading with delay */}
         {
           <TextGenerateEffect
             words={headingWords}
-            textClassName='text-3xl md:text-5xl lg:text-5xl xl:text-6xl'
+            textClassName="text-3xl md:text-5xl lg:text-5xl xl:text-6xl"
           />
         }
 
@@ -59,8 +59,8 @@ export const HeroText = () => {
         {isSubheadingVisible && (
           <TextGenerateEffect
             words={subHeadingWords}
-            className='text-primary'
-            textClassName='font-semibold  text-sm sm:text-[17px] md:text-[16px] lg:text-[18px]'
+            className="text-primary"
+            textClassName="font-semibold  text-sm sm:text-[17px] md:text-[16px] lg:text-[18px]"
           />
         )}
       </div>
@@ -68,8 +68,8 @@ export const HeroText = () => {
       {/* Render search bar with delay */}
       {isSearchBarVisible && (
         <div
-          id='hero-search-bar'
-          className='w-full relative ml-auto sm:-ml-4 md:-ml-24 lg:ml-0 mt-3 flex justify-start'
+          id="hero-search-bar"
+          className="w-full relative ml-auto sm:-ml-4 md:-ml-24 lg:ml-0 mt-3 flex justify-start"
         >
           <PlaceholdersAndVanishInput
             placeholders={placeholders}
