@@ -26,9 +26,9 @@ export const TextGenerateEffect = ({
         filter: filter ? "blur(0px)" : "none",
       },
       {
-        duration: duration ? duration : 1,
+        duration: duration ? duration : 0.5,
         delay: stagger(0.1),
-      },
+      }
     );
   }, [scope.current]);
 
@@ -39,7 +39,7 @@ export const TextGenerateEffect = ({
           return (
             <motion.span
               key={word + idx}
-              className=" opacity-0"
+              className=' opacity-0'
               style={{
                 filter: filter ? "blur(10px)" : "none",
               }}
@@ -54,7 +54,7 @@ export const TextGenerateEffect = ({
 
   return (
     <div className={cn("font-bold", className)}>
-      <div className="mt-4">
+      <div className='mt-4'>
         <div
           className={cn(" text-2xl leading-snug tracking-wide", textClassName)}
         >

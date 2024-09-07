@@ -443,15 +443,15 @@ export const MostPopularCategories = [
           "https://yt3.ggpht.com/Zfsn9A06EPzUcAg3ewj6LVNsBKyoXearDbsAmHNVXae1K6Kf2KYcTQTZq38U0j5wMbscVxriqQ=s88-c-k-c0x00ffffff-no-rj",
       },
       {
-        name: "Chloe Ting",
+        name: "Ami Rodriguez",
         platform: "YOUTUBE",
-        accountId: "UCCgLoMYIyP0U56dEhEL1wXQ",
-        handle: "@chloeting",
-        followerCount: 25400000,
+        accountId: "UCwohKbRK2QnojtLh3p7xwaA",
+        handle: "@amirodriguezz",
+        followerCount: 29900000,
         rating: 0.0,
         reviews: 0,
         imageUrl:
-          "https://yt3.ggpht.com/ytc/AIdro_n_1ODQx19XQ6G29JytVGt1maDNJEzakv_Lz24UVY60gZE=s88-c-k-c0x00ffffff-no-rj",
+          "https://yt3.ggpht.com/szI_vJAC7n-f1WpOhfVuT0RZ4IyoeJVVCRo3i3T7-fJEIWwEGENhwSvEmVOCrR4TugkumAsM=s88-c-k-c0x00ffffff-no-rj",
       },
       {
         name: "Always McMahon",
