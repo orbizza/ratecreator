@@ -10,6 +10,7 @@ export { IconCloud };
 export * from "./components/ui/sphere-mask";
 export * from "./components/ui/text-generate-effect";
 export * from "./components/ui/placeholders-and-vanish-input";
+export * from "./components/ui/placeholders-and-vanish-input-category";
 import LinearGradient from "./components/ui/linear-gradient";
 export { LinearGradient };
 import RadialGradient from "./components/ui/radial-gradient";

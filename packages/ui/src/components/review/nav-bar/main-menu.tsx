@@ -2,17 +2,32 @@
 
 import React from "react";
 import { Button, Separator } from "@ratecreator/ui";
+import { useRouter } from "next/navigation";
 
 export function MainMenu() {
+  const router = useRouter();
+
   return (
-    <div className="flex items-center h-8 gap-x-2 xl:gap-3">
-      <Button variant={"ghost"}>For creators</Button>
-      <Separator orientation="vertical" />
-      <Button variant={"link"}>Write a review</Button>
-      <Button variant={"ghost"}>Categories</Button>
-      <Button variant={"ghost"}>Blog</Button>
-      <Button variant={"outline"}>Log in</Button>
-      <Button variant={"default"}>Sign up</Button>
+    <div className='flex items-center h-8 gap-x-2 xl:gap-3'>
+      <Button variant={"ghost"} onClick={() => router.push("/creators")}>
+        For creators
+      </Button>
+      <Separator orientation='vertical' />
+      <Button variant={"link"} onClick={() => router.push("/write-review")}>
+        Write a review
+      </Button>
+      <Button variant={"ghost"} onClick={() => router.push("/categories")}>
+        Categories
+      </Button>
+      <Button variant={"ghost"} onClick={() => router.push("/blog")}>
+        Blog
+      </Button>
+      <Button variant={"outline"} onClick={() => router.push("/login")}>
+        Log in
+      </Button>
+      <Button variant={"default"} onClick={() => router.push("/signup")}>
+        Sign up
+      </Button>
     </div>
   );
 }
