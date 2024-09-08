@@ -11,13 +11,25 @@ import {
 } from "@ratecreator/ui";
 import { MobileSideNav } from "./mobile-side-nav";
 import { MainMenu } from "./main-menu";
+import { usePathname } from "next/navigation";
 
 import { SearchPlaceholders } from "@ratecreator/store";
 
 export function Appbar() {
   const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [isLandingPage, setIsLandingPage] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    setIsLandingPage(pathname === "/");
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isLandingPage) {
+      setIsHeroVisible(false);
+      return;
+    }
+
     const handleScroll = (entries: IntersectionObserverEntry[]) => {
       const heroEntry = entries[0];
       setIsHeroVisible(heroEntry.isIntersecting);
@@ -28,19 +40,23 @@ export function Appbar() {
     });
 
     const heroSection = document.querySelector("#hero-search-bar");
-    if (heroSection) observer.observe(heroSection);
+    if (heroSection) {
+      observer.observe(heroSection);
+    }
 
     return () => {
       if (heroSection) observer.unobserve(heroSection);
     };
-  }, []);
+  }, [isLandingPage]);
 
   const navBarStyle: React.CSSProperties = {
     backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)", // For Safari compatibility
+    WebkitBackdropFilter: "blur(10px)",
   };
 
   const placeholders = SearchPlaceholders;
+
+  const showSearchBar = isLandingPage ? !isHeroVisible : true;
 
   return (
     <header className="px-4 py-2">
@@ -60,45 +76,34 @@ export function Appbar() {
                   height={40}
                   className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
                 />
-                {/* Text visible only on md and larger screens */}
                 <span className="text-lg  xl:text-2xl font-semibold whitespace-nowrap">
                   RATE<span className="text-[#ff3131]"> CREATOR</span>
                 </span>
               </Link>
             </div>
 
-            {/* Search Bar - visible only when hero-text is not visible */}
-            {!isHeroVisible && (
-              <div className="hidden lg:block  mx-[50px] xl:mx-20 w-full relative  items-center justify-center">
+            {/* Search Bar */}
+            {showSearchBar && (
+              <div className="hidden lg:block mx-[50px] xl:mx-20 w-full relative items-center justify-center">
                 <PlaceholdersAndVanishInput placeholders={placeholders} />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
               </div>
             )}
 
-            {/* Search icon (visible only on sm screens) */}
-
             {/* Additional Components */}
             <div className="flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2">
-              {/* Main Menu for large screens */}
               <div className="hidden lg:flex items-center">
                 <MainMenu />
               </div>
-              {!isHeroVisible && (
-                <div className="block lg:hidden ">
-                  <Button
-                    variant="ghost"
-                    // className='bg-secondary'
-                    size={"icon"}
-                  >
+              {showSearchBar && (
+                <div className="block lg:hidden">
+                  <Button variant="ghost" size={"icon"}>
                     <Search />
                   </Button>
                 </div>
               )}
 
-              {/* Mode toggle for dark/light theme */}
               <ModeToggle />
 
-              {/* Mobile side navigation for smaller screens */}
               <div className="block lg:hidden">
                 <MobileSideNav />
               </div>

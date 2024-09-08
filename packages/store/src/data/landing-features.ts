@@ -11,13 +11,13 @@ import {
 
 export const Features = [
   {
-    title: "Rate and Review",
+    title: "Rate & Review",
     description:
       "Share your experiences by rating and reviewing creators you follow.",
     icon: Sparkles,
   },
   {
-    title: "Discover new creators",
+    title: "Discover Creators",
     description:
       "Find the perfect creator through our well-organized categories and sub-categories.",
     icon: Layers,

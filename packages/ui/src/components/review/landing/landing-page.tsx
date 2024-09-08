@@ -5,6 +5,8 @@ import { HeroSection } from "./hero-section";
 import { SparklesText, Separator, SphereMask } from "@ratecreator/ui";
 import { CreatorCTA } from "./creator-cta";
 import { WhyRateCreator } from "./why-rc";
+import { CataloguedStats } from "./catalogued-stats";
+import { PopularCategories } from "./popular-categories";
 
 export const LandingPage = () => {
   const [isCreatorCtaVisible, setIsCreatorCtaVisible] = useState(false);
@@ -36,12 +38,18 @@ export const LandingPage = () => {
     <main className="min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto">
       {/* Hero Section with Create Creator CTA */}
       <HeroSection />
-      {/* <Separator className='my-4' /> */}
 
-      {/* ToDo: Most Popular Categories with Write a review */}
+      <Separator className="my-4" />
+
+      {/* ToDo: Most Popular Categories with Write a review CTA */}
+      <PopularCategories />
+
+      {/* Catalogued Stats */}
+      <CataloguedStats />
 
       {/* ToDo: Reviews card */}
 
+      <Separator className="my-4" />
       {/* Why use RC */}
       <WhyRateCreator />
 

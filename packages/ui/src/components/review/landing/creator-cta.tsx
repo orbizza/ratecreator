@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  Button,
-  buttonVariants,
-  LinearGradient,
-  Marquee,
-} from "@ratecreator/ui";
-import { cn } from "@ratecreator/ui/utils";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion, useAnimation, useInView } from "framer-motion";
+import Link from "next/link";
 import {
   Youtube,
   ChevronRight,
@@ -17,7 +12,9 @@ import {
   Linkedin,
   Twitch,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+
+import { Button, Marquee } from "@ratecreator/ui";
+import { cn, ny } from "@ratecreator/ui/utils";
 
 const tiles = [
   {
@@ -30,6 +27,12 @@ const tiles = [
     icon: <Twitter className="size-full" />,
     bg: (
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 opacity-70 blur-[20px] filter"></div>
+    ),
+  },
+  {
+    icon: <Youtube className="size-full" />,
+    bg: (
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-full bg-gradient-to-r from-orange-600 via-rose-600 to-violet-600 opacity-70 blur-[20px] filter"></div>
     ),
   },
   {
@@ -46,12 +49,6 @@ const tiles = [
   },
   {
     icon: <Linkedin className="size-full" />,
-    bg: (
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-full bg-gradient-to-r from-orange-600 via-rose-600 to-violet-600 opacity-70 blur-[20px] filter"></div>
-    ),
-  },
-  {
-    icon: <Youtube className="size-full" />,
     bg: (
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-full bg-gradient-to-r from-gray-600 via-gray-500 to-gray-400 opacity-70 blur-[20px] filter"></div>
     ),
@@ -160,12 +157,15 @@ export function CreatorCTA() {
               ))}
             </Marquee>
             <div className="absolute z-10">
-              <div className="z-10 mt-4 flex flex-col items-center text-center text-primary">
-                <h1 className="text-3xl md:text-5xl text-secondary-foreground font-bold my-[2rem] lg:text-7xl">
+              <div className="z-10 flex flex-col items-center text-center text-primary">
+                <h1 className=" text-3xl md:text-5xl text-primary font-bold my-[2rem] lg:text-7xl">
                   Are you a creator?
                 </h1>
-                <Button variant={"default"}>
-                  Get Started
+                <Button
+                  variant={"outline"}
+                  className="rounded-full bg-secondary-foreground text-secondary "
+                >
+                  ✨ Get Started
                   <ChevronRight className="ml-1 size-4 transition-all duration-300 ease-out group-hover:translate-x-1" />
                 </Button>
               </div>
