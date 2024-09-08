@@ -49,21 +49,21 @@ export const CategoryListPage: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className='container mx-auto p-4 mt-10'>
-      <div className='flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14 '>
-        <div className='text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto'>
+    <div className="container mx-auto p-4 mt-10">
+      <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14 ">
+        <div className="text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
           What are you looking for?
         </div>
-        <div className='w-full'>
+        <div className="w-full">
           <SearchBar />
         </div>
       </div>
-      <Separator className=' my-4' />
-      <div className='mt-20 my-[4rem]'>
-        <h2 className='text-2xl font-semibold my-4 mb-10'>
+      <Separator className=" my-4" />
+      <div className="mt-20 my-[4rem]">
+        <h2 className="text-2xl font-semibold my-4 mb-10">
           Explore companies by category
         </h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {categories
             .filter((cat) => cat.depth === 0)
             .map((category) => (
@@ -86,7 +86,7 @@ const SearchBar: React.FC = () => {
     console.log("submitted");
   };
   return (
-    <div className='mb-4 w-full items-center justify-center flex'>
+    <div className="mb-4 w-full items-center justify-center flex">
       <PlaceholdersAndVanishInputCategory
         placeholders={placeholders}
         onSubmit={onSubmit}
@@ -111,10 +111,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className='p-4'>
-        <div className='flex items-center mb-2'>
+      <div className="p-4">
+        <div className="flex items-center mb-2">
           {icon}
-          <h3 className='text-lg font-semibold ml-2'>{category.name}</h3>
+          <h3 className="text-lg font-semibold ml-2">{category.name}</h3>
         </div>
         {/* {category.description && (
           <p className='text-sm mb-2 text-gray-600 dark:text-gray-300'>
@@ -124,7 +124,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
         {category.subcategories && category.subcategories.length > 0 && (
           <ul>
             {category.subcategories.map((subcategory) => (
-              <li key={subcategory.id} className='text-sm py-1'>
+              <li key={subcategory.id} className="text-sm py-1">
                 {subcategory.name}
               </li>
             ))}

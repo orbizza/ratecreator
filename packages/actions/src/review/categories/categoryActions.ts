@@ -41,9 +41,9 @@ export async function getCategoryData(): Promise<Category[]> {
             createdAt: sub.createdAt,
             updatedAt: sub.updatedAt,
             deletedAt: sub.deletedAt, // We're not fetching deeper levels here
-          })
+          }),
         ),
-      })
+      }),
     );
   } catch (error) {
     console.error("Failed to fetch categories:", error);

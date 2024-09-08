@@ -8,11 +8,11 @@ export function MainMenu() {
   const router = useRouter();
 
   return (
-    <div className='flex items-center h-8 gap-x-2 xl:gap-3'>
+    <div className="flex items-center h-8 gap-x-2 xl:gap-3">
       <Button variant={"ghost"} onClick={() => router.push("/creators")}>
         For creators
       </Button>
-      <Separator orientation='vertical' />
+      <Separator orientation="vertical" />
       <Button variant={"link"} onClick={() => router.push("/write-review")}>
         Write a review
       </Button>
