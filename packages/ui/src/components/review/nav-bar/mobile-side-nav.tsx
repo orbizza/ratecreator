@@ -9,6 +9,7 @@ import {
   SheetContent,
   SheetTrigger,
   Separator,
+  SheetTitle,
 } from "@ratecreator/ui";
 
 export function MobileSideNav() {
@@ -19,28 +20,26 @@ export function MobileSideNav() {
           <SquareMenu size="30" />
         </Button>
       </SheetTrigger>
+
       <SheetContent className="w-[320px] border-l-1 ">
-        <div className=" grid gap-4 py-4 w-[270px]">
+        <SheetTitle>
           <Button
             variant="ghost"
-            className="items-center border-2 border-transparent rounded-md bg-secondary w-[270px] justify-start"
+            className="items-center  border-transparent rounded-md "
+            size={"icon"}
           >
             <Search />
-            <input
-              id="SearchSidebar"
-              type="text"
-              placeholder="Search creators ..."
-              className="flex h-8 w-[270px] rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground ring-0 focus:ring-0 focus:outline-none px-3 py-2 text-sm file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50"
-            />
           </Button>
-
-          <Separator className="my-4 w-[270px]" />
-          <Button>Login</Button>
+        </SheetTitle>
+        <div className=" grid gap-4 py-4 w-[270px]">
+          <Button variant={"ghost"}>For creators</Button>
+          {/* <Separator className='my-4 w-[270px]' /> */}
           <Button variant={"link"}>Write a review</Button>
           <Button variant={"ghost"}>Categories</Button>
           <Button variant={"ghost"}>Blog</Button>
-          <Separator className="my-4" />
-          <Button variant={"default"}>For Creators</Button>
+          <Separator className="" />
+          <Button variant={"outline"}>Log in</Button>
+          <Button>Sign up</Button>
         </div>
       </SheetContent>
     </Sheet>

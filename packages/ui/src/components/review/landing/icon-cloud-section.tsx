@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 import { IconCloud } from "@ratecreator/ui";
@@ -33,89 +35,9 @@ const slugs = [
   "mewe",
   "vk",
   "signal",
-  "gab",
-  "parler",
   "viber",
   "meetup",
 ];
-
-// const slugs = [
-//   // Popular Social Media Platforms with messaging apps
-//   "facebook",
-//   "twitter",
-//   "instagram",
-//   "linkedin",
-//   "youtube",
-//   "snapchat",
-//   "tiktok",
-//   "whatsapp",
-//   "pinterest",
-//   "reddit",
-//   "tumblr",
-//   "telegram",
-//   "medium",
-//   "slack",
-//   "discord",
-//   "dribbble",
-//   "behance",
-//   "flickr",
-//   "twitch",
-//   "wechat",
-//   "messenger",
-//   "vimeo",
-//   "clubhouse",
-//   "quora",
-//   "xing",
-//   "mix",
-//   "mastodon",
-//   "mewe",
-//   "vk",
-//   "line",
-//   "qq",
-//   "renren",
-//   "douyin",
-//   "signal",
-//   "gab",
-//   "parler",
-//   "viber",
-//   "weibo",
-//   "meetup",
-// ];
-
-// const slugs = [
-//   // Popular Social Media Platforms
-//   "facebook",
-//   "twitter",
-//   "instagram",
-//   "linkedin",
-//   "youtube",
-//   "snapchat",
-//   "tiktok",
-//   "pinterest",
-//   "reddit",
-//   "tumblr",
-//   "medium",
-//   "slack",
-//   "discord",
-//   "dribbble",
-//   "behance",
-//   "flickr",
-//   "twitch",
-//   "vimeo",
-//   "clubhouse",
-//   "quora",
-//   "xing",
-//   "mix",
-//   "mastodon",
-//   "mewe",
-//   "vk",
-//   "renren",
-//   "douyin",
-//   "gab",
-//   "parler",
-//   "weibo",
-//   "meetup",
-// ];
 
 export function IconCloudSection() {
   return (
