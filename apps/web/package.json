@@ -17,6 +17,7 @@
     "@ratecreator/store": "*",
     "@ratecreator/db": "*",
     "@ratecreator/actions": "*",
+    "@ratecreator/auth": "*",
     "@ratecreator/types": "*"
   },
   "devDependencies": {
