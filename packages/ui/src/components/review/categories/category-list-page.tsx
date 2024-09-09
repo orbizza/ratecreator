@@ -32,7 +32,7 @@ export const CategoryListPage: React.FC = () => {
         const data = await getCategoryData();
         // console.log(data);
         const categoriesWithColors = addColorsToCategories(
-          data as CategoryWithColor[]
+          data as CategoryWithColor[],
         );
         setCategories(categoriesWithColors);
         setLoading(false);
@@ -46,7 +46,7 @@ export const CategoryListPage: React.FC = () => {
   }, []);
 
   const addColorsToCategories = (
-    categories: CategoryWithColor[]
+    categories: CategoryWithColor[],
   ): CategoryWithColor[] => {
     return categories.map((category) => ({
       ...category,
@@ -61,21 +61,21 @@ export const CategoryListPage: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className='container mx-auto p-4 mt-10'>
-      <div className='flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14'>
-        <div className='text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto'>
+    <div className="container mx-auto p-4 mt-10">
+      <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
+        <div className="text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
           What are you looking for?
         </div>
-        <div className='w-full'>
+        <div className="w-full">
           <SearchBar />
         </div>
       </div>
-      <Separator className='my-4' />
-      <div className='mt-20 my-[4rem]'>
-        <h2 className='text-2xl font-semibold my-4 mb-10'>
+      <Separator className="my-4" />
+      <div className="mt-20 my-[4rem]">
+        <h2 className="text-2xl font-semibold my-4 mb-10">
           Explore companies by category
         </h2>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
@@ -96,7 +96,7 @@ const SearchBar: React.FC = () => {
     console.log("submitted");
   };
   return (
-    <div className='mb-4 w-full items-center justify-center flex'>
+    <div className="mb-4 w-full items-center justify-center flex">
       <PlaceholdersAndVanishInputCategory
         placeholders={placeholders}
         onSubmit={onSubmit}
@@ -116,15 +116,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
     <div
       className={`${category.bgColor} rounded-lg overflow-hidden transition-transform transform hover:scale-105 text-white`}
     >
-      <div className='p-4'>
-        <div className='flex items-center mb-2'>
+      <div className="p-4">
+        <div className="flex items-center mb-2">
           {icon}
-          <h3 className='text-lg font-semibold ml-2'>{category.name}</h3>
+          <h3 className="text-lg font-semibold ml-2">{category.name}</h3>
         </div>
         {category.subcategories && category.subcategories.length > 0 && (
-          <div className='mt-2 text-sm'>
+          <div className="mt-2 text-sm">
             <strong>Subcategories:</strong>
-            <ul className='list-disc list-inside mt-1'>
+            <ul className="list-disc list-inside mt-1">
               {category.subcategories.map((subcat) => (
                 <li key={subcat.id}>{subcat.name}</li>
               ))}
