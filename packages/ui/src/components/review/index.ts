@@ -4,3 +4,4 @@ export * from "./footer/footer";
 export * from "./landing/landing-page";
 export * from "./cards/card-landing-vertical";
 export * from "./cards/card-landing-horizontal";
+export * from "./categories/category-list-page";

@@ -1,0 +1,19 @@
+{
+  "name": "@ratecreator/actions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.5.4",
+    "@ratecreator/store": "*",
+    "@ratecreator/db": "*",
+    "@ratecreator/types": "*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./review": "./src/review/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@ratecreator/auth",
+  "version": "1.0.0",
+  "main": "clerk-provider.tsx",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^5.0.35",
+    "@clerk/nextjs": "^5.4.1",
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
