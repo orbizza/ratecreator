@@ -17,24 +17,14 @@ export const HeroText = () => {
   // State to control visibility of heading, subheading, and search bar
 
   const [isSubheadingVisible, setIsSubheadingVisible] = useState(false);
-  // const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
 
   useEffect(() => {
-    // Show subheading after heading (1 second later)
     const subheadingTimer = setTimeout(() => {
       setIsSubheadingVisible(true);
     }, 200);
 
-    // Show search bar after subheading (1 second later)
-    // const searchBarTimer = setTimeout(() => {
-    //   setIsSearchBarVisible(true);
-    // }, 400);
-
-    // Cleanup timers if component unmounts
     return () => {
-      // clearTimeout(headingTimer);
       clearTimeout(subheadingTimer);
-      // clearTimeout(searchBarTimer);
     };
   }, []);
 

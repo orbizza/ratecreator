@@ -15,7 +15,10 @@
     "next": "14.2.7",
     "@ratecreator/ui": "*",
     "@ratecreator/store": "*",
-    "@ratecreator/db": "*"
+    "@ratecreator/db": "*",
+    "@ratecreator/actions": "*",
+    "@ratecreator/auth": "*",
+    "@ratecreator/types": "*"
   },
   "devDependencies": {
     "typescript": "^5",

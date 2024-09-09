@@ -10,6 +10,7 @@ generator client {
 model Category {
   id           String     @id @default(cuid()) @map("_id")
   name         String   
+  slug         String
   description  String?
   longDescription String?
   parentId     String?
@@ -23,6 +24,7 @@ model Category {
 
   @@unique([name, parentId])
   @@index([name])
+  @@index([slug])
   @@index([parentId])
   @@index([description])
   @@index([longDescription])
