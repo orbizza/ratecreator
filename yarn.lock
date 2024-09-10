@@ -489,6 +489,14 @@
     std-env "^3.7.0"
     swr "^2.2.0"
 
+"@clerk/themes@^2.1.27":
+  version "2.1.27"
+  resolved "https://registry.yarnpkg.com/@clerk/themes/-/themes-2.1.27.tgz#ac93f0f7e65274aca6025b3d987dc35058c39020"
+  integrity sha512-BFbSDhhFMTPsWzbEqm/LOOT4ULEin0C7jSngeiCFKjCG246QhsqfEZfwZVrWM7Gzfz/geR6itAtmLSSFDpzAbA==
+  dependencies:
+    "@clerk/types" "4.19.0"
+    tslib "2.4.1"
+
 "@clerk/types@4.19.0":
   version "4.19.0"
   resolved "https://registry.yarnpkg.com/@clerk/types/-/types-4.19.0.tgz#945370cfb80afae5ceef31c7110ef4ab32726f5f"
@@ -1091,6 +1099,16 @@
   integrity sha512-FmlW1rCg7hBpEBwFbjHwCW6AmWLQM6g/v0Sn8XbP9NvmSZ2San1FpQeyPtufzOMSIx7Y4dzjlHoifhp+7NkZhw==
   dependencies:
     "@radix-ui/react-primitive" "2.0.0"
+
+"@radix-ui/react-avatar@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-avatar/-/react-avatar-1.1.0.tgz#457c81334c93f4608df15f081e7baa286558d6a2"
+  integrity sha512-Q/PbuSMk/vyAd/UoIShVGZ7StHHeRFYU7wXmi5GV+8cLXflZAEpHL/F697H1klrzxKXNtZ97vWiC0q3RKUH8UA==
+  dependencies:
+    "@radix-ui/react-context" "1.1.0"
+    "@radix-ui/react-primitive" "2.0.0"
+    "@radix-ui/react-use-callback-ref" "1.1.0"
+    "@radix-ui/react-use-layout-effect" "1.1.0"
 
 "@radix-ui/react-collapsible@1.1.0":
   version "1.1.0"
