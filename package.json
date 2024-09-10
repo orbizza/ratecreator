@@ -40,6 +40,7 @@
     "@changesets/cli": "^2.27.6",
     "@clerk/clerk-sdk-node": "^5.0.35",
     "@clerk/nextjs": "^5.4.1",
+    "@clerk/themes": "^2.1.27",
     "@icons-pack/react-simple-icons": "^10.0.0",
     "@types/node": "^22.4.2",
     "@types/supertest": "^6.0.2",

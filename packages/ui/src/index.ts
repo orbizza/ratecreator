@@ -19,6 +19,7 @@ export * from "./components/ui/animated-gradient-text";
 export * from "./components/ui/text-hover-effect";
 export * from "./components/ui/sparkles-text";
 export * from "./components/ui/marquee";
+export * from "./components/ui/avatar";
 
 export * from "./components/themes/theme-provider";
 export * from "./components/themes/toggle-theme";
