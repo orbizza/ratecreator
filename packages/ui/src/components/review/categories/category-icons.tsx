@@ -64,5 +64,5 @@ const categoryIcons: Record<string, LucideIcon> = {
 
 export function getIconForCategory(categoryName: string): React.ReactElement {
   const IconComponent = categoryIcons[categoryName] || Briefcase; // Default to ShoppingCart if no match
-  return <IconComponent className='w-6 h-6' />;
+  return <IconComponent className="w-6 h-6" />;
 }
