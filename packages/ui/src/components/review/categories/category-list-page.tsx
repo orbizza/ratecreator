@@ -1,24 +1,88 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
+
 import { getCategoryData } from "@ratecreator/actions/review";
 import { getIconForCategory } from "./category-icons";
 import { Category } from "@ratecreator/types/review";
 import { PlaceholdersAndVanishInputCategory, Separator } from "@ratecreator/ui";
 
-const bgColors = [
-  "bg-blue-500",
-  "bg-green-500",
-  "bg-yellow-500",
-  "bg-red-500",
-  "bg-purple-500",
-  "bg-pink-500",
-  "bg-indigo-500",
-  "bg-teal-500",
+const lightBgColors = [
+  "bg-green-200",
+  "bg-blue-200",
+  "bg-yellow-200",
+  "bg-red-200",
+  "bg-pink-200",
+  "bg-indigo-200",
+  "bg-teal-200",
+  "bg-orange-200",
+  "bg-cyan-200",
+  "bg-lime-200",
+  "bg-emerald-200",
+  "bg-sky-200",
+  "bg-violet-200",
+  "bg-fuchsia-200",
+  "bg-rose-200",
+];
+
+const darkBgColors = [
+  "dark:bg-green-800",
+  "dark:bg-blue-800",
+  "dark:bg-yellow-800",
+  "dark:bg-red-800",
+  "dark:bg-pink-800",
+  "dark:bg-indigo-800",
+  "dark:bg-teal-800",
+  "dark:bg-orange-800",
+  "dark:bg-cyan-800",
+  "dark:bg-lime-800",
+  "dark:bg-emerald-800",
+  "dark:bg-sky-800",
+  "dark:bg-violet-800",
+  "dark:bg-fuchsia-800",
+  "dark:bg-rose-800",
+];
+
+const lightHoverColors = [
+  "hover:bg-green-300",
+  "hover:bg-blue-300",
+  "hover:bg-yellow-300",
+  "hover:bg-red-300",
+  "hover:bg-pink-300",
+  "hover:bg-indigo-300",
+  "hover:bg-teal-300",
+  "hover:bg-orange-300",
+  "hover:bg-cyan-300",
+  "hover:bg-lime-300",
+  "hover:bg-emerald-300",
+  "hover:bg-sky-300",
+  "hover:bg-violet-300",
+  "hover:bg-fuchsia-300",
+  "hover:bg-rose-300",
+];
+
+const darkHoverColors = [
+  "dark:hover:bg-green-900",
+  "dark:hover:bg-blue-900",
+  "dark:hover:bg-yellow-900",
+  "dark:hover:bg-red-900",
+  "dark:hover:bg-pink-900",
+  "dark:hover:bg-indigo-900",
+  "dark:hover:bg-teal-900",
+  "dark:hover:bg-orange-900",
+  "dark:hover:bg-cyan-900",
+  "dark:hover:bg-lime-900",
+  "dark:hover:bg-emerald-900",
+  "dark:hover:bg-sky-900",
+  "dark:hover:bg-violet-900",
+  "dark:hover:bg-fuchsia-900",
+  "dark:hover:bg-rose-900",
 ];
 
 interface CategoryWithColor extends Category {
   bgColor: string;
+  hoverColor: string;
 }
 
 export const CategoryListPage: React.FC = () => {
@@ -30,9 +94,8 @@ export const CategoryListPage: React.FC = () => {
     const fetchCategories = async () => {
       try {
         const data = await getCategoryData();
-        // console.log(data);
         const categoriesWithColors = addColorsToCategories(
-          data as CategoryWithColor[],
+          data as CategoryWithColor[]
         );
         setCategories(categoriesWithColors);
         setLoading(false);
@@ -46,14 +109,12 @@ export const CategoryListPage: React.FC = () => {
   }, []);
 
   const addColorsToCategories = (
-    categories: CategoryWithColor[],
+    categories: CategoryWithColor[]
   ): CategoryWithColor[] => {
-    return categories.map((category) => ({
+    return categories.map((category, index) => ({
       ...category,
-      bgColor: bgColors[Math.floor(Math.random() * bgColors.length)],
-      subcategories: category.subcategories
-        ? addColorsToCategories(category.subcategories as CategoryWithColor[])
-        : [],
+      bgColor: `${lightBgColors[index % lightBgColors.length]} ${darkBgColors[index % darkBgColors.length]}`,
+      hoverColor: `${lightHoverColors[index % lightHoverColors.length]} ${darkHoverColors[index % darkHoverColors.length]}`,
     }));
   };
 
@@ -61,23 +122,25 @@ export const CategoryListPage: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="container mx-auto p-4 mt-10">
-      <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
-        <div className="text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
+    <div className='container mx-auto p-4 mt-10'>
+      <div className='flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14'>
+        <div className='text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto'>
           What are you looking for?
         </div>
-        <div className="w-full">
+        <div className='w-full'>
           <SearchBar />
         </div>
       </div>
-      <Separator className="my-4" />
-      <div className="mt-20 my-[4rem]">
-        <h2 className="text-2xl font-semibold my-4 mb-10">
+      <Separator className='my-4' />
+      <div className='mt-20 my-[4rem]'>
+        <h2 className='text-2xl font-semibold my-4 mb-10'>
           Explore companies by category
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className='columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4'>
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <div key={category.id} className='break-inside-avoid mb-4'>
+              <CategoryCard category={category} />
+            </div>
           ))}
         </div>
       </div>
@@ -96,7 +159,7 @@ const SearchBar: React.FC = () => {
     console.log("submitted");
   };
   return (
-    <div className="mb-4 w-full items-center justify-center flex">
+    <div className='mb-4 w-full items-center justify-center flex'>
       <PlaceholdersAndVanishInputCategory
         placeholders={placeholders}
         onSubmit={onSubmit}
@@ -113,25 +176,44 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   const icon = getIconForCategory(category.name);
 
   return (
-    <div
-      className={`${category.bgColor} rounded-lg overflow-hidden transition-transform transform hover:scale-105 text-white`}
-    >
-      <div className="p-4">
-        <div className="flex items-center mb-2">
-          {icon}
-          <h3 className="text-lg font-semibold ml-2">{category.name}</h3>
-        </div>
-        {category.subcategories && category.subcategories.length > 0 && (
-          <div className="mt-2 text-sm">
-            <strong>Subcategories:</strong>
-            <ul className="list-disc list-inside mt-1">
-              {category.subcategories.map((subcat) => (
-                <li key={subcat.id}>{subcat.name}</li>
-              ))}
-            </ul>
+    <div className='rounded-lg overflow-hidden shadow-md flex flex-col h-full'>
+      <Link href={`/category/${category.id}`} passHref className='block'>
+        <div
+          className={`${category.bgColor} ${category.hoverColor} p-4 transition-transform hover:scale-105`}
+        >
+          <div className='flex flex-col items-center justify-center '>
+            <div className='text-4xl text-gray-800 dark:text-white mb-2'>
+              {icon}
+            </div>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-white text-center'>
+              {category.name}
+            </h3>
           </div>
-        )}
-      </div>
+        </div>
+      </Link>
+      {category.subcategories && category.subcategories.length > 0 && (
+        <div className='bg-white dark:bg-gray-900 p-4 flex-grow'>
+          <ul className='list-none p-0 m-0'>
+            {category.subcategories.map((subcat) => (
+              <Link
+                href={`/category/${subcat.id}`}
+                passHref
+                className='block transition-transform hover:scale-105'
+              >
+                <li
+                  key={subcat.id}
+                  className='text-sm text-gray-600 dark:text-gray-300 py-1'
+                >
+                  {subcat.name}
+                  <Separator className='my-2' />
+                </li>
+              </Link>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
+
+export default CategoryListPage;
