@@ -11,7 +11,7 @@ model Category {
   id           String     @id @default(cuid()) @map("_id")
   name         String   
   slug         String
-  description  String?
+  shortDescription  String?
   longDescription String?
   parentId     String?
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -22,11 +22,11 @@ model Category {
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
 
-  @@unique([name, parentId])
+  @@unique([slug, parentId])
   @@index([name])
   @@index([slug])
   @@index([parentId])
-  @@index([description])
+  @@index([shortDescription])
   @@index([longDescription])
 }
 
