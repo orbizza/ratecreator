@@ -55,7 +55,7 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
   // TODO: Fetch data from the server and serve the Most Popular Categories by default
   // TODO: List Actions by Default, clear on search
   const [filteredData, setFilteredData] = useState<FilteredCategory[]>(
-    MostPopularCategories
+    MostPopularCategories,
   );
 
   const resetSearch = useCallback(() => {
@@ -73,7 +73,7 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
         items: category.items.filter(
           (item) =>
             item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.handle.toLowerCase().includes(searchTerm.toLowerCase())
+            item.handle.toLowerCase().includes(searchTerm.toLowerCase()),
         ),
       })).filter((category) => category.items.length > 0);
     }
@@ -260,23 +260,23 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
   return (
     <KBarProvider actions={actions}>
       <KBarPortal>
-        <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
-          <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
-            <div className='p-4 flex-grow overflow-hidden'>
-              <div className='relative'>
+        <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
+          <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
+            <div className="p-4 flex-grow overflow-hidden">
+              <div className="relative">
                 <Search
-                  className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                   size={20}
                 />
                 <KBarSearch
-                  className='w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
+                  className="w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   onChange={handleSearchChange}
                   value={searchTerm}
-                  placeholder='Search creator, category, or community'
+                  placeholder="Search creator, category, or community"
                 />
                 {searchTerm && (
                   <button
-                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={clearSearch}
                   >
                     <X size={20} />
@@ -288,7 +288,7 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
                 activeTab={activeTab}
               />
             </div>
-            <div className='flex border-t border-border'>
+            <div className="flex border-t border-border">
               {tabs.map((tab) => (
                 <button
                   key={tab}

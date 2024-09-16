@@ -169,7 +169,7 @@ export function PlaceholdersAndVanishInput({
     if (value && inputRef.current) {
       const maxX = newDataRef.current.reduce(
         (prev, current) => (current.x > prev ? current.x : prev),
-        0
+        0,
       );
       animate(maxX);
     }
@@ -195,7 +195,7 @@ export function PlaceholdersAndVanishInput({
       e.stopPropagation();
       query.toggle();
     },
-    [query]
+    [query],
   );
 
   return (
@@ -209,7 +209,7 @@ export function PlaceholdersAndVanishInput({
     <form
       className={cn(
         "w-full relative  max-w-xl lg:mx-0 mx-auto bg-white dark:bg-zinc-800 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200",
-        value && "bg-gray-50"
+        value && "bg-gray-50",
       )}
       onSubmit={handleSubmit}
       onClick={onClick}
@@ -217,11 +217,11 @@ export function PlaceholdersAndVanishInput({
       <canvas
         className={cn(
           "absolute pointer-events-none  text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20",
-          !animating ? "opacity-0" : "opacity-100"
+          !animating ? "opacity-0" : "opacity-100",
         )}
         ref={canvasRef}
       />
-      <Search className='absolute left-4 top-3 h-6 w-6 ' />
+      <Search className="absolute left-4 top-3 h-6 w-6 " />
 
       <input
         onChange={(e) => {
@@ -233,26 +233,26 @@ export function PlaceholdersAndVanishInput({
         onKeyDown={handleKeyDown}
         ref={inputRef}
         value={value}
-        type='text'
+        type="text"
         className={cn(
           "w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-14  pr-20",
-          animating && "text-transparent dark:text-transparent"
+          animating && "text-transparent dark:text-transparent",
         )}
       />
 
-      <div className='absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center z-80'>
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center z-80">
         <Button
-          variant='ghost'
+          variant="ghost"
           onClick={handleShortcutClick}
-          className='text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 p-1 rounded cursor-pointer'
+          className="text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 p-1 rounded cursor-pointer"
         >
           {isMac ? (
-            <div className='grid grid-flow-col gap-1 mx-[0] text-lg'>
+            <div className="grid grid-flow-col gap-1 mx-[0] text-lg">
               <Kbd>⌘</Kbd>
               <Kbd>K</Kbd>
             </div>
           ) : (
-            <div className='grid grid-flow-col gap-1 mx-[0] text-lg'>
+            <div className="grid grid-flow-col gap-1 mx-[0] text-lg">
               <Kbd>Ctrl</Kbd>
               <Kbd>K</Kbd>
             </div>
@@ -260,8 +260,8 @@ export function PlaceholdersAndVanishInput({
         </Button>
       </div>
 
-      <div className='absolute inset-0 flex items-center rounded-full pointer-events-none'>
-        <AnimatePresence mode='wait'>
+      <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
+        <AnimatePresence mode="wait">
           {!value && (
             <motion.p
               initial={{
@@ -281,7 +281,7 @@ export function PlaceholdersAndVanishInput({
                 duration: 0.3,
                 ease: "linear",
               }}
-              className='dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-14 text-left w-[calc(100%-2rem)] truncate'
+              className="dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-14 text-left w-[calc(100%-2rem)] truncate"
             >
               {placeholders[currentPlaceholder]}
             </motion.p>
