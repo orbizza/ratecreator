@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import {
   PlaceholdersAndVanishInput,
@@ -8,6 +8,7 @@ import {
 } from "@ratecreator/ui";
 
 import { SearchPlaceholders } from "@ratecreator/store";
+import { useKBar } from "kbar";
 
 export const HeroText = () => {
   const headingWords = `Where You Go for Creators.`;
@@ -28,11 +29,11 @@ export const HeroText = () => {
     };
   }, []);
 
-  //  Add the action to open the command search bar
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("submitted");
-  };
+  const { query } = useKBar();
+
+  const handleSerarchClick = useCallback(() => {
+    query.toggle();
+  }, [query]);
 
   return (
     <div className="flex flex-col items-start m-2 md:m-10 gap-y-8 mx-auto w-full max-w-3xl">
@@ -65,7 +66,7 @@ export const HeroText = () => {
         >
           <PlaceholdersAndVanishInput
             placeholders={placeholders}
-            onSubmit={onSubmit}
+            onClick={handleSerarchClick}
           />
         </div>
       )}

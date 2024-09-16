@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
@@ -14,6 +14,7 @@ import { MainMenu } from "./main-menu";
 import { usePathname } from "next/navigation";
 
 import { SearchPlaceholders } from "@ratecreator/store";
+import { useKBar } from "kbar";
 
 export function Appbar() {
   const [isHeroVisible, setIsHeroVisible] = useState(true);
@@ -58,6 +59,12 @@ export function Appbar() {
 
   const showSearchBar = isLandingPage ? !isHeroVisible : true;
 
+  const { query } = useKBar();
+
+  const handleSerarchClick = useCallback(() => {
+    query.toggle();
+  }, [query]);
+
   return (
     <header className="px-4 py-2">
       <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
@@ -85,7 +92,10 @@ export function Appbar() {
             {/* Search Bar */}
             {showSearchBar && (
               <div className="hidden lg:block mx-[50px] xl:mx-20 w-full relative items-center justify-center">
-                <PlaceholdersAndVanishInput placeholders={placeholders} />
+                <PlaceholdersAndVanishInput
+                  placeholders={placeholders}
+                  onClick={handleSerarchClick}
+                />
               </div>
             )}
 
@@ -96,7 +106,11 @@ export function Appbar() {
               </div>
               {showSearchBar && (
                 <div className="block lg:hidden">
-                  <Button variant="ghost" size={"icon"}>
+                  <Button
+                    variant="ghost"
+                    size={"icon"}
+                    onClick={handleSerarchClick}
+                  >
                     <Search />
                   </Button>
                 </div>
