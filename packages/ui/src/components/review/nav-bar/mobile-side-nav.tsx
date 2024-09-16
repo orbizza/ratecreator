@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Search,
   SquareMenu,
@@ -34,11 +34,17 @@ import {
   AvatarFallback,
   SheetHeader,
 } from "@ratecreator/ui";
+import { useKBar } from "kbar";
 
 export function MobileSideNav() {
   const router = useRouter();
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
+  const { query } = useKBar();
+
+  const handleSerarchClick = useCallback(() => {
+    query.toggle();
+  }, [query]);
 
   function getInitials(nameOrEmail: string) {
     if (!nameOrEmail) return "SD";
@@ -78,13 +84,16 @@ export function MobileSideNav() {
 
           <SheetContent className="w-[320px] border-l-1 ">
             <SheetTitle>
-              <Button
-                variant="ghost"
-                className="items-center  border-transparent rounded-md "
-                size={"icon"}
-              >
-                <Search />
-              </Button>
+              <SheetClose asChild>
+                <Button
+                  variant="ghost"
+                  className="items-center  border-transparent rounded-md "
+                  size={"icon"}
+                  onClick={handleSerarchClick}
+                >
+                  <Search />
+                </Button>
+              </SheetClose>
             </SheetTitle>
 
             <SheetTitle className="p-2 flex items-center justify-center">
@@ -274,13 +283,16 @@ export function MobileSideNav() {
 
           <SheetContent className="w-[320px] border-l-1 ">
             <SheetTitle>
-              <Button
-                variant="ghost"
-                className="items-center  border-transparent rounded-md "
-                size={"icon"}
-              >
-                <Search />
-              </Button>
+              <SheetClose asChild>
+                <Button
+                  variant="ghost"
+                  className="items-center  border-transparent rounded-md "
+                  size={"icon"}
+                  onClick={handleSerarchClick}
+                >
+                  <Search />
+                </Button>
+              </SheetClose>
             </SheetTitle>
             <Separator className="my-4 w-[270px]" />
             <div className=" grid gap-4 py-4 w-[270px]">
