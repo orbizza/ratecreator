@@ -2,6 +2,7 @@
 export interface Category {
   id: string;
   name: string;
+  slug: string;
   description?: string | null;
   longDescription?: string | null;
   parentId?: string | null;
@@ -10,4 +11,8 @@ export interface Category {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
+}
+
+export interface SearchResult extends Category {
+  parentCategory?: string;
 }
