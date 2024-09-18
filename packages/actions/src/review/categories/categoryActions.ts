@@ -6,20 +6,20 @@ import { Category } from "@ratecreator/types/review";
 export async function getCategoryData(): Promise<Category[]> {
   try {
     // Test database connection
-    await prisma.$connect();
-    console.log("Database connection successful");
+    // await prisma.$connect();
+    // console.log("Database connection successful");
 
     // Count all categories without any conditions
-    const totalCount = await prisma.category.count();
-    console.log("Total categories in database:", totalCount);
+    // const totalCount = await prisma.category.count();
+    // console.log("Total categories in database:", totalCount);
 
     // Count categories that are not deleted
-    const nonDeletedCount = await prisma.category.count({
-      where: {
-        deletedAt: null,
-      },
-    });
-    console.log("Non-deleted categories:", nonDeletedCount);
+    // const nonDeletedCount = await prisma.category.count({
+    //   where: {
+    //     deletedAt: null,
+    //   },
+    // });
+    // console.log("Non-deleted categories:", nonDeletedCount);
 
     // Fetch all categories without any conditions
     const allCategories = await prisma.category.findMany({
@@ -28,8 +28,8 @@ export async function getCategoryData(): Promise<Category[]> {
       },
     });
 
-    console.log("All categories fetched:", allCategories.length);
-    console.log("Sample category:", allCategories[0]);
+    // console.log("All categories fetched:", allCategories.length);
+    // console.log("Sample category:", allCategories[0]);
 
     // Original logic starts here
     const categoryMap: { [key: string]: Category } = {};
@@ -46,9 +46,9 @@ export async function getCategoryData(): Promise<Category[]> {
     const rootCategories: Category[] = [];
     allCategories.forEach((category) => {
       if (category.parentId) {
-        const parent = categoryMap[category.parentId];
-        if (parent) {
-          parent.subcategories?.push(categoryMap[category.id]);
+        const parentId = categoryMap[category.parentId];
+        if (parentId) {
+          parentId.subcategories?.push(categoryMap[category.id]);
         } else {
           console.warn(`Parent category not found for: ${category.id}`);
         }
@@ -64,7 +64,8 @@ export async function getCategoryData(): Promise<Category[]> {
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     throw new Error("Failed to fetch categories");
-  } finally {
-    await prisma.$disconnect();
   }
+  // finally {
+  //   await prisma.$disconnect();
+  // }
 }

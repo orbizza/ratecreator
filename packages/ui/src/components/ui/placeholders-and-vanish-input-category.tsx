@@ -9,12 +9,12 @@ export function PlaceholdersAndVanishInputCategory({
   placeholders,
   onChange,
   onSubmit,
-  onClick,
+  passedValue,
 }: {
   placeholders: string[];
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
-  onClick?: (e: React.MouseEvent<HTMLFormElement>) => void;
+  passedValue?: string;
 }) {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
@@ -191,7 +191,6 @@ export function PlaceholdersAndVanishInputCategory({
         value && "bg-gray-50",
       )}
       onSubmit={handleSubmit}
-      onClick={onClick}
     >
       <canvas
         className={cn(
@@ -214,7 +213,7 @@ export function PlaceholdersAndVanishInputCategory({
         value={value}
         type="text"
         className={cn(
-          "w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-14  pr-20",
+          "w-full relative text-sm sm:text-base  border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-14  pr-20",
           animating && "text-transparent dark:text-transparent",
         )}
       />
@@ -274,7 +273,7 @@ export function PlaceholdersAndVanishInputCategory({
                 opacity: 0,
               }}
               transition={{
-                duration: 0.3,
+                duration: 0.5,
                 ease: "linear",
               }}
               className="dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-14 text-left w-[calc(100%-2rem)] truncate"

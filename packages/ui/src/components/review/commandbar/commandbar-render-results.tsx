@@ -20,7 +20,7 @@ export const RenderResults: React.FC<RenderResultsProps> = ({
   const router = useRouter();
 
   const handleCategoryClick = (categoryName: string) => {
-    router.push(`/category/${encodeURIComponent(categoryName)}`);
+    router.push(`/categories/${encodeURIComponent(categoryName)}`);
   };
   return (
     <div className="mt-4 max-h-[50vh] overflow-y-auto">
