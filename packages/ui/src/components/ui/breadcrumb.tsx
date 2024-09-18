@@ -9,7 +9,7 @@ const Breadcrumb = React.forwardRef<
   React.ComponentPropsWithoutRef<"nav"> & {
     separator?: React.ReactNode;
   }
->(({ ...props }, ref) => <nav ref={ref} aria-label='breadcrumb' {...props} />);
+>(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />);
 Breadcrumb.displayName = "Breadcrumb";
 
 const BreadcrumbList = React.forwardRef<
@@ -20,7 +20,7 @@ const BreadcrumbList = React.forwardRef<
     ref={ref}
     className={ny(
       "text-muted-foreground flex flex-wrap items-center gap-1.5 break-words text-sm sm:gap-2.5",
-      className
+      className,
     )}
     {...props}
   />
@@ -63,9 +63,9 @@ const BreadcrumbPage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <span
     ref={ref}
-    role='link'
-    aria-disabled='true'
-    aria-current='page'
+    role="link"
+    aria-disabled="true"
+    aria-current="page"
     className={ny("text-foreground font-normal", className)}
     {...props}
   />
@@ -79,8 +79,8 @@ function BreadcrumbSeparator({
 }: React.ComponentProps<"li">) {
   return (
     <li
-      role='presentation'
-      aria-hidden='true'
+      role="presentation"
+      aria-hidden="true"
       className={ny("[&>svg]:size-3.5", className)}
       {...props}
     >
@@ -96,13 +96,13 @@ function BreadcrumbEllipsis({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      role='presentation'
-      aria-hidden='true'
+      role="presentation"
+      aria-hidden="true"
       className={ny("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontal className='size-4' />
-      <span className='sr-only'>More</span>
+      <MoreHorizontal className="size-4" />
+      <span className="sr-only">More</span>
     </span>
   );
 }

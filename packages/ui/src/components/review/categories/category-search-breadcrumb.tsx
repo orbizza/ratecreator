@@ -47,7 +47,7 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href='/categories'>Category</BreadcrumbLink>
+          <BreadcrumbLink href="/categories">Category</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
 
@@ -55,11 +55,11 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
           <>
             <BreadcrumbItem>
               <DropdownMenu>
-                <DropdownMenuTrigger className='flex items-center gap-1'>
-                  <BreadcrumbEllipsis className='size-4' />
-                  <span className='sr-only'>Toggle menu</span>
+                <DropdownMenuTrigger className="flex items-center gap-1">
+                  <BreadcrumbEllipsis className="size-4" />
+                  <span className="sr-only">Toggle menu</span>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='start'>
+                <DropdownMenuContent align="start">
                   {hiddenCategories.map((category) => (
                     <DropdownMenuItem key={category.id}>
                       <BreadcrumbLink href={`/categories/${category.slug}`}>
