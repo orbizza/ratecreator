@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 import { getCategoryData } from "@ratecreator/actions/review";
-import { getIconForCategory } from "./category-icons";
-import { Category } from "@ratecreator/types/review";
-import { PlaceholdersAndVanishInputCategory, Separator } from "@ratecreator/ui";
+
+import { CategoryWithColor } from "@ratecreator/types/review";
+import { Separator, Skeleton } from "@ratecreator/ui";
+
+import SearchBar from "./search-bar";
+import { CategoryCardListPage } from "./category-card-list-page";
 
 const lightBgColors = [
   "bg-green-200",
@@ -80,11 +82,6 @@ const darkHoverColors = [
   "dark:hover:bg-rose-900",
 ];
 
-interface CategoryWithColor extends Category {
-  bgColor: string;
-  hoverColor: string;
-}
-
 export const CategoryListPage: React.FC = () => {
   const [categories, setCategories] = useState<CategoryWithColor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -118,9 +115,6 @@ export const CategoryListPage: React.FC = () => {
     }));
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
     <div className="container mx-auto p-4 mt-10">
       <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
@@ -128,7 +122,7 @@ export const CategoryListPage: React.FC = () => {
           What are you looking for?
         </div>
         <div className="w-full">
-          <SearchBar />
+          <SearchBar categories={categories} isLoading={false} />
         </div>
       </div>
       <Separator className="my-4" />
@@ -136,84 +130,47 @@ export const CategoryListPage: React.FC = () => {
         <h2 className="text-2xl font-semibold my-4 mb-10">
           Explore companies by category
         </h2>
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-          {categories.map((category) => (
-            <div key={category.id} className="break-inside-avoid mb-4">
-              <CategoryCard category={category} />
-            </div>
-          ))}
-        </div>
+        {!loading && (
+          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+            {categories.map((category) => (
+              <div key={category.id} className="break-inside-avoid mb-4">
+                <CategoryCardListPage category={category} />
+              </div>
+            ))}
+          </div>
+        )}
+        {loading && <CategoryListLoadingCard />}
+        {error && <p>Error: {error}</p>}
       </div>
     </div>
   );
 };
 
-const SearchBar: React.FC = () => {
-  const placeholders = [
-    "Search for categories",
-    "Search for sub-categories",
-    "Enter any category name",
-  ];
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("submitted");
-  };
-  return (
-    <div className="mb-4 w-full items-center justify-center flex">
-      <PlaceholdersAndVanishInputCategory
-        placeholders={placeholders}
-        onSubmit={onSubmit}
-      />
-    </div>
-  );
-};
-
-interface CategoryCardProps {
-  category: CategoryWithColor;
-}
-
-const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
-  const icon = getIconForCategory(category.name);
+const CategoryListLoadingCard: React.FC = () => {
+  const skeletonCount = 7;
 
   return (
-    <div className="rounded-lg overflow-hidden shadow-md flex flex-col h-full">
-      <Link href={`/category/${category.id}`} passHref className="block">
-        <div
-          className={`${category.bgColor} ${category.hoverColor} p-4 transition-transform hover:scale-105`}
-        >
-          <div className="flex flex-col items-center justify-center ">
-            <div className="text-4xl text-gray-800 dark:text-white mb-2">
-              {icon}
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-8">
+      {[...Array(skeletonCount)].map((_, index) => (
+        <>
+          <div key={index} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white text-center">
-              {category.name}
-            </h3>
           </div>
-        </div>
-      </Link>
-      {category.subcategories && category.subcategories.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 p-4 flex-grow">
-          <ul className="list-none p-0 m-0">
-            {category.subcategories.map((subcat) => (
-              <Link
-                href={`/category/${subcat.id}`}
-                passHref
-                className="block transition-transform hover:scale-105"
-              >
-                <li
-                  key={subcat.id}
-                  className="text-sm text-gray-600 dark:text-gray-300 py-1"
-                >
-                  {subcat.name}
-                  <Separator className="my-2" />
-                </li>
-              </Link>
-            ))}
-          </ul>
-        </div>
-      )}
+          <div key={index} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </>
+      ))}
     </div>
   );
 };
-
-export default CategoryListPage;

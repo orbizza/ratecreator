@@ -10,7 +10,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ name }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/category/${encodeURIComponent(name)}`);
+    router.push(`/categories/${encodeURIComponent(name)}`);
   };
 
   return (
