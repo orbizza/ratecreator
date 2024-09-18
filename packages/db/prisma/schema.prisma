@@ -22,9 +22,8 @@ model Category {
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
 
-  @@unique([slug, parentId])
+  @@unique([slug])
   @@index([name])
-  @@index([slug])
   @@index([parentId])
   @@index([shortDescription])
   @@index([longDescription])

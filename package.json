@@ -42,6 +42,7 @@
     "@clerk/nextjs": "^5.4.1",
     "@clerk/themes": "^2.1.27",
     "@icons-pack/react-simple-icons": "^10.0.0",
+    "@radix-ui/react-popover": "^1.1.1",
     "@types/lodash": "^4.17.7",
     "@types/node": "^22.4.2",
     "@types/supertest": "^6.0.2",

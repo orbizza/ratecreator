@@ -3,7 +3,7 @@ import { CategoryListPage } from "@ratecreator/ui/review";
 
 export default function CategoriesList() {
   return (
-    <div className="min-h-[calc(100vh-20vh)] ">
+    <div>
       <CategoryListPage />
     </div>
   );
