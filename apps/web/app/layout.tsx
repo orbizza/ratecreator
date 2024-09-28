@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 
 import "@ratecreator/ui/styles.css";
 import "./globals.css";
-import { Providers } from "./providers";
+import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -24,13 +24,15 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
-          <Providers>
-            <Appbar />
-            {children}
-            <Footer />
-          </Providers>
-        </body>
+        <CSPostHogProvider>
+          <body className={inter.className}>
+            <Providers>
+              <Appbar />
+              {children}
+              <Footer />
+            </Providers>
+          </body>
+        </CSPostHogProvider>
       </html>
     </ClerkProvider>
   );
