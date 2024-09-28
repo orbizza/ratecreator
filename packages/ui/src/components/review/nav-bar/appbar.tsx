@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
+import posthog from "posthog-js";
+
 import {
   Button,
   ModeToggle,
@@ -62,6 +64,8 @@ export function Appbar() {
   const { query } = useKBar();
 
   const handleSerarchClick = useCallback(() => {
+    console.log({ event: "Search bar clicked" });
+    posthog.capture("Search Bar Clicked", { property: "value" });
     query.toggle();
   }, [query]);
 
