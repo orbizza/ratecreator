@@ -5,6 +5,7 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  keywords: String[];
   shortDescription?: string | null;
   longDescription?: string | null;
   parentId?: string | null;

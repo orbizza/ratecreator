@@ -11,7 +11,8 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    "./client": "./src/index.ts"
+    "./client": "./src/index.ts",
+    "./redis-do": "./src/redis-do.ts"
   },
   "devDependencies": {
     "prisma": "5.13.0"

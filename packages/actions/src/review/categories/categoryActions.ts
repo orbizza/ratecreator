@@ -1,10 +1,30 @@
 "use server";
 
 import prisma from "@ratecreator/db/client";
+import redis from "@ratecreator/db/redis-do";
 import { Category } from "@ratecreator/types/review";
+
+const CACHE_KEY = "categories"; // Define a key for caching categories
+
+// ToDo: Enable Vercel Caching in case of deployment
+
+// interface GetCategoryDataResponse {
+//   categories: Category[];
+//   headers: {
+//     "Cache-Control": string;
+//   };
+// }
 
 export async function getCategoryData(): Promise<Category[]> {
   try {
+    // Check if the data is already cached in Redis
+    const cachedCategories = await redis.get(CACHE_KEY);
+
+    if (cachedCategories) {
+      console.log("Returning cached categories");
+      return JSON.parse(cachedCategories); // Return cached data
+    }
+
     // Test database connection
     // await prisma.$connect();
     // console.log("Database connection successful");
@@ -59,6 +79,22 @@ export async function getCategoryData(): Promise<Category[]> {
 
     // console.log("Root categories found:", rootCategories.length);
     // console.log("Sample root category:", rootCategories[0]);
+
+    // Cache the result in Redis
+    await redis.set(CACHE_KEY, JSON.stringify(rootCategories));
+    console.log("Categories cached in Redis");
+
+    // Add Cache-Control headers to cache the response in Vercel's CDN indefinitely
+    const cacheControlHeader = {
+      headers: {
+        "Cache-Control": "s-maxage=31536000, stale-while-revalidate", // Cache for 1 year
+      },
+    };
+
+    // return {
+    //   categories: rootCategories, // The array of categories
+    //   headers: cacheControlHeader.headers, // Cache-Control headers
+    // };
 
     return rootCategories;
   } catch (error) {

@@ -13,6 +13,7 @@ model Category {
   slug         String
   shortDescription  String?
   longDescription String?
+  keywords      String[]
   parentId     String?
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subcategories Category[] @relation("CategoryHierarchy")
@@ -27,6 +28,7 @@ model Category {
   @@index([parentId])
   @@index([shortDescription])
   @@index([longDescription])
+  @@index([keywords])
 }
 
 

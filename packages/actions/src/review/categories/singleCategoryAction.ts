@@ -12,7 +12,7 @@ if (!uri) {
 
 async function getSubcategories(
   categoriesCollection: any,
-  parentId: string,
+  parentId: string
 ): Promise<Category[]> {
   const subcategories = await categoriesCollection
     .find({ parentId: new ObjectId(parentId) })
@@ -25,6 +25,7 @@ function serializeCategory(category: any): Category {
     id: category._id ? category._id.toString() : undefined,
     name: category.name,
     slug: category.slug,
+    keywords: category.keywords || [],
     shortDescription: category.shortDescription || null,
     longDescription: category.longDescription || null,
     parentId: category.parentId ? category.parentId.toString() : null,
@@ -42,7 +43,7 @@ function serializeCategory(category: any): Category {
 }
 
 export async function getCategoryDetails(
-  slug: string,
+  slug: string
 ): Promise<Category[] | null> {
   let client: MongoClient | null = null;
 
@@ -68,7 +69,7 @@ export async function getCategoryDetails(
       // Fetch subcategories for the current category
       serializedCategory.subcategories = await getSubcategories(
         categoriesCollection,
-        serializedCategory.id,
+        serializedCategory.id
       );
 
       categories.unshift(serializedCategory);

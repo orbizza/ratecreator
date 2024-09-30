@@ -31,7 +31,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
         setSearchResults([]);
       }
     }, 300),
-    [categories],
+    [categories]
   );
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
 
   const searchCategories = (
     categories: Category[],
-    term: string,
+    term: string
   ): SearchResult[] => {
     const results: SearchResult[] = [];
     const searchLower = term.toLowerCase();
@@ -81,10 +81,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
   const matchesSearch = (category: Category, term: string): boolean => {
     return Boolean(
       category.name.toLowerCase().includes(term) ||
+        (category.keywords &&
+          category.keywords.some((keyword) =>
+            keyword.toLowerCase().includes(term)
+          )) ||
         (category.shortDescription &&
           category.shortDescription.toLowerCase().includes(term)) ||
         (category.longDescription &&
-          category.longDescription.toLowerCase().includes(term)),
+          category.longDescription.toLowerCase().includes(term))
     );
   };
 
@@ -104,7 +108,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
   }
 
   return (
-    <div className="mb-4 w-full items-center justify-center flex flex-col">
+    <div className='mb-4 w-full items-center justify-center flex flex-col'>
       <PlaceholdersAndVanishInputCategory
         placeholders={placeholders}
         onSubmit={onSubmit}
@@ -115,7 +119,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
         <SearchResults results={searchResults} />
       ) : (
         searchTerm.length > 0 && (
-          <div className="mt-2 text-gray-500 dark:text-gray-400">
+          <div className='mt-2 text-gray-500 dark:text-gray-400'>
             No results found. Please try a different search term.
           </div>
         )
