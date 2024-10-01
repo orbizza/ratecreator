@@ -19,14 +19,14 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: "Invalid category type" },
-          { status: 400 }
+          { status: 400 },
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
