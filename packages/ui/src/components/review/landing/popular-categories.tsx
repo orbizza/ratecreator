@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { cn } from "@ratecreator/ui/utils";
 
 import { MostPopularCategories } from "@ratecreator/store";
@@ -23,8 +25,8 @@ const CategoryList = ({
   selectedCategory,
   onSelectCategory,
 }: CategoryListProps) => (
-  <div className="space-y-2 my-[1rem]">
-    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+  <div className='space-y-2 my-[1rem]'>
+    <h1 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
       Most Popular Categories
     </h1>
     {categories.map((category) => (
@@ -64,9 +66,9 @@ const CategoryItem = ({
 
 // SelectedCategoryHeader component
 const SelectedCategoryHeader = ({ category }: { category: string }) => (
-  <div className="flex justify-end items-center mb-4">
+  <div className='flex justify-end items-center mb-4'>
     <Button variant={"link"}>
-      See all {category} <ChevronRight className="ml-1" size={16} />
+      See all {category} <ChevronRight className='ml-1' size={16} />
     </Button>
   </div>
 );
@@ -115,15 +117,15 @@ const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
         <Link
           href={"#"}
           key={item?.link}
-          className="relative group  block p-2 h-full w-full"
+          className='relative group  block p-2 h-full w-full'
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl"
-                layoutId="hoverBackground"
+                className='absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl'
+                layoutId='hoverBackground'
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -151,15 +153,16 @@ const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
 // Main component
 const PopularCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState(
-    MostPopularCategories[0].name,
+    MostPopularCategories[0].name
   );
+  const router = useRouter();
 
   // Data structure: each category has its own list of account items
   const categories = MostPopularCategories;
 
   // Get selected category's data
   const selectedCategoryData = categories.find(
-    (cat) => cat.name === selectedCategory,
+    (cat) => cat.name === selectedCategory
   );
 
   // Function to handle category selection
@@ -168,29 +171,32 @@ const PopularCategories = () => {
   };
 
   return (
-    <div className="flex flex-col ml-5 my-[5rem]">
+    <div className='flex flex-col ml-5 my-[5rem]'>
       {/* Category List */}
-      <div className="flex">
-        <div className="w-2/5 md:w-1/4 pr-4">
+      <div className='flex'>
+        <div className='w-2/5 md:w-1/4 pr-4'>
           <CategoryList
             categories={categories}
             selectedCategory={selectedCategory}
             onSelectCategory={handleSelectCategory}
           />
-          <Button className="w-full mt-4 justify-start">
+          <Button
+            className='w-full mt-4 justify-start'
+            onClick={() => router.push("/categories")}
+          >
             View All Categories
           </Button>
         </div>
 
         {/* Category Grid */}
-        <div className="mr-5 w-3/5 md:w-3/4">
+        <div className='mr-5 w-3/5 md:w-3/4'>
           <SelectedCategoryHeader category={selectedCategory} />
           <CategoryGrid
             accounts={selectedCategoryData ? selectedCategoryData.items : []}
           />
         </div>
       </div>
-      <div className="my-[5rem]">
+      <div className='my-[5rem]'>
         <WriteReviewCTA />
       </div>
     </div>

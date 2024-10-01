@@ -12,6 +12,7 @@ export interface Category {
   parent?: Category | null;
   subcategories?: Category[];
   depth: number;
+  popular: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
