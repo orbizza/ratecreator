@@ -5,12 +5,14 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  keywords: String[];
   shortDescription?: string | null;
   longDescription?: string | null;
   parentId?: string | null;
   parent?: Category | null;
   subcategories?: Category[];
   depth: number;
+  popular: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
