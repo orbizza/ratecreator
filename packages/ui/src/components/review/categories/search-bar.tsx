@@ -81,6 +81,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, isLoading }) => {
   const matchesSearch = (category: Category, term: string): boolean => {
     return Boolean(
       category.name.toLowerCase().includes(term) ||
+        (category.keywords &&
+          category.keywords.some((keyword) =>
+            keyword.toLowerCase().includes(term),
+          )) ||
         (category.shortDescription &&
           category.shortDescription.toLowerCase().includes(term)) ||
         (category.longDescription &&

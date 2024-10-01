@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { cn } from "@ratecreator/ui/utils";
 
 import { MostPopularCategories } from "@ratecreator/store";
@@ -153,6 +155,7 @@ const PopularCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState(
     MostPopularCategories[0].name,
   );
+  const router = useRouter();
 
   // Data structure: each category has its own list of account items
   const categories = MostPopularCategories;
@@ -177,7 +180,10 @@ const PopularCategories = () => {
             selectedCategory={selectedCategory}
             onSelectCategory={handleSelectCategory}
           />
-          <Button className="w-full mt-4 justify-start">
+          <Button
+            className="w-full mt-4 justify-start"
+            onClick={() => router.push("/categories")}
+          >
             View All Categories
           </Button>
         </div>
