@@ -1,26 +1,20 @@
 "use server";
 
-import { MongoClient, ObjectId } from "mongodb";
-// import path from "path";
-// import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 import { getRedisClient, closeRedisConnection } from "@ratecreator/db/redis-do";
+import {
+  getMongoClient,
+  closeMongoConnection,
+} from "@ratecreator/db/mongo-client";
 import { Category } from "@ratecreator/types/review";
 import axios from "axios";
 
-// Load environment variables from .env file
-// dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 const CACHE_ALL_CATEGORIES = "all-categories";
-const uri = process.env.DATABASE_URL_ONLINE || "";
-
-if (!uri) {
-  console.log("DATABASE_URL: " + uri);
-  throw new Error("DATABASE_URL environment variable is not set");
-}
 
 async function getSubcategories(
   categoriesCollection: any,
-  parentId: string,
+  parentId: string
 ): Promise<Category[]> {
   const subcategories = await categoriesCollection
     .find({ parentId: new ObjectId(parentId) })
@@ -49,14 +43,14 @@ function serializeCategory(category: any): Category {
 
 function getSubcategoriesFromCache(
   categories: Category[],
-  parentId: string,
+  parentId: string
 ): Category[] {
   const subcategories = categories.filter((cat) => cat.parentId === parentId);
   return subcategories.map((subcat) => {
     const serialized = serializeCategory(subcat);
     serialized.subcategories = getSubcategoriesFromCache(
       categories,
-      subcat.id!,
+      subcat.id!
     );
     return serialized;
   });
@@ -64,7 +58,7 @@ function getSubcategoriesFromCache(
 
 function buildCategoryHierarchy(
   categories: Category[],
-  slug: string,
+  slug: string
 ): Category[] {
   const result: Category[] = [];
   let currentCategory = categories.find((cat) => cat.slug === slug);
@@ -75,7 +69,7 @@ function buildCategoryHierarchy(
     // Get all levels of subcategories
     serializedCategory.subcategories = getSubcategoriesFromCache(
       categories,
-      currentCategory.id!,
+      currentCategory.id!
     );
 
     result.unshift(serializedCategory);
@@ -84,7 +78,7 @@ function buildCategoryHierarchy(
       break;
     }
     currentCategory = categories.find(
-      (cat) => cat.id === currentCategory!.parentId,
+      (cat) => cat.id === currentCategory!.parentId
     );
   }
 
@@ -92,9 +86,9 @@ function buildCategoryHierarchy(
 }
 
 export async function getCategoryDetails(
-  slug: string,
+  slug: string
 ): Promise<Category[] | null> {
-  let client: MongoClient | null = null;
+  const client = await getMongoClient();
   const redis = getRedisClient();
   try {
     const cachedCategories = await redis.get(CACHE_ALL_CATEGORIES);
@@ -111,8 +105,6 @@ export async function getCategoryDetails(
 
       return categoryHierarchy;
     } else {
-      client = new MongoClient(uri);
-      await client.connect();
       const database = client.db("ratecreator");
       const categoriesCollection = database.collection<Category>("Category");
 
@@ -132,7 +124,7 @@ export async function getCategoryDetails(
         // Fetch subcategories for the current category
         serializedCategory.subcategories = await getSubcategories(
           categoriesCollection,
-          serializedCategory.id,
+          serializedCategory.id
         );
 
         categories.unshift(serializedCategory);
@@ -146,7 +138,7 @@ export async function getCategoryDetails(
 
       //ToDo: Call the api to cache all the categories
       await axios.get(
-        `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=all`,
+        `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=all`
       );
 
       return categories;
@@ -154,8 +146,5 @@ export async function getCategoryDetails(
   } catch (error) {
     console.error("Error fetching category details:", error);
     throw error;
-  } finally {
-    if (client) await client.close();
-    await closeRedisConnection();
   }
 }
