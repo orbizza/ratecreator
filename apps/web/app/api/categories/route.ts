@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 import prisma from "@ratecreator/db/client";
-import { getRedisClient, closeRedisConnection } from "@ratecreator/db/redis-do";
-import {
-  getMongoClient,
-  closeMongoConnection,
-} from "@ratecreator/db/mongo-client";
+import { getRedisClient } from "@ratecreator/db/redis-do";
+import clientPromise from "@ratecreator/db/mongo-client";
 import { Account, Category, PopularCategory } from "@ratecreator/types/review";
 
 const CACHE_ROOT_CATEGORIES = "categories";
@@ -33,14 +30,14 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: "Invalid category type" },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -99,7 +96,7 @@ async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
 }
 
 async function handlePopularCategories(
-  redis: ReturnType<typeof getRedisClient>,
+  redis: ReturnType<typeof getRedisClient>
 ) {
   const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
   if (cachedCategories) {
@@ -125,9 +122,9 @@ async function handlePopularCategories(
 }
 
 async function fetchAccountsForPopularCategories(
-  redis: ReturnType<typeof getRedisClient>,
+  redis: ReturnType<typeof getRedisClient>
 ) {
-  const client = await getMongoClient();
+  const client = await clientPromise;
   try {
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedCategories) {
@@ -152,7 +149,7 @@ async function fetchAccountsForPopularCategories(
             .toArray();
 
           const accountIds: ObjectId[] = categoryMappings.map(
-            (mapping) => new ObjectId(mapping.accountId),
+            (mapping) => new ObjectId(mapping.accountId)
           );
 
           const accounts = await accountCollection
@@ -182,7 +179,7 @@ async function fetchAccountsForPopularCategories(
         } catch (error) {
           console.error(
             `Error fetching accounts for category ${category.id}:`,
-            error,
+            error
           );
           return {
             category: {
@@ -193,11 +190,11 @@ async function fetchAccountsForPopularCategories(
             accounts: [],
           };
         }
-      }),
+      })
     );
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
-      JSON.stringify(accountsByCategory),
+      JSON.stringify(accountsByCategory)
     );
     console.log("Account and Categories cached in Redis");
 
@@ -206,7 +203,7 @@ async function fetchAccountsForPopularCategories(
     console.error("Error in fetchAccountsForPopularCategories:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
