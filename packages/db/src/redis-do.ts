@@ -19,6 +19,18 @@ export const getRedisClient = (): Redis => {
     redisClient.on("connect", () => {
       console.log("Connected to Redis");
     });
+
+    process.on("SIGINT", async () => {
+      console.log("Gracefully shutting down...");
+      await closeRedisConnection();
+      process.exit(0);
+    });
+
+    process.on("SIGTERM", async () => {
+      console.log("Gracefully shutting down...");
+      await closeRedisConnection();
+      process.exit(0);
+    });
   }
 
   return redisClient;
