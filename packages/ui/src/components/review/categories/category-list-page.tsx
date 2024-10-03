@@ -90,11 +90,39 @@ export const CategoryListPage: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        // Check for cached data in localStorage
+        const cachedCategories = localStorage.getItem("categoriesWithColors");
+        const cacheExpiry = localStorage.getItem("categoriesWithColorsExpiry");
+        const currentTime = new Date().getTime();
+
+        if (
+          cachedCategories &&
+          cacheExpiry &&
+          currentTime < Number(cacheExpiry)
+        ) {
+          // Use cached data if available and not expired
+          const parsedCategories = JSON.parse(cachedCategories);
+          setCategories(parsedCategories);
+          setLoading(false);
+          return; // Exit early since we used cached data
+        }
         const data = await getCategoryData();
         const categoriesWithColors = addColorsToCategories(
           data as CategoryWithColor[],
         );
         setCategories(categoriesWithColors);
+
+        // Cache the fetched data in localStorage and set an expiration (e.g., 24 hours)
+        localStorage.setItem(
+          "categoriesWithColors",
+          JSON.stringify(categoriesWithColors),
+        );
+        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+        localStorage.setItem(
+          "categoriesWithColorsExpiry",
+          expiryTime.toString(),
+        );
+
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");

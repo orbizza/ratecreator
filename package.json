@@ -16,7 +16,8 @@
     "prisma-generate": "npx dotenv -e .env -- npx prisma generate --schema=packages/db/prisma/schema.prisma",
     "category-dev": "yarn workspace @ratecreator/category dev",
     "category-build": "yarn workspace @ratecreator/category build",
-    "category-start": "yarn workspace @ratecreator/category start"
+    "category-start": "yarn workspace @ratecreator/category start",
+    "npm-clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +"
   },
   "devDependencies": {
     "@ratecreator/typescript-config": "*",
