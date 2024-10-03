@@ -1,12 +1,15 @@
 import { MongoClient } from "mongodb";
 
+
 declare global {
   var _mongoClientPromise: Promise<MongoClient>;
 }
 
+
 const uri = process.env.DATABASE_URL_ONLINE || "";
 
 if (!uri) {
+
   throw new Error("DATABASE_URL_ONLINE environment variable not set!");
 }
 
@@ -27,3 +30,4 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export default clientPromise;
+

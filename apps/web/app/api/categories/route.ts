@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 import prisma from "@ratecreator/db/client";
+
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import clientPromise from "@ratecreator/db/mongo-client";
+
 import { Account, Category, PopularCategory } from "@ratecreator/types/review";
 
 const CACHE_ROOT_CATEGORIES = "categories";
@@ -124,7 +126,9 @@ async function handlePopularCategories(
 async function fetchAccountsForPopularCategories(
   redis: ReturnType<typeof getRedisClient>,
 ) {
+
   const client = await clientPromise;
+
   try {
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedCategories) {
