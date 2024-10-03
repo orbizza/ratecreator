@@ -57,6 +57,8 @@ model Account {
   updatedAt       DateTime   @updatedAt
   language_code   String?
   lang_confidence_score Float?
+  rating          Float?
+  reviewCount     Int?
   
 
   @@unique([platform, accountId])
@@ -73,6 +75,8 @@ model Account {
   @@index([keywords_en])
   @@index([isSuspended])
   @@index([language_code])
+  @@index([reviewCount])
+  @@index([rating])
 }
 
 model CategoryMapping {

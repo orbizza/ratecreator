@@ -8,8 +8,8 @@ export const MostPopularCategories = [
         accountId: "UCt4t-jeY85JegMlZ-E5UWtA",
         handle: "@aajtak",
         followerCount: 66800000,
-        rating: 0.0,
-        reviews: 0,
+        rating: 3.0,
+        reviews: 30,
         imageUrl:
           "https://yt3.ggpht.com/ytc/AIdro_m1WLxquYeEO9VgyA7-cYFrn_hd2dSaNtmL8-NIHMCQIuPQ=s88-c-k-c0x00ffffff-no-rj",
       },

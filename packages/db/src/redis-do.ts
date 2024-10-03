@@ -1,22 +1,34 @@
 import Redis from "ioredis";
-// import dotenv from "dotenv";
-// import path from "path";
-// Load environment variables from .env file
-// dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-// You can store these in environment variables for better security
-const redis = new Redis({
-  host: process.env.REDIS_HOST || "",
-  username: process.env.REDIS_USERNAME || "",
-  port: parseInt(process.env.REDIS_PORT || "25061", 10), // default Redis port for DO managed
-  password: process.env.REDIS_PASSWORD || "",
-  tls: {},
-});
+let redisClient: Redis | null = null;
 
-// Log connection errors
-redis.on("error", (err) => {
-  // console.error("Path: ", path.resolve(__dirname, "../../../.env"));
-  console.error("Redis connection error:", err);
-});
+export const getRedisClient = (): Redis => {
+  if (!redisClient) {
+    redisClient = new Redis({
+      host: process.env.REDIS_HOST || "",
+      port: parseInt(process.env.REDIS_PORT || "6379", 10),
+      username: process.env.REDIS_USERNAME || "",
+      password: process.env.REDIS_PASSWORD || "",
+      tls: {},
+    });
 
-export default redis;
+    redisClient.on("error", (err) => {
+      console.error("Redis client error:", err);
+    });
+
+    redisClient.on("connect", () => {
+      console.log("Connected to Redis");
+    });
+  }
+
+  return redisClient;
+};
+
+export const closeRedisConnection = async (): Promise<void> => {
+  if (redisClient) {
+    await redisClient.quit();
+    redisClient = null;
+  }
+};
+
+export default getRedisClient;

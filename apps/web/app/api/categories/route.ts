@@ -1,39 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MongoClient, ObjectId } from "mongodb";
+
 import prisma from "@ratecreator/db/client";
-import redis from "@ratecreator/db/redis-do";
-import { Category } from "@ratecreator/types/review";
+import { getRedisClient, closeRedisConnection } from "@ratecreator/db/redis-do";
+import { Account, Category, PopularCategory } from "@ratecreator/types/review";
 
 const CACHE_ROOT_CATEGORIES = "categories";
 const CACHE_ALL_CATEGORIES = "all-categories";
+const CACHE_POPULAR_CATEGORIES = "popular-categories";
+const CACHE_POPULAR_CATEGORY_ACCOUNTS = "popular-categories-with-accounts";
+const uri = process.env.DATABASE_URL_ONLINE || "";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type");
+  const redis = getRedisClient();
 
   try {
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
+
     switch (type) {
       case "all":
-        return await handleAllCategories();
+        return await handleAllCategories(redis);
       case "root":
-        return await handleRootCategories();
+        return await handleRootCategories(redis);
+      case "popular-categories":
+        return await handlePopularCategories(redis);
+      case "popular-cat-data":
+        return await fetchAccountsForPopularCategories(redis);
       default:
         return NextResponse.json(
           { error: "Invalid category type" },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 },
+      { status: 500 }
     );
+  } finally {
+    await closeRedisConnection();
   }
 }
 
-async function handleAllCategories() {
-  // Delete cache for testing db
-  // await redis.del(CACHE_ALL_CATEGORIES);
+async function handleAllCategories(redis: ReturnType<typeof getRedisClient>) {
   const cachedCategories = await redis.get(CACHE_ALL_CATEGORIES);
   if (cachedCategories) {
     console.log("Returning cached all categories");
@@ -50,10 +61,7 @@ async function handleAllCategories() {
   return NextResponse.json(allCategories);
 }
 
-async function handleRootCategories() {
-  // Delete cache for testing db
-  // await redis.del(CACHE_ROOT_CATEGORIES);
-  // await redis.del(CACHE_ALL_CATEGORIES);
+async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
   const cachedCategories = await redis.get(CACHE_ROOT_CATEGORIES);
   if (cachedCategories) {
     console.log("Returning cached root categories");
@@ -88,3 +96,169 @@ async function handleRootCategories() {
 
   return NextResponse.json(rootCategories);
 }
+
+async function handlePopularCategories(
+  redis: ReturnType<typeof getRedisClient>
+) {
+  const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
+  if (cachedCategories) {
+    console.log("Returning cached popular categories");
+    return NextResponse.json(JSON.parse(cachedCategories));
+  }
+
+  const popularCategories = await prisma.category.findMany({
+    where: { popular: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  });
+  // console.log(popularCategories);
+  // console.log("Returning popular categories");
+
+  await redis.set(CACHE_POPULAR_CATEGORIES, JSON.stringify(popularCategories));
+  console.log("Popular Categories cached in Redis");
+
+  return NextResponse.json(popularCategories);
+}
+
+async function fetchAccountsForPopularCategories(
+  redis: ReturnType<typeof getRedisClient>
+) {
+  let client: MongoClient | null = null;
+
+  try {
+    const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
+    if (cachedCategories) {
+      console.log("Returning cached popular categories");
+      return NextResponse.json(JSON.parse(cachedCategories));
+    }
+    const popularCategoriesResponse = await handlePopularCategories(redis);
+    const popularCategories: PopularCategory[] =
+      await popularCategoriesResponse.json();
+    console.log("Popular Categories Received");
+
+    client = new MongoClient(uri);
+    await client.connect();
+    const database = client.db("ratecreator");
+    const categoryMappingCollection = database.collection("CategoryMapping");
+    const accountCollection = database.collection<Account>("Account");
+
+    const accountsByCategory = await Promise.all(
+      popularCategories.map(async (category) => {
+        try {
+          const categoryMappings = await categoryMappingCollection
+            .find({ categoryId: category.id })
+
+            .toArray();
+
+          const accountIds = categoryMappings.map(
+            (mapping) => new ObjectId(mapping.accountId)
+          );
+
+          const accounts = await accountCollection
+            .find({ _id: { $in: accountIds } })
+            .sort({ followerCount: -1 })
+            .limit(20)
+            .toArray();
+
+          return {
+            category: {
+              id: category.id,
+              name: category.name,
+              slug: category.slug,
+            },
+            accounts: accounts.map((account) => ({
+              id: account._id.toString(),
+              name: account.name,
+              handle: account.handle,
+              platform: account.platform,
+              accountId: account.accountId,
+              followerCount: account.followerCount,
+              rating: account.rating,
+              reviewCount: account.reviewCount,
+              imageUrl: account.imageUrl,
+            })),
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching accounts for category ${category.id}:`,
+            error
+          );
+          return {
+            category: {
+              id: category.id,
+              name: category.name,
+              slug: category.slug,
+            },
+            accounts: [],
+          };
+        }
+      })
+    );
+    await redis.set(
+      CACHE_POPULAR_CATEGORY_ACCOUNTS,
+      JSON.stringify(accountsByCategory)
+    );
+    console.log("Account and Categories cached in Redis");
+
+    return NextResponse.json(accountsByCategory);
+  } catch (error) {
+    console.error("Error in fetchAccountsForPopularCategories:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
+  } finally {
+    if (client) await client.close();
+  }
+}
+
+// const accountsByCategory = [];
+// for (const category of popularCategories) {
+//   console.log("Fetching accounts for category: ", category.name);
+//   const accounts = await prisma.categoryMapping.findMany({
+//     where: {
+//       categoryId: category.id, // Using the categoryId from the first action
+//     },
+//     select: {
+//       account: {
+//         select: {
+//           name: true,
+//           handle: true,
+//           platform: true,
+//           accountId: true,
+//           followerCount: true,
+//           rating: true,
+//           reviewCount: true,
+//           imageUrl: true,
+//         },
+//       },
+//     },
+//     orderBy: {
+//       account: {
+//         followerCount: "desc", // Sorting by follower count
+//       },
+//     },
+//     take: 20, // Limiting results to 20 accounts per category
+//   });
+
+//   // Store the category with its associated accounts
+//   accountsByCategory.push({
+//     category: {
+//       name: category.name,
+//       slug: category.slug,
+//     },
+//     accounts: accounts.map((mapping) => mapping.account), // Extract accounts
+//   });
+// }
+
+// return accountsByCategory;
+
+// await redis.set(CACHE_ALL_CATEGORIES, JSON.stringify(allCategories));
+// console.log("All Categories cached in Redis");
+// await redis.set(CACHE_ROOT_CATEGORIES, JSON.stringify(rootCategories));
+// console.log("Root Categories cached in Redis");
+
+// return NextResponse.json(rootCategories);

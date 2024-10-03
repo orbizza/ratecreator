@@ -92,7 +92,7 @@ export const CategoryListPage: React.FC = () => {
       try {
         // Check for cached data in localStorage
         const cachedCategories = localStorage.getItem("categoriesWithColors");
-        const cacheExpiry = localStorage.getItem("categoriesExpiry");
+        const cacheExpiry = localStorage.getItem("categoriesWithColorsExpiry");
         const currentTime = new Date().getTime();
 
         if (
@@ -102,27 +102,25 @@ export const CategoryListPage: React.FC = () => {
         ) {
           // Use cached data if available and not expired
           const parsedCategories = JSON.parse(cachedCategories);
-          console.log("Using local cached categories");
           setCategories(parsedCategories);
           setLoading(false);
           return; // Exit early since we used cached data
         }
-
         const data = await getCategoryData();
         const categoriesWithColors = addColorsToCategories(
-          data as CategoryWithColor[],
+          data as CategoryWithColor[]
         );
         setCategories(categoriesWithColors);
 
         // Cache the fetched data in localStorage and set an expiration (e.g., 24 hours)
         localStorage.setItem(
           "categoriesWithColors",
-          JSON.stringify(categoriesWithColors),
+          JSON.stringify(categoriesWithColors)
         );
         const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
         localStorage.setItem(
           "categoriesWithColorsExpiry",
-          expiryTime.toString(),
+          expiryTime.toString()
         );
 
         setLoading(false);
@@ -136,7 +134,7 @@ export const CategoryListPage: React.FC = () => {
   }, []);
 
   const addColorsToCategories = (
-    categories: CategoryWithColor[],
+    categories: CategoryWithColor[]
   ): CategoryWithColor[] => {
     return categories.map((category, index) => ({
       ...category,
@@ -146,24 +144,24 @@ export const CategoryListPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 mt-10">
-      <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
-        <div className="text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
+    <div className='container mx-auto p-4 mt-10'>
+      <div className='flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14'>
+        <div className='text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto'>
           What are you looking for?
         </div>
-        <div className="w-full">
+        <div className='w-full'>
           <SearchBar categories={categories} isLoading={false} />
         </div>
       </div>
-      <Separator className="my-4" />
-      <div className="mt-20 my-[4rem]">
-        <h2 className="text-2xl font-semibold my-4 mb-10">
+      <Separator className='my-4' />
+      <div className='mt-20 my-[4rem]'>
+        <h2 className='text-2xl font-semibold my-4 mb-10'>
           Explore companies by category
         </h2>
         {!loading && (
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+          <div className='columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4'>
             {categories.map((category) => (
-              <div key={category.id} className="break-inside-avoid mb-4">
+              <div key={category.id} className='break-inside-avoid mb-4'>
                 <CategoryCardListPage category={category} />
               </div>
             ))}
@@ -180,23 +178,23 @@ const CategoryListLoadingCard: React.FC = () => {
   const skeletonCount = 7;
 
   return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-8">
+    <div className='w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-8'>
       {[...Array(skeletonCount)].map((_, index) => (
         <>
-          <div key={index} className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
+          <div key={index} className='flex flex-col space-y-3'>
+            <Skeleton className='h-[125px] w-full rounded-xl' />
+            <div className='space-y-2'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-3/4' />
             </div>
           </div>
-          <div key={index} className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
+          <div key={index} className='flex flex-col space-y-3'>
+            <Skeleton className='h-[125px] w-full rounded-xl' />
+            <div className='space-y-2'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-3/4' />
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-3/4' />
             </div>
           </div>
         </>

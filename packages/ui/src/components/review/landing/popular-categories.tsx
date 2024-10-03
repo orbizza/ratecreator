@@ -8,14 +8,23 @@ import { useRouter } from "next/navigation";
 
 import { cn } from "@ratecreator/ui/utils";
 
-import { MostPopularCategories } from "@ratecreator/store";
+import { Button, Skeleton } from "@ratecreator/ui";
+import {
+  PopularCategory,
+  PopularAccount,
+  PopularCategoryWithAccounts,
+} from "@ratecreator/types/review";
+import {
+  getMostPopularCategories,
+  getMostPopularCategoryWithData,
+} from "@ratecreator/actions/review";
+
 import { CardLandingVertical } from "../cards/card-landing-vertical";
-import { Button } from "@ratecreator/ui";
 import { WriteReviewCTA } from "./write-review-cta";
 
 // CategoryList component
 type CategoryListProps = {
-  categories: Array<{ name: string }>;
+  categories: PopularCategory[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
 };
@@ -25,13 +34,13 @@ const CategoryList = ({
   selectedCategory,
   onSelectCategory,
 }: CategoryListProps) => (
-  <div className="space-y-2 my-[1rem]">
-    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+  <div className='space-y-2 my-[1rem]'>
+    <h1 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
       Most Popular Categories
     </h1>
     {categories.map((category) => (
       <CategoryItem
-        key={category.name}
+        key={category.slug}
         category={category.name}
         isSelected={category.name === selectedCategory}
         onSelect={() => onSelectCategory(category.name)}
@@ -64,17 +73,8 @@ const CategoryItem = ({
   </button>
 );
 
-// SelectedCategoryHeader component
-const SelectedCategoryHeader = ({ category }: { category: string }) => (
-  <div className="flex justify-end items-center mb-4">
-    <Button variant={"link"}>
-      See all {category} <ChevronRight className="ml-1" size={16} />
-    </Button>
-  </div>
-);
-
 // CategoryGrid component
-const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
+const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   const [screenSize, setScreenSize] = useState("");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -107,7 +107,7 @@ const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
       case "medium":
         return accounts.slice(0, 8);
       default:
-        return accounts.slice(0, 9);
+        return accounts.slice(0, 12);
     }
   }, [accounts, screenSize]);
 
@@ -115,17 +115,17 @@ const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
     <div className={cn("grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 ")}>
       {displayedAccounts.map((item, idx) => (
         <Link
-          href={"#"}
-          key={item?.link}
-          className="relative group  block p-2 h-full w-full"
+          href={`/accounts/${item?.platform.toLowerCase()}/${item?.handle}`}
+          key={item?.handle}
+          className='relative group  block p-2 h-full w-full'
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl"
-                layoutId="hoverBackground"
+                className='absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl'
+                layoutId='hoverBackground'
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -138,68 +138,216 @@ const CategoryGrid = ({ accounts }: { accounts: Array<any> }) => {
               />
             )}
           </AnimatePresence>
-          <CardLandingVertical key={item.accountId - item.platform} {...item} />
+          <CardLandingVertical {...item} />
         </Link>
       ))}
     </div>
-    // <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-5 sm:ml-12'>
-    //   {displayedAccounts.map((item) => (
-    //     <CardLandingVertical key={item.accountId - item.platform} {...item} />
-    //   ))}
-    // </div>
   );
 };
 
 // Main component
 const PopularCategories = () => {
-  const [selectedCategory, setSelectedCategory] = useState(
-    MostPopularCategories[0].name,
+  const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
+    []
   );
+  const [popularCategories, setPopularCategories] = useState<PopularCategory[]>(
+    []
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [loadingCategories, setLoadingCategories] = useState<boolean>(true);
+  const [loadingAccounts, setLoadingAccounts] = useState<boolean>(true);
   const router = useRouter();
 
-  // Data structure: each category has its own list of account items
-  const categories = MostPopularCategories;
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        // Check for cached data in localStorage
+        const cachedCategories = localStorage.getItem("mostPopularCategories");
+        const cacheExpiry = localStorage.getItem("mostPopularCategoriesExpiry");
+        const currentTime = new Date().getTime();
+        if (
+          cachedCategories &&
+          cacheExpiry &&
+          currentTime < Number(cacheExpiry)
+        ) {
+          // Use cached data if available and not expired
+          const parsedCategories = JSON.parse(cachedCategories);
 
-  // Get selected category's data
+          setPopularCategories(parsedCategories);
+          setLoadingCategories(false);
+
+          return; // Exit early since we used cached data
+        }
+
+        const category_data = await getMostPopularCategories();
+        setPopularCategories(category_data);
+        setLoadingCategories(false);
+
+        localStorage.setItem(
+          "mostPopularCategories",
+          JSON.stringify(category_data)
+        );
+        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+        localStorage.setItem(
+          "mostPopularCategoriesExpiry",
+          expiryTime.toString()
+        );
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    const fetchCategoriesWithData = async () => {
+      try {
+        const cachedCategoryAccount = localStorage.getItem(
+          "mostPopularCategoryAccount"
+        );
+        const cacheAccountExpiry = localStorage.getItem(
+          "mostPopularCategoryAccountExpiry"
+        );
+        const currentTimeAccount = new Date().getTime();
+        if (
+          cachedCategoryAccount &&
+          cacheAccountExpiry &&
+          currentTimeAccount < Number(cacheAccountExpiry)
+        ) {
+          // Use cached data if available and not expired
+          const parsedCategories = JSON.parse(cachedCategoryAccount);
+
+          setCategories(parsedCategories);
+          setLoadingAccounts(false);
+          if (parsedCategories.length > 0) {
+            setSelectedCategory(parsedCategories[0].category.name);
+          }
+          return; // Exit early since we used cached data
+        }
+        const data = await getMostPopularCategoryWithData();
+        setCategories(data);
+        setLoadingAccounts(false);
+
+        localStorage.setItem(
+          "mostPopularCategoryAccount",
+          JSON.stringify(data)
+        );
+        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+        localStorage.setItem(
+          "mostPopularCategoryAccountExpiry",
+          expiryTime.toString()
+        );
+        if (data.length > 0) {
+          setSelectedCategory(data[0].category.name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories with accounts:", error);
+      }
+    };
+
+    fetchCategories();
+    fetchCategoriesWithData();
+  }, []);
+
   const selectedCategoryData = categories.find(
-    (cat) => cat.name === selectedCategory,
+    (cat) => cat.category.name === selectedCategory
   );
 
-  // Function to handle category selection
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
   };
 
   return (
-    <div className="flex flex-col ml-5 my-[5rem]">
-      {/* Category List */}
-      <div className="flex">
-        <div className="w-2/5 md:w-1/4 pr-4">
-          <CategoryList
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-          />
+    <div className='flex flex-col ml-5 my-[5rem]'>
+      <div className='flex'>
+        <div className='w-2/5 md:w-1/4 pr-4'>
+          {loadingCategories ? (
+            <CategoryLoadingCard />
+          ) : (
+            <CategoryList
+              // categories={categories.map((cat) => cat.category)}
+              categories={popularCategories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleSelectCategory}
+            />
+          )}
           <Button
-            className="w-full mt-4 justify-start"
+            className='w-full mt-4 justify-start'
             onClick={() => router.push("/categories")}
           >
             View All Categories
           </Button>
         </div>
 
-        {/* Category Grid */}
-        <div className="mr-5 w-3/5 md:w-3/4">
-          <SelectedCategoryHeader category={selectedCategory} />
-          <CategoryGrid
-            accounts={selectedCategoryData ? selectedCategoryData.items : []}
-          />
+        <div className='mr-5 w-3/5 md:w-3/4'>
+          {loadingAccounts ? (
+            <CreatorLoadingCard />
+          ) : selectedCategoryData ? (
+            <>
+              <div className='flex justify-end items-center mb-4'>
+                <Button
+                  variant={"link"}
+                  onClick={() =>
+                    router.push(
+                      `/categories/${selectedCategoryData.category.slug}`
+                    )
+                  }
+                >
+                  See all {selectedCategoryData.category.name}{" "}
+                  <ChevronRight className='ml-1' size={16} />
+                </Button>
+              </div>
+              <CategoryGrid accounts={selectedCategoryData.accounts} />
+            </>
+          ) : null}
         </div>
       </div>
-      <div className="my-[5rem]">
+      <div className='my-[5rem]'>
         <WriteReviewCTA />
       </div>
     </div>
+  );
+};
+
+const CategoryLoadingCard: React.FC = () => {
+  const skeletonCount = 6;
+
+  return (
+    <div className='space-y-5 my-[1rem]'>
+      <h1 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
+        Most Popular Categories
+      </h1>
+      {[...Array(skeletonCount)].map((_, index) => (
+        <div key={index} className='flex flex-col space-y-3'>
+          <div className='space-y-2'>
+            <Skeleton className='h-8 w-full' />
+            <Skeleton className='h-8 w-3/4' />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const CreatorLoadingCard: React.FC = () => {
+  const skeletonCount = 12;
+
+  return (
+    <>
+      <div className='flex justify-end items-center mb-4'>
+        <Button variant={"link"}>
+          See all <Skeleton className='h-4 w-[150px] ml-2' />
+          <ChevronRight className='ml-1' size={16} />
+        </Button>
+      </div>
+      <div className='w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4'>
+        {[...Array(skeletonCount)].map((_, index) => (
+          <div key={index} className='flex flex-col space-y-3'>
+            <Skeleton className='h-[125px] w-full rounded-xl' />
+            <div className='space-y-2'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-3/4' />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
