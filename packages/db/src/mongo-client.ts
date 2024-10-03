@@ -7,7 +7,7 @@ declare global {
 const uri = process.env.DATABASE_URL_ONLINE || "";
 
 if (!uri) {
-  throw new Error("DATABASE_URL_ONLINE environment variable not set");
+  throw new Error("DATABASE_URL_ONLINE environment variable not set!");
 }
 
 let client: MongoClient;
