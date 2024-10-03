@@ -23,4 +23,18 @@ export interface Account {
   updatedAt: Date;
   language_code?: string;
   lang_confidence_score?: number;
+  rating?: number;
+  reviewCount?: number;
+}
+
+export interface PopularAccount {
+  id: string;
+  accountId: string;
+  name: string;
+  handle: string;
+  platform: string;
+  imageUrl: string;
+  followerCount: number;
+  rating: number;
+  reviewCount: number;
 }

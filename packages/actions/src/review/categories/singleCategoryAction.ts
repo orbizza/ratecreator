@@ -4,7 +4,7 @@ import { MongoClient, ObjectId } from "mongodb";
 // import path from "path";
 // import dotenv from "dotenv";
 
-import redis from "@ratecreator/db/redis-do";
+import { getRedisClient, closeRedisConnection } from "@ratecreator/db/redis-do";
 import { Category } from "@ratecreator/types/review";
 import axios from "axios";
 
@@ -95,7 +95,7 @@ export async function getCategoryDetails(
   slug: string,
 ): Promise<Category[] | null> {
   let client: MongoClient | null = null;
-
+  const redis = getRedisClient();
   try {
     const cachedCategories = await redis.get(CACHE_ALL_CATEGORIES);
     if (cachedCategories) {
@@ -145,7 +145,7 @@ export async function getCategoryDetails(
       }
 
       //ToDo: Call the api to cache all the categories
-      const response = await axios.get(
+      await axios.get(
         `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=all`,
       );
 
@@ -156,5 +156,6 @@ export async function getCategoryDetails(
     throw error;
   } finally {
     if (client) await client.close();
+    await closeRedisConnection();
   }
 }

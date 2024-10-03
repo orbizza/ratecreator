@@ -11,6 +11,7 @@ import {
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
 import { ny } from "@ratecreator/ui/utils";
+import { PopularAccount } from "@ratecreator/types/review";
 
 export function CardLandingVertical({
   imageUrl,
@@ -18,17 +19,9 @@ export function CardLandingVertical({
   handle,
   followerCount,
   rating,
-  reviews,
+  reviewCount,
   platform,
-}: {
-  imageUrl: string;
-  name: string;
-  handle: string;
-  followerCount: number;
-  rating: number;
-  reviews: number;
-  platform: string;
-}) {
+}: PopularAccount) {
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case "instagram":
@@ -104,7 +97,7 @@ export function CardLandingVertical({
           <div className="text-secondary-foreground dark:text-primary-foreground">
             {rating}{" "}
             <span className="ml-1 text-sm text-gray-600 items-center">
-              ({reviews})
+              ({reviewCount})
             </span>
           </div>
         </div>

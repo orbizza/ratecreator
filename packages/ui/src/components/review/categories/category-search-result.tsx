@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowRightLeft, ChevronRight, Info } from "lucide-react";
 
 import { Account, Category } from "@ratecreator/types/review";
 import {
@@ -25,7 +26,6 @@ import { CategoryBreadcrumb } from "./category-search-breadcrumb";
 import { CreatorGrid } from "./category-search-creator-grid";
 import { FilterSidebar } from "./category-search-filter-sidebar";
 import { RelatedCategories } from "./category-search-related-category";
-import { ArrowRightLeft, Info } from "lucide-react";
 import { SubCategoriesList } from "./category-search-subcategory";
 
 export const CategoriesSearchResults: React.FC = () => {
@@ -42,10 +42,33 @@ export const CategoriesSearchResults: React.FC = () => {
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
+        // Check cached slug data in localStorage
+        const slugDetails = slug + "-categoryDetails";
+        const cachedSlugData = localStorage.getItem(slugDetails);
+        const slugExpiry = slug + "-detailsExpiry";
+        const cacheExpiry = localStorage.getItem(slugExpiry);
+        const currentTime = new Date().getTime();
+
+        if (
+          cachedSlugData &&
+          cacheExpiry &&
+          currentTime < Number(cacheExpiry)
+        ) {
+          // Use cached data if available and not expired
+          const parsedCategories = JSON.parse(cachedSlugData);
+          console.log("Using local cached details for slug: ", slug);
+          setCategories(parsedCategories);
+          setLoading(false);
+          return; // Exit early since we used cached data
+        }
+
         const data = await getCategoryDetails(slug);
-        console.log("Fetched categories:", data);
+        // console.log("Fetched categories:", data);
         if (data) {
           setCategories(data);
+          localStorage.setItem(slugDetails, JSON.stringify(data));
+          const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+          localStorage.setItem(slugExpiry, expiryTime.toString());
         }
         setLoading(false);
       } catch (err) {
@@ -65,13 +88,38 @@ export const CategoriesSearchResults: React.FC = () => {
   return (
     <div className="container mx-auto p-4 mt-16">
       <div className="flex flex-col">
-        <CategoryBreadcrumb categories={categories} />
+        {loading && (
+          <div className="flex flex-row gap-x-2 items-center">
+            <span className="text-sm text-muted-foreground hover:text-foreground">
+              {" "}
+              Category
+            </span>
+            <ChevronRight
+              className="text-sm text-muted-foreground "
+              size={14}
+            />
+            <Skeleton className="h-4 w-[300px]" />
+          </div>
+        )}
+        {!loading && <CategoryBreadcrumb categories={categories} />}
         <div className="flex flex-col justify-center items-center w-full m-8 gap-4">
-          <div className=" lg:text-5xl font-bold">
-            Best in {currentCategory?.name}
+          <div className="flex flex-wrap justify-center items-baseline lg:text-5xl font-bold">
+            <span className="mr-2">Best in</span>
+            {loading ? (
+              <Skeleton className="h-8 w-[250px] inline-block" /> // Adjust width as needed
+            ) : (
+              <span>{currentCategory?.name}</span>
+            )}
           </div>
           <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
-            {currentCategory?.shortDescription} <Info size={18} />
+            {loading ? (
+              <Skeleton className="h-4 w-[250px]" />
+            ) : (
+              <>
+                <span>{currentCategory?.shortDescription}</span>
+                <Info size={18} />
+              </>
+            )}
           </div>
         </div>
         <Separator className="my-[4rem]" />

@@ -1,5 +1,6 @@
 // packages/types/src/category.ts
-import { CategoryMapping } from "./category-mapping-types"; // Import the CategoryMapping type
+import { CategoryMapping } from "./category-mapping-types";
+import { PopularAccount } from "./account-types";
 
 export interface Category {
   id: string;
@@ -30,4 +31,14 @@ export interface CategoryWithColor extends Category {
 
 export interface CategoryCardProps {
   category: CategoryWithColor;
+}
+export interface PopularCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface PopularCategoryWithAccounts {
+  category: Category;
+  accounts: PopularAccount[];
 }
