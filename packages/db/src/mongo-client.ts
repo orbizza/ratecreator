@@ -1,37 +1,33 @@
 import { MongoClient } from "mongodb";
 
-let client: MongoClient | null = null;
-let clientPromise: Promise<MongoClient> | null = null;
+
+declare global {
+  var _mongoClientPromise: Promise<MongoClient>;
+}
+
 
 const uri = process.env.DATABASE_URL_ONLINE || "";
 
 if (!uri) {
-  throw new Error("Please define the DATABASE_URL_ONLINE environment variable");
+
+  throw new Error("DATABASE_URL_ONLINE environment variable not set!");
 }
 
-export async function getMongoClient(): Promise<MongoClient> {
-  if (client) {
-    return client;
-  }
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
 
-  if (!clientPromise) {
+if (process.env.NODE_ENV === "development") {
+  // In development mode, use a global variable so that the client is reused
+  if (!global._mongoClientPromise) {
     client = new MongoClient(uri);
-    clientPromise = client.connect();
+    global._mongoClientPromise = client.connect();
   }
-
-  try {
-    client = await clientPromise;
-    return client;
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-    throw error;
-  }
+  clientPromise = global._mongoClientPromise;
+} else {
+  // In production mode, it's best to not use a global variable
+  client = new MongoClient(uri);
+  clientPromise = client.connect();
 }
 
-export async function closeMongoConnection(): Promise<void> {
-  if (client) {
-    await client.close();
-    client = null;
-    clientPromise = null;
-  }
-}
+export default clientPromise;
+
