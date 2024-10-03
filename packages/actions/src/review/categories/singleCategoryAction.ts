@@ -1,22 +1,16 @@
 "use server";
 
-import { MongoClient, ObjectId } from "mongodb";
-// import path from "path";
-// import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 import { getRedisClient, closeRedisConnection } from "@ratecreator/db/redis-do";
+import {
+  getMongoClient,
+  closeMongoConnection,
+} from "@ratecreator/db/mongo-client";
 import { Category } from "@ratecreator/types/review";
 import axios from "axios";
 
-// Load environment variables from .env file
-// dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 const CACHE_ALL_CATEGORIES = "all-categories";
-const uri = process.env.DATABASE_URL_ONLINE || "";
-
-if (!uri) {
-  console.log("DATABASE_URL: " + uri);
-  throw new Error("DATABASE_URL environment variable is not set");
-}
 
 async function getSubcategories(
   categoriesCollection: any,
@@ -94,7 +88,7 @@ function buildCategoryHierarchy(
 export async function getCategoryDetails(
   slug: string,
 ): Promise<Category[] | null> {
-  let client: MongoClient | null = null;
+  const client = await getMongoClient();
   const redis = getRedisClient();
   try {
     const cachedCategories = await redis.get(CACHE_ALL_CATEGORIES);
@@ -111,8 +105,6 @@ export async function getCategoryDetails(
 
       return categoryHierarchy;
     } else {
-      client = new MongoClient(uri);
-      await client.connect();
       const database = client.db("ratecreator");
       const categoriesCollection = database.collection<Category>("Category");
 
@@ -154,8 +146,5 @@ export async function getCategoryDetails(
   } catch (error) {
     console.error("Error fetching category details:", error);
     throw error;
-  } finally {
-    if (client) await client.close();
-    await closeRedisConnection();
   }
 }
