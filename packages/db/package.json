@@ -13,9 +13,12 @@
   "exports": {
     "./client": "./src/index.ts",
     "./redis-do": "./src/redis-do.ts",
-    "./mongo-client": "./src/mongo-client.ts"
+    "./mongo-client": "./src/mongo-client-wrapper.ts"
   },
   "devDependencies": {
     "prisma": "5.13.0"
+  },
+  "scripts": {
+    "cleanup": "node dist/cleanup-db-connections.js"
   }
 }
