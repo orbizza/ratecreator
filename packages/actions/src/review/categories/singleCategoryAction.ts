@@ -2,9 +2,8 @@
 
 import { ObjectId } from "mongodb";
 
-
 import { getRedisClient } from "@ratecreator/db/redis-do";
-import clientPromise from "@ratecreator/db/mongo-client";
+import { getMongoClient } from "@ratecreator/db/mongo-client";
 
 import { Category } from "@ratecreator/types/review";
 import axios from "axios";
@@ -87,8 +86,7 @@ function buildCategoryHierarchy(
 export async function getCategoryDetails(
   slug: string,
 ): Promise<Category[] | null> {
-
-  const client = await clientPromise;
+  const client = await getMongoClient();
 
   const redis = getRedisClient();
   try {

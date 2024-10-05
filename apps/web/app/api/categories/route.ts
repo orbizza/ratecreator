@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
-import prisma from "@ratecreator/db/client";
+import { getPrismaClient } from "@ratecreator/db/client";
 
 import { getRedisClient } from "@ratecreator/db/redis-do";
-import clientPromise from "@ratecreator/db/mongo-client";
+import { getMongoClient } from "@ratecreator/db/mongo-client";
 
 import { Account, Category, PopularCategory } from "@ratecreator/types/review";
 
@@ -13,9 +13,11 @@ const CACHE_ALL_CATEGORIES = "all-categories";
 const CACHE_POPULAR_CATEGORIES = "popular-categories";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "popular-categories-with-accounts";
 
+const prisma = getPrismaClient();
+
 export async function GET(request: NextRequest) {
   const redis = getRedisClient();
-
+  // await redis.flushall();
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
@@ -45,6 +47,7 @@ export async function GET(request: NextRequest) {
 }
 
 async function handleAllCategories(redis: ReturnType<typeof getRedisClient>) {
+  // await redis.del(CACHE_ALL_CATEGORIES);
   const cachedCategories = await redis.get(CACHE_ALL_CATEGORIES);
   if (cachedCategories) {
     console.log("Returning cached all categories");
@@ -62,6 +65,7 @@ async function handleAllCategories(redis: ReturnType<typeof getRedisClient>) {
 }
 
 async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
+  // await redis.del(CACHE_ROOT_CATEGORIES);
   const cachedCategories = await redis.get(CACHE_ROOT_CATEGORIES);
   if (cachedCategories) {
     console.log("Returning cached root categories");
@@ -100,6 +104,7 @@ async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
 async function handlePopularCategories(
   redis: ReturnType<typeof getRedisClient>,
 ) {
+  // await redis.del(CACHE_POPULAR_CATEGORIES);
   const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
   if (cachedCategories) {
     console.log("Returning cached popular categories");
@@ -126,10 +131,10 @@ async function handlePopularCategories(
 async function fetchAccountsForPopularCategories(
   redis: ReturnType<typeof getRedisClient>,
 ) {
-
-  const client = await clientPromise;
+  const client = await getMongoClient();
 
   try {
+    // await redis.del(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedCategories) {
       console.log("Returning cached popular categories");
