@@ -11,10 +11,11 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    "./client": "./src/index.ts",
-    "./redis-do": "./src/redis-do.ts",
-    "./mongo-client": "./src/mongo-client-wrapper.ts",
-    "./algolia-client": "./src/algolia-client.ts"
+    "./client": "./src/clients/index.ts",
+    "./redis-do": "./src/clients/redis-do.ts",
+    "./mongo-client": "./src/clients/mongo-client-wrapper.ts",
+    "./algolia-client": "./src/clients/algolia-client.ts",
+    "./utils": "./src/utils/index.ts"
   },
   "devDependencies": {
     "prisma": "5.13.0"

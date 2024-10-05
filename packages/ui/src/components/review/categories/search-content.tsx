@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchBox, useHits } from "react-instantsearch";
 import debounce from "lodash/debounce";
 import AlgoliaSearchWithAnimations from "./search-algolia-placeholder";
 import SearchResults from "./search-results";
 import { SearchResult } from "@ratecreator/types/review";
+import { searchCache } from "@ratecreator/db/utils";
 
 interface SearchContentProps {
   searchTerm: string;
@@ -38,13 +39,23 @@ const SearchContent: React.FC<SearchContentProps> = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { refine } = useSearchBox();
   const { hits } = useHits<AlgoliaHit>();
+  const [cachedResults, setCachedResults] = useState<SearchResult[] | null>(
+    null
+  );
 
   const debouncedRefine = useCallback(
-    debounce((value: string) => {
-      refine(value);
-      setIsSearchOpen(value.length > 0);
+    debounce(async (value: string) => {
+      const cached = await searchCache.getCachedResults(value);
+      if (cached) {
+        setCachedResults(cached);
+        setIsSearchOpen(true);
+      } else {
+        setCachedResults(null);
+        refine(value);
+        setIsSearchOpen(value.length > 0);
+      }
     }, 300),
-    [refine],
+    [refine]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +97,15 @@ const SearchContent: React.FC<SearchContentProps> = ({
     }));
   };
 
+  useEffect(() => {
+    if (hits.length > 0 && searchTerm) {
+      const results = mapHitsToSearchResults(hits);
+      searchCache.setCachedResults(searchTerm, results);
+    }
+  }, [hits, searchTerm]);
+
+  const displayResults = cachedResults || mapHitsToSearchResults(hits);
+
   return (
     <>
       <AlgoliaSearchWithAnimations
@@ -96,11 +116,11 @@ const SearchContent: React.FC<SearchContentProps> = ({
         value={searchTerm}
       />
       {isSearchOpen &&
-        (hits.length > 0 ? (
-          <SearchResults results={mapHitsToSearchResults(hits)} />
+        (displayResults.length > 0 ? (
+          <SearchResults results={displayResults} />
         ) : (
-          <div className="mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4">
-            <p className="text-center text-muted-foreground">
+          <div className='mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4'>
+            <p className='text-center text-muted-foreground'>
               No category or sub-category found
             </p>
           </div>
