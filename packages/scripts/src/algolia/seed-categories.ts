@@ -71,7 +71,7 @@ const seedData = async () => {
           createdAt: category.createdAt,
           updatedAt: category.updatedAt,
         },
-      })
+      }),
     );
   });
 

@@ -44,7 +44,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
       refine(value);
       setIsSearchOpen(value.length > 0);
     }, 300),
-    [refine]
+    [refine],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,8 +99,8 @@ const SearchContent: React.FC<SearchContentProps> = ({
         (hits.length > 0 ? (
           <SearchResults results={mapHitsToSearchResults(hits)} />
         ) : (
-          <div className='mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4'>
-            <p className='text-center text-muted-foreground'>
+          <div className="mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4">
+            <p className="text-center text-muted-foreground">
               No category or sub-category found
             </p>
           </div>
