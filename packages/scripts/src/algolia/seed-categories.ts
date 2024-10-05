@@ -1,7 +1,6 @@
 import pLimit from "p-limit";
 import { getWriteClient } from "@ratecreator/db/algolia-client";
-import { getPrismaClient } from "@ratecreator/db/client";
-import { ObjectId } from "mongodb"; // Import the ObjectId type if using MongoDB
+import { getPrismaClient } from "@ratecreator/db/client"; // Import the ObjectId type if using MongoDB
 
 const prisma = getPrismaClient();
 const client = getWriteClient();
@@ -71,7 +70,7 @@ const seedData = async () => {
           createdAt: category.createdAt,
           updatedAt: category.updatedAt,
         },
-      }),
+      })
     );
   });
 
