@@ -175,6 +175,9 @@ const PopularCategories = () => {
 
           setPopularCategories(parsedCategories);
           setLoadingCategories(false);
+          if (parsedCategories.length > 0) {
+            setSelectedCategory(parsedCategories[0].name);
+          }
 
           return; // Exit early since we used cached data
         }
@@ -182,6 +185,9 @@ const PopularCategories = () => {
         const category_data = await getMostPopularCategories();
         setPopularCategories(category_data);
         setLoadingCategories(false);
+        if (category_data.length > 0) {
+          setSelectedCategory(category_data[0].name);
+        }
 
         localStorage.setItem(
           "mostPopularCategories",

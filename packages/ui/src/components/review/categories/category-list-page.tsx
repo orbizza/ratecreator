@@ -150,7 +150,7 @@ export const CategoryListPage: React.FC = () => {
           What are you looking for?
         </div>
         <div className="w-full">
-          <SearchBar categories={categories} isLoading={false} />
+          <SearchBar />
         </div>
       </div>
       <Separator className="my-4" />

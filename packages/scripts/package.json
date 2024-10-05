@@ -1,0 +1,23 @@
+{
+  "name": "@ratecreator/scripts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@ratecreator/db": "*",
+    "@ratecreator/store": "*",
+    "@ratecreator/types": "*",
+    "@types/express": "^5.0.0",
+    "esbuild": "^0.24.0",
+    "express": "^4.21.0",
+    "p-limit": "^6.1.0",
+    "typescript": "^5.6.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.1"
+  },
+  "scripts": {
+    "seed-category": "tsx src/algolia/seed-categories.ts"
+  }
+}
