@@ -44,10 +44,10 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
   }
 
   return (
-    <Breadcrumb className='lg:mb-4'>
+    <Breadcrumb className="lg:mb-4">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href='/categories' className='text-[12px] lg:text-sm'>
+          <BreadcrumbLink href="/categories" className="text-[12px] lg:text-sm">
             Category
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -57,16 +57,16 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
           <>
             <BreadcrumbItem>
               <DropdownMenu>
-                <DropdownMenuTrigger className='flex items-center gap-1'>
-                  <BreadcrumbEllipsis className='size-4' />
-                  <span className='sr-only'>Toggle menu</span>
+                <DropdownMenuTrigger className="flex items-center gap-1">
+                  <BreadcrumbEllipsis className="size-4" />
+                  <span className="sr-only">Toggle menu</span>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='start'>
+                <DropdownMenuContent align="start">
                   {hiddenCategories.map((category) => (
                     <DropdownMenuItem key={category.id}>
                       <BreadcrumbLink
                         href={`/categories/${category.slug}`}
-                        className='text-[12px] lg:text-sm'
+                        className="text-[12px] lg:text-sm"
                       >
                         {category.name}
                       </BreadcrumbLink>
@@ -81,7 +81,7 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
 
         {visibleCategories.map((category, index) => (
           <React.Fragment key={category.id}>
-            <BreadcrumbItem className='text-[12px] lg:text-sm'>
+            <BreadcrumbItem className="text-[12px] lg:text-sm">
               {index === visibleCategories.length - 1 ? (
                 <BreadcrumbPage>{category.name}</BreadcrumbPage>
               ) : (
