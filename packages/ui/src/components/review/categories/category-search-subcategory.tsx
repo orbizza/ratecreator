@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@ratecreator/ui";
-import { ArrowRightLeft } from "lucide-react";
+import { SquareStack } from "lucide-react";
 
 interface SubCategoriesProps {
   categories: Category[];
@@ -21,34 +21,34 @@ export const SubCategoriesList: React.FC<SubCategoriesProps> = ({
   const length = categories.length === 0;
 
   return (
-    <div className="mt-8 rounded-lg overflow-hidden shadow-md flex flex-col ">
-      <div className="bg-stone-50  dark:bg-gray-900 p-4 flex-grow">
+    <div className='mt-8 rounded-lg overflow-hidden shadow-md flex flex-col '>
+      <div className='bg-stone-50  dark:bg-gray-900 p-4 flex-grow'>
         <Accordion
-          type="single"
+          type='single'
           collapsible
-          className="w-full"
-          defaultValue="item-1"
+          className='w-full'
+          defaultValue='item-1'
         >
-          <AccordionItem value="item-1">
-            <AccordionTrigger className="hover:no-underline">
-              <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
-                <ArrowRightLeft size={20} />
+          <AccordionItem value='item-1' className='border-0'>
+            <AccordionTrigger className='hover:no-underline'>
+              <div className='flex flex-row items-center mb-2 text-primary text-lg gap-x-2'>
+                <SquareStack size={20} />
                 <p>Sub Categories</p>
               </div>
             </AccordionTrigger>
             <AccordionContent>
               {!length && (
-                <ul className="list-none p-0 m-0">
+                <ul className='list-none p-0 m-0'>
                   {categories.map((subcat) => (
                     <Link
                       key={subcat.id}
                       href={`/categories/${subcat.slug}`}
                       passHref
-                      className="block transition-transform hover:text-primary"
+                      className='block transition-transform hover:text-primary'
                     >
-                      <li className="text-sm  py-1">
+                      <li className='text-sm  py-1'>
                         {subcat.name}
-                        <Separator className="my-2" />
+                        <Separator className='my-2' />
                       </li>
                     </Link>
                   ))}
