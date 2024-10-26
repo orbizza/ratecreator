@@ -8,7 +8,7 @@ interface CreatorGridProps {
 
 export const CreatorGrid: React.FC<CreatorGridProps> = ({ creators }) => {
   return (
-    <div className="w-3/4 grid grid-cols-3 gap-4">
+    <div className="w-full grid grid-cols-3 gap-4">
       {creators.map((creator) => (
         <div key={creator.id} className="border p-4 rounded">
           <div className="flex items-center mb-2">

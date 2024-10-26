@@ -18,6 +18,8 @@
     "tsx": "^4.19.1"
   },
   "scripts": {
-    "seed-category": "tsx src/algolia/seed-categories.ts"
+    "seed-category": "tsx src/algolia/seed-categories.ts",
+    "seed-account-youtube": "tsx src/algolia/seed-youtube-accounts.ts",
+    "flush-redis-cache": "tsx src/redis/flushRedisCache.ts"
   }
 }
