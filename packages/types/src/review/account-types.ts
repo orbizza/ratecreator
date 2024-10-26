@@ -25,6 +25,7 @@ export interface Account {
   lang_confidence_score?: number;
   rating?: number;
   reviewCount?: number;
+  lastIndexedAt?: Date;
 }
 
 export interface PopularAccount {
