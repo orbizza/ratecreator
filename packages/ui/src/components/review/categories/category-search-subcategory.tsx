@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@ratecreator/ui";
-import { ArrowRightLeft } from "lucide-react";
+import { SquareStack } from "lucide-react";
 
 interface SubCategoriesProps {
   categories: Category[];
@@ -29,10 +29,10 @@ export const SubCategoriesList: React.FC<SubCategoriesProps> = ({
           className="w-full"
           defaultValue="item-1"
         >
-          <AccordionItem value="item-1">
+          <AccordionItem value="item-1" className="border-0">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
-                <ArrowRightLeft size={20} />
+                <SquareStack size={20} />
                 <p>Sub Categories</p>
               </div>
             </AccordionTrigger>

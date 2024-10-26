@@ -26,4 +26,4 @@ export interface FilteredCategory {
   items: FilteredItem[];
 }
 
-export type TabType = "All" | "Creators" | "Communities" | "Categories";
+export type TabType = "All" | "YouTube" | "Reddit" | "X";

@@ -17,8 +17,8 @@ model Category {
   parentId     String?
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subcategories Category[] @relation("CategoryHierarchy")
-  accounts     CategoryMapping[]
-  popular     Boolean    @default(false)
+  accounts     CategoryMapping[] @relation("CategoryToCategoryMapping") // Added @relation attribute
+  popular      Boolean    @default(false)
   depth        Int        @default(0)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -32,6 +32,7 @@ model Category {
   @@index([keywords])
   @@index([popular])
 }
+
 
 
 model Account {
@@ -48,7 +49,7 @@ model Account {
   description_en  String?
   keywords        String?
   keywords_en     String?
-  categories      CategoryMapping[]
+  categories      CategoryMapping[] @relation("AccountToCategoryMapping") 
   ytData          Json?
   isSeeded        Boolean    @default(false)
   isSuspended     Boolean    @default(false)
@@ -59,8 +60,9 @@ model Account {
   lang_confidence_score Float?
   rating          Float?
   reviewCount     Int?
+  isSubCategoryFailed Boolean? @default(false)
+  lastIndexedAt   DateTime?
   
-
   @@unique([platform, accountId])
   @@index([platform])
   @@index([accountId])
@@ -77,14 +79,17 @@ model Account {
   @@index([language_code])
   @@index([reviewCount])
   @@index([rating])
+  @@index([isSubCategoryFailed])
+  @@index([lastIndexedAt])
 }
+
 
 model CategoryMapping {
   id         String   @id @default(cuid()) @map("_id")
   accountId  String
   categoryId String
-  account    Account  @relation(fields: [accountId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
+  account    Account  @relation("AccountToCategoryMapping", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  category   Category @relation("CategoryToCategoryMapping", fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -92,6 +97,7 @@ model CategoryMapping {
   @@index([accountId])
   @@index([categoryId])
 }
+
 
 enum Platform {
   YOUTUBE

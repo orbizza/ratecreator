@@ -29,7 +29,7 @@ export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
           className="w-full"
           defaultValue="item-1"
         >
-          <AccordionItem value="item-1">
+          <AccordionItem value="item-1" className="border-0">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
                 <ArrowRightLeft size={20} />
