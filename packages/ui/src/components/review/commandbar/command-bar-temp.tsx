@@ -66,7 +66,7 @@ const SearchComponent = ({
 
     if (activeTab !== "All") {
       filtered = filtered.filter(
-        (result) => result.platform === activeTab.toUpperCase()
+        (result) => result.platform === activeTab.toUpperCase(),
       );
     }
 
@@ -82,20 +82,20 @@ const SearchComponent = ({
         categories: hit.categories,
         rating: hit.rating,
         reviews: hit.reviewCount,
-      }))
+      })),
     );
   }, [hits, activeTab]);
 
   return (
-    <div className='mt-4 max-h-[50vh] overflow-y-auto'>
+    <div className="mt-4 max-h-[50vh] overflow-y-auto">
       {filteredResults.length > 0 ? (
-        <div className='space-y-2'>
+        <div className="space-y-2">
           {filteredResults.map((result) => (
             <CreatorCard key={result.accountId} {...result} />
           ))}
         </div>
       ) : searchTerm ? (
-        <div className='text-center text-muted-foreground'>
+        <div className="text-center text-muted-foreground">
           No results found for the current tab.
         </div>
       ) : null}
@@ -147,28 +147,28 @@ const CommandBarContent: React.FC<{ children: React.ReactNode }> = ({
       query.toggle();
       // Redirect to search page with query parameters
       router.push(
-        `/search?q=${encodeURIComponent(searchTerm)}${activeTab !== "All" ? `&platform=${encodeURIComponent(activeTab)}` : ""}`
+        `/search?q=${encodeURIComponent(searchTerm)}${activeTab !== "All" ? `&platform=${encodeURIComponent(activeTab)}` : ""}`,
       );
     }
   };
   return (
     <>
-      <InstantSearch searchClient={searchClient} indexName='accounts'>
+      <InstantSearch searchClient={searchClient} indexName="accounts">
         <KBarPortal>
-          <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
-            <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
-              <div className='p-4 flex-grow overflow-hidden'>
-                <div className='relative flex'>
+          <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
+            <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
+              <div className="p-4 flex-grow overflow-hidden">
+                <div className="relative flex">
                   <Search
-                    className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                     size={20}
                   />
 
                   <KBarSearch
-                    className='w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
+                    className="w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     onChange={handleSearchChange}
                     value={searchTerm}
-                    placeholder='Search creators...'
+                    placeholder="Search creators..."
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSearchRedirect();
@@ -177,7 +177,7 @@ const CommandBarContent: React.FC<{ children: React.ReactNode }> = ({
                   />
 
                   {searchTerm && (
-                    <div className='flex ml-2'>
+                    <div className="flex ml-2">
                       <Button onClick={handleSearchRedirect}>Search</Button>
                     </div>
                   )}
@@ -190,7 +190,7 @@ const CommandBarContent: React.FC<{ children: React.ReactNode }> = ({
                 />
                 {/* </InstantSearch> */}
               </div>
-              <div className='flex border-t border-border'>
+              <div className="flex border-t border-border">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
