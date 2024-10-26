@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
-import { useCallback, useEffect, useState } from "react";
-
+import { useCallback, useEffect, useState, forwardRef } from "react";
+import type { ReactNode, ChangeEvent, KeyboardEvent } from "react";
+import { InstantSearch, useHits, useSearchBox } from "react-instantsearch";
 import {
   Link,
   MailOpen,
@@ -11,16 +12,12 @@ import {
   Home,
   CircleUserRound,
   PenLine,
-  CircleDollarSign,
-  Laptop,
-  Hourglass,
-  Library,
-  // Youtube,
-  Newspaper,
   Search,
-  FolderRoot,
-  X,
-  UsersRound,
+  Library,
+  Laptop,
+  Newspaper,
+  Hourglass,
+  LucideIcon,
 } from "lucide-react";
 
 import {
@@ -29,111 +26,352 @@ import {
   KBarPortal,
   KBarPositioner,
   KBarSearch,
+  KBarResults,
+  useKBar,
+  useMatches,
+  ActionImpl,
+  ActionId,
+  VisualState,
 } from "kbar";
 
-import { MostPopularCategories, showToastState } from "@ratecreator/store";
-import { FilteredCategory, TabType } from "@ratecreator/types/review";
-import { RenderResults } from "./commandbar-render-results";
+import { getSearchClient } from "@ratecreator/db/algolia-client";
+import { showToastState } from "@ratecreator/store";
+import { Button } from "../../ui/button";
+import { CreatorCard } from "../cards/card-commandbar-creator";
 import { CommandBarReset } from "./commandbar-reset";
 
-const tabs: TabType[] = ["All", "Creators", "Communities", "Categories"];
+// Type Definitions
+type Platform = "YOUTUBE" | "X" | "REDDIT";
+type TabType = "All" | "YouTube" | "X" | "Reddit";
+
+interface SearchResult {
+  accountId: string;
+  platform: Platform;
+  handle: string;
+  name: string;
+  description: string;
+  followerCount: number;
+  imageUrl: string;
+  categories: string[];
+  rating: number;
+  reviews: number;
+}
+
+interface ResultItemProps {
+  action: ActionImpl;
+  active: boolean;
+  currentRootActionId: ActionId | null;
+}
+
+interface SearchComponentProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  activeTab: TabType;
+}
+
+interface CommandBarContentProps {
+  children: ReactNode;
+}
+
+interface CommandBarProps {
+  children: ReactNode;
+}
+
+interface GroupNameProps {
+  name: string;
+}
+
+interface KBarAction {
+  id: string;
+  name: string;
+  shortcut?: string[];
+  keywords: string;
+  section: string;
+  perform: () => void;
+  icon?: ReactNode;
+  subtitle?: string;
+}
+
+// Helper function to type guard the search hits
+function isSearchHit(hit: any): hit is SearchResult {
+  return (
+    typeof hit === "object" &&
+    hit !== null &&
+    typeof hit.objectID === "string" &&
+    typeof hit.platform === "string" &&
+    ["YOUTUBE", "X", "REDDIT"].includes(hit.platform)
+  );
+}
+
+// Results rendering components
+const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
+  ({ action, active, currentRootActionId }, ref) => {
+    const ancestors = [...(action.ancestors || [])].reverse();
+
+    return (
+      <div
+        ref={ref}
+        className={`px-4 py-2 flex items-center justify-between cursor-pointer ${
+          active
+            ? "bg-accent text-accent-foreground rounded-md"
+            : "text-foreground"
+        }`}
+      >
+        <div className='flex items-center gap-2'>
+          {action.icon && (
+            <span className='text-muted-foreground'>{action.icon}</span>
+          )}
+          <div>
+            <div className='flex items-center gap-2'>
+              {ancestors.map((ancestor) => (
+                <span
+                  key={ancestor.id}
+                  className='text-sm text-muted-foreground'
+                >
+                  {ancestor.name}
+                </span>
+              ))}
+              <span>{action.name}</span>
+            </div>
+            {action.subtitle && (
+              <span className='text-sm text-muted-foreground'>
+                {action.subtitle}
+              </span>
+            )}
+          </div>
+        </div>
+        {action.shortcut?.length ? (
+          <div className='flex items-center uppercase gap-1'>
+            {action.shortcut.map((sc) => (
+              <kbd
+                key={sc}
+                className='px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground'
+              >
+                {sc}
+              </kbd>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+);
+
+ResultItem.displayName = "ResultItem";
+
+const GroupName = ({ name }: GroupNameProps): JSX.Element => (
+  <div className='px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase'>
+    {name}
+  </div>
+);
+
+const RenderResults = (): JSX.Element => {
+  const { results, rootActionId } = useMatches();
+
+  return (
+    <KBarResults
+      items={results}
+      onRender={({ item, active }) =>
+        typeof item === "string" ? (
+          <GroupName name={item} />
+        ) : (
+          <ResultItem
+            action={item}
+            active={active}
+            currentRootActionId={rootActionId ?? null}
+          />
+        )
+      }
+    />
+  );
+};
+
+const SearchComponent = ({
+  searchTerm,
+  onSearchChange,
+  activeTab,
+}: SearchComponentProps): JSX.Element => {
+  const { refine } = useSearchBox();
+  const { hits } = useHits();
+  const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
+
+  useEffect(() => {
+    refine(searchTerm);
+  }, [searchTerm, refine]);
+
+  useEffect(() => {
+    const validHits = hits.filter(isSearchHit);
+    let filtered = [...validHits];
+
+    if (activeTab !== "All") {
+      filtered = filtered.filter(
+        (result) => result.platform === activeTab.toUpperCase()
+      );
+    }
+
+    setFilteredResults(
+      filtered.map((hit) => ({
+        accountId: hit.objectID,
+        platform: hit.platform as Platform,
+        handle: hit.handle,
+        name: hit.name,
+        description: hit.description,
+        followerCount: hit.followerCount,
+        imageUrl: hit.imageUrl,
+        categories: hit.categories,
+        rating: hit.rating,
+        reviews: hit.reviewCount,
+      }))
+    );
+  }, [hits, activeTab]);
+
+  return (
+    <div className='mt-4 max-h-[50vh] overflow-y-auto'>
+      {filteredResults.length > 0 ? (
+        <div className='space-y-2'>
+          {filteredResults.map((result) => (
+            <div key={result.accountId}>
+              {/* Replace with your CreatorCard component */}
+              <CreatorCard key={result.accountId} {...result} />
+            </div>
+          ))}
+        </div>
+      ) : searchTerm ? (
+        <div className='text-center text-muted-foreground'>
+          No results found for the current tab.
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+const tabs: readonly TabType[] = ["All", "YouTube", "X", "Reddit"] as const;
+
+const CommandBarContent = ({
+  children,
+}: CommandBarContentProps): JSX.Element => {
+  const router = useRouter();
+  const searchClient = getSearchClient();
+  const { query } = useKBar();
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<TabType>("All");
+  const [showSearch, setShowSearch] = useState<boolean>(false);
+
+  const resetSearch = useCallback(() => {
+    setSearchTerm("");
+    setActiveTab("All");
+    setShowSearch(false);
+  }, []);
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setShowSearch(true);
+  };
+
+  const handleSearchRedirect = () => {
+    if (searchTerm) {
+      query.toggle();
+      router.push(
+        `/search?q=${encodeURIComponent(searchTerm)}${
+          activeTab !== "All"
+            ? `&platform=${encodeURIComponent(activeTab)}`
+            : ""
+        }`
+      );
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleSearchRedirect();
+    }
+  };
+
+  return (
+    <>
+      <InstantSearch searchClient={searchClient} indexName='accounts'>
+        <KBarPortal>
+          <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
+            <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
+              <div className='p-4 flex-grow overflow-hidden'>
+                <div className='relative flex'>
+                  <Search
+                    className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
+                    size={20}
+                  />
+                  <CustomKBarSearch
+                    defaultPlaceholder='Search creators and communities... '
+                    className='w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
+                    onChange={handleSearchChange}
+                    value={searchTerm}
+                    onKeyDown={handleKeyDown}
+                  />
+
+                  {/* <KBarSearch
+                    className='w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
+                    onChange={handleSearchChange}
+                    value={searchTerm}
+                    placeholder='Search creators or press ⌘+K for commands...'
+                    onKeyDown={handleKeyDown}
+                  /> */}
+
+                  {searchTerm && (
+                    <div className='flex ml-2'>
+                      <Button onClick={handleSearchRedirect}>Search</Button>
+                    </div>
+                  )}
+                </div>
+
+                {showSearch ? (
+                  <SearchComponent
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    activeTab={activeTab}
+                  />
+                ) : (
+                  <RenderResults />
+                )}
+              </div>
+
+              {showSearch && (
+                <div className='flex border-t border-border'>
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab}
+                      className={`flex-1 text-center py-2 ${
+                        activeTab === tab
+                          ? "border-t-2 border-primary"
+                          : "bg-secondary text-muted-foreground hover:bg-primary hover:opacity-75 hover:text-accent-foreground"
+                      }`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </KBarAnimator>
+          </KBarPositioner>
+        </KBarPortal>
+      </InstantSearch>
+      <CommandBarReset onReset={resetSearch} />
+      {children}
+    </>
+  );
+};
 
 export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const router = useRouter();
   const [showToast, setShowToast] = useRecoilState(showToastState);
+  const router = useRouter();
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(window.location.href);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
-
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<TabType>("All");
-  // TODO: Fetch data from the server and serve the Most Popular Categories by default
-  // TODO: List Actions by Default, clear on search
-  const [filteredData, setFilteredData] = useState<FilteredCategory[]>(
-    MostPopularCategories,
-  );
-
-  const resetSearch = useCallback(() => {
-    setSearchTerm("");
-    setActiveTab("All");
-    setFilteredData(MostPopularCategories);
-  }, []);
-
-  useEffect(() => {
-    let filtered: FilteredCategory[] = MostPopularCategories;
-
-    if (searchTerm) {
-      filtered = MostPopularCategories.map((category) => ({
-        ...category,
-        items: category.items.filter(
-          (item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.handle.toLowerCase().includes(searchTerm.toLowerCase()),
-        ),
-      })).filter((category) => category.items.length > 0);
-    }
-
-    if (activeTab === "Creators") {
-      filtered = filtered
-        .map((category) => ({
-          ...category,
-          items: category.items.filter((item) => {
-            if ("platform" in item) {
-              return item.platform === "YOUTUBE";
-            }
-            return false;
-          }),
-        }))
-        .filter((category) => category.items.length > 0);
-    } else if (activeTab === "Categories") {
-      filtered = [
-        {
-          name: "Categories",
-          items: filtered.map((category) => ({
-            name: category.name,
-            isCategory: true as const,
-          })),
-        },
-      ];
-    } else if (activeTab === "Communities") {
-      // For now, Communities tab is empty
-      filtered = [];
-    }
-
-    setFilteredData(filtered);
-  }, [searchTerm, activeTab]);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const clearSearch = () => {
-    resetSearch();
-  };
-
-  // useEffect(() => {
-  //   const displayToast = () => {
-  //     <div className='fixed bottom-5 right-5'>
-  //       {/* {toast("Link copied to clipboard!", {
-  //         action: {
-  //           label: "Close",
-  //           onClick: () => setShowToast(false),
-  //         },
-  //       })} */}
-  //     </div>;
-  //   };
-
-  //   if (showToast) {
-  //     displayToast();
-  //     setShowToast(false);
-  //   }
-  // }, [showToast, setShowToast]);
-
   const actions = [
     {
       id: "copy",
@@ -259,55 +497,44 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <KBarProvider actions={actions}>
-      <KBarPortal>
-        <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
-          <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
-            <div className="p-4 flex-grow overflow-hidden">
-              <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                  size={20}
-                />
-                <KBarSearch
-                  className="w-full pl-10 pr-4 py-2 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  onChange={handleSearchChange}
-                  value={searchTerm}
-                  placeholder="Search creator, category, or community"
-                />
-                {searchTerm && (
-                  <button
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    onClick={clearSearch}
-                  >
-                    <X size={20} />
-                  </button>
-                )}
-              </div>
-              <RenderResults
-                filteredData={filteredData}
-                activeTab={activeTab}
-              />
-            </div>
-            <div className="flex border-t border-border">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  className={`flex-1 text-center py-2 ${
-                    activeTab === tab
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </KBarAnimator>
-        </KBarPositioner>
-      </KBarPortal>
-      <CommandBarReset onReset={resetSearch} />
-      {children}
+      <CommandBarContent>{children}</CommandBarContent>
     </KBarProvider>
+  );
+};
+
+interface CustomSearchProps {
+  defaultPlaceholder?: string;
+  className?: string;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+}
+
+export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
+  defaultPlaceholder = "Type your search here...",
+  className = "",
+  onChange,
+  value,
+  onKeyDown,
+}) => {
+  const { query, searchQuery, visualState } = useKBar((state) => ({
+    searchQuery: state.searchQuery,
+    visualState: state.visualState,
+  }));
+
+  return (
+    <input
+      ref={query.inputRefSetter}
+      className={className}
+      autoFocus={visualState === VisualState.showing}
+      role='combobox'
+      aria-expanded={visualState === VisualState.showing}
+      aria-controls='kbar-listbox'
+      aria-autocomplete='list'
+      value={value || searchQuery}
+      placeholder={defaultPlaceholder}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+    />
   );
 };
