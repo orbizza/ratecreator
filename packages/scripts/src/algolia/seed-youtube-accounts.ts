@@ -10,7 +10,7 @@ const limit = pLimit(20); // Adjust concurrency limit as needed
 
 // Helper function to fetch category slugs based on CategoryMapping
 const getCategorySlugs = async (
-  categoryMappingIds: string[],
+  categoryMappingIds: string[]
 ): Promise<string[]> => {
   try {
     // Get a MongoDB client
@@ -50,6 +50,9 @@ const getCategorySlugs = async (
 };
 
 interface YTData {
+  snippet?: {
+    publishedAt?: string;
+  };
   status?: {
     madeForKids?: boolean;
   };
@@ -69,9 +72,25 @@ const seedAccounts = async () => {
   const db = mongo_client.db("ratecreator");
   try {
     // Fetch accounts with specific conditions
+    // const accounts = await prisma.account.findMany({
+    //   where: {
+    //     lastIndexedAt: { equals: null },
+    //     isSeeded: true,
+    //     isSubCategoryFailed: false,
+    //     platform: "YOUTUBE",
+    //   },
+    //   orderBy: {
+    //     followerCount: "desc",
+    //   },
+    //   take: 1982,
+    //   include: {
+    //     categories: true,
+    //   },
+    // });
+
     const accounts = await prisma.account.findMany({
       where: {
-        lastIndexedAt: { equals: null },
+        lastIndexedAt: { not: null },
         isSeeded: true,
         isSubCategoryFailed: false,
         platform: "YOUTUBE",
@@ -79,7 +98,7 @@ const seedAccounts = async () => {
       orderBy: {
         followerCount: "desc",
       },
-      //   take: 1982,
+      take: 21982,
       include: {
         categories: true,
       },
@@ -94,7 +113,7 @@ const seedAccounts = async () => {
       try {
         // Extract category IDs from the account
         const categoryMappingIds = account.categories.map(
-          (category) => category.id,
+          (category) => category.id
         );
         const categorySlugs = categoryMappingIds.length
           ? await getCategorySlugs(categoryMappingIds)
@@ -126,8 +145,10 @@ const seedAccounts = async () => {
                 (account.ytData as YTData)?.brandingSettings?.image
                   ?.bannerExternalUrl ?? "",
               categories: categorySlugs,
+              createdDate:
+                (account.ytData as YTData)?.snippet?.publishedAt ?? null,
             },
-          }),
+          })
         );
 
         // Update the lastIndexedAt timestamp using Prisma
@@ -135,7 +156,7 @@ const seedAccounts = async () => {
           .collection("Account")
           .updateOne(
             { _id: new ObjectId(account.id) },
-            { $set: { lastIndexedAt: new Date() } },
+            { $set: { lastIndexedAt: new Date() } }
           );
 
         console.log(`Account ${account.accountId} indexed successfully`);
@@ -149,15 +170,6 @@ const seedAccounts = async () => {
   } catch (error) {
     console.error("Error seeding accounts:", error);
   } finally {
-    // Close MongoDB and Prisma clients
-    // const mongoClient = await getMongoClient();
-    // await mongoClient.close();
-    // console.log("MongoDB client closed");
-
-    // await prisma.$disconnect();
-    // console.log("Prisma client disconnected");
-
-    // Exit the process
     process.exit(0);
   }
 };

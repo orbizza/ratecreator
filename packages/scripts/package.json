@@ -20,6 +20,7 @@
   "scripts": {
     "seed-category": "tsx src/algolia/seed-categories.ts",
     "seed-account-youtube": "tsx src/algolia/seed-youtube-accounts.ts",
+    "update-account-youtube": "tsx src/algolia/update-youtube-accounts.ts",
     "flush-redis-cache": "tsx src/redis/flushRedisCache.ts"
   }
 }

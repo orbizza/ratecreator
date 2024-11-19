@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { InstantSearch } from "react-instantsearch";
+import { InstantSearch, Configure } from "react-instantsearch";
 import { getSearchClient } from "@ratecreator/db/algolia-client";
 import SearchContent from "./search-content";
 
@@ -18,8 +18,8 @@ const SearchBar: React.FC = () => {
   ];
 
   return (
-    <InstantSearch searchClient={searchClient} indexName="categories">
-      <div className="mb-4 w-full items-center justify-center flex flex-col">
+    <InstantSearch searchClient={searchClient} indexName='categories'>
+      <div className='mb-4 w-full items-center justify-center flex flex-col'>
         <SearchContent
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
