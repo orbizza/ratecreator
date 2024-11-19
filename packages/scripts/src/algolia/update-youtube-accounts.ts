@@ -47,14 +47,14 @@ const updateAlgoliaRecords = async () => {
             objectID: hit.objectID,
             indexName: "accounts",
             attributesToUpdate: { createdDate: createdDate }, // Add or update the createdDate field
-          })
+          }),
         );
 
         console.log(`Updated record with objectID ${hit.objectID}`);
       } catch (error) {
         console.error(
           `Error updating record with objectID ${hit.objectID}:`,
-          error
+          error,
         );
       }
     });
