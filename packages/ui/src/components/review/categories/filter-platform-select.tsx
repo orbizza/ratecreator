@@ -31,7 +31,7 @@ const CustomMultiSelectValue: React.FC<{
   const remaining = values.length - maxDisplay;
 
   return (
-    <span className='flex gap-1 items-center'>
+    <span className="flex gap-1 items-center">
       {displayValues.map((value, index) => (
         <React.Fragment key={value}>
           {index > 0 && ", "}
@@ -55,9 +55,9 @@ export const PlatformSelect: React.FC = () => {
 
   return (
     <MultiSelect value={selectedValues} onValueChange={setSelectedValues}>
-      <MultiSelectTrigger className='overflow-hidden shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+      <MultiSelectTrigger className="overflow-hidden shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
         <CustomMultiSelectValue
-          placeholder='Platforms'
+          placeholder="Platforms"
           maxDisplay={3}
           values={selectedValues}
         />
@@ -68,9 +68,9 @@ export const PlatformSelect: React.FC = () => {
             <MultiSelectItem
               key={value}
               value={value}
-              className='flex items-center gap-2'
+              className="flex items-center gap-2"
             >
-              <div className='flex items-center gap-2'>
+              <div className="flex items-center gap-2">
                 <Icon size={16} className={color} />
                 {label}
               </div>
