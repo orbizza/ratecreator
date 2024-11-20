@@ -1,6 +1,9 @@
 // components/FilterSidebar.tsx
-import React from "react";
-import { Category } from "@ratecreator/types/review";
+
+"use client";
+import React, { useEffect, useState } from "react";
+import { AppWindow, BadgeCheck, Info, SlidersHorizontal } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -8,61 +11,76 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@ratecreator/ui";
-import { SlidersHorizontal } from "lucide-react";
+
+import RatingSelect from "./filters-rating-select";
+import { PlatformSelect } from "./filter-platform-select";
+import { FollowersSelect } from "./filter-follower-select";
+import { VideoCountSelect } from "./filter-video-select";
 
 interface FilterSidebarProps {}
 
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
   return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-gray-50 text-foreground dark:bg-stone-900 dark:text-foreground p-4  space-y-4">
-      <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
+    <div className='rounded-lg overflow-hidden shadow-md bg-gray-50 text-foreground dark:bg-stone-900 dark:text-foreground p-4  space-y-4'>
+      <div className='flex flex-row items-center text-primary text-lg gap-x-2'>
         <SlidersHorizontal size={20} />
-        <p>Filters</p>
+        <p className='text-xl'>Filters</p>
       </div>
-      <Select>
-        <SelectTrigger>
-          <SelectValue placeholder="Platforms" />
-        </SelectTrigger>
-        <SelectContent>{/* Add platform options */}</SelectContent>
-      </Select>
+      <div className='flex flex-col gap-y-1 mx-auto'>
+        <div className='flex flex-row gap-x-2 items-center'>
+          <AppWindow size={16} />
+          <span className='text-[16px]'>Platforms</span>
+          <Info size={14} className='text-muted-foreground' />
+        </div>
+        <PlatformSelect />
+      </div>
 
+      <RatingSelect />
+      <FollowersSelect />
+      <VideoCountSelect />
       <Select>
         <SelectTrigger>
-          <SelectValue placeholder="Rating" />
+          <SelectValue placeholder='Countries' />
         </SelectTrigger>
-        <SelectContent>{/* Add rating options */}</SelectContent>
+        <SelectContent></SelectContent>
       </Select>
-
       <Select>
         <SelectTrigger>
-          <SelectValue placeholder="Sub Count" />
+          <SelectValue placeholder='Language' />
         </SelectTrigger>
-        <SelectContent>{/* Add sub count options */}</SelectContent>
+        <SelectContent></SelectContent>
       </Select>
-
       <Select>
         <SelectTrigger>
-          <SelectValue placeholder="Video Count" />
+          <SelectValue placeholder='Reviews Count' />
         </SelectTrigger>
-        <SelectContent>{/* Add video count options */}</SelectContent>
+        <SelectContent></SelectContent>
       </Select>
-
-      <Select>
-        <SelectTrigger>
-          <SelectValue placeholder="Countries" />
-        </SelectTrigger>
-        <SelectContent>{/* Add country options */}</SelectContent>
-      </Select>
-
-      <Select>
-        <SelectTrigger>
-          <SelectValue placeholder="Claimed" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="true">Yes</SelectItem>
-          <SelectItem value="false">No</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className='flex flex-col mb-2 gap-y-1 mx-auto'>
+        <div className='flex flex-row gap-x-2 items-center'>
+          <BadgeCheck size={16} />
+          <span className='text-[16px]'>Claimed</span>
+          <Info size={14} className='text-muted-foreground' />
+        </div>
+        <Select defaultValue={"false"}>
+          <SelectTrigger>
+            <SelectValue placeholder='Claimed' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='true'>Yes</SelectItem>
+            <SelectItem value='false'>No</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };
