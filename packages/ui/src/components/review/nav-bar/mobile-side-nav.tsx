@@ -36,6 +36,8 @@ import {
 } from "@ratecreator/ui";
 import { useKBar } from "kbar";
 
+import { getInitials } from "@ratecreator/db/utils";
+
 export function MobileSideNav() {
   const router = useRouter();
   const { isSignedIn, signOut } = useAuth();
@@ -45,22 +47,6 @@ export function MobileSideNav() {
   const handleSerarchClick = useCallback(() => {
     query.toggle();
   }, [query]);
-
-  function getInitials(nameOrEmail: string) {
-    if (!nameOrEmail) return "SD";
-
-    const nameParts = nameOrEmail.split(" ");
-
-    if (nameParts.length > 1) {
-      const firstNameInitial = nameParts[0].charAt(0).toUpperCase();
-      const lastNameInitial = nameParts[nameParts.length - 1]
-        .charAt(0)
-        .toUpperCase();
-      return `${firstNameInitial}${lastNameInitial}`;
-    } else {
-      return nameOrEmail.charAt(0).toUpperCase();
-    }
-  }
 
   return (
     <>

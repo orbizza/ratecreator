@@ -31,27 +31,12 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@ratecreator/ui";
+import { getInitials } from "@ratecreator/db/utils";
 
 export function MainMenu() {
   const router = useRouter();
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
-
-  function getInitials(nameOrEmail: string) {
-    if (!nameOrEmail) return "SD";
-
-    const nameParts = nameOrEmail.split(" ");
-
-    if (nameParts.length > 1) {
-      const firstNameInitial = nameParts[0].charAt(0).toUpperCase();
-      const lastNameInitial = nameParts[nameParts.length - 1]
-        .charAt(0)
-        .toUpperCase();
-      return `${firstNameInitial}${lastNameInitial}`;
-    } else {
-      return nameOrEmail.charAt(0).toUpperCase();
-    }
-  }
 
   return (
     <div className="flex items-center h-8 gap-x-2 xl:gap-3">
@@ -176,7 +161,7 @@ export function MainMenu() {
             Log in
           </Button>
           <Button variant={"default"} onClick={() => router.push("/sign-up")}>
-            Sign up
+            Get Started
           </Button>
         </>
       )}

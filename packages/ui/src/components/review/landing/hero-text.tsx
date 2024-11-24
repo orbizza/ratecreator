@@ -11,8 +11,33 @@ import { SearchPlaceholders } from "@ratecreator/store";
 import { useKBar } from "kbar";
 
 export const HeroText = () => {
-  const headingWords = `Where You Go for Creators.`;
+  // const headingWords = `Where You Go for Creators.`;
+  const headingWords = `Find the Creators.`;
   const subHeadingWords = `Search and review from 3,100,000+ creators and communities.`;
+  /*
+  Heading:
+    Question Format:
+    What will you explore among 3.1M+ creators?
+    Ready to search and review millions of creators?
+    Who will you connect with today?
+    Want to review the best creators and communities?
+    Sentence Format:
+    Search and review from over 3.1M creators and communities.
+    Explore 3.1M+ creators across platforms.
+    Your gateway to millions of creators and communities.
+    Find and review creators effortlessly.
+  Subheading:
+    Question Format:
+    What will you explore among 3.1M+ creators?
+    Ready to search and review millions of creators?
+    Who will you connect with today?
+    Want to review the best creators and communities?
+    Sentence Format:
+    Search and review from over 3.1M creators and communities.
+    Explore 3.1M+ creators across platforms.
+    Your gateway to millions of creators and communities.
+    Find and review creators effortlessly.
+   */
   const placeholders = SearchPlaceholders;
 
   // State to control visibility of heading, subheading, and search bar

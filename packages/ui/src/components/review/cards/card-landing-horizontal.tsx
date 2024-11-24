@@ -11,6 +11,7 @@ import {
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
 import { ny } from "@ratecreator/ui/utils";
+import { formatValue } from "@ratecreator/db/utils";
 
 export function CardLandingHorizontal({
   imageUrl,
@@ -46,12 +47,6 @@ export function CardLandingHorizontal({
       default:
         return null;
     }
-  };
-
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)} M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1)} K`;
-    return value.toString();
   };
 
   return (

@@ -3,14 +3,9 @@
 import React from "react";
 import { cubicBezier, motion } from "framer-motion";
 import { UsersRound } from "lucide-react";
+import { formatValue } from "@ratecreator/db/utils";
 
 export function WriteReviewCTA() {
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)} M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1)} K`;
-    return value.toString();
-  };
-
   const variant1 = {
     initial: {
       y: 0,

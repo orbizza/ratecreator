@@ -1,7 +1,5 @@
 import { algoliasearch, SearchClient } from "algoliasearch";
 
-import { Category, Account } from "@ratecreator/types/review"; // Adjust path as necessary
-
 let searchClientInstance: SearchClient | null = null;
 let writeClientInstance: SearchClient | null = null;
 
