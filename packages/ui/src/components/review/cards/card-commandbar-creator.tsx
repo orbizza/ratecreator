@@ -13,6 +13,7 @@ import {
 } from "@icons-pack/react-simple-icons";
 
 import { SearchCreator } from "@ratecreator/types/review";
+import { formatValue } from "@ratecreator/db/utils";
 
 export const CreatorCard: React.FC<SearchCreator> = ({
   name,
@@ -28,12 +29,6 @@ export const CreatorCard: React.FC<SearchCreator> = ({
 
   const handleClick = () => {
     router.push(`/creator/${platform.toLowerCase()}/${accountId}`);
-  };
-
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)} M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1)} K`;
-    return value.toString();
   };
 
   return (

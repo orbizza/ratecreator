@@ -17,6 +17,7 @@ import { usePathname } from "next/navigation";
 
 import { SearchPlaceholders } from "@ratecreator/store";
 import { useKBar } from "kbar";
+import { useAuth } from "@clerk/nextjs";
 
 export function Appbar() {
   const [isHeroVisible, setIsHeroVisible] = useState(true);
@@ -69,6 +70,8 @@ export function Appbar() {
     query.toggle();
   }, [query]);
 
+  const { isSignedIn, signOut } = useAuth();
+
   return (
     <header className="px-4 py-2">
       <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
@@ -105,7 +108,7 @@ export function Appbar() {
 
             {/* Additional Components */}
             <div className="flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2">
-              <div className="hidden lg:flex items-center">
+              <div className="hidden 2xl:flex items-center">
                 <MainMenu />
               </div>
               {showSearchBar && (
@@ -120,9 +123,10 @@ export function Appbar() {
                 </div>
               )}
 
+              {/* {!isSignedIn && <ModeToggle />} */}
               <ModeToggle />
 
-              <div className="block lg:hidden">
+              <div className="block 2xl:hidden">
                 <MobileSideNav />
               </div>
             </div>

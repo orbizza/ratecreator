@@ -28,6 +28,27 @@ export interface Account {
   lastIndexedAt?: Date;
 }
 
+export interface SearchAccount {
+  accountId: string;
+  name?: string;
+  handle?: string;
+  description?: string;
+  categories: string[];
+  platform: string;
+  keywords?: string;
+  country?: string;
+  language_code?: string;
+  followerCount?: number;
+  imageUrl?: string;
+  rating?: number;
+  reviewCount?: number;
+  madeForKids?: boolean;
+  viewCount?: number;
+  videoCount?: number;
+  bannerImageUrl?: string;
+  createdAt: string;
+}
+
 export interface PopularAccount {
   id: string;
   accountId: string;

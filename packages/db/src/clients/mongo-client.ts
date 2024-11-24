@@ -38,7 +38,9 @@ function createMongoClient(): Promise<MongoClient> {
 if (process.env.NODE_ENV === "development") {
   if (!global._mongoClientPromise) {
     console.log("Initializing global MongoDB client for development");
-    global._mongoClientPromise = createMongoClient();
+    global._mongoClientPromise = createMongoClient(); // Force initialization
+  } else {
+    console.log("MongoDB client already initialized globally");
   }
   clientPromise = global._mongoClientPromise;
 } else {

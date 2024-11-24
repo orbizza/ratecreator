@@ -18,6 +18,7 @@ import {
   SiTwitch,
   SiReddit,
 } from "react-icons/si";
+import { formatValue } from "@ratecreator/db/utils";
 
 const stats = [
   { value: 700000, label: "YouTube Channels", icon: SiYoutube },
@@ -27,12 +28,6 @@ const stats = [
   { value: 70000, label: "Twitch Broadcasters", icon: SiTwitch },
   { value: 400000, label: "Reddit Communities", icon: SiReddit },
 ];
-
-const formatValue = (value: number) => {
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-  return value.toString();
-};
 
 const CountingNumber = ({
   value,

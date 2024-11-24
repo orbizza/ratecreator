@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { InstantSearch } from "react-instantsearch";
+import { InstantSearch, Configure } from "react-instantsearch";
 import { getSearchClient } from "@ratecreator/db/algolia-client";
 import SearchContent from "./search-content";
 
