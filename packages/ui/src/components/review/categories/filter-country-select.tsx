@@ -39,7 +39,7 @@ const CustomMultiSelectValue = ({
   });
 
   const displayText = (
-    <span className='flex gap-1 items-center'>
+    <span className="flex gap-1 items-center">
       {labels.map((label, index) => (
         <span key={label}>
           {index > 0 && ", "}
@@ -54,10 +54,10 @@ const CustomMultiSelectValue = ({
   );
 
   return (
-    <div className='flex items-center gap-2'>
+    <div className="flex items-center gap-2">
       {displayText}
       {values.length > 0 && !values.includes("ALL") && (
-        <span className='ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm'>
+        <span className="ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm">
           {values.length}
         </span>
       )}
@@ -70,7 +70,7 @@ async function searchCountries(keyword?: string) {
 
   const lowerKeyword = keyword.toLowerCase();
   return countryCodes.filter((country) =>
-    country.label.toLowerCase().includes(lowerKeyword)
+    country.label.toLowerCase().includes(lowerKeyword),
   );
 }
 
@@ -119,15 +119,15 @@ export const CountrySelect = () => {
       onValueChange={handleValueChange}
       onSearch={handleSearch}
     >
-      <MultiSelectTrigger className='shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+      <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
         <CustomMultiSelectValue
-          placeholder='Select countries'
+          placeholder="Select countries"
           maxDisplay={3}
           maxItemLength={5}
           values={selectedValues}
         />
       </MultiSelectTrigger>
-      <MultiSelectContent className='bg-neutral-50 text-foreground dark:bg-neutral-950'>
+      <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
         <MultiSelectSearch />
         <MultiSelectList>
           {loading
@@ -136,7 +136,7 @@ export const CountrySelect = () => {
                 options.map((country) => ({
                   value: country.id,
                   label: country.label,
-                }))
+                })),
               )}
           <MultiSelectEmpty>
             {loading ? "Loading..." : "No countries found"}

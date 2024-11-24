@@ -62,8 +62,8 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
   if (count === null) return null;
   else if (count === 0)
     return (
-      <div className='flex gap-0.5'>
-        <div className='flex items-center'>
+      <div className="flex gap-0.5">
+        <div className="flex items-center">
           <StarHalf
             size={12}
             className={`fill-current ${color} transform translate-x-[6px]`}
@@ -90,7 +90,7 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
     );
 
   return (
-    <div className='flex gap-0.5'>
+    <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
@@ -124,11 +124,11 @@ export const RatingCheckbox: React.FC = () => {
   };
 
   return (
-    <div className='flex flex-col space-y-2'>
+    <div className="flex flex-col space-y-2">
       {ratingCheckbox.map((item) => (
         <div
           key={item.id}
-          className='flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group'
+          className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
           onClick={() =>
             handleCheckboxChange(!selectedFilters.includes(item.id), item.id)
           }
@@ -136,9 +136,9 @@ export const RatingCheckbox: React.FC = () => {
           <Checkbox
             id={item.id}
             checked={selectedFilters.includes(item.id)}
-            className='group-hover:border-primary pointer-events-none'
+            className="group-hover:border-primary pointer-events-none"
           />
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Label
               htmlFor={item.id}
               className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  cursor-pointer select-none ${item.color}`}

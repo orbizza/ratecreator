@@ -79,35 +79,35 @@ export function StatsSection() {
   };
 
   return (
-    <section id='stats'>
-      <div className='container mx-auto px-4 '>
-        <div className='text-center space-y-4 py-4 mx-auto'>
-          <h2 className='text-[14px]  font-mono font-medium tracking-tight'>
+    <section id="stats">
+      <div className="container mx-auto px-4 ">
+        <div className="text-center space-y-4 py-4 mx-auto">
+          <h2 className="text-[14px]  font-mono font-medium tracking-tight">
             PLATFORM WISE CREATORS & COMMUNITIES
           </h2>
-          <h4 className='text-[42px] text-primary font-medium mb-4 lg:mb-8 text-balance max-w-3xl mx-auto tracking-tighter'>
+          <h4 className="text-[42px] text-primary font-medium mb-4 lg:mb-8 text-balance max-w-3xl mx-auto tracking-tighter">
             Total Accounts Catalogued
           </h4>
         </div>
         <div
-          className='grid grid-cols-1 mx-20 md:mx-0 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8'
+          className="grid grid-cols-1 mx-20 md:mx-0 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8"
           ref={ref}
         >
           {stats.map((stat, index) => (
             <motion.div
               key={index}
-              initial='hidden'
+              initial="hidden"
               animate={controls}
               variants={itemVariants}
               custom={index}
-              className='flex flex-col sm:flex-row sm:mx-24 md:mx-10 items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4'
+              className="flex flex-col sm:flex-row sm:mx-24 md:mx-10 items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4"
             >
-              <stat.icon className='w-10 h-10 lg:w-12 lg:h-12 text-primary' />
-              <div className='text-center sm:text-left'>
-                <h3 className='text-2xl md:text-3xl lg:text-4xl font-bold mb-1'>
+              <stat.icon className="w-10 h-10 lg:w-12 lg:h-12 text-primary" />
+              <div className="text-center sm:text-left">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1">
                   <CountingNumber value={stat.value} />
                 </h3>
-                <p className='text-sm text-muted-foreground'>{stat.label}</p>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
               </div>
             </motion.div>
           ))}

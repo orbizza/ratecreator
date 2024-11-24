@@ -9,7 +9,7 @@ interface CreatorGridProps {
 
 export const CreatorGrid: React.FC<CreatorGridProps> = ({ creators }) => {
   return (
-    <div className='w-full grid grid-cols-3 gap-4'>
+    <div className="w-full grid grid-cols-3 gap-4">
       {creators.map((creator) => (
         <CardForSearchResult key={creator.accountId} creator={creator} />
       ))}
