@@ -1,4 +1,5 @@
 export const languageCodes = [
+  { id: "all", label: "All Languages" },
   { id: "af", label: "Afrikaans" },
   { id: "am", label: "Amharic" },
   { id: "ar", label: "Arabic" },

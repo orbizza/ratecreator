@@ -8,10 +8,11 @@ import {
   Checkbox,
   Label,
 } from "@ratecreator/ui";
-import { Info, Video } from "lucide-react";
-import { videoCountCheckbox } from "@ratecreator/store";
+import { Info, MessagesSquare } from "lucide-react";
 
-export const VideoCountCheckbox: React.FC = () => {
+import { reviewCountCheckbox } from "@ratecreator/store";
+
+export const ReviewCountCheckbox: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
 
   const handleCheckboxChange = (checked: boolean, id: string) => {
@@ -32,7 +33,7 @@ export const VideoCountCheckbox: React.FC = () => {
 
   return (
     <div className='flex flex-col space-y-2'>
-      {videoCountCheckbox.map((item) => (
+      {reviewCountCheckbox.map((item) => (
         <div
           key={item.id}
           className='flex items-center space-x-2 p-2 dark:hover:bg-accent hover:bg-neutral-200 hover:rounded-md cursor-pointer transition-colors duration-200 group'
@@ -57,19 +58,19 @@ export const VideoCountCheckbox: React.FC = () => {
   );
 };
 
-//  const VideoCountSelect: React.FC = () => {
+// const ReviewCountSelect: React.FC = () => {
 //   return (
 //     <Accordion type='single' collapsible className='w-full'>
-//       <AccordionItem value='video-count' className='border-0'>
+//       <AccordionItem value='review-count' className='border-0'>
 //         <AccordionTrigger className='hover:no-underline p-0'>
 //           <div className='flex flex-row gap-x-2 items-center'>
-//             <Video size={16} />
-//             <span className='text-[16px]'>Video Count</span>
+//             <MessagesSquare size={16} />
+//             <span className='text-[16px]'>Review Count</span>
 //             <Info size={14} className='text-muted-foreground' />
 //           </div>
 //         </AccordionTrigger>
-//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950'>
-//           <VideoCountCheckbox />
+//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 '>
+//           <ReviewCountCheckbox />
 //         </AccordionContent>
 //       </AccordionItem>
 //     </Accordion>

@@ -1,0 +1,148 @@
+"use client";
+
+import { useRef, useState } from "react";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectEmpty,
+  MultiSelectList,
+  MultiSelectSearch,
+  MultiSelectTrigger,
+  MultiSelectValue,
+  renderMultiSelectOptions,
+} from "@ratecreator/ui";
+
+import { countryCodes } from "@ratecreator/store";
+
+interface CustomMultiSelectValueProps {
+  placeholder: string;
+  maxDisplay?: number;
+  maxItemLength?: number;
+  values?: string[];
+}
+
+const CustomMultiSelectValue = ({
+  placeholder,
+  maxDisplay = 3,
+  maxItemLength = 5,
+  values = [],
+}: CustomMultiSelectValueProps) => {
+  if (!values.length) {
+    return <span>{placeholder}</span>;
+  }
+
+  const displayValues = values.slice(0, maxDisplay);
+  const remaining = values.length - maxDisplay;
+  const labels = displayValues.map((value) => {
+    const country = countryCodes.find((c) => c.id === value);
+    return country?.label || value;
+  });
+
+  const displayText = (
+    <span className='flex gap-1 items-center'>
+      {labels.map((label, index) => (
+        <span key={label}>
+          {index > 0 && ", "}
+          {label.length > maxItemLength
+            ? label === "All Countries"
+              ? label
+              : `${label.slice(0, maxItemLength)}...`
+            : label}
+        </span>
+      ))}
+    </span>
+  );
+
+  return (
+    <div className='flex items-center gap-2'>
+      {displayText}
+      {values.length > 0 && !values.includes("ALL") && (
+        <span className='ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm'>
+          {values.length}
+        </span>
+      )}
+    </div>
+  );
+};
+
+async function searchCountries(keyword?: string) {
+  if (!keyword) return countryCodes;
+
+  const lowerKeyword = keyword.toLowerCase();
+  return countryCodes.filter((country) =>
+    country.label.toLowerCase().includes(lowerKeyword)
+  );
+}
+
+export const CountrySelect = () => {
+  const [loading, setLoading] = useState(false);
+  const [options, setOptions] = useState(countryCodes);
+  const [selectedValues, setSelectedValues] = useState(["ALL"]);
+  const indexRef = useRef(0);
+
+  const handleSearch = async (keyword?: string) => {
+    const index = ++indexRef.current;
+    setLoading(true);
+    const newOptions = await searchCountries(keyword);
+    if (indexRef.current === index) {
+      setOptions(newOptions);
+      setLoading(false);
+    }
+  };
+
+  const handleValueChange = (newValues: string[]) => {
+    // Compare old and new values to identify what changed
+    const wasAllSelected = selectedValues.includes("ALL");
+    const isAllSelected = newValues.includes("ALL");
+
+    // Case 1: ALL is being selected
+    if (!wasAllSelected && isAllSelected) {
+      setSelectedValues(["ALL"]);
+      return;
+    }
+
+    // Case 2: ALL is being unselected
+    if (wasAllSelected && !isAllSelected) {
+      const nonAllValues = newValues.filter((value) => value !== "ALL");
+      setSelectedValues(nonAllValues);
+      return;
+    }
+
+    // Case 3: Individual countries being selected/unselected
+    const nonAllValues = newValues.filter((value) => value !== "ALL");
+    setSelectedValues(nonAllValues.length ? nonAllValues : ["ALL"]);
+  };
+
+  return (
+    <MultiSelect
+      value={selectedValues}
+      onValueChange={handleValueChange}
+      onSearch={handleSearch}
+    >
+      <MultiSelectTrigger className='shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+        <CustomMultiSelectValue
+          placeholder='Select countries'
+          maxDisplay={3}
+          maxItemLength={5}
+          values={selectedValues}
+        />
+      </MultiSelectTrigger>
+      <MultiSelectContent className='bg-neutral-50 text-foreground dark:bg-neutral-950'>
+        <MultiSelectSearch />
+        <MultiSelectList>
+          {loading
+            ? null
+            : renderMultiSelectOptions(
+                options.map((country) => ({
+                  value: country.id,
+                  label: country.label,
+                }))
+              )}
+          <MultiSelectEmpty>
+            {loading ? "Loading..." : "No countries found"}
+          </MultiSelectEmpty>
+        </MultiSelectList>
+      </MultiSelectContent>
+    </MultiSelect>
+  );
+};

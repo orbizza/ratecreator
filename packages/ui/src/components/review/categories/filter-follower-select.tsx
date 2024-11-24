@@ -12,26 +12,31 @@ import {
 import { Info, Users } from "lucide-react";
 import { followersCheckbox } from "@ratecreator/store";
 
-export const FollowersSelect: React.FC = () => {
-  return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="followers-count" className="border-0 ">
-        <AccordionTrigger className="hover:no-underline">
-          <div className="flex flex-row gap-x-2 items-center">
-            <Users size={16} />
-            <span className="text-[16px]">Followers</span>
-            <Info size={14} className="text-muted-foreground" />
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground">
-          <FollowersCheckbox />
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-};
+// export const FollowersSelect: React.FC = () => {
+//   return (
+//     <Accordion
+//       type='single'
+//       collapsible
+//       className='w-full'
+//       defaultValue='followers-count'
+//     >
+//       <AccordionItem value='followers-count' className='border-0 '>
+//         {/* <AccordionTrigger className='hover:no-underline p-0'>
+//           <div className='flex flex-row gap-x-2 items-center'>
+//             <Users size={16} />
+//             <span className='text-[16px]'>Followers</span>
+//             <Info size={14} className='text-muted-foreground' />
+//           </div>
+//         </AccordionTrigger> */}
+//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+//           <FollowersCheckbox />
+//         </AccordionContent>
+//       </AccordionItem>
+//     </Accordion>
+//   );
+// };
 
-const FollowersCheckbox: React.FC = () => {
+export const FollowersCheckbox: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
 
   const handleCheckboxChange = (checked: boolean, id: string) => {
@@ -53,11 +58,11 @@ const FollowersCheckbox: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className='flex flex-col space-y-2'>
       {followersCheckbox.map((item) => (
         <div
           key={item.id}
-          className="flex items-center space-x-2 p-1 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
+          className='flex items-center space-x-2 p-1 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group'
         >
           <Checkbox
             id={item.id}
@@ -65,11 +70,11 @@ const FollowersCheckbox: React.FC = () => {
             onCheckedChange={(checked) =>
               handleCheckboxChange(checked as boolean, item.id)
             }
-            className="group-hover:border-primary"
+            className='group-hover:border-primary'
           />
           <Label
             htmlFor={item.id}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full"
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full'
           >
             {item.label}
           </Label>

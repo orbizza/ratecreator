@@ -7,6 +7,6 @@ export * from "./data/filter-country-code.ts";
 export * from "./data/filter-language-code.ts";
 export * from "./data/filter-followers-checkbox.ts";
 export * from "./data/filter-video-count-checkbox.ts";
-export * from "./data/filter-platforms-select.ts";
+export * from "./data/filter-review-count-checkbox.ts";
 
 export * from "./atoms/toastState.ts";
