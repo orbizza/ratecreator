@@ -28,6 +28,36 @@ export interface Account {
   lastIndexedAt?: Date;
 }
 
+export interface SearchResults {
+  hits: SearchAccount[];
+  nbHits: number;
+  page: number;
+  nbPages: number;
+  hitsPerPage: number;
+  facets: {
+    platform?: { [key: string]: number };
+    categories?: { [key: string]: number };
+    country?: { [key: string]: number };
+    language_code?: { [key: string]: number };
+    madeForKids?: { [key: string]: number };
+  };
+  exhaustiveFacetsCount: boolean;
+  exhaustiveNbHits: boolean;
+  exhaustiveTypo: boolean;
+  exhaustive: {
+    facetsCount: boolean;
+    nbHits: boolean;
+    typo: boolean;
+  };
+  query: string;
+  params: string;
+  index: string;
+  renderingContent: Record<string, unknown>;
+  processingTimeMS: number;
+  processingTimingsMS: Record<string, number>;
+  serverTimeMS: number;
+}
+
 export interface SearchAccount {
   accountId: string;
   platform: string;
@@ -48,10 +78,6 @@ export interface SearchAccount {
   categories: string[];
   createdDate: string;
   objectID: string;
-}
-
-export interface SearchAccountsResult {
-  facetHits: SearchAccount[];
 }
 
 export interface SearchAccountsParams {
