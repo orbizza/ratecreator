@@ -44,3 +44,10 @@ export const getInitials = (nameOrEmail: string) => {
     return nameOrEmail.charAt(0).toUpperCase();
   }
 };
+
+export const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.slice(0, maxLength - 3) + "...";
+};

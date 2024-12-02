@@ -32,11 +32,11 @@ export const ReviewCountCheckbox: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className='flex flex-col space-y-2'>
       {reviewCountCheckbox.map((item) => (
         <div
           key={item.id}
-          className="flex items-center space-x-2 p-2 dark:hover:bg-accent hover:bg-neutral-200 hover:rounded-md cursor-pointer transition-colors duration-200 group"
+          className='flex items-center space-x-2 p-2 dark:hover:bg-accent hover:bg-neutral-200 hover:rounded-md cursor-pointer transition-colors duration-200 group'
         >
           <Checkbox
             id={item.id}
@@ -44,11 +44,11 @@ export const ReviewCountCheckbox: React.FC = () => {
             onCheckedChange={(checked) =>
               handleCheckboxChange(checked as boolean, item.id)
             }
-            className="group-hover:border-primary"
+            className='group-hover:border-primary'
           />
           <Label
             htmlFor={item.id}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full"
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full'
           >
             {item.label}
           </Label>
@@ -57,22 +57,3 @@ export const ReviewCountCheckbox: React.FC = () => {
     </div>
   );
 };
-
-// const ReviewCountSelect: React.FC = () => {
-//   return (
-//     <Accordion type='single' collapsible className='w-full'>
-//       <AccordionItem value='review-count' className='border-0'>
-//         <AccordionTrigger className='hover:no-underline p-0'>
-//           <div className='flex flex-row gap-x-2 items-center'>
-//             <MessagesSquare size={16} />
-//             <span className='text-[16px]'>Review Count</span>
-//             <Info size={14} className='text-muted-foreground' />
-//           </div>
-//         </AccordionTrigger>
-//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 '>
-//           <ReviewCountCheckbox />
-//         </AccordionContent>
-//       </AccordionItem>
-//     </Accordion>
-//   );
-// };
