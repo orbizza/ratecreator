@@ -31,11 +31,11 @@ export const VideoCountCheckbox: React.FC = () => {
   };
 
   return (
-    <div className='flex flex-col space-y-2'>
+    <div className="flex flex-col space-y-2">
       {videoCountCheckbox.map((item) => (
         <div
           key={item.id}
-          className='flex items-center space-x-2 p-2 dark:hover:bg-accent hover:bg-neutral-200 hover:rounded-md cursor-pointer transition-colors duration-200 group'
+          className="flex items-center space-x-2 p-2 dark:hover:bg-accent hover:bg-neutral-200 hover:rounded-md cursor-pointer transition-colors duration-200 group"
         >
           <Checkbox
             id={item.id}
@@ -43,11 +43,11 @@ export const VideoCountCheckbox: React.FC = () => {
             onCheckedChange={(checked) =>
               handleCheckboxChange(checked as boolean, item.id)
             }
-            className='group-hover:border-primary'
+            className="group-hover:border-primary"
           />
           <Label
             htmlFor={item.id}
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full'
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full"
           >
             {item.label}
           </Label>
