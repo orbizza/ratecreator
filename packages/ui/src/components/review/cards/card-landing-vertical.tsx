@@ -12,7 +12,7 @@ import {
 } from "@icons-pack/react-simple-icons";
 import { ny } from "@ratecreator/ui/utils";
 import { PopularAccount } from "@ratecreator/types/review";
-import { formatValue } from "@ratecreator/db/utils";
+import { formatValue, truncateText } from "@ratecreator/db/utils";
 
 export function CardLandingVertical({
   imageUrl,
@@ -55,12 +55,12 @@ export function CardLandingVertical({
           className="rounded-full"
           width="40"
           height="40"
-          alt={name}
+          alt={truncateText(name, 5)}
           src={imageUrl}
         />
         <div className="flex flex-col">
           <figcaption className="text-sm font-medium dark:text-white">
-            {name}
+            {truncateText(name, 15)}
           </figcaption>
           <p className="mt-1 text-xs font-medium dark:text-white/40">
             {handle}

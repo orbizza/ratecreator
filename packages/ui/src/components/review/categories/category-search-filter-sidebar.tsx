@@ -43,9 +43,31 @@ import { ReviewCountCheckbox } from "./filter-reviews-count-select";
 import { CountrySelect } from "./filter-country-select";
 import { LanguageSelect } from "./filter-language-select";
 
-interface FilterSidebarProps {}
+interface FilterSidebarProps {
+  onPlatformChange: (value: string[]) => void;
+  onFollowersChange: (value: string[]) => void;
+  onRatingChange: (value: string[]) => void;
+  onVideoCountChange: (value: string[]) => void;
+  onReviewCountChange: (value: string[]) => void;
+  onCountryChange: (value: string[]) => void;
+  onLanguageChange: (value: string[]) => void;
+  onClaimedChange: (value: string | null) => void;
+  onMadeForKidsChange: (value: string | null) => void;
+  onClearFilters: () => void;
+}
 
-export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({
+  onPlatformChange,
+  onFollowersChange,
+  onRatingChange,
+  onVideoCountChange,
+  onReviewCountChange,
+  onCountryChange,
+  onLanguageChange,
+  onClaimedChange,
+  onMadeForKidsChange,
+  onClearFilters,
+}) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -68,7 +90,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
             </div>
           </AccordionTrigger>
           <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground">
-            <PlatformCheckbox />
+            <PlatformCheckbox onPlatformChange={onPlatformChange} />
           </AccordionContent>
         </AccordionItem>
 
@@ -132,7 +154,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
         </div>
         <Select>
           <SelectTrigger>
-            <SelectValue placeholder="Both Status" />
+            <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="claimed-true">Yes</SelectItem>
