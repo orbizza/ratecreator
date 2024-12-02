@@ -56,22 +56,3 @@ export const VideoCountCheckbox: React.FC = () => {
     </div>
   );
 };
-
-//  const VideoCountSelect: React.FC = () => {
-//   return (
-//     <Accordion type='single' collapsible className='w-full'>
-//       <AccordionItem value='video-count' className='border-0'>
-//         <AccordionTrigger className='hover:no-underline p-0'>
-//           <div className='flex flex-row gap-x-2 items-center'>
-//             <Video size={16} />
-//             <span className='text-[16px]'>Video Count</span>
-//             <Info size={14} className='text-muted-foreground' />
-//           </div>
-//         </AccordionTrigger>
-//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950'>
-//           <VideoCountCheckbox />
-//         </AccordionContent>
-//       </AccordionItem>
-//     </Accordion>
-//   );
-// };

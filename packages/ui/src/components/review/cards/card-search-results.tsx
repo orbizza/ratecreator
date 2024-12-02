@@ -30,7 +30,9 @@ import {
   formatValue,
   fromSlug,
   getInitials,
+  truncateText,
 } from "@ratecreator/db/utils";
+import { truncate } from "lodash";
 
 const getPlatformIcon = (platform: string) => {
   switch (platform.toLowerCase()) {
@@ -110,26 +112,14 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
     videoCount = 0,
     categories = [],
     platform,
-    createdAt,
-    bannerImageUrl = "",
+    createdDate = "",
+    bannerURL = "",
   } = creator;
   const defaultBg = cn(
     "bg-gradient-to-r",
     "from-[#ffffff] via-[#f3e8de] to-[#efd4d4]",
     "dark:from-[#646161] dark:via-[#333231] dark:to-[#0a0b0b]",
   );
-  /*
-  bg-gradient-to-r from-[#a5f3fc] via-[#67e8f9] to-[#22d3ee]
-  bg-[radial-gradient(circle_at_left,_var(--tw-gradient-stops))] from-[#ffffff] via-[#f3e8de] to-[#efd4d4]
-  bg-[radial-gradient(circle_at_left,_var(--tw-gradient-stops))] from-[#807d7d] via-[#52504e] to-[#0a0b0b]
-  bg-[radial-gradient(circle_at_left,_var(--tw-gradient-stops))] from-[#646161] via-[#333231] to-[#0a0b0b]
-  bg-gradient-to-r from-[#cffafe] via-[#a5f3fc] to-[#67e8f9]
-  */
-  //   cn(
-  //   "bg-gradient-to-br",
-  //   "dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
-  //   "from-gray-100 via-gray-200 to-gray-300"
-  // );
 
   const displayCategories = categories.slice(0, 5).map(fromSlug);
   const remainingCount = Math.max(0, categories.length - 5);
@@ -151,7 +141,9 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                 </Avatar>
 
                 <div>
-                  <p className="font-medium text-base">{name}</p>
+                  <p className="font-medium text-base">
+                    {truncateText(name, 15)}
+                  </p>
                   <p className="text-sm text-muted-foreground">{handle}</p>
                 </div>
               </div>
@@ -170,12 +162,16 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                   ) : platform === "twitter" ? (
                     <>
                       <ScrollText size={16} className="text-primary" />
-                      <span className="text-sm">{formatValue(videoCount)}</span>
+                      <span className="text-sm">
+                        {formatValue(Number(videoCount))}
+                      </span>
                     </>
                   ) : (
                     <>
                       <Video size={16} className="text-primary" />
-                      <span className="text-sm">{formatValue(videoCount)}</span>
+                      <span className="text-sm">
+                        {formatValue(Number(videoCount))}
+                      </span>
                     </>
                   )}
                 </div>
@@ -199,13 +195,11 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
         {/* Bottom section with categories */}
         <div
           style={
-            bannerImageUrl
-              ? { backgroundImage: `url(${bannerImageUrl})` }
-              : undefined
+            bannerURL ? { backgroundImage: `url(${bannerURL})` } : undefined
           }
           className={cn(
             "rounded-b-lg p-4 relative overflow-hidden border-x border-b bg-cover bg-center h-3/4",
-            !bannerImageUrl && defaultBg,
+            !bannerURL && defaultBg,
           )}
         >
           <div className="absolute w-full h-full top-0 left-0 transition duration-300 dark:group-hover/card:bg-black dark:group-hover/card:opacity-60 group-hover/card:bg-gray-100 group-hover/card:opacity-40 grou-hover/card:rounded-b-lg"></div>
@@ -216,7 +210,7 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                 variant="secondary"
                 className="bg-opacity-20 hover:bg-opacity-30 text-[10px]"
               >
-                Joined {formatDate(createdAt)}
+                Joined {formatDate(createdDate)}
               </Badge>
               {getPlatformIcon(platform)}
             </div>

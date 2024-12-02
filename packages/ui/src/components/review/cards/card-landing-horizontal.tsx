@@ -11,7 +11,7 @@ import {
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
 import { ny } from "@ratecreator/ui/utils";
-import { formatValue } from "@ratecreator/db/utils";
+import { formatValue, truncateText } from "@ratecreator/db/utils";
 
 export function CardLandingHorizontal({
   imageUrl,
@@ -69,7 +69,7 @@ export function CardLandingHorizontal({
         />
         <div className="flex flex-col">
           <figcaption className="text-sm font-medium dark:text-white">
-            {name}
+            {truncateText(name, 15)}
           </figcaption>
           <p className="mt-1 text-xs font-medium dark:text-white/40">
             {handle}

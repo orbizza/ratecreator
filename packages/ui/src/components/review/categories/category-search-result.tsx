@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowDownZA,
@@ -37,30 +37,31 @@ import { FilterSidebar } from "./category-search-filter-sidebar";
 import { RelatedCategories } from "./category-search-related-category";
 import { SubCategoriesList } from "./category-search-subcategory";
 import { CardForSearchResult } from "../cards/card-search-results";
+import { searchCreators } from "@ratecreator/actions/review";
 
-const creator: SearchAccount = {
-  accountId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
-  name: "PewDiePie",
-  handle: "@pewdiepie",
-  imageUrl:
-    "https://yt3.ggpht.com/5oUY3tashyxfqsjO5SGhjT4dus8FkN9CsAHwXWISFrdPYii1FudD4ICtLfuCw6-THJsJbgoY=s88-c-k-c0x00ffffff-no-rj",
-  followerCount: 111000000,
-  rating: 3.9,
-  reviewCount: 10250,
-  videoCount: 4780,
-  categories: [
-    "arts-and-entertainment",
-    "comedy-and-humor",
-    "comedic-vlogs",
-    "gaming-and-esports",
-    "let-s-play-videos",
-    "gaming-news",
-    "lifestyle-and-vlogs",
-  ],
-  platform: "YOUTUBE",
-  createdAt: "2010-04-29T10:54:00Z",
-  bannerImageUrl: "",
-};
+// const creator: SearchAccount = {
+//   accountId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
+//   name: "PewDiePie",
+//   handle: "@pewdiepie",
+//   imageUrl:
+//     "https://yt3.ggpht.com/5oUY3tashyxfqsjO5SGhjT4dus8FkN9CsAHwXWISFrdPYii1FudD4ICtLfuCw6-THJsJbgoY=s88-c-k-c0x00ffffff-no-rj",
+//   followerCount: 111000000,
+//   rating: 3.9,
+//   reviewCount: 10250,
+//   videoCount: 4780,
+//   categories: [
+//     "arts-and-entertainment",
+//     "comedy-and-humor",
+//     "comedic-vlogs",
+//     "gaming-and-esports",
+//     "let-s-play-videos",
+//     "gaming-news",
+//     "lifestyle-and-vlogs",
+//   ],
+//   platform: "YOUTUBE",
+//   createdAt: "2010-04-29T10:54:00Z",
+//   bannerImageUrl: "",
+// };
 //https://yt3.googleusercontent.com/H2UiRucb_N6GUtayijRvKQIINVzMRpftdTqUQLhjxwsnTdx7TXmapV_SK7G5HpBZUgnQbVnHOQ
 
 //https://yt3.googleusercontent.com/82q_54Y1P3uTo9hVWV82rIE_O_j4cZUaB_wFq_4LKcteG72IEaDqBsuoXarUA35osaFX6q-0
@@ -76,10 +77,69 @@ export const CategoriesSearchResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDescending, setIsDescending] = useState(true);
 
+  // Filters and Sorting
+  const [platform, setPlatform] = useState<string[]>([]);
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [rating, setRating] = useState<string[]>([]);
+  const [videoCount, setVideoCount] = useState<string[]>([]);
+  const [reviewCount, setReviewCount] = useState<string[]>([]);
+  const [country, setCountry] = useState<string[]>([]);
+  const [language, setLanguage] = useState<string[]>([]);
+  const [claimed, setClaimed] = useState<string | null>(null);
+  const [madeForKids, setMadeForKids] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState("followed");
+
+  const handleClearFilters = useCallback(() => {
+    setPlatform([]);
+    setFollowers([]);
+    setRating([]);
+    setVideoCount([]);
+    setReviewCount([]);
+    setCountry([]);
+    setLanguage([]);
+    setClaimed(null);
+    setMadeForKids(null);
+  }, []);
+
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
-    // Add your sorting logic here
   };
+
+  const fetchCreators = useCallback(async () => {
+    try {
+      setCreatorLoading(true);
+      const results = await searchCreators({
+        filters: {
+          platform,
+          categories: [slug],
+        },
+        sortBy,
+        sortOrder: isDescending ? "desc" : "asc",
+      });
+      console.log("results: ", results);
+      setCreators(results);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setCreatorLoading(false);
+    }
+  }, [
+    sortBy,
+    isDescending,
+    platform,
+    followers,
+    rating,
+    videoCount,
+    reviewCount,
+    country,
+    language,
+    claimed,
+    madeForKids,
+  ]);
+
+  useEffect(() => {
+    fetchCreators();
+  }, [fetchCreators]);
 
   useEffect(() => {
     const fetchCategoryDetails = async () => {
@@ -170,7 +230,18 @@ export const CategoriesSearchResults: React.FC = () => {
       </div>
       <div className="flex flex-row">
         <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
-          <FilterSidebar />
+          <FilterSidebar
+            onPlatformChange={setPlatform}
+            onFollowersChange={setFollowers}
+            onRatingChange={setRating}
+            onVideoCountChange={setVideoCount}
+            onReviewCountChange={setReviewCount}
+            onCountryChange={setCountry}
+            onLanguageChange={setLanguage}
+            onClaimedChange={setClaimed}
+            onMadeForKidsChange={setMadeForKids}
+            onClearFilters={handleClearFilters}
+          />
           {!loading && (
             <>
               <SubCategoriesList
@@ -195,7 +266,20 @@ export const CategoriesSearchResults: React.FC = () => {
         <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
           <div className="flex xl:hidden flex-col-reverse gap-y-2 md:flex-row md:items-center justify-between">
             <div className="flex flex-row w-2/5 items-center text-primary justify-between ">
-              {!loading && <FilterSidebar />}
+              {!loading && (
+                <FilterSidebar
+                  onPlatformChange={setPlatform}
+                  onFollowersChange={setFollowers}
+                  onRatingChange={setRating}
+                  onVideoCountChange={setVideoCount}
+                  onReviewCountChange={setReviewCount}
+                  onCountryChange={setCountry}
+                  onLanguageChange={setLanguage}
+                  onClaimedChange={setClaimed}
+                  onMadeForKidsChange={setMadeForKids}
+                  onClearFilters={handleClearFilters}
+                />
+              )}
               {loading && (
                 <Button
                   variant="default"
@@ -286,14 +370,14 @@ export const CategoriesSearchResults: React.FC = () => {
               <Info size={14} />
             </div>
           </div>
-          <div className="w-full items-center justify-center md:justify-between grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+          {/* <div className='w-full items-center justify-center md:justify-between grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
             <CardForSearchResult creator={creator} />
             <CardForSearchResult creator={creator} />
             <CardForSearchResult creator={creator} />
             <CardForSearchResult creator={creator} />
             <CardForSearchResult creator={creator} />
             <CardForSearchResult creator={creator} />
-          </div>
+          </div> */}
           {creatorLoading && <CreatorLoadingCard />}
           {!creatorLoading && <CreatorGrid creators={creators} />}
         </div>

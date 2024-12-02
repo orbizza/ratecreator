@@ -63,24 +63,30 @@ const platformFilters = [
   },
 ];
 
-export const PlatformCheckbox: React.FC = () => {
+interface PlatformCheckboxProps {
+  onPlatformChange: (values: string[]) => void;
+}
+
+export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = ({
+  onPlatformChange,
+}) => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
 
   const handleCheckboxChange = (checked: boolean, id: string) => {
     setSelectedFilters((prev) => {
+      let newValues;
       if (id === "all") {
-        // If "All" is selected, clear other selections
-        return checked ? ["all"] : [];
+        newValues = checked ? ["all"] : [];
       } else {
-        // Remove "All" when selecting other options
         const withoutAll = prev.filter((item) => item !== "all");
-
         if (checked) {
-          return [...withoutAll, id];
+          newValues = [...withoutAll, id];
         } else {
-          return withoutAll.filter((item) => item !== id);
+          newValues = withoutAll.filter((item) => item !== id);
         }
       }
+      onPlatformChange(newValues);
+      return newValues;
     });
   };
 
@@ -113,20 +119,3 @@ export const PlatformCheckbox: React.FC = () => {
     </div>
   );
 };
-
-// export const PlatformSelect: React.FC = () => {
-//   return (
-//     <Accordion
-//       type='single'
-//       collapsible
-//       className='w-full'
-//       defaultValue='platform'
-//     >
-//       <AccordionItem value='platform' className='border-0'>
-//         <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground'>
-//           <PlatformCheckbox />
-//         </AccordionContent>
-//       </AccordionItem>
-//     </Accordion>
-//   );
-// };
