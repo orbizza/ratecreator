@@ -36,35 +36,9 @@ import { CreatorGrid } from "./category-search-creator-grid";
 import { FilterSidebar } from "./category-search-filter-sidebar";
 import { RelatedCategories } from "./category-search-related-category";
 import { SubCategoriesList } from "./category-search-subcategory";
-import { CardForSearchResult } from "../cards/card-search-results";
 import { searchCreators } from "@ratecreator/actions/review";
+import { PaginationBar } from "../cards/pagination-bar";
 
-// const creator: SearchAccount = {
-//   accountId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
-//   name: "PewDiePie",
-//   handle: "@pewdiepie",
-//   imageUrl:
-//     "https://yt3.ggpht.com/5oUY3tashyxfqsjO5SGhjT4dus8FkN9CsAHwXWISFrdPYii1FudD4ICtLfuCw6-THJsJbgoY=s88-c-k-c0x00ffffff-no-rj",
-//   followerCount: 111000000,
-//   rating: 3.9,
-//   reviewCount: 10250,
-//   videoCount: 4780,
-//   categories: [
-//     "arts-and-entertainment",
-//     "comedy-and-humor",
-//     "comedic-vlogs",
-//     "gaming-and-esports",
-//     "let-s-play-videos",
-//     "gaming-news",
-//     "lifestyle-and-vlogs",
-//   ],
-//   platform: "YOUTUBE",
-//   createdAt: "2010-04-29T10:54:00Z",
-//   bannerImageUrl: "",
-// };
-//https://yt3.googleusercontent.com/H2UiRucb_N6GUtayijRvKQIINVzMRpftdTqUQLhjxwsnTdx7TXmapV_SK7G5HpBZUgnQbVnHOQ
-
-//https://yt3.googleusercontent.com/82q_54Y1P3uTo9hVWV82rIE_O_j4cZUaB_wFq_4LKcteG72IEaDqBsuoXarUA35osaFX6q-0
 export const CategoriesSearchResults: React.FC = () => {
   const params = useParams();
   const router = useRouter();
@@ -76,6 +50,10 @@ export const CategoriesSearchResults: React.FC = () => {
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDescending, setIsDescending] = useState(true);
+  const [count, setCount] = useState<number>(0);
+  const [viewCount, setViewCount] = useState<string>("");
+  const [hitsPerPage, setHitsPerPage] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(0);
 
   // Filters and Sorting
   const [platform, setPlatform] = useState<string[]>([]);
@@ -110,14 +88,36 @@ export const CategoriesSearchResults: React.FC = () => {
       setCreatorLoading(true);
       const results = await searchCreators({
         filters: {
-          platform,
+          platform: platform.length > 0 ? platform : undefined,
           categories: [slug],
         },
         sortBy,
         sortOrder: isDescending ? "desc" : "asc",
+        page: currentPage,
+        limit: 20,
       });
       console.log("results: ", results);
-      setCreators(results);
+      if ("hits" in results && Array.isArray(results.hits)) {
+        setCreators(results.hits as SearchAccount[]);
+        if ("nbHits" in results && "hitsPerPage" in results) {
+          setCount(results.nbHits as number);
+          // setHitsPerPage(results.hitsPerPage as number);
+          const totalResults = results.nbHits as number;
+          const remainingResults = totalResults - currentPage * 20;
+          const currentPageHits = Math.min(20, remainingResults);
+          setHitsPerPage(results.hitsPerPage as number);
+          setViewCount(
+            currentPage === 0
+              ? "1 - " + (results.hitsPerPage as number) + " "
+              : currentPage * 20 +
+                  1 +
+                  " - " +
+                  (currentPage * 20 + (results.hitsPerPage as number)),
+          );
+        }
+      } else {
+        throw new Error("Invalid search results format");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -135,11 +135,17 @@ export const CategoriesSearchResults: React.FC = () => {
     language,
     claimed,
     madeForKids,
+    currentPage,
+    slug,
   ]);
 
   useEffect(() => {
     fetchCreators();
   }, [fetchCreators]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     const fetchCategoryDetails = async () => {
@@ -336,7 +342,17 @@ export const CategoriesSearchResults: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <div>Count</div>
+            <div>
+              {creatorLoading && (
+                <span className="text-muted-foreground text-sm"># of ###</span>
+              )}
+              {!creatorLoading && (
+                <div className="flex flex-row items-center gap-x-2 text-muted-foreground text-sm">
+                  {" "}
+                  {viewCount} of {count} <Info size={14} />
+                </div>
+              )}
+            </div>
             <div className="flex justify-end items-center gap-x-2">
               <Toggle
                 aria-label="Toggle Sort Order"
@@ -370,16 +386,19 @@ export const CategoriesSearchResults: React.FC = () => {
               <Info size={14} />
             </div>
           </div>
-          {/* <div className='w-full items-center justify-center md:justify-between grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
-            <CardForSearchResult creator={creator} />
-            <CardForSearchResult creator={creator} />
-            <CardForSearchResult creator={creator} />
-            <CardForSearchResult creator={creator} />
-            <CardForSearchResult creator={creator} />
-            <CardForSearchResult creator={creator} />
-          </div> */}
           {creatorLoading && <CreatorLoadingCard />}
-          {!creatorLoading && <CreatorGrid creators={creators} />}
+          {!creatorLoading && (
+            <>
+              <CreatorGrid creators={creators} />
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={Math.ceil(count / hitsPerPage)}
+                onPageChange={handlePageChange}
+                totalItems={count}
+                itemsPerPage={hitsPerPage}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

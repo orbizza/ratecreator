@@ -1,6 +1,10 @@
 import { algoliasearch, SearchClient } from "algoliasearch";
 // import { SearchResponse } from "@algolia/client-search";
-import { SearchAccount, SearchAccountsParams } from "@ratecreator/types/review";
+import {
+  SearchAccount,
+  SearchAccountsParams,
+  SearchResults,
+} from "@ratecreator/types/review";
 
 let searchClientInstance: SearchClient | null = null;
 let writeClientInstance: SearchClient | null = null;
@@ -28,7 +32,7 @@ export const getWriteClient = (): SearchClient => {
 
 export const getSearchAccounts = async (
   params: SearchAccountsParams,
-): Promise<SearchAccount[]> => {
+): Promise<SearchResults> => {
   const client = getSearchClient();
   const BASE_INDEX_NAME = "accounts";
   let indexName = BASE_INDEX_NAME;
@@ -121,13 +125,10 @@ export const getSearchAccounts = async (
         },
       },
     ]);
-    console.log("params: ", params);
-    // Access the first result from the array of SearchResponses
-    if ("hits" in searchResults.results[0]) {
-      return searchResults.results[0].hits;
-    } else {
-      throw new Error("Invalid search results format");
-    }
+
+    // Return the exact structure from Algolia
+
+    return searchResults.results[0] as SearchResults;
   } catch (error) {
     console.error("Algolia search error:", error);
     throw error;
