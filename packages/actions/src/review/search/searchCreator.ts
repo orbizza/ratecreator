@@ -22,7 +22,7 @@ interface SearchCreatorsParams {
 }
 
 export const searchCreators = async (
-  params: SearchCreatorsParams
+  params: SearchCreatorsParams,
 ): Promise<SearchResults[]> => {
   const response = await axios.get("/api/search/accounts", {
     headers: {
