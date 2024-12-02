@@ -1,6 +1,10 @@
 import { algoliasearch, SearchClient } from "algoliasearch";
 // import { SearchResponse } from "@algolia/client-search";
-import { SearchAccount, SearchAccountsParams } from "@ratecreator/types/review";
+import {
+  SearchAccount,
+  SearchAccountsParams,
+  SearchResults,
+} from "@ratecreator/types/review";
 
 let searchClientInstance: SearchClient | null = null;
 let writeClientInstance: SearchClient | null = null;
@@ -9,7 +13,7 @@ export const getSearchClient = (): SearchClient => {
   if (!searchClientInstance) {
     const algoliaClient = algoliasearch(
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!,
+      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
     );
     searchClientInstance = algoliaClient;
   }
@@ -20,15 +24,15 @@ export const getWriteClient = (): SearchClient => {
   if (!writeClientInstance) {
     writeClientInstance = algoliasearch(
       process.env.ALGOLIA_APP_ID!,
-      process.env.ALGOLIA_WRITE_API_KEY!,
+      process.env.ALGOLIA_WRITE_API_KEY!
     );
   }
   return writeClientInstance;
 };
 
 export const getSearchAccounts = async (
-  params: SearchAccountsParams,
-): Promise<SearchAccount[]> => {
+  params: SearchAccountsParams
+): Promise<SearchResults> => {
   const client = getSearchClient();
   const BASE_INDEX_NAME = "accounts";
   let indexName = BASE_INDEX_NAME;
@@ -41,7 +45,7 @@ export const getSearchAccounts = async (
     // Handle platform filter (multiple platforms using OR)
     if (params.filters.platform && params.filters.platform.length > 0) {
       const platformFilters = params.filters.platform.map(
-        (p: string) => `platform:${p.toUpperCase()}`,
+        (p: string) => `platform:${p.toUpperCase()}`
       );
       filters.push(`(${platformFilters.join(" OR ")})`);
     }
@@ -72,7 +76,7 @@ export const getSearchAccounts = async (
     // Handle multiple countries (OR)
     if (params.filters.country && params.filters.country.length > 0) {
       const countryFilters = params.filters.country.map(
-        (c: string) => `country:${c}`,
+        (c: string) => `country:${c}`
       );
       filters.push(`(${countryFilters.join(" OR ")})`);
     }
@@ -80,7 +84,7 @@ export const getSearchAccounts = async (
     // Handle multiple languages (OR)
     if (params.filters.language && params.filters.language.length > 0) {
       const languageFilters = params.filters.language.map(
-        (l: string) => `language_code:${l}`,
+        (l: string) => `language_code:${l}`
       );
       filters.push(`(${languageFilters.join(" OR ")})`);
     }
@@ -97,7 +101,7 @@ export const getSearchAccounts = async (
     // Handle categories (AND between categories)
     if (params.filters.categories && params.filters.categories.length > 0) {
       const categoryFilters = params.filters.categories.map(
-        (c: string) => `categories:${c}`,
+        (c: string) => `categories:${c}`
       );
       filters.push(`(${categoryFilters.join(" OR ")})`);
     }
@@ -121,13 +125,10 @@ export const getSearchAccounts = async (
         },
       },
     ]);
-    console.log("params: ", params);
-    // Access the first result from the array of SearchResponses
-    if ("hits" in searchResults.results[0]) {
-      return searchResults.results[0].hits;
-    } else {
-      throw new Error("Invalid search results format");
-    }
+
+    // Return the exact structure from Algolia
+
+    return searchResults.results[0] as SearchResults;
   } catch (error) {
     console.error("Algolia search error:", error);
     throw error;

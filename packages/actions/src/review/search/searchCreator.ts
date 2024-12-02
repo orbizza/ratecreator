@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SearchAccount } from "@ratecreator/types/review";
+import { SearchResults } from "@ratecreator/types/review";
 
 interface SearchCreatorsParams {
   query?: string;
@@ -22,13 +22,14 @@ interface SearchCreatorsParams {
 }
 
 export const searchCreators = async (
-  params: SearchCreatorsParams,
-): Promise<SearchAccount[]> => {
+  params: SearchCreatorsParams
+): Promise<SearchResults[]> => {
   const response = await axios.get("/api/search/accounts", {
     headers: {
       "Content-Type": "application/json",
     },
     params,
   });
+
   return response.data.searchResults;
 };

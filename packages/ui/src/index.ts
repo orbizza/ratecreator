@@ -33,6 +33,7 @@ export * from "./components/ui/dialog";
 export * from "./components/ui/toggle";
 export * from "./components/ui/toggle-group";
 export * from "./components/ui/checkbox";
+export * from "./components/ui/pagination";
 
 export * from "./components/themes/theme-provider";
 export * from "./components/themes/toggle-theme";
