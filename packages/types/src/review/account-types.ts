@@ -72,8 +72,8 @@ export interface SearchAccount {
   rating: number;
   reviewCount: number;
   madeForKids: boolean;
-  viewCount?: string;
-  videoCount?: string;
+  viewCount?: number;
+  videoCount?: number;
   bannerURL?: string;
   categories: string[];
   createdDate: string;
