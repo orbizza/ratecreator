@@ -84,11 +84,11 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = ({
   };
 
   return (
-    <div className='flex flex-col space-y-2'>
+    <div className="flex flex-col space-y-2">
       {platformFilters.map(({ id, label, icon: Icon, color }) => (
         <div
           key={id}
-          className='flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group'
+          className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
           onClick={() =>
             handleCheckboxChange(!selectedFilters.includes(id), id)
           }
@@ -96,13 +96,13 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = ({
           <Checkbox
             id={id}
             checked={selectedFilters.includes(id)}
-            className='group-hover:border-primary pointer-events-none'
+            className="group-hover:border-primary pointer-events-none"
           />
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Icon size={16} className={color} />
             <Label
               htmlFor={id}
-              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none'
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
             >
               {label}
             </Label>
