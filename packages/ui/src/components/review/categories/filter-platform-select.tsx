@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
 import { Layout } from "lucide-react";
 import { Checkbox, Label } from "@ratecreator/ui";
+import { platformFiltersState } from "@ratecreator/store/review";
+
 import {
   SiInstagram,
   SiYoutube,
@@ -56,53 +59,66 @@ const platformFilters = [
   },
 ];
 
-interface PlatformCheckboxProps {
-  onPlatformChange: (values: string[]) => void;
-}
+interface PlatformCheckboxProps {}
 
-export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = ({
-  onPlatformChange,
-}) => {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
+export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
+  const [selectedFilters, setSelectedFilters] =
+    useRecoilState(platformFiltersState);
 
-  const handleCheckboxChange = (checked: boolean, id: string) => {
-    setSelectedFilters((prev) => {
-      let newValues;
-      if (id === "all") {
-        newValues = checked ? ["all"] : [];
-      } else {
-        const withoutAll = prev.filter((item) => item !== "all");
-        if (checked) {
-          newValues = [...withoutAll, id];
+  const handleCheckboxChange = useCallback(
+    (checked: boolean, id: string) => {
+      setSelectedFilters((prev) => {
+        if (id === "all") {
+          return checked ? ["all"] : [];
         } else {
-          newValues = withoutAll.filter((item) => item !== id);
+          const withoutAll = prev.filter((item) => item !== "all");
+          if (checked) {
+            return [...withoutAll, id];
+          } else {
+            const newValues = withoutAll.filter((item) => item !== id);
+            return newValues.length === 0 ? ["all"] : newValues;
+          }
         }
-      }
-      onPlatformChange(newValues);
-      return newValues;
-    });
-  };
+      });
+    },
+    [setSelectedFilters]
+  );
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className='flex flex-col space-y-2'>
       {platformFilters.map(({ id, label, icon: Icon, color }) => (
         <div
           key={id}
-          className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
-          onClick={() =>
-            handleCheckboxChange(!selectedFilters.includes(id), id)
-          }
+          className='flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group'
+          onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
             id={id}
-            checked={selectedFilters.includes(id)}
-            className="group-hover:border-primary pointer-events-none"
+            checked={(selectedFilters as string[]).includes(id)}
+            onCheckedChange={(checked) =>
+              handleCheckboxChange(checked as boolean, id)
+            }
+            className='group-hover:border-primary'
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           />
-          <div className="flex items-center gap-2">
+          <div
+            className='flex items-center gap-2'
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleCheckboxChange(
+                !(selectedFilters as string[]).includes(id),
+                id
+              );
+            }}
+          >
             <Icon size={16} className={color} />
             <Label
               htmlFor={id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none'
+              onClick={(e) => e.stopPropagation()}
             >
               {label}
             </Label>

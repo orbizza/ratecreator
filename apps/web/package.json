@@ -18,7 +18,8 @@
     "@ratecreator/db": "*",
     "@ratecreator/actions": "*",
     "@ratecreator/auth": "*",
-    "@ratecreator/types": "*"
+    "@ratecreator/types": "*",
+    "@ratecreator/hooks": "*"
   },
   "devDependencies": {
     "typescript": "^5",

@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { languageFiltersState } from "@ratecreator/store/review";
 import {
   MultiSelect,
   MultiSelectContent,
@@ -32,14 +34,13 @@ const CustomMultiSelectValue = ({
   }
 
   const displayValues = values.slice(0, maxDisplay);
-  const remaining = values.length - maxDisplay;
   const labels = displayValues.map((value) => {
     const language = languageCodes.find((l) => l.id === value);
     return language?.label || value;
   });
 
   const displayText = (
-    <span className="flex gap-1 items-center">
+    <span className='flex gap-1 items-center'>
       {labels.map((label, index) => (
         <span key={label}>
           {index > 0 && ", "}
@@ -54,10 +55,10 @@ const CustomMultiSelectValue = ({
   );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className='flex items-center gap-2'>
       {displayText}
       {values.length > 0 && !values.includes("all") && (
-        <span className="ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm">
+        <span className='ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm'>
           {values.length}
         </span>
       )}
@@ -67,17 +68,17 @@ const CustomMultiSelectValue = ({
 
 async function searchLanguages(keyword?: string) {
   if (!keyword) return languageCodes;
-
   const lowerKeyword = keyword.toLowerCase();
   return languageCodes.filter((language) =>
-    language.label.toLowerCase().includes(lowerKeyword),
+    language.label.toLowerCase().includes(lowerKeyword)
   );
 }
 
 export const LanguageSelect = () => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(languageCodes);
-  const [selectedValues, setSelectedValues] = useState(["all"]);
+  const [selectedValues, setSelectedValues] =
+    useRecoilState(languageFiltersState);
   const indexRef = useRef(0);
 
   const handleSearch = async (keyword?: string) => {
@@ -91,24 +92,20 @@ export const LanguageSelect = () => {
   };
 
   const handleValueChange = (newValues: string[]) => {
-    // Compare old and new values to identify what changed
     const wasAllSelected = selectedValues.includes("all");
     const isAllSelected = newValues.includes("all");
 
-    // Case 1: ALL is being selected
     if (!wasAllSelected && isAllSelected) {
       setSelectedValues(["all"]);
       return;
     }
 
-    // Case 2: ALL is being unselected
     if (wasAllSelected && !isAllSelected) {
       const nonAllValues = newValues.filter((value) => value !== "all");
       setSelectedValues(nonAllValues);
       return;
     }
 
-    // Case 3: Individual languages being selected/unselected
     const nonAllValues = newValues.filter((value) => value !== "all");
     setSelectedValues(nonAllValues.length ? nonAllValues : ["all"]);
   };
@@ -119,15 +116,15 @@ export const LanguageSelect = () => {
       onValueChange={handleValueChange}
       onSearch={handleSearch}
     >
-      <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
+      <MultiSelectTrigger className='shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground'>
         <CustomMultiSelectValue
-          placeholder="Select languages"
+          placeholder='Select languages'
           maxDisplay={3}
           maxItemLength={5}
           values={selectedValues}
         />
       </MultiSelectTrigger>
-      <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
+      <MultiSelectContent className='bg-neutral-50 text-foreground dark:bg-neutral-950'>
         <MultiSelectSearch />
         <MultiSelectList>
           {loading
@@ -136,7 +133,7 @@ export const LanguageSelect = () => {
                 options.map((language) => ({
                   value: language.id,
                   label: language.label,
-                })),
+                }))
               )}
           <MultiSelectEmpty>
             {loading ? "Loading..." : "No languages found"}
