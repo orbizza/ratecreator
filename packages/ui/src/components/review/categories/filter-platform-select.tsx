@@ -81,15 +81,15 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
         }
       });
     },
-    [setSelectedFilters]
+    [setSelectedFilters],
   );
 
   return (
-    <div className='flex flex-col space-y-2'>
+    <div className="flex flex-col space-y-2">
       {platformFilters.map(({ id, label, icon: Icon, color }) => (
         <div
           key={id}
-          className='flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group'
+          className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
           onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
@@ -98,26 +98,26 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
             onCheckedChange={(checked) =>
               handleCheckboxChange(checked as boolean, id)
             }
-            className='group-hover:border-primary'
+            className="group-hover:border-primary"
             onClick={(e) => {
               e.stopPropagation();
             }}
           />
           <div
-            className='flex items-center gap-2'
+            className="flex items-center gap-2"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handleCheckboxChange(
                 !(selectedFilters as string[]).includes(id),
-                id
+                id,
               );
             }}
           >
             <Icon size={16} className={color} />
             <Label
               htmlFor={id}
-              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none'
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {label}

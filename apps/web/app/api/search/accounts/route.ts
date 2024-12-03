@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     console.error("Search error:", error);
     return NextResponse.json(
       { error: "Failed to perform search" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

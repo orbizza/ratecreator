@@ -66,7 +66,11 @@ const ClaimedSelect = () => {
 
   const handleClaimedChange = (value: string) => {
     setClaimed(
-      value === "claimed-true" ? true : value === "claimed-false" ? false : null
+      value === "claimed-true"
+        ? true
+        : value === "claimed-false"
+          ? false
+          : null,
     );
   };
 
@@ -76,11 +80,11 @@ const ClaimedSelect = () => {
       onValueChange={handleClaimedChange}
     >
       <SelectTrigger>
-        <SelectValue placeholder='All Statuses' />
+        <SelectValue placeholder="All Statuses" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value='claimed-true'>Yes</SelectItem>
-        <SelectItem value='claimed-false'>No</SelectItem>
+        <SelectItem value="claimed-true">Yes</SelectItem>
+        <SelectItem value="claimed-false">No</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -91,7 +95,7 @@ const MadeForKidsSelect = () => {
 
   const handleMadeForKidsChange = (value: string) => {
     setMadeForKids(
-      value === "kids-true" ? true : value === "kids-false" ? false : null
+      value === "kids-true" ? true : value === "kids-false" ? false : null,
     );
   };
 
@@ -103,11 +107,11 @@ const MadeForKidsSelect = () => {
       onValueChange={handleMadeForKidsChange}
     >
       <SelectTrigger>
-        <SelectValue placeholder='All contents' />
+        <SelectValue placeholder="All contents" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value='kids-true'>Yes</SelectItem>
-        <SelectItem value='kids-false'>No</SelectItem>
+        <SelectItem value="kids-true">Yes</SelectItem>
+        <SelectItem value="kids-false">No</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -152,69 +156,69 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   }
 
   const FilterContent = () => (
-    <div className='space-y-4'>
-      <Accordion type='single' collapsible className='space-y-2'>
-        <AccordionItem value='platform' className='border-0'>
-          <AccordionTrigger className='hover:no-underline p-1'>
-            <div className='flex flex-row gap-x-2 items-center'>
+    <div className="space-y-4">
+      <Accordion type="single" collapsible className="space-y-2">
+        <AccordionItem value="platform" className="border-0">
+          <AccordionTrigger className="hover:no-underline p-1">
+            <div className="flex flex-row gap-x-2 items-center">
               <AppWindow size={16} />
-              <span className='text-[16px]'>Platforms</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="text-[16px]">Platforms</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
-          <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+          <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground">
             <PlatformCheckbox />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value='followers-count' className='border-0 '>
-          <AccordionTrigger className='hover:no-underline p-1'>
-            <div className='flex flex-row gap-x-2 items-center'>
+        <AccordionItem value="followers-count" className="border-0 ">
+          <AccordionTrigger className="hover:no-underline p-1">
+            <div className="flex flex-row gap-x-2 items-center">
               <Users size={16} />
-              <span className='text-[16px]'>Followers</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="text-[16px]">Followers</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
-          <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+          <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground">
             <FollowersCheckbox />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value='rating' className='border-0'>
-          <AccordionTrigger className='hover:no-underline p-1'>
-            <div className='flex flex-row gap-x-2 items-center'>
+        <AccordionItem value="rating" className="border-0">
+          <AccordionTrigger className="hover:no-underline p-1">
+            <div className="flex flex-row gap-x-2 items-center">
               <Sparkles size={16} />
-              <span className='text-[16px]'>Ratings</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="text-[16px]">Ratings</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
-          <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground'>
+          <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-foreground">
             <RatingCheckbox />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value='review-count' className='border-0'>
-          <AccordionTrigger className='hover:no-underline p-1'>
-            <div className='flex flex-row gap-x-2 items-center'>
+        <AccordionItem value="review-count" className="border-0">
+          <AccordionTrigger className="hover:no-underline p-1">
+            <div className="flex flex-row gap-x-2 items-center">
               <MessagesSquare size={16} />
-              <span className='text-[16px]'>Review Count</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="text-[16px]">Review Count</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
-          <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 '>
+          <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950 ">
             <ReviewCountCheckbox />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value='video-count' className='border-0'>
-          <AccordionTrigger className='hover:no-underline p-1'>
-            <div className='flex flex-row gap-x-2 items-center'>
+        <AccordionItem value="video-count" className="border-0">
+          <AccordionTrigger className="hover:no-underline p-1">
+            <div className="flex flex-row gap-x-2 items-center">
               <Video size={16} />
-              <span className='text-[16px]'>Video Count</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="text-[16px]">Video Count</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
-          <AccordionContent className='mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950'>
+          <AccordionContent className="mt-2 p-2 overflow-hidden shadow-md rounded-md bg-neutral-100 text-foreground dark:bg-neutral-950">
             <VideoCountCheckbox />
           </AccordionContent>
         </AccordionItem>
@@ -231,35 +235,35 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       </div> */}
 
       {/* Made for Kids */}
-      <div className='flex flex-col mb-2 gap-y-1'>
-        <div className='flex flex-row gap-x-2 items-center'>
+      <div className="flex flex-col mb-2 gap-y-1">
+        <div className="flex flex-row gap-x-2 items-center">
           <Baby size={16} />
-          <span className='text-[16px]'>Made for kids</span>
-          <Info size={14} className='text-muted-foreground' />
+          <span className="text-[16px]">Made for kids</span>
+          <Info size={14} className="text-muted-foreground" />
         </div>
 
         <MadeForKidsSelect />
       </div>
-      <div className='flex flex-col gap-y-1'>
-        <div className='flex flex-row gap-x-2 items-center'>
+      <div className="flex flex-col gap-y-1">
+        <div className="flex flex-row gap-x-2 items-center">
           <Globe size={16} />
-          <span className='text-[16px]'>Countries</span>
-          <Info size={14} className='text-muted-foreground' />
+          <span className="text-[16px]">Countries</span>
+          <Info size={14} className="text-muted-foreground" />
         </div>
         <CountrySelect />
       </div>
-      <div className='flex flex-col gap-y-1'>
-        <div className='flex flex-row gap-x-2 items-center'>
+      <div className="flex flex-col gap-y-1">
+        <div className="flex flex-row gap-x-2 items-center">
           <Languages size={16} />
-          <span className='text-[16px]'>Languages</span>
-          <Info size={14} className='text-muted-foreground' />
+          <span className="text-[16px]">Languages</span>
+          <Info size={14} className="text-muted-foreground" />
         </div>
         <LanguageSelect />
       </div>
       <Button
-        variant='default'
-        size='sm'
-        className='w-full mt-4 gap-2'
+        variant="default"
+        size="sm"
+        className="w-full mt-4 gap-2"
         onClick={handleClearFilters}
       >
         <RouteOff size={16} />
@@ -270,26 +274,26 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   return (
     <>
       {/* Mobile Sheet Filter */}
-      <div className='xl:hidden'>
+      <div className="xl:hidden">
         <Sheet>
           <SheetTrigger asChild>
             <Button
-              variant='default'
-              size='sm'
-              className='flex items-center gap-2'
+              variant="default"
+              size="sm"
+              className="flex items-center gap-2"
             >
               <SlidersHorizontal size={16} />
               Filters
             </Button>
           </SheetTrigger>
-          <SheetContent side='left' className='w-[300px]'>
-            <SheetHeader className='flex '>
-              <SheetTitle className='flex text-primary items-center gap-2'>
+          <SheetContent side="left" className="w-[300px]">
+            <SheetHeader className="flex ">
+              <SheetTitle className="flex text-primary items-center gap-2">
                 <SlidersHorizontal size={20} />
                 Filters
               </SheetTitle>
             </SheetHeader>
-            <div className='mt-6'>
+            <div className="mt-6">
               <FilterContent />
             </div>
           </SheetContent>
@@ -297,10 +301,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className='hidden xl:block rounded-lg overflow-hidden shadow-md bg-gray-50 text-foreground dark:bg-stone-900 dark:text-foreground p-4 space-y-4'>
-        <div className='flex flex-row items-center text-primary text-lg gap-x-2'>
+      <div className="hidden xl:block rounded-lg overflow-hidden shadow-md bg-gray-50 text-foreground dark:bg-stone-900 dark:text-foreground p-4 space-y-4">
+        <div className="flex flex-row items-center text-primary text-lg gap-x-2">
           <SlidersHorizontal size={20} />
-          <p className='text-xl'>Filters</p>
+          <p className="text-xl">Filters</p>
         </div>
         <FilterContent />
       </div>
