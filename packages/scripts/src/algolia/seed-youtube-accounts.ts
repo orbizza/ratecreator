@@ -138,9 +138,12 @@ const seedAccounts = async () => {
               reviewCount: account.reviewCount,
               madeForKids:
                 (account.ytData as YTData)?.status?.madeForKids ?? false,
-              viewCount: (account.ytData as YTData)?.statistics?.viewCount ?? 0,
-              videoCount:
+              viewCount: Number(
+                (account.ytData as YTData)?.statistics?.viewCount ?? 0,
+              ),
+              videoCount: Number(
                 (account.ytData as YTData)?.statistics?.videoCount ?? 0,
+              ),
               bannerURL:
                 (account.ytData as YTData)?.brandingSettings?.image
                   ?.bannerExternalUrl ?? "",

@@ -7,6 +7,7 @@ export interface SearchCreator {
   rating: number;
   reviews: number;
   imageUrl: string;
+  setOpen?: () => void;
 }
 
 export interface SearchCategory {

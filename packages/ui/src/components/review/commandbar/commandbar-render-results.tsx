@@ -40,7 +40,11 @@ export const RenderResults: React.FC<RenderResultsProps> = ({
               "isCategory" in item ? (
                 <CategoryCard key={item.name} name={item.name} />
               ) : (
-                <CreatorCard key={item.accountId} {...item} />
+                <CreatorCard
+                  key={item.accountId}
+                  {...item}
+                  setOpen={() => query.toggle()}
+                />
               ),
             )}
           </div>

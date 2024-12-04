@@ -20,6 +20,7 @@ import {
   StickyNote,
   UsersRound,
   Video,
+  View,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -113,6 +114,7 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
     platform,
     createdDate = "",
     bannerURL = "",
+    viewCount = 0,
     objectID,
   } = creator;
   const defaultBg = cn(
@@ -144,14 +146,18 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                   <p className="font-medium text-base">
                     {truncateText(name, 15)}
                   </p>
-                  <p className="text-sm text-muted-foreground">{handle}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {truncateText(handle, 20)}
+                  </p>
                 </div>
               </div>
+
               <div className="flex flex-col items-end gap-2">
                 <div className="flex items-center gap-2">
                   <UsersRound size={16} className="text-primary" />
                   <span className="text-sm">{formatValue(followerCount)}</span>
                 </div>
+
                 <div className="flex items-center gap-2">
                   {platform === "reddit" ? (
                     <>
@@ -184,9 +190,13 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                 <StarRating rating={rating} />{" "}
                 <span className={`font-bold ${colour}`}>{rating}</span>
               </div>
-              <div className="flex items-end gap-2">
+              <div className="flex items-center gap-2">
                 <MessageSquareMore size={16} className="text-primary" />
                 <span className="text-sm">{formatValue(reviewCount)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <View size={16} className="text-primary" />
+                <span className="text-sm">{formatValue(viewCount)}</span>
               </div>
             </div>
           </div>

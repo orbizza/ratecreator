@@ -12,7 +12,11 @@ import {
   SquareStack,
 } from "lucide-react";
 
-import { Category, SearchAccount } from "@ratecreator/types/review";
+import {
+  Category,
+  SearchAccount,
+  SearchAccountsParams,
+} from "@ratecreator/types/review";
 import {
   Separator,
   Accordion,
@@ -38,6 +42,22 @@ import { RelatedCategories } from "./category-search-related-category";
 import { SubCategoriesList } from "./category-search-subcategory";
 import { searchCreators } from "@ratecreator/actions/review";
 import { PaginationBar } from "../cards/pagination-bar";
+import {
+  languageFiltersState,
+  countryFiltersState,
+  followersFiltersState,
+  platformFiltersState,
+  ratingFiltersState,
+  reviewCountFiltersState,
+  videoCountFiltersState,
+  madeForKidsFilterState,
+  claimedFilterState,
+  sortByFilterState,
+  isDescendingFilterState,
+  pageNumberState,
+} from "@ratecreator/store/review";
+import { useDebounce } from "@ratecreator/hooks";
+import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
 
 export const CategoriesSearchResults: React.FC = () => {
   const params = useParams();
@@ -49,71 +69,119 @@ export const CategoriesSearchResults: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDescending, setIsDescending] = useState(true);
   const [count, setCount] = useState<number>(0);
   const [viewCount, setViewCount] = useState<string>("");
   const [hitsPerPage, setHitsPerPage] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
 
   // Filters and Sorting
-  const [platform, setPlatform] = useState<string[]>([]);
-  const [followers, setFollowers] = useState<string[]>([]);
-  const [rating, setRating] = useState<string[]>([]);
-  const [videoCount, setVideoCount] = useState<string[]>([]);
-  const [reviewCount, setReviewCount] = useState<string[]>([]);
-  const [country, setCountry] = useState<string[]>([]);
-  const [language, setLanguage] = useState<string[]>([]);
-  const [claimed, setClaimed] = useState<string | null>(null);
-  const [madeForKids, setMadeForKids] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState("followed");
+  const platform = useRecoilValue(platformFiltersState);
+  const followers = useRecoilValue(followersFiltersState);
+  const rating = useRecoilValue(ratingFiltersState);
+  const videoCount = useRecoilValue(videoCountFiltersState);
+  const reviewCount = useRecoilValue(reviewCountFiltersState);
+  const country = useRecoilValue(countryFiltersState);
+  const language = useRecoilValue(languageFiltersState);
+  const claimed = useRecoilValue(claimedFilterState);
+  const madeForKids = useRecoilValue(madeForKidsFilterState);
 
-  const handleClearFilters = useCallback(() => {
-    setPlatform([]);
-    setFollowers([]);
-    setRating([]);
-    setVideoCount([]);
-    setReviewCount([]);
-    setCountry([]);
-    setLanguage([]);
-    setClaimed(null);
-    setMadeForKids(null);
-  }, []);
+  const debouncedPlatform = useDebounce(platform, 1000);
+  const [sortBy, setSortBy] = useRecoilState(sortByFilterState);
+  const [isDescending, setIsDescending] = useRecoilState(
+    isDescendingFilterState,
+  );
+
+  // Add reset functions for all states
+  const resetPlatform = useResetRecoilState(platformFiltersState);
+  const resetFollowers = useResetRecoilState(followersFiltersState);
+  const resetRating = useResetRecoilState(ratingFiltersState);
+  const resetVideoCount = useResetRecoilState(videoCountFiltersState);
+  const resetReviewCount = useResetRecoilState(reviewCountFiltersState);
+  const resetCountry = useResetRecoilState(countryFiltersState);
+  const resetLanguage = useResetRecoilState(languageFiltersState);
+  const resetClaimed = useResetRecoilState(claimedFilterState);
+  const resetMadeForKids = useResetRecoilState(madeForKidsFilterState);
+  const resetSortBy = useResetRecoilState(sortByFilterState);
+  const resetIsDescending = useResetRecoilState(isDescendingFilterState);
+  const resetPageNumber = useResetRecoilState(pageNumberState);
+
+  // Add useEffect to reset all states on mount
+  useEffect(() => {
+    resetPlatform();
+    resetFollowers();
+    resetRating();
+    resetVideoCount();
+    resetReviewCount();
+    resetCountry();
+    resetLanguage();
+    resetClaimed();
+    resetMadeForKids();
+    resetSortBy();
+    resetIsDescending();
+    resetPageNumber();
+  }, [
+    resetPlatform,
+    resetFollowers,
+    resetRating,
+    resetVideoCount,
+    resetReviewCount,
+    resetCountry,
+    resetLanguage,
+    resetClaimed,
+    resetMadeForKids,
+    resetSortBy,
+    resetIsDescending,
+    resetPageNumber,
+  ]);
 
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
+    setCurrentPage(0);
   };
 
   const fetchCreators = useCallback(async () => {
     try {
       setCreatorLoading(true);
-      const results = await searchCreators({
+      const searchParams: SearchAccountsParams = {
+        query: "",
+        page: currentPage,
+        limit: 20,
         filters: {
-          platform: platform.length > 0 ? platform : undefined,
+          platform: debouncedPlatform.includes("all")
+            ? undefined
+            : debouncedPlatform,
+          followers: followers.includes("all") ? undefined : followers,
+          rating: rating.includes("all") ? undefined : rating,
+          videoCount: videoCount.includes("all") ? undefined : videoCount,
+          reviewCount: reviewCount.includes("all") ? undefined : reviewCount,
+          country: country.includes("ALL") ? undefined : country,
+          language: language.includes("all") ? undefined : language,
+          claimed: claimed === null ? undefined : claimed === true,
+          madeForKids: madeForKids === null ? undefined : madeForKids === true,
           categories: [slug],
         },
         sortBy,
         sortOrder: isDescending ? "desc" : "asc",
-        page: currentPage,
-        limit: 20,
-      });
-      console.log("results: ", results);
+      };
+
+      const results = await searchCreators(searchParams);
+
       if ("hits" in results && Array.isArray(results.hits)) {
         setCreators(results.hits as SearchAccount[]);
         if ("nbHits" in results && "hitsPerPage" in results) {
           setCount(results.nbHits as number);
-          // setHitsPerPage(results.hitsPerPage as number);
-          const totalResults = results.nbHits as number;
-          const remainingResults = totalResults - currentPage * 20;
-          const currentPageHits = Math.min(20, remainingResults);
           setHitsPerPage(results.hitsPerPage as number);
-          setViewCount(
-            currentPage === 0
-              ? "1 - " + (results.hitsPerPage as number) + " "
-              : currentPage * 20 +
-                  1 +
-                  " - " +
-                  (currentPage * 20 + (results.hitsPerPage as number)),
-          );
+          const hitsPerPage = 20;
+          const isLastPage =
+            currentPage ===
+            Math.floor((results.nbHits as number) / hitsPerPage);
+          const start = currentPage * hitsPerPage + 1;
+          const end = isLastPage
+            ? (results.nbHits as number)
+            : start + hitsPerPage - 1;
+
+          const displayRange = `${start} - ${end} `;
+          setViewCount(displayRange);
         }
       } else {
         throw new Error("Invalid search results format");
@@ -126,7 +194,7 @@ export const CategoriesSearchResults: React.FC = () => {
   }, [
     sortBy,
     isDescending,
-    platform,
+    debouncedPlatform,
     followers,
     rating,
     videoCount,
@@ -236,18 +304,7 @@ export const CategoriesSearchResults: React.FC = () => {
       </div>
       <div className="flex flex-row">
         <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
-          <FilterSidebar
-            onPlatformChange={setPlatform}
-            onFollowersChange={setFollowers}
-            onRatingChange={setRating}
-            onVideoCountChange={setVideoCount}
-            onReviewCountChange={setReviewCount}
-            onCountryChange={setCountry}
-            onLanguageChange={setLanguage}
-            onClaimedChange={setClaimed}
-            onMadeForKidsChange={setMadeForKids}
-            onClearFilters={handleClearFilters}
-          />
+          <FilterSidebar />
           {!loading && (
             <>
               <SubCategoriesList
@@ -260,6 +317,7 @@ export const CategoriesSearchResults: React.FC = () => {
           )}
           {loading && (
             <div className="flex flex-col ">
+              <FilterSkeleton />
               <CategoryLoadingCard text="Sub Categories" type="sub" />
               <CategoryLoadingCard text="Related Categories" type="related" />
             </div>
@@ -272,20 +330,6 @@ export const CategoriesSearchResults: React.FC = () => {
         <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
           <div className="flex xl:hidden flex-col-reverse gap-y-2 md:flex-row md:items-center justify-between">
             <div className="flex flex-row w-2/5 items-center text-primary justify-between ">
-              {!loading && (
-                <FilterSidebar
-                  onPlatformChange={setPlatform}
-                  onFollowersChange={setFollowers}
-                  onRatingChange={setRating}
-                  onVideoCountChange={setVideoCount}
-                  onReviewCountChange={setReviewCount}
-                  onCountryChange={setCountry}
-                  onLanguageChange={setLanguage}
-                  onClaimedChange={setClaimed}
-                  onMadeForKidsChange={setMadeForKids}
-                  onClearFilters={handleClearFilters}
-                />
-              )}
               {loading && (
                 <Button
                   variant="default"
@@ -297,9 +341,7 @@ export const CategoriesSearchResults: React.FC = () => {
                   Filters
                 </Button>
               )}
-              {/* ToDo: Add a reset function and display the button as enabled
-              once a filter is selected
-                */}
+              {!loading && <FilterSidebar />}
             </div>
 
             <div className="flex flex-row md:w-3/5 items-center justify-between ">
@@ -368,18 +410,25 @@ export const CategoriesSearchResults: React.FC = () => {
                   <ArrowUpZA size={16} />
                 )}
               </Toggle>
-              <Select defaultValue="followed">
+              <Select
+                defaultValue="followed"
+                onValueChange={(value) => {
+                  setSortBy(value);
+                  setCurrentPage(0);
+                }}
+                value={sortBy}
+              >
                 <SelectTrigger className="w-[118px] items-center">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup className="justify-start">
                     <SelectItem value="followed">Followed</SelectItem>
-                    <SelectItem value="new">New Account</SelectItem>
+                    <SelectItem value="new-account">New Account</SelectItem>
                     <SelectItem value="rated">Rated</SelectItem>
-                    <SelectItem value="reviewed">Reviewed</SelectItem>
-                    <SelectItem value="views">Views</SelectItem>
+                    <SelectItem value="review-count">Review Count</SelectItem>
                     <SelectItem value="videos">Videos</SelectItem>
+                    <SelectItem value="views">Views</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -409,6 +458,25 @@ interface CategoryLoadingCardProps {
   text: string;
   type: "sub" | "related";
 }
+
+const FilterSkeleton: React.FC = () => {
+  return (
+    <div className="p-4 space-y-4 bg-neutral-900 rounded-md">
+      <div className="flex flex-row items-center text-primary text-lg gap-x-2">
+        <SlidersHorizontal size={20} />
+        <p className="text-xl">Filters</p>
+      </div>
+
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="space-y-2">
+          <div className="h-4 bg-neutral-800 rounded w-1/3"></div>
+          <div className="h-8 bg-neutral-800 rounded w-full"></div>
+        </div>
+      ))}
+      <div className="h-10 bg-red-800 rounded w-full mt-4"></div>
+    </div>
+  );
+};
 
 const CategoryLoadingCard: React.FC<CategoryLoadingCardProps> = ({
   text,

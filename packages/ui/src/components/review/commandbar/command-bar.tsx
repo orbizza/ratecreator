@@ -194,6 +194,7 @@ const SearchComponent = ({
   const { refine } = useSearchBox();
   const { hits } = useHits();
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
+  const { query } = useKBar();
 
   useEffect(() => {
     refine(searchTerm);
@@ -232,7 +233,11 @@ const SearchComponent = ({
           {filteredResults.map((result) => (
             <div key={result.accountId}>
               {/* Replace with your CreatorCard component */}
-              <CreatorCard key={result.accountId} {...result} />
+              <CreatorCard
+                key={result.accountId}
+                {...result}
+                setOpen={() => query.toggle()}
+              />
             </div>
           ))}
         </div>

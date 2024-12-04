@@ -37,11 +37,21 @@ export const getSearchAccounts = async (
   const BASE_INDEX_NAME = "accounts";
   let indexName = BASE_INDEX_NAME;
   if (params.sortBy) {
-    indexName = `${BASE_INDEX_NAME}_${params.sortBy}_${params.sortOrder}`;
+    if (params.sortBy === "followed" && params.sortOrder === "desc") {
+      indexName = `${BASE_INDEX_NAME}`;
+    } else {
+      indexName = `${BASE_INDEX_NAME}_${params.sortBy}_${params.sortOrder}`;
+    }
   }
 
-  const filters: string[] = [];
+  let filters: string[] = [];
   if (params.filters) {
+    if (params.filters.categories && params.filters.categories.length > 0) {
+      const categoryFilters = params.filters.categories.map(
+        (c: string) => `categories:"${c}"`,
+      );
+      filters.push(`(${categoryFilters.join(" OR ")})`);
+    }
     // Handle platform filter (multiple platforms using OR)
     if (params.filters.platform && params.filters.platform.length > 0) {
       const platformFilters = params.filters.platform.map(
@@ -52,26 +62,42 @@ export const getSearchAccounts = async (
     // filters: 'platform:YOUTUBE'
     // Handle followers range
     if (params.filters.followers) {
-      const { min, max } = params.filters.followers;
-      filters.push(`followerCount:${min} TO ${max}`);
+      if (typeof params.filters.followers === "string") {
+        filters.push(params.filters.followers);
+      } else {
+        const { min, max } = params.filters.followers;
+        filters.push(`followerCount >= ${min} AND followerCount < ${max}`);
+      }
     }
 
     // Handle rating range
     if (params.filters.rating) {
-      const { min, max } = params.filters.rating;
-      filters.push(`rating:${min} TO ${max}`);
+      if (typeof params.filters.rating === "string") {
+        filters.push(params.filters.rating);
+      } else {
+        const { min, max } = params.filters.rating;
+        filters.push(`rating >= ${min} AND rating < ${max}`);
+      }
     }
 
     // Handle video count range
     if (params.filters.videoCount) {
-      const { min, max } = params.filters.videoCount;
-      filters.push(`videoCount:${min} TO ${max}`);
+      if (typeof params.filters.videoCount === "string") {
+        filters.push(params.filters.videoCount);
+      } else {
+        const { min, max } = params.filters.videoCount;
+        filters.push(`rating >= ${min} AND rating < ${max}`);
+      }
     }
 
     // Handle review count range
     if (params.filters.reviewCount) {
-      const { min, max } = params.filters.reviewCount;
-      filters.push(`reviewCount:${min} TO ${max}`);
+      if (typeof params.filters.reviewCount === "string") {
+        filters.push(params.filters.reviewCount);
+      } else {
+        const { min, max } = params.filters.reviewCount;
+        filters.push(`rating >= ${min} AND rating < ${max}`);
+      }
     }
     // Handle multiple countries (OR)
     if (params.filters.country && params.filters.country.length > 0) {
@@ -98,14 +124,16 @@ export const getSearchAccounts = async (
       filters.push(`madeForKids:${params.filters.madeForKids}`);
     }
 
-    // Handle categories (AND between categories)
-    if (params.filters.categories && params.filters.categories.length > 0) {
-      const categoryFilters = params.filters.categories.map(
-        (c: string) => `categories:${c}`,
-      );
-      filters.push(`(${categoryFilters.join(" OR ")})`);
-    }
+    // // Handle categories (AND between categories)
+    // if (params.filters.categories && params.filters.categories.length > 0) {
+    //   const categoryFilters = params.filters.categories.map(
+    //     (c: string) => `categories:"${c}"`
+    //   );
+    //   filters.push(`(${categoryFilters.join(" OR ")})`);
+    // }
   }
+
+  // console.log("Final filters:", filters.join(" AND "));
 
   try {
     const searchResults = await client.search<SearchAccount>([
