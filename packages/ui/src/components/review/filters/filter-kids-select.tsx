@@ -18,7 +18,7 @@ const MadeForKids = () => {
 
   const handleMadeForKidsChange = (value: string) => {
     setMadeForKids(
-      value === "kids-true" ? true : value === "kids-false" ? false : null
+      value === "kids-true" ? true : value === "kids-false" ? false : null,
     );
   };
 
@@ -29,12 +29,12 @@ const MadeForKids = () => {
       }
       onValueChange={handleMadeForKidsChange}
     >
-      <SelectTrigger className='shadow-md bg-neutral-50  dark:bg-neutral-950 '>
-        <SelectValue placeholder='All contents' />
+      <SelectTrigger className="shadow-md bg-neutral-50  dark:bg-neutral-950 ">
+        <SelectValue placeholder="All contents" />
       </SelectTrigger>
-      <SelectContent className='bg-neutral-50  dark:bg-neutral-950'>
-        <SelectItem value='kids-true'>Yes</SelectItem>
-        <SelectItem value='kids-false'>No</SelectItem>
+      <SelectContent className="bg-neutral-50  dark:bg-neutral-950">
+        <SelectItem value="kids-true">Yes</SelectItem>
+        <SelectItem value="kids-false">No</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -42,11 +42,11 @@ const MadeForKids = () => {
 
 export const MadeForKidsSelect = () => {
   return (
-    <div className='flex flex-col mb-2 gap-y-2'>
-      <div className='flex flex-row gap-x-2 items-center'>
+    <div className="flex flex-col mb-2 gap-y-2">
+      <div className="flex flex-row gap-x-2 items-center">
         <Baby size={16} />
-        <span className='text-[16px]'>Made for kids</span>
-        <Info size={14} className='text-muted-foreground' />
+        <span className="text-[16px]">Made for kids</span>
+        <Info size={14} className="text-muted-foreground" />
       </div>
       <MadeForKids />
     </div>
