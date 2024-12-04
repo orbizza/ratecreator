@@ -185,6 +185,7 @@ interface MultiSelectTriggerProps
   extends React.ComponentPropsWithoutRef<typeof Primitive.div> {}
 
 function PreventClick(e: React.MouseEvent | React.TouchEvent) {
+  if (e.type === "touchstart") return; // Allow touch events to pass through
   e.preventDefault();
   e.stopPropagation();
 }
@@ -207,7 +208,7 @@ const MultiSelectTrigger = React.forwardRef<
           className,
         )}
         onClick={disabled ? PreventClick : props.onClick}
-        onTouchStart={disabled ? PreventClick : props.onTouchStart}
+        onTouchStart={props.onTouchStart} // Remove prevention for touch events
       >
         {children}
         <ChevronsUpDown aria-hidden className="size-4 shrink-0 opacity-50" />

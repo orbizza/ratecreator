@@ -62,10 +62,13 @@ export const SubCategoriesList: React.FC<SubCategoriesProps> = ({
               className="flex items-center gap-2"
             >
               <SquareStack size={16} />
-              Sub Categories
+              <span className="hidden md:inline-block">Sub Categories</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px]">
+          <SheetContent
+            side="left"
+            className="w-[300px] overflow-y-auto max-h-screen"
+          >
             <SheetHeader>
               <SheetTitle className="flex text-primary items-center gap-2">
                 <SquareStack size={20} />

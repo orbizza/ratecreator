@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   ArrowDownZA,
   ArrowRightLeft,
@@ -19,10 +19,6 @@ import {
 } from "@ratecreator/types/review";
 import {
   Separator,
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
   Skeleton,
   Select,
   SelectContent,
@@ -58,10 +54,14 @@ import {
 } from "@ratecreator/store/review";
 import { useDebounce } from "@ratecreator/hooks";
 import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
+import {
+  CategoryLoadingCard,
+  CreatorLoadingCard,
+  FilterSkeleton,
+} from "../skeletons/skeleton-category-search-results";
 
 export const CategoriesSearchResults: React.FC = () => {
   const params = useParams();
-  const router = useRouter();
   const slug = params?.slug as string;
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -328,8 +328,25 @@ export const CategoriesSearchResults: React.FC = () => {
           )}
         </div>
         <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
-          <div className="flex xl:hidden flex-col-reverse gap-y-2 md:flex-row md:items-center justify-between">
-            <div className="flex flex-row w-2/5 items-center text-primary justify-between ">
+          <div className="flex xl:hidden gap-y-2 flex-row items-center justify-between">
+            {loading && (
+              <Button
+                variant="default"
+                size="sm"
+                disabled
+                className="flex items-center gap-2"
+              >
+                <SlidersHorizontal size={16} />
+                <span className="hidden md:inline-block">Filters</span>
+              </Button>
+            )}
+            {!loading && <FilterSidebar />}
+            <div className="flex flex-row items-center">
+              {!loading && (
+                <SubCategoriesList
+                  categories={currentCategory?.subcategories || []}
+                />
+              )}
               {loading && (
                 <Button
                   variant="default"
@@ -337,50 +354,30 @@ export const CategoriesSearchResults: React.FC = () => {
                   disabled
                   className="flex items-center gap-2"
                 >
-                  <SlidersHorizontal size={16} />
-                  Filters
+                  <SquareStack size={16} />
+                  <span className="hidden md:inline-block">Sub Categories</span>
                 </Button>
               )}
-              {!loading && <FilterSidebar />}
             </div>
-
-            <div className="flex flex-row md:w-3/5 items-center justify-between ">
-              <div className="flex flex-row items-center">
-                {!loading && (
-                  <SubCategoriesList
-                    categories={currentCategory?.subcategories || []}
-                  />
-                )}
-                {loading && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    disabled
-                    className="flex items-center gap-2"
-                  >
-                    <SquareStack size={16} />
-                    Sub Categories
-                  </Button>
-                )}
-              </div>
-              <div className="flex flex-row justify-between items-center ">
-                {!loading && (
-                  <RelatedCategories
-                    categories={parentCategory?.subcategories || []}
-                  />
-                )}
-                {loading && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    disabled
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowRightLeft size={16} />
+            <div className="flex flex-row justify-between items-center ">
+              {!loading && (
+                <RelatedCategories
+                  categories={parentCategory?.subcategories || []}
+                />
+              )}
+              {loading && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  disabled
+                  className="flex items-center gap-2"
+                >
+                  <ArrowRightLeft size={16} />
+                  <span className="hidden md:inline-block">
                     Related Categories
-                  </Button>
-                )}
-              </div>
+                  </span>
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex flex-row items-center justify-between">
@@ -401,7 +398,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 pressed={!isDescending}
                 onPressedChange={handleToggle}
               >
-                <span className="hidden lg:inline-block text-[12px] mr-1">
+                <span className="hidden sm:inline-block text-[12px] mr-1">
                   {isDescending ? "Most" : "Least"}
                 </span>
                 {isDescending ? (
@@ -450,92 +447,6 @@ export const CategoriesSearchResults: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
-  );
-};
-
-interface CategoryLoadingCardProps {
-  text: string;
-  type: "sub" | "related";
-}
-
-const FilterSkeleton: React.FC = () => {
-  return (
-    <div className="p-4 space-y-4 bg-neutral-900 rounded-md">
-      <div className="flex flex-row items-center text-primary text-lg gap-x-2">
-        <SlidersHorizontal size={20} />
-        <p className="text-xl">Filters</p>
-      </div>
-
-      {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="space-y-2">
-          <div className="h-4 bg-neutral-800 rounded w-1/3"></div>
-          <div className="h-8 bg-neutral-800 rounded w-full"></div>
-        </div>
-      ))}
-      <div className="h-10 bg-red-800 rounded w-full mt-4"></div>
-    </div>
-  );
-};
-
-const CategoryLoadingCard: React.FC<CategoryLoadingCardProps> = ({
-  text,
-  type,
-}) => {
-  const Icon = type === "sub" ? SquareStack : ArrowRightLeft;
-
-  return (
-    <Accordion
-      type="single"
-      collapsible
-      className="w-full"
-      defaultValue="item-1"
-    >
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="hover:no-underline">
-          <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
-            <Icon size={20} />
-            <p>{text}</p>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-};
-
-const CreatorLoadingCard: React.FC = () => {
-  const skeletonCount = 10;
-
-  return (
-    <div className="w-full grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-center">
-      {[...Array(skeletonCount)].map((_, index) => (
-        <div
-          key={index}
-          className="flex flex-col space-y-2 max-w-80 h-96 dark:border-neutral-700 border-2 rounded-lg p-2 "
-        >
-          <div className="flex items-center space-x-2  h-1/4 w-full">
-            <Skeleton className="size-12 rounded-full" />
-            <div className="space-y-2 ">
-              <Skeleton className="h-4 w-[240px] md:w-[220px]" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
-          <Skeleton className="h-2/4 w-full" />
-          <div className="space-y-2 h-1/4">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        </div>
-      ))}
     </div>
   );
 };

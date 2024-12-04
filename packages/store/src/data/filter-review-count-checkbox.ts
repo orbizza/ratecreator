@@ -1,7 +1,7 @@
 export const reviewCountCheckbox = [
   {
     id: "all",
-    label: "All",
+    label: "All Reviews",
   },
   // enable once the review count has gone up and disable the 1000+ options
   //   {

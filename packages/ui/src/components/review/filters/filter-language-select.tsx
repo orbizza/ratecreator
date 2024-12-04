@@ -2,9 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-
-import { countryFiltersState } from "@ratecreator/store/review";
-
+import { languageFiltersState } from "@ratecreator/store/review";
 import {
   MultiSelect,
   MultiSelectContent,
@@ -12,12 +10,11 @@ import {
   MultiSelectList,
   MultiSelectSearch,
   MultiSelectTrigger,
-  MultiSelectValue,
   renderMultiSelectOptions,
 } from "@ratecreator/ui";
 
-import { countryCodes } from "@ratecreator/store";
-import { Globe, Info } from "lucide-react";
+import { languageCodes } from "@ratecreator/store";
+import { Info, Languages } from "lucide-react";
 
 interface CustomMultiSelectValueProps {
   placeholder: string;
@@ -37,10 +34,9 @@ const CustomMultiSelectValue = ({
   }
 
   const displayValues = values.slice(0, maxDisplay);
-  const remaining = values.length - maxDisplay;
   const labels = displayValues.map((value) => {
-    const country = countryCodes.find((c) => c.id === value);
-    return country?.label || value;
+    const language = languageCodes.find((l) => l.id === value);
+    return language?.label || value;
   });
 
   const displayText = (
@@ -49,7 +45,7 @@ const CustomMultiSelectValue = ({
         <span key={label}>
           {index > 0 && ", "}
           {label.length > maxItemLength
-            ? label === "All Countries"
+            ? label === "All Languages"
               ? label
               : `${label.slice(0, maxItemLength)}...`
             : label}
@@ -61,7 +57,7 @@ const CustomMultiSelectValue = ({
   return (
     <div className="flex items-center gap-2">
       {displayText}
-      {values.length > 0 && !values.includes("ALL") && (
+      {values.length > 0 && !values.includes("all") && (
         <span className="ml-auto bg-neutral-200 dark:bg-neutral-800 px-2 py-0.5 rounded-full text-sm">
           {values.length}
         </span>
@@ -70,25 +66,25 @@ const CustomMultiSelectValue = ({
   );
 };
 
-async function searchCountries(keyword?: string) {
-  if (!keyword) return countryCodes;
-
+async function searchLanguages(keyword?: string) {
+  if (!keyword) return languageCodes;
   const lowerKeyword = keyword.toLowerCase();
-  return countryCodes.filter((country) =>
-    country.label.toLowerCase().includes(lowerKeyword),
+  return languageCodes.filter((language) =>
+    language.label.toLowerCase().includes(lowerKeyword),
   );
 }
-export const CountrySelect = () => {
+
+export const LanguageSelect = () => {
   const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState(countryCodes);
+  const [options, setOptions] = useState(languageCodes);
   const [selectedValues, setSelectedValues] =
-    useRecoilState(countryFiltersState);
+    useRecoilState(languageFiltersState);
   const indexRef = useRef(0);
 
   const handleSearch = async (keyword?: string) => {
     const index = ++indexRef.current;
     setLoading(true);
-    const newOptions = await searchCountries(keyword);
+    const newOptions = await searchLanguages(keyword);
     if (indexRef.current === index) {
       setOptions(newOptions);
       setLoading(false);
@@ -96,29 +92,29 @@ export const CountrySelect = () => {
   };
 
   const handleValueChange = (newValues: string[]) => {
-    const wasAllSelected = selectedValues.includes("ALL");
-    const isAllSelected = newValues.includes("ALL");
+    const wasAllSelected = selectedValues.includes("all");
+    const isAllSelected = newValues.includes("all");
 
     if (!wasAllSelected && isAllSelected) {
-      setSelectedValues(["ALL"]);
+      setSelectedValues(["all"]);
       return;
     }
 
     if (wasAllSelected && !isAllSelected) {
-      const nonAllValues = newValues.filter((value) => value !== "ALL");
+      const nonAllValues = newValues.filter((value) => value !== "all");
       setSelectedValues(nonAllValues);
       return;
     }
 
-    const nonAllValues = newValues.filter((value) => value !== "ALL");
-    setSelectedValues(nonAllValues.length ? nonAllValues : ["ALL"]);
+    const nonAllValues = newValues.filter((value) => value !== "all");
+    setSelectedValues(nonAllValues.length ? nonAllValues : ["all"]);
   };
 
   return (
-    <div className="flex flex-col gap-y-1">
+    <div className="flex flex-col gap-y-2">
       <div className="flex flex-row gap-x-2 items-center">
-        <Globe size={16} />
-        <span className="text-[16px]">Countries</span>
+        <Languages size={16} />
+        <span className="text-[16px]">Languages</span>
         <Info size={14} className="text-muted-foreground" />
       </div>
       <MultiSelect
@@ -128,7 +124,7 @@ export const CountrySelect = () => {
       >
         <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
           <CustomMultiSelectValue
-            placeholder="Select countries"
+            placeholder="Select languages"
             maxDisplay={3}
             maxItemLength={5}
             values={selectedValues}
@@ -140,13 +136,13 @@ export const CountrySelect = () => {
             {loading
               ? null
               : renderMultiSelectOptions(
-                  options.map((country) => ({
-                    value: country.id,
-                    label: country.label,
+                  options.map((language) => ({
+                    value: language.id,
+                    label: language.label,
                   })),
                 )}
             <MultiSelectEmpty>
-              {loading ? "Loading..." : "No countries found"}
+              {loading ? "Loading..." : "No languages found"}
             </MultiSelectEmpty>
           </MultiSelectList>
         </MultiSelectContent>
