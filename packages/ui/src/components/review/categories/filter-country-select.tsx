@@ -1,6 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+
+import { countryFiltersState } from "@ratecreator/store/review";
+
 import {
   MultiSelect,
   MultiSelectContent,
@@ -13,6 +17,7 @@ import {
 } from "@ratecreator/ui";
 
 import { countryCodes } from "@ratecreator/store";
+import { Globe, Info } from "lucide-react";
 
 interface CustomMultiSelectValueProps {
   placeholder: string;
@@ -73,11 +78,11 @@ async function searchCountries(keyword?: string) {
     country.label.toLowerCase().includes(lowerKeyword),
   );
 }
-
 export const CountrySelect = () => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(countryCodes);
-  const [selectedValues, setSelectedValues] = useState(["ALL"]);
+  const [selectedValues, setSelectedValues] =
+    useRecoilState(countryFiltersState);
   const indexRef = useRef(0);
 
   const handleSearch = async (keyword?: string) => {
@@ -91,58 +96,61 @@ export const CountrySelect = () => {
   };
 
   const handleValueChange = (newValues: string[]) => {
-    // Compare old and new values to identify what changed
     const wasAllSelected = selectedValues.includes("ALL");
     const isAllSelected = newValues.includes("ALL");
 
-    // Case 1: ALL is being selected
     if (!wasAllSelected && isAllSelected) {
       setSelectedValues(["ALL"]);
       return;
     }
 
-    // Case 2: ALL is being unselected
     if (wasAllSelected && !isAllSelected) {
       const nonAllValues = newValues.filter((value) => value !== "ALL");
       setSelectedValues(nonAllValues);
       return;
     }
 
-    // Case 3: Individual countries being selected/unselected
     const nonAllValues = newValues.filter((value) => value !== "ALL");
     setSelectedValues(nonAllValues.length ? nonAllValues : ["ALL"]);
   };
 
   return (
-    <MultiSelect
-      value={selectedValues}
-      onValueChange={handleValueChange}
-      onSearch={handleSearch}
-    >
-      <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
-        <CustomMultiSelectValue
-          placeholder="Select countries"
-          maxDisplay={3}
-          maxItemLength={5}
-          values={selectedValues}
-        />
-      </MultiSelectTrigger>
-      <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
-        <MultiSelectSearch />
-        <MultiSelectList>
-          {loading
-            ? null
-            : renderMultiSelectOptions(
-                options.map((country) => ({
-                  value: country.id,
-                  label: country.label,
-                })),
-              )}
-          <MultiSelectEmpty>
-            {loading ? "Loading..." : "No countries found"}
-          </MultiSelectEmpty>
-        </MultiSelectList>
-      </MultiSelectContent>
-    </MultiSelect>
+    <div className="flex flex-col gap-y-1">
+      <div className="flex flex-row gap-x-2 items-center">
+        <Globe size={16} />
+        <span className="text-[16px]">Countries</span>
+        <Info size={14} className="text-muted-foreground" />
+      </div>
+      <MultiSelect
+        value={selectedValues}
+        onValueChange={handleValueChange}
+        onSearch={handleSearch}
+      >
+        <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
+          <CustomMultiSelectValue
+            placeholder="Select countries"
+            maxDisplay={3}
+            maxItemLength={5}
+            values={selectedValues}
+          />
+        </MultiSelectTrigger>
+        <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
+          <MultiSelectSearch />
+          <MultiSelectList>
+            {loading
+              ? null
+              : renderMultiSelectOptions(
+                  options.map((country) => ({
+                    value: country.id,
+                    label: country.label,
+                  })),
+                )}
+            <MultiSelectEmpty>
+              {loading ? "Loading..." : "No countries found"}
+            </MultiSelectEmpty>
+          </MultiSelectList>
+        </MultiSelectContent>
+      </MultiSelect>
+    </div>
   );
 };

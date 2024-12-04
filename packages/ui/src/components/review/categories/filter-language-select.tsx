@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { languageFiltersState } from "@ratecreator/store/review";
 import {
   MultiSelect,
   MultiSelectContent,
@@ -13,6 +15,7 @@ import {
 } from "@ratecreator/ui";
 
 import { languageCodes } from "@ratecreator/store";
+import { Info, Languages } from "lucide-react";
 
 interface CustomMultiSelectValueProps {
   placeholder: string;
@@ -32,7 +35,6 @@ const CustomMultiSelectValue = ({
   }
 
   const displayValues = values.slice(0, maxDisplay);
-  const remaining = values.length - maxDisplay;
   const labels = displayValues.map((value) => {
     const language = languageCodes.find((l) => l.id === value);
     return language?.label || value;
@@ -67,7 +69,6 @@ const CustomMultiSelectValue = ({
 
 async function searchLanguages(keyword?: string) {
   if (!keyword) return languageCodes;
-
   const lowerKeyword = keyword.toLowerCase();
   return languageCodes.filter((language) =>
     language.label.toLowerCase().includes(lowerKeyword),
@@ -77,7 +78,8 @@ async function searchLanguages(keyword?: string) {
 export const LanguageSelect = () => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(languageCodes);
-  const [selectedValues, setSelectedValues] = useState(["all"]);
+  const [selectedValues, setSelectedValues] =
+    useRecoilState(languageFiltersState);
   const indexRef = useRef(0);
 
   const handleSearch = async (keyword?: string) => {
@@ -91,58 +93,61 @@ export const LanguageSelect = () => {
   };
 
   const handleValueChange = (newValues: string[]) => {
-    // Compare old and new values to identify what changed
     const wasAllSelected = selectedValues.includes("all");
     const isAllSelected = newValues.includes("all");
 
-    // Case 1: ALL is being selected
     if (!wasAllSelected && isAllSelected) {
       setSelectedValues(["all"]);
       return;
     }
 
-    // Case 2: ALL is being unselected
     if (wasAllSelected && !isAllSelected) {
       const nonAllValues = newValues.filter((value) => value !== "all");
       setSelectedValues(nonAllValues);
       return;
     }
 
-    // Case 3: Individual languages being selected/unselected
     const nonAllValues = newValues.filter((value) => value !== "all");
     setSelectedValues(nonAllValues.length ? nonAllValues : ["all"]);
   };
 
   return (
-    <MultiSelect
-      value={selectedValues}
-      onValueChange={handleValueChange}
-      onSearch={handleSearch}
-    >
-      <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
-        <CustomMultiSelectValue
-          placeholder="Select languages"
-          maxDisplay={3}
-          maxItemLength={5}
-          values={selectedValues}
-        />
-      </MultiSelectTrigger>
-      <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
-        <MultiSelectSearch />
-        <MultiSelectList>
-          {loading
-            ? null
-            : renderMultiSelectOptions(
-                options.map((language) => ({
-                  value: language.id,
-                  label: language.label,
-                })),
-              )}
-          <MultiSelectEmpty>
-            {loading ? "Loading..." : "No languages found"}
-          </MultiSelectEmpty>
-        </MultiSelectList>
-      </MultiSelectContent>
-    </MultiSelect>
+    <div className="flex flex-col gap-y-1">
+      <div className="flex flex-row gap-x-2 items-center">
+        <Languages size={16} />
+        <span className="text-[16px]">Languages</span>
+        <Info size={14} className="text-muted-foreground" />
+      </div>
+      <MultiSelect
+        value={selectedValues}
+        onValueChange={handleValueChange}
+        onSearch={handleSearch}
+      >
+        <MultiSelectTrigger className="shadow-md bg-neutral-50 text-foreground dark:bg-neutral-950 dark:text-foreground">
+          <CustomMultiSelectValue
+            placeholder="Select languages"
+            maxDisplay={3}
+            maxItemLength={5}
+            values={selectedValues}
+          />
+        </MultiSelectTrigger>
+        <MultiSelectContent className="bg-neutral-50 text-foreground dark:bg-neutral-950">
+          <MultiSelectSearch />
+          <MultiSelectList>
+            {loading
+              ? null
+              : renderMultiSelectOptions(
+                  options.map((language) => ({
+                    value: language.id,
+                    label: language.label,
+                  })),
+                )}
+            <MultiSelectEmpty>
+              {loading ? "Loading..." : "No languages found"}
+            </MultiSelectEmpty>
+          </MultiSelectList>
+        </MultiSelectContent>
+      </MultiSelect>
+    </div>
   );
 };

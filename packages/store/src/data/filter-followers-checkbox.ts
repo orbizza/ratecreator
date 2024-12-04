@@ -1,7 +1,7 @@
 export const followersCheckbox = [
   {
     id: "all",
-    label: "All",
+    label: "All Followers",
   },
   {
     id: "100M+",

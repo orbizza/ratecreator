@@ -25,8 +25,6 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   currentPage,
   totalPages,
   onPageChange,
-  totalItems,
-  itemsPerPage,
 }) => {
   const { isSignedIn } = useAuth();
   const router = useRouter();

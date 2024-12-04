@@ -63,7 +63,7 @@ export function CardLandingVertical({
             {truncateText(name, 15)}
           </figcaption>
           <p className="mt-1 text-xs font-medium dark:text-white/40">
-            {handle}
+            {truncateText(handle, 20)}
           </p>
         </div>
         <div className="ml-auto">{getPlatformIcon(platform)}</div>

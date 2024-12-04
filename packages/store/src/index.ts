@@ -10,3 +10,4 @@ export * from "./data/filter-video-count-checkbox.ts";
 export * from "./data/filter-review-count-checkbox.ts";
 
 export * from "./atoms/toastState.ts";
+export * from "./atoms/review/index.ts";

@@ -15,7 +15,11 @@ import {
 import { SearchCreator } from "@ratecreator/types/review";
 import { formatValue } from "@ratecreator/db/utils";
 
-export const CreatorCard: React.FC<SearchCreator> = ({
+export const CreatorCard: React.FC<
+  SearchCreator & {
+    setOpen: () => void;
+  }
+> = ({
   name,
   platform,
   accountId,
@@ -24,11 +28,13 @@ export const CreatorCard: React.FC<SearchCreator> = ({
   rating,
   reviews,
   imageUrl,
+  setOpen,
 }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/creator/${platform.toLowerCase()}/${accountId}`);
+    setOpen();
+    router.push(`/review/${platform.toLowerCase()}/${accountId}`);
   };
 
   return (
