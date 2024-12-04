@@ -1,61 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useRecoilState } from "recoil";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
   Checkbox,
   Label,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@ratecreator/ui";
-import { Info, Users } from "lucide-react";
 import { followersCheckbox } from "@ratecreator/store";
+import { followersFiltersState } from "@ratecreator/store/review";
+import { Info, Users } from "lucide-react";
 
 export const FollowersCheckbox: React.FC = () => {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
-
-  const handleCheckboxChange = (checked: boolean, id: string) => {
-    setSelectedFilters((prev) => {
-      if (id === "all") {
-        // If "All" is selected, clear other selections
-        return checked ? ["all"] : [];
-      } else {
-        // Remove "All" when selecting other options
-        const withoutAll = prev.filter((item) => item !== "all");
-
-        if (checked) {
-          return [...withoutAll, id];
-        } else {
-          return withoutAll.filter((item) => item !== id);
-        }
-      }
-    });
-  };
+  const [selectedFilters, setSelectedFilters] = useRecoilState(
+    followersFiltersState
+  );
 
   return (
-    <div className="flex flex-col space-y-2">
-      {followersCheckbox.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-center space-x-2 p-1 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
-        >
-          <Checkbox
-            id={item.id}
-            checked={selectedFilters.includes(item.id)}
-            onCheckedChange={(checked) =>
-              handleCheckboxChange(checked as boolean, item.id)
-            }
-            className="group-hover:border-primary"
-          />
-          <Label
-            htmlFor={item.id}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none w-full"
-          >
-            {item.label}
-          </Label>
-        </div>
-      ))}
+    <div className='flex flex-col mb-2 gap-y-1'>
+      <div className='flex flex-row gap-x-2 items-center'>
+        <Users size={16} />
+        <span className='text-[16px]'>Followers</span>
+        <Info size={14} className='text-muted-foreground' />
+      </div>
+      <Select value={selectedFilters} onValueChange={setSelectedFilters}>
+        <SelectTrigger className='shadow-md bg-neutral-50  dark:bg-neutral-950 '>
+          <SelectValue placeholder='Select filter' />
+        </SelectTrigger>
+        <SelectContent className='bg-neutral-50  dark:bg-neutral-950'>
+          <SelectGroup>
+            {followersCheckbox.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   );
 };

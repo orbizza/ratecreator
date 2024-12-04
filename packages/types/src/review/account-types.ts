@@ -86,22 +86,10 @@ export interface SearchAccountsParams {
   limit?: number;
   filters?: {
     platform?: string[];
-    followers?: {
-      min: number;
-      max: number;
-    };
-    rating?: {
-      min: number;
-      max: number;
-    };
-    videoCount?: {
-      min: number;
-      max: number;
-    };
-    reviewCount?: {
-      min: number;
-      max: number;
-    };
+    followers?: string | { min: number; max: number };
+    rating?: string | { min: number; max: number };
+    videoCount?: string | { min: number; max: number };
+    reviewCount?: string | { min: number; max: number };
     country?: string[];
     language?: string[];
     claimed?: boolean;

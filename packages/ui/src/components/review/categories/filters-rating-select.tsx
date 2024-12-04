@@ -1,21 +1,26 @@
 "use client";
 import React, { useState } from "react";
 import { Star, Info, Sparkles, StarHalf } from "lucide-react";
+import { useRecoilState } from "recoil";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
   Checkbox,
   Label,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@ratecreator/ui";
+
+import { ratingFiltersState } from "@ratecreator/store/review";
 
 const ratingCheckbox = [
   {
     id: "all",
-    label: "All",
+    label: "All Ratings",
     stars: null,
-    color: "text-primary",
+    color: "",
   },
   {
     id: "5",
@@ -62,8 +67,8 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
   if (count === null) return null;
   else if (count === 0)
     return (
-      <div className="flex gap-0.5">
-        <div className="flex items-center">
+      <div className='flex gap-0.5'>
+        <div className='flex items-center'>
           <StarHalf
             size={12}
             className={`fill-current ${color} transform translate-x-[6px]`}
@@ -90,7 +95,7 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
     );
 
   return (
-    <div className="flex gap-0.5">
+    <div className='flex gap-0.5'>
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
@@ -105,54 +110,42 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
 };
 
 export const RatingCheckbox: React.FC = () => {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
-
-  const handleCheckboxChange = (checked: boolean, id: string) => {
-    setSelectedFilters((prev) => {
-      if (id === "all") {
-        return checked ? ["all"] : [];
-      } else {
-        const withoutAll = prev.filter((item) => item !== "all");
-
-        if (checked) {
-          return [...withoutAll, id];
-        } else {
-          return withoutAll.filter((item) => item !== id);
-        }
-      }
-    });
-  };
+  const [selectedFilters, setSelectedFilters] =
+    useRecoilState(ratingFiltersState);
 
   return (
-    <div className="flex flex-col space-y-2">
-      {ratingCheckbox.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
-          onClick={() =>
-            handleCheckboxChange(!selectedFilters.includes(item.id), item.id)
-          }
-        >
-          <Checkbox
-            id={item.id}
-            checked={selectedFilters.includes(item.id)}
-            className="group-hover:border-primary pointer-events-none"
-          />
-          <div className="flex items-center gap-2">
-            <Label
-              htmlFor={item.id}
-              className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  cursor-pointer select-none ${item.color}`}
-            >
-              {item.label}
-            </Label>
-            {item.stars !== 0 ? (
-              <RatingStars count={item.stars} color={item.color} />
-            ) : (
-              <RatingStars count={0} color={item.color} />
-            )}
-          </div>
-        </div>
-      ))}
+    <div className='flex flex-col mb-2 gap-y-1'>
+      <div className='flex flex-row gap-x-2 items-center'>
+        <Sparkles size={16} />
+        <span className='text-[16px]'>Ratings</span>
+        <Info size={14} className='text-muted-foreground' />
+      </div>
+      <Select value={selectedFilters} onValueChange={setSelectedFilters}>
+        <SelectTrigger className='shadow-md bg-neutral-50  dark:bg-neutral-950 dark:text-foreground'>
+          <SelectValue placeholder='Select filter' />
+        </SelectTrigger>
+        <SelectContent className='bg-neutral-50  dark:bg-neutral-950'>
+          <SelectGroup>
+            {ratingCheckbox.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                <div className='flex items-center gap-2'>
+                  <Label
+                    htmlFor={item.id}
+                    className={`text-sm font-medium  peer-disabled:cursor-not-allowed peer-disabled:opacity-70  cursor-pointer select-none ${item.color}`}
+                  >
+                    {item.label}
+                  </Label>
+                  {item.stars !== 0 ? (
+                    <RatingStars count={item.stars} color={item.color} />
+                  ) : (
+                    <RatingStars count={0} color={item.color} />
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   );
 };

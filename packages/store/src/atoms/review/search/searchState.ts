@@ -1,40 +1,28 @@
 import { atom } from "recoil";
 
-import { Account } from "@ratecreator/types/review";
-
-export const searchPlatformState = atom<string>({
-  key: "searchPlatformState",
-  default: "ALL",
-});
-
-export const searchResultsState = atom<Account[]>({
-  key: "searchResultsState",
-  default: [],
-});
-
 export const platformFiltersState = atom<string[]>({
   key: "platformFiltersState",
   default: ["all"],
 });
 
-export const followersFiltersState = atom<string[]>({
+export const followersFiltersState = atom<string>({
   key: "followersFiltersState",
-  default: ["all"],
+  default: "all",
 });
 
-export const ratingFiltersState = atom<string[]>({
+export const ratingFiltersState = atom<string>({
   key: "ratingFiltersState",
-  default: ["all"],
+  default: "all",
 });
 
-export const videoCountFiltersState = atom<string[]>({
+export const videoCountFiltersState = atom<string>({
   key: "videoCountFiltersState",
-  default: ["all"],
+  default: "all",
 });
 
-export const reviewCountFiltersState = atom<string[]>({
+export const reviewCountFiltersState = atom<string>({
   key: "reviewCountFiltersState",
-  default: ["all"],
+  default: "all",
 });
 
 export const countryFiltersState = atom<string[]>({

@@ -25,8 +25,6 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   currentPage,
   totalPages,
   onPageChange,
-  totalItems,
-  itemsPerPage,
 }) => {
   const { isSignedIn } = useAuth();
   const router = useRouter();
@@ -55,7 +53,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                href="#"
+                href='#'
                 onClick={() => currentPage > 0 && onPageChange(currentPage - 1)}
                 className={
                   currentPage === 0
@@ -67,7 +65,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
 
             {displayPage > 2 && (
               <PaginationItem>
-                <PaginationLink href="#" onClick={() => handlePageClick(1)}>
+                <PaginationLink href='#' onClick={() => handlePageClick(1)}>
                   1
                 </PaginationLink>
               </PaginationItem>
@@ -82,7 +80,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             {displayPage > 1 && (
               <PaginationItem>
                 <PaginationLink
-                  href="#"
+                  href='#'
                   onClick={() => handlePageClick(displayPage - 1)}
                 >
                   {displayPage - 1}
@@ -92,7 +90,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
 
             <PaginationItem>
               <PaginationLink
-                href="#"
+                href='#'
                 isActive
                 onClick={() => handlePageClick(displayPage)}
               >
@@ -103,7 +101,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             {displayPage < maxPage && (
               <PaginationItem>
                 <PaginationLink
-                  href="#"
+                  href='#'
                   onClick={() => handlePageClick(displayPage + 1)}
                 >
                   {displayPage + 1}
@@ -120,7 +118,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             {displayPage < maxPage - 1 && (
               <PaginationItem>
                 <PaginationLink
-                  href="#"
+                  href='#'
                   onClick={() => handlePageClick(maxPage + 1)}
                 >
                   {maxPage + 1}
@@ -130,7 +128,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
 
             <PaginationItem>
               <PaginationNext
-                href="#"
+                href='#'
                 onClick={() =>
                   currentPage < maxPage && onPageChange(currentPage + 1)
                 }
@@ -148,7 +146,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                href="#"
+                href='#'
                 className={
                   currentPage === 0
                     ? "pointer-events-none opacity-50"
@@ -158,7 +156,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             </PaginationItem>
             <PaginationItem>
               <PaginationLink
-                href="#"
+                href='#'
                 isActive
                 onClick={(e) => {
                   e.preventDefault();
@@ -170,7 +168,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             </PaginationItem>
             <PaginationItem>
               <PaginationLink
-                href="#"
+                href='#'
                 onClick={(e) => {
                   e.preventDefault();
                   handleSignInRedirect();
@@ -186,7 +184,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             {displayPage < maxPage - 1 && (
               <PaginationItem>
                 <PaginationLink
-                  href="#"
+                  href='#'
                   onClick={(e) => {
                     e.preventDefault();
                     handleSignInRedirect();
@@ -198,7 +196,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
             )}
             <PaginationItem>
               <PaginationNext
-                href="#"
+                href='#'
                 onClick={(e) => {
                   e.preventDefault();
                   handleSignInRedirect();
@@ -209,11 +207,11 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
         </Pagination>
       )}
       {!isSignedIn && (
-        <div className="text-center mt-4 text-muted-foreground text-sm">
+        <div className='text-center mt-4 text-muted-foreground text-sm'>
           Please{" "}
           <Link
             href={`/sign-in?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`}
-            className="text-primary hover:underline"
+            className='text-primary hover:underline'
           >
             sign in
           </Link>{" "}
