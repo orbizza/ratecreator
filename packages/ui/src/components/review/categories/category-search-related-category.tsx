@@ -26,26 +26,26 @@ export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
   const length = categories.length === 0;
 
   const CategoryContent = () => (
-    <div className="w-full">
+    <div className='w-full'>
       {!length && (
-        <ul className="list-none p-0 m-0">
+        <ul className='list-none p-0 m-0'>
           {categories.map((subcat) => (
             <Link
               key={subcat.id}
               href={`/categories/${subcat.slug}`}
               passHref
-              className="block transition-transform hover:text-primary"
+              className='block transition-transform hover:text-primary'
             >
-              <li className="text-sm py-1">
+              <li className='text-sm py-1'>
                 {subcat.name}
-                <Separator className="my-2" />
+                <Separator className='my-2' />
               </li>
             </Link>
           ))}
         </ul>
       )}
       {length && (
-        <p className="text-muted-foreground">No related categories found</p>
+        <p className='text-muted-foreground'>No related categories found</p>
       )}
     </div>
   );
@@ -53,26 +53,29 @@ export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
   return (
     <>
       {/* Mobile Sheet Categories */}
-      <div className="xl:hidden">
+      <div className='xl:hidden'>
         <Sheet>
           <SheetTrigger asChild>
             <Button
-              variant="default"
-              size="sm"
-              className="flex items-center gap-2"
+              variant='default'
+              size='sm'
+              className='flex items-center gap-2'
             >
               <ArrowRightLeft size={16} />
-              Related Categories
+              <span className='hidden md:inline-block'>Related Categories</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px]">
+          <SheetContent
+            side='left'
+            className='w-[300px] overflow-y-auto max-h-screen'
+          >
             <SheetHeader>
-              <SheetTitle className="flex text-primary items-center gap-2">
+              <SheetTitle className='flex text-primary items-center gap-2'>
                 <ArrowRightLeft size={20} />
                 Related Categories
               </SheetTitle>
             </SheetHeader>
-            <div className="mt-6">
+            <div className='mt-6'>
               <CategoryContent />
             </div>
           </SheetContent>
@@ -80,17 +83,17 @@ export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden xl:flex mt-8 mb-8 rounded-lg overflow-hidden shadow-md flex-col">
-        <div className="bg-stone-50 dark:bg-gray-900 p-4 flex-grow">
+      <div className='hidden xl:flex mt-8 mb-8 rounded-lg overflow-hidden shadow-md flex-col'>
+        <div className='bg-stone-50 dark:bg-gray-900 p-4 flex-grow'>
           <Accordion
-            type="single"
+            type='single'
             collapsible
-            className="w-full"
-            defaultValue="item-1"
+            className='w-full'
+            defaultValue='item-1'
           >
-            <AccordionItem value="item-1" className="border-0">
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
+            <AccordionItem value='item-1' className='border-0'>
+              <AccordionTrigger className='hover:no-underline'>
+                <div className='flex flex-row items-center mb-2 text-primary text-lg gap-x-2'>
                   <ArrowRightLeft size={20} />
                   <p>Related Categories</p>
                 </div>
