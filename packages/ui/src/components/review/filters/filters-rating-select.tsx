@@ -1,9 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Star, Info, Sparkles, StarHalf } from "lucide-react";
 import { useRecoilState } from "recoil";
 import {
-  Checkbox,
   Label,
   Select,
   SelectContent,
@@ -114,7 +113,7 @@ export const RatingCheckbox: React.FC = () => {
     useRecoilState(ratingFiltersState);
 
   return (
-    <div className="flex flex-col mb-2 gap-y-1">
+    <div className="flex flex-col mb-2 gap-y-2">
       <div className="flex flex-row gap-x-2 items-center">
         <Sparkles size={16} />
         <span className="text-[16px]">Ratings</span>

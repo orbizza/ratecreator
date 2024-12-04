@@ -68,7 +68,7 @@ export function MobileSideNav() {
             </Button>
           </SheetTrigger>
 
-          <SheetContent className="w-[320px] border-l-1 ">
+          <SheetContent className="w-[320px] border-l-1 overflow-y-auto max-h-screen">
             <SheetTitle>
               <SheetClose asChild>
                 <Button
@@ -102,8 +102,7 @@ export function MobileSideNav() {
               </Button>
             </SheetClose>
             <Separator className="my-4 w-[270px]" />
-            <div className=" grid gap-4 py-4 w-[270px]">
-              {/* <div className=' grid gap-4 py-4 w-[270px]'> */}
+            <div className="grid gap-2 py-4 w-[270px]">
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
@@ -267,7 +266,7 @@ export function MobileSideNav() {
             </Button>
           </SheetTrigger>
 
-          <SheetContent className="w-[320px] border-l-1 ">
+          <SheetContent className="w-[320px] border-l-1 overflow-y-auto max-h-screen">
             <SheetTitle>
               <SheetClose asChild>
                 <Button
@@ -281,7 +280,7 @@ export function MobileSideNav() {
               </SheetClose>
             </SheetTitle>
             <Separator className="my-4 w-[270px]" />
-            <div className=" grid gap-4 py-4 w-[270px]">
+            <div className="grid gap-2 py-4 w-[270px]">
               <Button variant={"ghost"}>For creators</Button>
               {/* <Separator className='my-4 w-[270px]' /> */}
               <Button variant={"link"}>Write a review</Button>

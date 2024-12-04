@@ -62,10 +62,13 @@ export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
               className="flex items-center gap-2"
             >
               <ArrowRightLeft size={16} />
-              Related Categories
+              <span className="hidden md:inline-block">Related Categories</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px]">
+          <SheetContent
+            side="left"
+            className="w-[300px] overflow-y-auto max-h-screen"
+          >
             <SheetHeader>
               <SheetTitle className="flex text-primary items-center gap-2">
                 <ArrowRightLeft size={20} />

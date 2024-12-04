@@ -2,31 +2,32 @@
 
 "use client";
 import React, { useEffect, useState } from "react";
-import { Baby, Info, RouteOff, SlidersHorizontal } from "lucide-react";
-
+import { RouteOff, SlidersHorizontal } from "lucide-react";
 import { useResetRecoilState, useRecoilState } from "recoil";
 
 import {
   Button,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@ratecreator/ui";
 
-import { RatingCheckbox } from "./filters-rating-select";
-import { PlatformCheckbox } from "./filter-platform-select";
-import { FollowersCheckbox } from "./filter-follower-select";
-import { VideoCountCheckbox } from "./filter-video-select";
-import { ReviewCountCheckbox } from "./filter-reviews-count-select";
-import { CountrySelect } from "./filter-country-select";
-import { LanguageSelect } from "./filter-language-select";
+import { RatingCheckbox } from "../filters/filters-rating-select";
+import { PlatformCheckbox } from "../filters/filter-platform-select";
+import { FollowersCheckbox } from "../filters/filter-follower-select";
+import { VideoCountCheckbox } from "../filters/filter-video-select";
+import { ReviewCountCheckbox } from "../filters/filter-reviews-count-select";
+import { CountrySelect } from "../filters/filter-country-select";
+import { LanguageSelect } from "../filters/filter-language-select";
+import { MadeForKidsSelect } from "../filters/filter-kids-select";
+import { ClaimedSelect } from "../filters/filter-claimed-select";
+
 import {
   languageFiltersState,
   countryFiltersState,
@@ -43,62 +44,6 @@ import {
 } from "@ratecreator/store/review";
 
 interface FilterSidebarProps {}
-
-const ClaimedSelect = () => {
-  const [claimed, setClaimed] = useRecoilState(claimedFilterState);
-
-  const handleClaimedChange = (value: string) => {
-    setClaimed(
-      value === "claimed-true"
-        ? true
-        : value === "claimed-false"
-          ? false
-          : null,
-    );
-  };
-
-  return (
-    <Select
-      value={claimed === null ? "" : claimed ? "claimed-true" : "claimed-false"}
-      onValueChange={handleClaimedChange}
-    >
-      <SelectTrigger className="shadow-md bg-neutral-50  dark:bg-neutral-950 ">
-        <SelectValue placeholder="All Statuses" />
-      </SelectTrigger>
-      <SelectContent className="bg-neutral-50  dark:bg-neutral-950">
-        <SelectItem value="claimed-true">Yes</SelectItem>
-        <SelectItem value="claimed-false">No</SelectItem>
-      </SelectContent>
-    </Select>
-  );
-};
-
-const MadeForKidsSelect = () => {
-  const [madeForKids, setMadeForKids] = useRecoilState(madeForKidsFilterState);
-
-  const handleMadeForKidsChange = (value: string) => {
-    setMadeForKids(
-      value === "kids-true" ? true : value === "kids-false" ? false : null,
-    );
-  };
-
-  return (
-    <Select
-      value={
-        madeForKids === null ? "" : madeForKids ? "kids-true" : "kids-false"
-      }
-      onValueChange={handleMadeForKidsChange}
-    >
-      <SelectTrigger className="shadow-md bg-neutral-50  dark:bg-neutral-950 ">
-        <SelectValue placeholder="All contents" />
-      </SelectTrigger>
-      <SelectContent className="bg-neutral-50  dark:bg-neutral-950">
-        <SelectItem value="kids-true">Yes</SelectItem>
-        <SelectItem value="kids-false">No</SelectItem>
-      </SelectContent>
-    </Select>
-  );
-};
 
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [isMounted, setIsMounted] = useState(false);
@@ -165,6 +110,23 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    resetPageNumber();
+  }, [
+    platformFilters,
+    followersFilters,
+    ratingFilters,
+    videoCountFilters,
+    reviewCountFilters,
+    countryFilters,
+    languageFilters,
+    claimed,
+    madeForKids,
+    sortBy,
+    isDescending,
+    resetPageNumber,
+  ]);
+
   if (!isMounted) {
     return null;
   }
@@ -176,37 +138,21 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       <RatingCheckbox />
       <ReviewCountCheckbox />
       <VideoCountCheckbox />
-      {/*  ToDo: Claim Status after Algolia is updated  */}
-      {/* <div className='flex flex-col mb-2 gap-y-1'>
-        <div className='flex flex-row gap-x-2 items-center'>
-          <BadgeCheck size={16} />
-          <span className='text-[16px]'>Claimed</span>
-          <Info size={14} className='text-muted-foreground' />
-        </div>
-        <ClaimedSelect />
-      </div> */}
+      {/*  ToDo: Enable Claim Status after Algolia is updated  */}
+      {/* <ClaimedSelect /> */}
 
-      {/* Made for Kids */}
-      <div className="flex flex-col mb-2 gap-y-1">
-        <div className="flex flex-row gap-x-2 items-center">
-          <Baby size={16} />
-          <span className="text-[16px]">Made for kids</span>
-          <Info size={14} className="text-muted-foreground" />
-        </div>
-        <MadeForKidsSelect />
-      </div>
-
+      <MadeForKidsSelect />
       <CountrySelect />
       <LanguageSelect />
 
       <Button
         variant="default"
         size="sm"
-        className="w-full mt-4 gap-2"
+        className="w-full mt-4 gap-2 "
         onClick={handleClearFilters}
         disabled={!hasActiveFilters()}
       >
-        <RouteOff size={16} />
+        <RouteOff size={16} className="mr-2" />
         Clear Filters
       </Button>
     </div>
@@ -223,10 +169,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
               className="flex items-center gap-2"
             >
               <SlidersHorizontal size={16} />
-              Filters
+              <span className="hidden md:inline-block">Filters</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px]">
+          <SheetContent
+            side="left"
+            className="w-[300px] overflow-y-auto max-h-screen"
+          >
             <SheetHeader className="flex ">
               <SheetTitle className="flex text-primary items-center gap-2">
                 <SlidersHorizontal size={20} />
@@ -241,12 +190,27 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden xl:block rounded-lg overflow-hidden shadow-md bg-gray-50 text-foreground dark:bg-stone-900 dark:text-foreground p-4 space-y-4">
-        <div className="flex flex-row items-center text-primary text-lg gap-x-2">
-          <SlidersHorizontal size={20} />
-          <p className="text-xl">Filters</p>
+      <div className="hidden xl:flex mt-1 rounded-lg overflow-hidden shadow-md flex-col">
+        <div className="dark:bg-neutral-900 bg-neutral-50 p-4 flex-grow">
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            defaultValue="item-1"
+          >
+            <AccordionItem value="item-1" className="border-0">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
+                  <SlidersHorizontal size={20} />
+                  <p className="text-xl">Filters</p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <FilterContent />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
-        <FilterContent />
       </div>
     </>
   );
