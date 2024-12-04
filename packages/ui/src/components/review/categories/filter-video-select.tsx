@@ -21,7 +21,7 @@ import { videoCountFiltersState } from "@ratecreator/store/review";
 
 export const VideoCountCheckbox: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useRecoilState(
-    videoCountFiltersState
+    videoCountFiltersState,
   );
 
   // const handleCheckboxChange = (checked: boolean, id: string) => {
@@ -64,17 +64,17 @@ export const VideoCountCheckbox: React.FC = () => {
     //     </div>
     //   ))}
     // </div>
-    <div className='flex flex-col mb-2 gap-y-1'>
-      <div className='flex flex-row gap-x-2 items-center'>
+    <div className="flex flex-col mb-2 gap-y-1">
+      <div className="flex flex-row gap-x-2 items-center">
         <Video size={16} />
-        <span className='text-[16px]'>Video Count</span>
-        <Info size={14} className='text-muted-foreground' />
+        <span className="text-[16px]">Video Count</span>
+        <Info size={14} className="text-muted-foreground" />
       </div>
       <Select value={selectedFilters} onValueChange={setSelectedFilters}>
-        <SelectTrigger className='shadow-md bg-neutral-50  dark:bg-neutral-950 '>
-          <SelectValue placeholder='Select filter' />
+        <SelectTrigger className="shadow-md bg-neutral-50  dark:bg-neutral-950 ">
+          <SelectValue placeholder="Select filter" />
         </SelectTrigger>
-        <SelectContent className='bg-neutral-50  dark:bg-neutral-950'>
+        <SelectContent className="bg-neutral-50  dark:bg-neutral-950">
           <SelectGroup>
             {videoCountCheckbox.map((item) => (
               <SelectItem key={item.id} value={item.id}>

@@ -67,8 +67,8 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
   if (count === null) return null;
   else if (count === 0)
     return (
-      <div className='flex gap-0.5'>
-        <div className='flex items-center'>
+      <div className="flex gap-0.5">
+        <div className="flex items-center">
           <StarHalf
             size={12}
             className={`fill-current ${color} transform translate-x-[6px]`}
@@ -95,7 +95,7 @@ const RatingStars: React.FC<{ count: number | null; color: string }> = ({
     );
 
   return (
-    <div className='flex gap-0.5'>
+    <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
@@ -114,21 +114,21 @@ export const RatingCheckbox: React.FC = () => {
     useRecoilState(ratingFiltersState);
 
   return (
-    <div className='flex flex-col mb-2 gap-y-1'>
-      <div className='flex flex-row gap-x-2 items-center'>
+    <div className="flex flex-col mb-2 gap-y-1">
+      <div className="flex flex-row gap-x-2 items-center">
         <Sparkles size={16} />
-        <span className='text-[16px]'>Ratings</span>
-        <Info size={14} className='text-muted-foreground' />
+        <span className="text-[16px]">Ratings</span>
+        <Info size={14} className="text-muted-foreground" />
       </div>
       <Select value={selectedFilters} onValueChange={setSelectedFilters}>
-        <SelectTrigger className='shadow-md bg-neutral-50  dark:bg-neutral-950 dark:text-foreground'>
-          <SelectValue placeholder='Select filter' />
+        <SelectTrigger className="shadow-md bg-neutral-50  dark:bg-neutral-950 dark:text-foreground">
+          <SelectValue placeholder="Select filter" />
         </SelectTrigger>
-        <SelectContent className='bg-neutral-50  dark:bg-neutral-950'>
+        <SelectContent className="bg-neutral-50  dark:bg-neutral-950">
           <SelectGroup>
             {ratingCheckbox.map((item) => (
               <SelectItem key={item.id} value={item.id}>
-                <div className='flex items-center gap-2'>
+                <div className="flex items-center gap-2">
                   <Label
                     htmlFor={item.id}
                     className={`text-sm font-medium  peer-disabled:cursor-not-allowed peer-disabled:opacity-70  cursor-pointer select-none ${item.color}`}
