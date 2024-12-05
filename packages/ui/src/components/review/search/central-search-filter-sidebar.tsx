@@ -139,7 +139,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   }
 
   const FilterContent = () => (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <PlatformCheckbox />
       <RootCategorySelect />
       <FollowersCheckbox />
@@ -154,13 +154,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       <LanguageSelect />
 
       <Button
-        variant='default'
-        size='sm'
-        className='w-full mt-4 gap-2 '
+        variant="default"
+        size="sm"
+        className="w-full mt-4 gap-2 "
         onClick={handleClearFilters}
         disabled={!hasActiveFilters()}
       >
-        <RouteOff size={16} className='mr-2' />
+        <RouteOff size={16} className="mr-2" />
         Clear Filters
       </Button>
     </div>
@@ -168,29 +168,29 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   return (
     <>
       {/* Mobile Sheet Filter */}
-      <div className='xl:hidden'>
+      <div className="xl:hidden">
         <Sheet>
           <SheetTrigger asChild>
             <Button
-              variant='default'
-              size='sm'
-              className='flex items-center gap-2'
+              variant="default"
+              size="sm"
+              className="flex items-center gap-2"
             >
               <SlidersHorizontal size={16} />
-              <span className='hidden md:inline-block'>Filters</span>
+              <span className="hidden md:inline-block">Filters</span>
             </Button>
           </SheetTrigger>
           <SheetContent
-            side='left'
-            className='w-[300px] overflow-y-auto max-h-screen'
+            side="left"
+            className="w-[300px] overflow-y-auto max-h-screen"
           >
-            <SheetHeader className='flex '>
-              <SheetTitle className='flex text-primary items-center gap-2'>
+            <SheetHeader className="flex ">
+              <SheetTitle className="flex text-primary items-center gap-2">
                 <SlidersHorizontal size={20} />
                 Filters
               </SheetTitle>
             </SheetHeader>
-            <div className='mt-6'>
+            <div className="mt-6">
               <FilterContent />
             </div>
           </SheetContent>
@@ -198,19 +198,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className='hidden xl:flex mt-1 rounded-lg overflow-hidden shadow-md flex-col'>
-        <div className='dark:bg-neutral-900 bg-neutral-50 p-4 flex-grow'>
+      <div className="hidden xl:flex mt-1 rounded-lg overflow-hidden shadow-md flex-col">
+        <div className="dark:bg-neutral-900 bg-neutral-50 p-4 flex-grow">
           <Accordion
-            type='single'
+            type="single"
             collapsible
-            className='w-full'
-            defaultValue='item-1'
+            className="w-full"
+            defaultValue="item-1"
           >
-            <AccordionItem value='item-1' className='border-0'>
-              <AccordionTrigger className='hover:no-underline'>
-                <div className='flex flex-row items-center mb-2 text-primary text-lg gap-x-2'>
+            <AccordionItem value="item-1" className="border-0">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-row items-center mb-2 text-primary text-lg gap-x-2">
                   <SlidersHorizontal size={20} />
-                  <p className='text-xl'>Filters</p>
+                  <p className="text-xl">Filters</p>
                 </div>
               </AccordionTrigger>
               <AccordionContent>

@@ -20,7 +20,7 @@ import { useSearchParams } from "next/navigation";
 
 export const RootCategorySelect: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useRecoilState(
-    rootCategoryFiltersState
+    rootCategoryFiltersState,
   );
   const resetRootCategory = useResetRecoilState(rootCategoryFiltersState);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -43,10 +43,10 @@ export const RootCategorySelect: React.FC = () => {
       try {
         // Check for cached data in localStorage
         const cachedCategories = localStorage.getItem(
-          "searchPageRootCategories"
+          "searchPageRootCategories",
         );
         const cacheExpiry = localStorage.getItem(
-          "searchPageRootCategoriesExpiry"
+          "searchPageRootCategoriesExpiry",
         );
         const currentTime = new Date().getTime();
 
@@ -71,7 +71,7 @@ export const RootCategorySelect: React.FC = () => {
         const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
         localStorage.setItem(
           "searchPageRootCategoriesExpiry",
-          expiryTime.toString()
+          expiryTime.toString(),
         );
 
         setLoading(false);
@@ -86,14 +86,14 @@ export const RootCategorySelect: React.FC = () => {
 
   return (
     <>
-      <div className='flex flex-col mb-2 gap-y-2'>
-        <div className='flex flex-row gap-x-2 items-center'>
+      <div className="flex flex-col mb-2 gap-y-2">
+        <div className="flex flex-row gap-x-2 items-center">
           <SquareStack size={16} />
-          <span className='text-[16px]'>Root Categories</span>
-          <Info size={14} className='text-muted-foreground' />
+          <span className="text-[16px]">Root Categories</span>
+          <Info size={14} className="text-muted-foreground" />
         </div>
         {loading && (
-          <Skeleton className='h-8 w-[300px] rounded-sm shadow-md bg-neutral-50  dark:bg-neutral-950' />
+          <Skeleton className="h-8 w-[300px] rounded-sm shadow-md bg-neutral-50  dark:bg-neutral-950" />
         )}
         {!loading && (
           <Select
@@ -102,15 +102,15 @@ export const RootCategorySelect: React.FC = () => {
               setSelectedFilters(value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className='shadow-md bg-neutral-50 dark:bg-neutral-950 text-foreground dark:text-foreground'>
+            <SelectTrigger className="shadow-md bg-neutral-50 dark:bg-neutral-950 text-foreground dark:text-foreground">
               <SelectValue
-                placeholder='All Categories'
-                className='text-primary'
+                placeholder="All Categories"
+                className="text-primary"
               />
             </SelectTrigger>
-            <SelectContent className='bg-neutral-50 dark:bg-neutral-950'>
+            <SelectContent className="bg-neutral-50 dark:bg-neutral-950">
               <SelectGroup>
-                <SelectItem value='all'>
+                <SelectItem value="all">
                   All Categories ({rootCategoryLength})
                 </SelectItem>
                 {categories.map((item) => (
