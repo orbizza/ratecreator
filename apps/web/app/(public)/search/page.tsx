@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-
+import { CentralSearchResults } from "@ratecreator/ui/review";
 import React from "react";
 
 export default function SearchPage() {
@@ -10,11 +10,9 @@ export default function SearchPage() {
   const platform = searchParams.get("platform");
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">
-        Search Results for {searchQuery}
-        {platform && platform !== "All" && ` in ${platform}`}
-      </h1>
-    </div>
+    <CentralSearchResults
+      searchQuery={searchQuery || ""}
+      platform={platform || undefined}
+    />
   );
 }

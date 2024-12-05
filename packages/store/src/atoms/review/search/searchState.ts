@@ -10,6 +10,11 @@ export const followersFiltersState = atom<string>({
   default: "all",
 });
 
+export const rootCategoryFiltersState = atom<string>({
+  key: "rootCategoryFiltersState",
+  default: "",
+});
+
 export const ratingFiltersState = atom<string>({
   key: "ratingFiltersState",
   default: "all",
