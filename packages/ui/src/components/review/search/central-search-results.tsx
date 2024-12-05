@@ -3,14 +3,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  ArrowDownZA,
-  ArrowRightLeft,
-  ArrowUpZA,
-  ChevronRight,
-  Info,
-  SlidersHorizontal,
-  SquareStack,
-} from "lucide-react";
+  useRecoilValue,
+  useRecoilState,
+  useResetRecoilState,
+  useSetRecoilState,
+} from "recoil";
+import { ArrowDownZA, ArrowUpZA, Info, SlidersHorizontal } from "lucide-react";
 
 import {
   Category,
@@ -19,7 +17,6 @@ import {
 } from "@ratecreator/types/review";
 import {
   Separator,
-  Skeleton,
   Select,
   SelectContent,
   SelectGroup,
@@ -30,14 +27,12 @@ import {
   Button,
 } from "@ratecreator/ui";
 import { getCategoryDetails } from "@ratecreator/actions/review";
-
-import { CategoryBreadcrumb } from "./category-search-breadcrumb";
-import { CreatorGrid } from "../cards/category-search-creator-grid";
-import { FilterSidebar } from "./category-search-filter-sidebar";
-import { RelatedCategories } from "./category-search-related-category";
-import { SubCategoriesList } from "./category-search-subcategory";
 import { searchCreators } from "@ratecreator/actions/review";
+
+import { CreatorGrid } from "../cards/category-search-creator-grid";
 import { PaginationBar } from "../cards/pagination-bar";
+import { FilterSidebar } from "./central-search-filter-sidebar";
+
 import {
   languageFiltersState,
   countryFiltersState,
@@ -51,23 +46,23 @@ import {
   sortByFilterState,
   isDescendingFilterState,
   pageNumberState,
+  rootCategoryFiltersState,
 } from "@ratecreator/store/review";
 import { useDebounce } from "@ratecreator/hooks";
-import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
+
 import {
-  CategoryLoadingCard,
   CreatorLoadingCard,
   FilterSkeleton,
 } from "../skeletons/skeleton-category-search-results";
 
-export const CategoriesSearchResults: React.FC = () => {
-  const params = useParams();
-  const slug = params?.slug as string;
-
-  const [categories, setCategories] = useState<Category[]>([]);
+export const CentralSearchResults: React.FC<{
+  searchQuery?: string;
+  platform?: string;
+}> = ({ searchQuery, platform: initialPlatform }) => {
   const [creators, setCreators] = useState<SearchAccount[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
+  const [filterSidebarLoading, setFilterSidebarLoading] =
+    useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState<number>(0);
   const [viewCount, setViewCount] = useState<string>("");
@@ -76,6 +71,7 @@ export const CategoriesSearchResults: React.FC = () => {
 
   // Filters and Sorting
   const platform = useRecoilValue(platformFiltersState);
+  const setPlatformFilter = useSetRecoilState(platformFiltersState);
   const followers = useRecoilValue(followersFiltersState);
   const rating = useRecoilValue(ratingFiltersState);
   const videoCount = useRecoilValue(videoCountFiltersState);
@@ -84,6 +80,7 @@ export const CategoriesSearchResults: React.FC = () => {
   const language = useRecoilValue(languageFiltersState);
   const claimed = useRecoilValue(claimedFilterState);
   const madeForKids = useRecoilValue(madeForKidsFilterState);
+  const rootCategory = useRecoilValue(rootCategoryFiltersState);
 
   const debouncedPlatform = useDebounce(platform, 1000);
   const [sortBy, setSortBy] = useRecoilState(sortByFilterState);
@@ -104,6 +101,7 @@ export const CategoriesSearchResults: React.FC = () => {
   const resetSortBy = useResetRecoilState(sortByFilterState);
   const resetIsDescending = useResetRecoilState(isDescendingFilterState);
   const resetPageNumber = useResetRecoilState(pageNumberState);
+  const resetRootCategory = useResetRecoilState(rootCategoryFiltersState);
 
   // Add useEffect to reset all states on mount
   useEffect(() => {
@@ -119,6 +117,7 @@ export const CategoriesSearchResults: React.FC = () => {
     resetSortBy();
     resetIsDescending();
     resetPageNumber();
+    resetRootCategory();
   }, [
     resetPlatform,
     resetFollowers,
@@ -132,7 +131,14 @@ export const CategoriesSearchResults: React.FC = () => {
     resetSortBy,
     resetIsDescending,
     resetPageNumber,
+    resetRootCategory,
   ]);
+
+  useEffect(() => {
+    if (initialPlatform && !platform.includes(initialPlatform.toLowerCase())) {
+      setPlatformFilter([initialPlatform.toUpperCase()]);
+    }
+  }, [initialPlatform, platform, setPlatformFilter]);
 
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
@@ -143,7 +149,7 @@ export const CategoriesSearchResults: React.FC = () => {
     try {
       setCreatorLoading(true);
       const searchParams: SearchAccountsParams = {
-        query: "",
+        query: searchQuery || "",
         page: currentPage,
         limit: 20,
         filters: {
@@ -158,7 +164,7 @@ export const CategoriesSearchResults: React.FC = () => {
           language: language.includes("all") ? undefined : language,
           claimed: claimed === null ? undefined : claimed === true,
           madeForKids: madeForKids === null ? undefined : madeForKids === true,
-          categories: [slug],
+          categories: rootCategory ? [rootCategory] : undefined,
         },
         sortBy,
         sortOrder: isDescending ? "desc" : "asc",
@@ -204,7 +210,8 @@ export const CategoriesSearchResults: React.FC = () => {
     claimed,
     madeForKids,
     currentPage,
-    slug,
+    rootCategory,
+    searchQuery,
   ]);
 
   useEffect(() => {
@@ -215,121 +222,40 @@ export const CategoriesSearchResults: React.FC = () => {
     setCurrentPage(page);
   };
 
+  // Add useEffect to handle initial filter sidebar loading
   useEffect(() => {
-    const fetchCategoryDetails = async () => {
-      try {
-        // Check cached slug data in localStorage
-        const slugDetails = slug + "-categoryDetails";
-        const cachedSlugData = localStorage.getItem(slugDetails);
-        const slugExpiry = slug + "-detailsExpiry";
-        const cacheExpiry = localStorage.getItem(slugExpiry);
-        const currentTime = new Date().getTime();
-
-        if (
-          cachedSlugData &&
-          cacheExpiry &&
-          currentTime < Number(cacheExpiry)
-        ) {
-          // Use cached data if available and not expired
-          const parsedCategories = JSON.parse(cachedSlugData);
-          console.log("Using local cached details for slug: ", slug);
-          setCategories(parsedCategories);
-          setLoading(false);
-          return; // Exit early since we used cached data
-        }
-
-        const data = await getCategoryDetails(slug);
-        // console.log("Fetched categories:", data);
-        if (data) {
-          setCategories(data);
-          localStorage.setItem(slugDetails, JSON.stringify(data));
-          const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
-          localStorage.setItem(slugExpiry, expiryTime.toString());
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error("Error in fetchCategoryDetails:", err);
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setLoading(false);
-      }
-    };
-
-    fetchCategoryDetails();
-  }, [slug]);
-
-  const currentCategory = categories[categories.length - 1];
-  const parentCategory =
-    categories.length > 1 ? categories[categories.length - 2] : null;
+    const timer = setTimeout(() => {
+      setFilterSidebarLoading(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className='container mx-auto p-4 mt-16'>
       <div className='flex flex-col'>
-        {loading && (
-          <div className='flex flex-row gap-x-2 items-center'>
-            <span className='text-[12px] lg:text-sm text-muted-foreground hover:text-foreground'>
-              {" "}
-              Category
-            </span>
-            <ChevronRight
-              className='text-sm text-muted-foreground '
-              size={14}
-            />
-            <Skeleton className='h-4 w-[300px]' />
-          </div>
-        )}
-        {!loading && <CategoryBreadcrumb categories={categories} />}
         <div className='flex flex-col justify-center items-center w-full m-8 gap-4'>
           <div className='flex flex-wrap justify-center items-baseline lg:text-5xl font-bold'>
-            <span className='mr-2'>Best in</span>
-            {loading ? (
-              <Skeleton className='h-8 w-[250px] inline-block' /> // Adjust width as needed
-            ) : (
-              <span>{currentCategory?.name}</span>
-            )}
-          </div>
-          <div className='flex flex-row items-center gap-x-2 text-muted-foreground'>
-            {loading ? (
-              <Skeleton className='h-4 w-[250px]' />
-            ) : (
-              <>
-                <span className='text-[13px] md:text-sm lg:text-xl'>
-                  {currentCategory?.shortDescription}
-                </span>
-                <Info size={14} />
-              </>
-            )}
+            <span className='mr-2'>Results for</span>
+            <span className='text-primary'>"{searchQuery}"</span>
           </div>
         </div>
         <Separator className='my-[2rem] xl:my-[4rem]' />
       </div>
       <div className='flex flex-row'>
         <div className='hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4'>
-          {!loading && <FilterSidebar />}
-          {!loading && (
-            <>
-              <SubCategoriesList
-                categories={currentCategory?.subcategories || []}
-              />
-              <RelatedCategories
-                categories={parentCategory?.subcategories || []}
-              />
-            </>
-          )}
-          {loading && (
-            <div className='flex flex-col '>
+          {!filterSidebarLoading && <FilterSidebar />}
+          {filterSidebarLoading && (
+            <div className='flex flex-col'>
               <FilterSkeleton />
-              <CategoryLoadingCard text='Sub Categories' type='sub' />
-              <CategoryLoadingCard text='Related Categories' type='related' />
             </div>
           )}
+          {/* ToDo: Add category based filter */}
+
           {error && <div className='text-red-500'>{error}</div>}
-          {!loading && !error && !currentCategory && (
-            <div>No category found</div>
-          )}
         </div>
         <div className='flex flex-col w-full xl:w-3/4 gap-4 mb-4'>
           <div className='flex xl:hidden gap-y-2 flex-row items-center justify-between'>
-            {loading && (
+            {filterSidebarLoading && (
               <Button
                 variant='default'
                 size='sm'
@@ -340,45 +266,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 <span className='hidden md:inline-block'>Filters</span>
               </Button>
             )}
-            {!loading && <FilterSidebar />}
-            <div className='flex flex-row items-center'>
-              {!loading && (
-                <SubCategoriesList
-                  categories={currentCategory?.subcategories || []}
-                />
-              )}
-              {loading && (
-                <Button
-                  variant='default'
-                  size='sm'
-                  disabled
-                  className='flex items-center gap-2'
-                >
-                  <SquareStack size={16} />
-                  <span className='hidden md:inline-block'>Sub Categories</span>
-                </Button>
-              )}
-            </div>
-            <div className='flex flex-row justify-between items-center '>
-              {!loading && (
-                <RelatedCategories
-                  categories={parentCategory?.subcategories || []}
-                />
-              )}
-              {loading && (
-                <Button
-                  variant='default'
-                  size='sm'
-                  disabled
-                  className='flex items-center gap-2'
-                >
-                  <ArrowRightLeft size={16} />
-                  <span className='hidden md:inline-block'>
-                    Related Categories
-                  </span>
-                </Button>
-              )}
-            </div>
+            {!filterSidebarLoading && <FilterSidebar />}
           </div>
           <div className='flex flex-row items-center justify-between'>
             <div>

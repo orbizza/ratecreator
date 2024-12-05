@@ -41,7 +41,9 @@ import {
   sortByFilterState,
   isDescendingFilterState,
   pageNumberState,
+  rootCategoryFiltersState,
 } from "@ratecreator/store/review";
+import { RootCategorySelect } from "../filters/filter-root-category-select";
 
 interface FilterSidebarProps {}
 
@@ -61,6 +63,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const resetSortByFilter = useResetRecoilState(sortByFilterState);
   const resetIsDescendingFilter = useResetRecoilState(isDescendingFilterState);
   const resetPageNumber = useResetRecoilState(pageNumberState);
+  const resetRootCategoryFilter = useResetRecoilState(rootCategoryFiltersState);
 
   // state selectors
   const [platformFilters] = useRecoilState(platformFiltersState);
@@ -74,10 +77,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [madeForKids] = useRecoilState(madeForKidsFilterState);
   const [sortBy] = useRecoilState(sortByFilterState);
   const [isDescending] = useRecoilState(isDescendingFilterState);
+  const [rootCategoryFilter] = useRecoilState(rootCategoryFiltersState);
 
   const hasActiveFilters = () => {
     return (
       platformFilters.length > 0 ||
+      rootCategoryFilter.length > 0 ||
       followersFilters.length > 0 ||
       ratingFilters.length > 0 ||
       videoCountFilters.length > 0 ||
@@ -104,6 +109,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     resetSortByFilter();
     resetIsDescendingFilter();
     resetPageNumber();
+    resetRootCategoryFilter();
   };
 
   useEffect(() => {
@@ -125,6 +131,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     sortBy,
     isDescending,
     resetPageNumber,
+    resetRootCategoryFilter,
   ]);
 
   if (!isMounted) {
@@ -134,6 +141,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const FilterContent = () => (
     <div className='space-y-4'>
       <PlatformCheckbox />
+      <RootCategorySelect />
       <FollowersCheckbox />
       <RatingCheckbox />
       <ReviewCountCheckbox />
