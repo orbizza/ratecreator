@@ -23,7 +23,7 @@ export const CreatorProfileYoutube = ({
         // Try to get data from IndexedDB cache
         const cachedData = await creatorCache.getCachedCreator(
           platform,
-          accountId
+          accountId,
         );
 
         if (cachedData) {
@@ -40,7 +40,7 @@ export const CreatorProfileYoutube = ({
         await creatorCache.setCachedCreator(platform, accountId, result);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch creator data"
+          err instanceof Error ? err.message : "Failed to fetch creator data",
         );
       } finally {
         setLoading(false);
@@ -51,12 +51,12 @@ export const CreatorProfileYoutube = ({
   }, [accountId, platform]);
 
   if (loading) {
-    return <div className='container mx-auto p-4 mt-16'>Loading...</div>;
+    return <div className="container mx-auto p-4 mt-16">Loading...</div>;
   }
 
   if (error) {
     return (
-      <div className='container mx-auto p-4 mt-16 text-red-500'>
+      <div className="container mx-auto p-4 mt-16 text-red-500">
         Error: {error}
       </div>
     );
@@ -64,16 +64,16 @@ export const CreatorProfileYoutube = ({
 
   if (!data) {
     return (
-      <div className='container mx-auto p-4 mt-16'>
+      <div className="container mx-auto p-4 mt-16">
         No data found for this creator
       </div>
     );
   }
 
   return (
-    <div className='container mx-auto p-4 mt-16'>
-      <h2 className='text-2xl font-bold mb-4'>Creator Data</h2>
-      <pre className='p-4 rounded-lg overflow-auto max-h-[80vh]'>
+    <div className="container mx-auto p-4 mt-16">
+      <h2 className="text-2xl font-bold mb-4">Creator Data</h2>
+      <pre className="p-4 rounded-lg overflow-auto max-h-[80vh]">
         {JSON.stringify(data, null, 2)}
       </pre>
     </div>

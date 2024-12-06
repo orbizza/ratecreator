@@ -10,7 +10,7 @@ export default function ReviewProfile({
   params: { accountId: string; platform: string };
 }) {
   return (
-    <main className='min-h-[calc(100vh-20vh)]'>
+    <main className="min-h-[calc(100vh-20vh)]">
       {platform === "youtube" && (
         <CreatorProfileYoutube accountId={accountId} platform={platform} />
       )}

@@ -35,7 +35,7 @@ export class CreatorCache {
 
   async getCachedCreator(
     platform: string,
-    accountId: string
+    accountId: string,
   ): Promise<CreatorData | null> {
     if (!this.db) await this.init();
 
@@ -62,7 +62,7 @@ export class CreatorCache {
   async setCachedCreator(
     platform: string,
     accountId: string,
-    data: CreatorData
+    data: CreatorData,
   ) {
     if (!this.db) await this.init();
 
