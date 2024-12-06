@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
 import {
   ArrowDownZA,
   ArrowRightLeft,
@@ -53,7 +54,7 @@ import {
   pageNumberState,
 } from "@ratecreator/store/review";
 import { useDebounce } from "@ratecreator/hooks";
-import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
+
 import {
   CategoryLoadingCard,
   CreatorLoadingCard,

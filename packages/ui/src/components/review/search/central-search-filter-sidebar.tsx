@@ -177,7 +177,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
               className="flex items-center gap-2"
             >
               <SlidersHorizontal size={16} />
-              <span className="hidden md:inline-block">Filters</span>
+              <span className="inline-block">Filters</span>
             </Button>
           </SheetTrigger>
           <SheetContent

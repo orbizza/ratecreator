@@ -147,7 +147,7 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                     {truncateText(name, 15)}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {truncateText(handle, 20)}
+                    {truncateText(handle, 15)}
                   </p>
                 </div>
               </div>

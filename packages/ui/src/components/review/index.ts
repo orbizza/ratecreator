@@ -9,3 +9,4 @@ export * from "./cards/card-commandbar-category";
 export * from "./categories/category-list-page";
 export * from "./categories/category-search-result";
 export * from "./search/central-search-results";
+export * from "./creator-profile/creator-profile-youtube";
