@@ -28,6 +28,47 @@ export interface Account {
   lastIndexedAt?: Date;
 }
 
+export interface CreatorData {
+  account: {
+    id: string;
+    platform: string;
+    accountId: string;
+    handle: string;
+    name_en: string;
+    description_en: string;
+    keywords_en: string;
+    followerCount: number;
+    imageUrl: string;
+    country: string | null;
+    language_code: string;
+    rating: number;
+    reviewCount: number;
+    ytData: {
+      snippet?: {
+        publishedAt: string;
+        thumbnails?: {
+          default?: { url: string; width: number; height: number };
+          medium?: { url: string; width: number; height: number };
+          high?: { url: string; width: number; height: number };
+        };
+      };
+      statistics?: {
+        viewCount: string;
+        videoCount: string;
+      };
+      status?: {
+        madeForKids: boolean;
+      };
+      brandingSettings?: {
+        image?: {
+          bannerExternalUrl?: string;
+        };
+      };
+    };
+  };
+  categories: string[];
+}
+
 export interface SearchResults {
   hits: SearchAccount[];
   nbHits: number;

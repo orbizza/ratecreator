@@ -1,7 +1,8 @@
 "use server";
 
-import { Category } from "@ratecreator/types/review";
 import axios from "axios";
+
+import { Category } from "@ratecreator/types/review";
 
 export async function getCategoryData(): Promise<Category[]> {
   try {

@@ -8,7 +8,7 @@ import { getMongoClient } from "@ratecreator/db/mongo-client";
 import { Category } from "@ratecreator/types/review";
 import axios from "axios";
 
-const CACHE_ALL_CATEGORIES = "all-categories";
+const CACHE_ALL_CATEGORIES = "category-all";
 
 async function getSubcategories(
   categoriesCollection: any,

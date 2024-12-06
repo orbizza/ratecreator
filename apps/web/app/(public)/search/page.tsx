@@ -1,8 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { CentralSearchResults } from "@ratecreator/ui/review";
 import React from "react";
+import { useSearchParams } from "next/navigation";
+
+import { CentralSearchResults } from "@ratecreator/ui/review";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
