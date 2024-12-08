@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSearchAccounts } from "@ratecreator/db/algolia-client";
+import qs from "qs";
 import { SearchAccountsParams } from "@ratecreator/types/review";
 import { getAuth } from "@clerk/nextjs/server";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(request: NextRequest) {
   try {
-    const query = request.nextUrl.searchParams.get("q");
-    const page = request.nextUrl.searchParams.get("page");
-    const limit = request.nextUrl.searchParams.get("limit");
-    const sortBy = request.nextUrl.searchParams.get("sortBy");
-    const sortOrder = request.nextUrl.searchParams.get("sortOrder");
+    // Parse the URL and query string using qs
+    const url = new URL(request.url);
+    const parsedQuery = qs.parse(url.search, { ignoreQueryPrefix: true });
     const { userId } = getAuth(request);
 
     // Initialize the params object matching SearchAccountsParams interface
     const params: SearchAccountsParams = {
-      query: query || "",
-      page: page ? parseInt(page as string) : 0,
-      limit: limit ? parseInt(limit as string) : 20,
-      sortBy: sortBy || "followerCount",
-      sortOrder: sortOrder === "desc" ? "desc" : "asc",
+      query: (parsedQuery.query as string) || "",
+      page: parsedQuery.page ? parseInt(parsedQuery.page as string) : 0,
+      limit: parsedQuery.limit ? parseInt(parsedQuery.limit as string) : 20,
+      sortBy: (parsedQuery.sortBy as string) || "followerCount",
+      sortOrder: (parsedQuery.sortOrder as "asc" | "desc") || "asc",
       filters: {}, // Initialize filters as an empty object
     };
 
@@ -31,15 +28,12 @@ export async function GET(request: NextRequest) {
     if (params.limit && params.limit > 20) {
       params.limit = 20;
     }
-    // Extract filters from query params
-    const filters = {
-      platform: request.nextUrl.searchParams.get("platform"),
-      followers: request.nextUrl.searchParams.get("followers"),
-      rating: request.nextUrl.searchParams.get("rating"),
-    };
+
+    // Extract filters from parsedQuery
+    const filters = parsedQuery.filters || {};
 
     // Map filters to the params.filters object
-    if (filters.platform) {
+    if (typeof filters === "object") {
       if ("platform" in filters) {
         const platformValue = filters.platform;
         if (params.filters) {
@@ -48,14 +42,6 @@ export async function GET(request: NextRequest) {
             : [platformValue as string];
         }
       }
-
-      // if ("followers" in filters) {
-      //   const [min, max] = (filters.followers as string).split("-").map(Number);
-      //   if (!isNaN(min) && !isNaN(max)) {
-      //     params.filters = params.filters || {};
-      //     params.filters.followers = { min, max };
-      //   }
-      // }
 
       if ("followers" in filters) {
         const followersFilter = filters.followers as string;
@@ -187,7 +173,7 @@ export async function GET(request: NextRequest) {
     console.error("Search error:", error);
     return NextResponse.json(
       { error: "Failed to perform search" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
