@@ -115,7 +115,7 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
     <div className={cn("grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 ")}>
       {displayedAccounts.map((item, idx) => (
         <Link
-          href={`/accounts/${item?.platform.toLowerCase()}/${item?.handle}`}
+          href={`/review/${item?.platform.toLowerCase()}/${item?.accountId}`}
           key={item?.handle}
           className="relative group  block p-2 h-full w-full"
           onMouseEnter={() => setHoveredIndex(idx)}
