@@ -25,13 +25,13 @@ const ratingCheckbox = [
     id: "5",
     label: "All 5.0 stars",
     stars: 5,
-    color: "text-green-500",
+    color: "text-emerald-500",
   },
   {
     id: "4-4.9",
     label: "4.0 - 4.9 stars",
     stars: 4,
-    color: "text-emerald-500",
+    color: "text-green-500",
   },
   {
     id: "3-3.9",

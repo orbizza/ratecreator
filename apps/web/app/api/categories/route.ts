@@ -15,13 +15,12 @@ const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 
 const prisma = getPrismaClient();
 
-export const dynamic = "force-dynamic";
-
 export async function GET(request: NextRequest) {
   const redis = getRedisClient();
   //await redis.flushall();
   try {
-    const type = request.nextUrl.searchParams.get("type");
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
 
     switch (type) {
       case "all":

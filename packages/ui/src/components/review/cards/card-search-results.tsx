@@ -72,10 +72,10 @@ const StarRating = ({ rating }: { rating: number }) => {
       colour = "text-yellow-600";
       break;
     case 4:
-      colour = "text-emerald-500";
+      colour = "text-green-500";
       break;
     case 5:
-      colour = "text-green-500";
+      colour = "text-emerald-500";
       break;
     default:
       colour = "text-yellow-500";

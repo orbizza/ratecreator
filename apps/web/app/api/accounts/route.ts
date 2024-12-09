@@ -8,8 +8,6 @@ import { CreatorData } from "@ratecreator/types/review";
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(request: NextRequest) {
   const redis = getRedisClient();
 
