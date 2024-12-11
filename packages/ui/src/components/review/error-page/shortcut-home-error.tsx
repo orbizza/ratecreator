@@ -31,18 +31,18 @@ export const ShortcutErrorHome = () => {
     ) : (
       <span>
         Press{" "}
-        <span className='inline-block px-2 py-1 bg-gray-200 text-sm font-mono rounded shadow text-gray-900'>
+        <span className="inline-block px-2 py-1 bg-gray-200 text-sm font-mono rounded shadow text-gray-900">
           G
         </span>{" "}
-        <span className='inline-block px-2 py-1 bg-gray-200 text-sm font-mono rounded shadow text-gray-900'>
+        <span className="inline-block px-2 py-1 bg-gray-200 text-sm font-mono rounded shadow text-gray-900">
           H
         </span>{" "}
         to go home →
       </span>
     );
     return (
-      <Button variant={"ghost"} onClick={onClick} className='font-normal mb-10'>
-        <div className='grid grid-flow-col gap-1 mx-[0] text-lg '>
+      <Button variant={"ghost"} onClick={onClick} className="font-normal mb-10">
+        <div className="grid grid-flow-col gap-1 mx-[0] text-lg ">
           {message}
         </div>
       </Button>
