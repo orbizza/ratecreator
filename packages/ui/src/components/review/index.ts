@@ -10,3 +10,5 @@ export * from "./categories/category-list-page";
 export * from "./categories/category-search-result";
 export * from "./search/central-search-results";
 export * from "./creator-profile/creator-profile-youtube";
+export * from "./error-page/error-message";
+export * from "./error-page/wip";

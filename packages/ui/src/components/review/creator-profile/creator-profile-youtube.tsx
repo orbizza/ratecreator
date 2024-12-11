@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-
+import { useRouter } from "next/navigation";
 import { getCreatorData } from "@ratecreator/actions/review";
 import { CreatorData } from "@ratecreator/types/review";
 import { creatorCache } from "@ratecreator/db/utils";
@@ -26,6 +26,7 @@ export const CreatorProfileYoutube = ({
     image?: string;
   } | null;
 }) => {
+  const router = useRouter();
   const [data, setData] = useState<CreatorData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,7 @@ export const CreatorProfileYoutube = ({
         setError(
           err instanceof Error ? err.message : "Failed to fetch creator data",
         );
+        router.push("/error");
       } finally {
         setLoading(false);
       }
