@@ -37,6 +37,7 @@ export * from "./components/ui/pagination";
 export * from "./components/ui/menubar";
 export * from "./components/ui/tabs";
 export * from "./components/ui/card";
+export * from "./components/ui/kbd";
 
 export * from "./components/themes/theme-provider";
 export * from "./components/themes/toggle-theme";
