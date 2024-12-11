@@ -6,6 +6,7 @@
   "dependencies": {
     "@prisma/client": "5.13.0",
     "@types/node": "^20.12.12",
+    "kafkajs": "^2.2.4",
     "prisma": "5.13.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
@@ -15,6 +16,7 @@
     "./redis-do": "./src/clients/redis-do.ts",
     "./mongo-client": "./src/clients/mongo-client-wrapper.ts",
     "./algolia-client": "./src/clients/algolia-client.ts",
+    "./kafka-client": "./src/clients/kafka-client.ts",
     "./utils": "./src/utils/index.ts"
   },
   "devDependencies": {
