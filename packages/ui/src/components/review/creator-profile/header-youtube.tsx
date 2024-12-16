@@ -218,7 +218,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
       ref={headerRef}
     >
       {/* Banner Section */}
-      <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg shadow-lg">
+      <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg ">
         {account.ytData?.brandingSettings?.image?.bannerExternalUrl ? (
           <Image
             src={
@@ -228,7 +228,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
             alt={`${account.name_en}'s banner`}
             fill
             priority
-            className="object-cover rounded-lg"
+            className="object-cover rounded-lg drop-shadow-2xl"
             sizes="100vw"
           />
         ) : (
@@ -236,14 +236,14 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
         )}
 
         <div className="absolute -bottom-32 left-6">
-          <Avatar className="w-36 h-36 rounded-lg border-2 border-border shadow-lg">
+          <Avatar className="w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg">
             <AvatarImage
               src={
                 account.ytData.snippet?.thumbnails?.high?.url ||
                 account.imageUrl
               }
             />
-            <AvatarFallback className="w-36 h-36 rounded-lg border-2 border-border shadow-lg">
+            <AvatarFallback className="w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg">
               {getInitials(account.name_en)}
             </AvatarFallback>
           </Avatar>
@@ -384,7 +384,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
                           account.imageUrl
                         }
                       />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary rounded-lg w-12 h-12">
                         {getInitials(account.name_en)}
                       </AvatarFallback>
                     </Avatar>

@@ -18,7 +18,9 @@
     "category-dev": "yarn workspace @ratecreator/category dev",
     "category-build": "yarn workspace @ratecreator/category build",
     "category-start": "yarn workspace @ratecreator/category start",
-    "npm-clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +"
+    "npm-clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +",
+    "dist-clean": "find . -name \"dist\" -type d -prune -exec rm -rf '{}' +",
+    "full-clean": "yarn npm-clean && yarn dist-clean"
   },
   "devDependencies": {
     "@ratecreator/typescript-config": "*",
@@ -39,6 +41,9 @@
   "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",
+    "apps/services/*",
+    "apps/webhooks/*",
+    "apps/consumers/*",
     "packages/*"
   ],
   "dependencies": {

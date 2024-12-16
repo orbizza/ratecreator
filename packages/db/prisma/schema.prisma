@@ -108,3 +108,26 @@ enum Platform {
   TWITCH
 }
 
+model User {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId // MongoDB's default ObjectId 
+  clerkId         String    @unique
+  email           String    @unique
+  name            String?
+  username        String?
+  isDeleted       Boolean   @default(false) // Soft delete indicator
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  webhookPayload  Json?
+  role            UserRole  @default(USER)
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  CREATOR
+  BRAND
+}
+
+
+

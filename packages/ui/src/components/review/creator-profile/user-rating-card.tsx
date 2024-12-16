@@ -71,12 +71,16 @@ const UserRatingCard = ({ accountId }: { accountId: string }) => {
             </Avatar>
           )}
         </div>
-
-        <div
-          onClick={handleWriteReviewClick}
-          className="text-sm sm:text-lg md:text-xl lg:text-2xl text-primary hover:underline cursor-pointer"
-        >
-          Write a review
+        <div className="flex flex-col gap-2">
+          <div className="text-sm md:text-lg lg:text-xl ">
+            {user?.fullName || user?.emailAddresses[0].toString() || ""}
+          </div>
+          <div
+            onClick={handleWriteReviewClick}
+            className="text-sm sm:text-lg md:text-xl lg:text-2xl text-primary hover:underline cursor-pointer"
+          >
+            Write a review
+          </div>
         </div>
 
         <div
