@@ -156,7 +156,7 @@ export const ChannelDetailsSection = ({
       <Accordion type="single" collapsible defaultValue="channel-stats">
         <AccordionItem value="channel-stats" className="border-0">
           <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <ChartColumn size={28} />
               <span className="">Channel Statistics</span>
               <Info size={14} className="text-muted-foreground" />
@@ -171,21 +171,13 @@ export const ChannelDetailsSection = ({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      {/* <div>
-        <h2 className='text-2xl font-bold mb-4'>Channel Statistics</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {stats.map((stat, index) => (
-            <StatCard key={index} {...stat} />
-          ))}
-        </div>
-      </div> */}
 
       <Separator />
 
       <Accordion type="single" collapsible defaultValue="channel-description">
         <AccordionItem value="channel-description" className="border-0">
           <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <AppWindow size={28} />
               <span className="">Channel Description</span>
               <Info size={14} className="text-muted-foreground" />
@@ -207,7 +199,7 @@ export const ChannelDetailsSection = ({
           <Accordion type="single" collapsible defaultValue="channel-keywords">
             <AccordionItem value="channel-keywords" className="border-0">
               <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-                <div className="flex flex-row gap-x-2 items-center">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
                   <Hash size={28} />
                   <span className="">Channel Keywords</span>
                   <Info size={14} className="text-muted-foreground" />
@@ -230,7 +222,7 @@ export const ChannelDetailsSection = ({
       <Accordion type="single" collapsible defaultValue="categories">
         <AccordionItem value="categories" id="categories" className="border-0">
           <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <SquareStack size={28} />
               <span className="">Categories</span>
               <Info size={14} className="text-muted-foreground" />
