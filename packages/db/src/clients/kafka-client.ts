@@ -1,9 +1,8 @@
-// /packages/clients/kafkaClient.ts
-import { Kafka, Producer, Consumer } from "kafkajs";
+import { Kafka, Producer, Consumer, Admin } from "kafkajs";
+import "../utils/loadEnv";
 
 let kafkaInstance: Kafka | null = null;
 
-// ToDo: Enable SSL mode with SSL true and add CA Cert
 export function getKafkaClient(): Kafka {
   if (!kafkaInstance) {
     kafkaInstance = new Kafka({
@@ -12,7 +11,10 @@ export function getKafkaClient(): Kafka {
         process.env.KAFKA_SERVICE_URI ||
           "db-kafka-nyc3-91394-do-user-17726573-0.j.db.ondigitalocean.com:25073",
       ],
-      ssl: false, // Set to true if SSL is required
+      ssl: {
+        rejectUnauthorized: false,
+        ca: [process.env.KAFKA_CA_CERT || ""],
+      },
       sasl:
         process.env.KAFKA_USERNAME && process.env.KAFKA_PASSWORD
           ? {
@@ -32,4 +34,22 @@ export function getKafkaProducer(): Producer {
 
 export function getKafkaConsumer(groupId: string): Consumer {
   return getKafkaClient().consumer({ groupId });
+}
+
+export async function createTopicIfNotExists(topicName: string) {
+  const kafka = getKafkaClient();
+  const admin: Admin = kafka.admin();
+  await admin.connect();
+
+  const topics = await admin.listTopics();
+  if (!topics.includes(topicName)) {
+    await admin.createTopics({
+      topics: [{ topic: topicName }],
+    });
+    console.log(`Topic ${topicName} created.`);
+  } else {
+    console.log(`Topic ${topicName} already exists.`);
+  }
+
+  await admin.disconnect();
 }
