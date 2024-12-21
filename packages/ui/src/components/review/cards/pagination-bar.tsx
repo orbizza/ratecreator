@@ -39,7 +39,9 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
     router.push(`/sign-in?redirect_url=${returnUrl}`);
   };
   const handlePageClick = (page: number) => {
-    onPageChange(page - 1); // Convert back to 0-based for internal handling
+    if (page >= 0 && page <= maxPage) {
+      onPageChange(page);
+    }
   };
 
   const handleDisabledClick = () => {
@@ -65,7 +67,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
 
             {displayPage > 2 && (
               <PaginationItem>
-                <PaginationLink href="#" onClick={() => handlePageClick(1)}>
+                <PaginationLink href="#" onClick={() => handlePageClick(0)}>
                   1
                 </PaginationLink>
               </PaginationItem>
@@ -81,7 +83,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               <PaginationItem>
                 <PaginationLink
                   href="#"
-                  onClick={() => handlePageClick(displayPage - 1)}
+                  onClick={() => handlePageClick(displayPage - 2)}
                 >
                   {displayPage - 1}
                 </PaginationLink>
@@ -92,7 +94,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               <PaginationLink
                 href="#"
                 isActive
-                onClick={() => handlePageClick(displayPage)}
+                onClick={() => handlePageClick(displayPage - 1)}
               >
                 {displayPage}
               </PaginationLink>
@@ -102,7 +104,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               <PaginationItem>
                 <PaginationLink
                   href="#"
-                  onClick={() => handlePageClick(displayPage + 1)}
+                  onClick={() => handlePageClick(displayPage)}
                 >
                   {displayPage + 1}
                 </PaginationLink>
@@ -115,11 +117,11 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
-            {displayPage < maxPage - 1 && (
+            {displayPage < maxPage && (
               <PaginationItem>
                 <PaginationLink
                   href="#"
-                  onClick={() => handlePageClick(maxPage + 1)}
+                  onClick={() => handlePageClick(maxPage)}
                 >
                   {maxPage + 1}
                 </PaginationLink>
