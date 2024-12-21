@@ -8,13 +8,13 @@ generator client {
 }
 
 model Category {
-  id           String     @id @default(cuid()) @map("_id")
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId 
   name         String   
-  slug         String
+  slug         String @unique
   shortDescription  String?
   longDescription String?
   keywords      String[]
-  parentId     String?
+  parentId     String? @db.ObjectId
   parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subcategories Category[] @relation("CategoryHierarchy")
   accounts     CategoryMapping[] @relation("CategoryToCategoryMapping") // Added @relation attribute
@@ -23,8 +23,7 @@ model Category {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
-
-  @@unique([slug])
+ 
   @@index([name])
   @@index([parentId])
   @@index([shortDescription])
@@ -36,7 +35,7 @@ model Category {
 
 
 model Account {
-  id              String     @id @default(cuid()) @map("_id")
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
   platform        Platform
   accountId       String
   handle          String?
@@ -85,9 +84,9 @@ model Account {
 
 
 model CategoryMapping {
-  id         String   @id @default(cuid()) @map("_id")
-  accountId  String
-  categoryId String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId  String   @db.ObjectId
+  categoryId String   @db.ObjectId
   account    Account  @relation("AccountToCategoryMapping", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   category   Category @relation("CategoryToCategoryMapping", fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   createdAt  DateTime @default(now())
@@ -120,6 +119,11 @@ model User {
   deletedAt       DateTime?
   webhookPayload  Json?
   role            UserRole  @default(USER)
+
+  @@index([name])
+  @@index([username])
+  @@index([isDeleted])
+  @@index([role])
 }
 
 enum UserRole {
