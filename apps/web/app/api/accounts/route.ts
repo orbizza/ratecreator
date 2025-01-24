@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
-
 import { getRedisClient } from "@ratecreator/db/redis-do";
-import { getMongoClient } from "@ratecreator/db/mongo-client";
-
+import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
+const prisma = getPrismaClient();
 
 export async function GET(request: NextRequest) {
   const redis = getRedisClient();
@@ -45,37 +43,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getCategorySlugs(
-  categoryMappingIds: string[],
-): Promise<string[]> {
-  try {
-    const mongo_client = await getMongoClient();
-    const db = mongo_client.db("ratecreator");
-
-    const categoryMappings = await db
-      .collection("CategoryMapping")
-      .find({ _id: { $in: categoryMappingIds.map((id) => new ObjectId(id)) } })
-      .toArray();
-
-    if (categoryMappings.length === 0) {
-      return [];
-    }
-
-    const categoryIds = categoryMappings.map((mapping) => mapping.categoryId);
-
-    const categories = await db
-      .collection("Category")
-      .find({ _id: { $in: categoryIds.map((id) => new ObjectId(id)) } })
-      .project({ slug: 1 })
-      .toArray();
-
-    return categories.map((category) => category.slug);
-  } catch (error) {
-    console.error("Error fetching category slugs:", error);
-    return [];
-  }
-}
-
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
   accountId: string,
@@ -87,56 +54,48 @@ async function handleYoutubeAccount(
       return NextResponse.json(JSON.parse(cachedData));
     }
 
-    const mongo_client = await getMongoClient();
-    const db = mongo_client.db("ratecreator");
-
-    const account = await db.collection("Account").findOne({
-      accountId: accountId,
-      platform: "YOUTUBE",
+    const account = await prisma.account.findFirst({
+      where: {
+        accountId: accountId,
+        platform: "YOUTUBE",
+      },
     });
 
     if (!account) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    // Get category slugs
-    const categorySlugs = await getCategorySlugs(account.categories || []);
+    // Get category mappings for this account
+    const categoryMappings = await prisma.categoryMapping.findMany({
+      where: { accountId: account.id },
+      include: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    const categorySlugs = categoryMappings.map(
+      (mapping) => mapping.category.slug,
+    );
 
     // Format response to match CreatorData type
     const responseData: CreatorData = {
       account: {
-        id: account._id.toString(),
+        id: account.id,
         platform: account.platform,
         accountId: account.accountId,
-        handle: account.handle,
-        name_en: account.name_en,
-        description_en: account.description_en,
-        keywords_en: account.keywords_en,
-        followerCount: account.followerCount,
-        imageUrl: account.imageUrl,
-        country: account.country,
-        language_code: account.language_code,
-        rating: account.rating,
-        reviewCount: account.reviewCount,
-        ytData: {
-          snippet: {
-            publishedAt: account.ytData?.snippet?.publishedAt,
-            thumbnails: account.ytData?.snippet?.thumbnails,
-          },
-          statistics: {
-            viewCount: account.ytData?.statistics?.viewCount,
-            videoCount: account.ytData?.statistics?.videoCount,
-          },
-          status: {
-            madeForKids: account.ytData?.status?.madeForKids ?? false,
-          },
-          brandingSettings: {
-            image: {
-              bannerExternalUrl:
-                account.ytData?.brandingSettings?.image?.bannerExternalUrl,
-            },
-          },
-        },
+        handle: account.handle ?? "",
+        name_en: account.name_en ?? "",
+        description_en: account.description_en ?? "",
+        keywords_en: account.keywords_en ?? "",
+        followerCount: account.followerCount ?? 0,
+        imageUrl: account.imageUrl ?? "",
+        country: account.country ?? null,
+        language_code: account.language_code ?? "",
+        rating: account.rating ?? 0,
+        reviewCount: account.reviewCount ?? 0,
+        ytData: (account.ytData as any) ?? {},
       },
       categories: categorySlugs,
     };

@@ -11,6 +11,7 @@ function getMongoURI(): string {
   const uri = process.env.DATABASE_URL_ONLINE || "";
   if (!uri) {
     console.error("DATABASE_URL_ONLINE is not set.");
+    throw new Error("DATABASE_URL_ONLINE is not set.");
   }
   // console.log("MongoDB URI:", uri);
   return uri;
