@@ -15,7 +15,7 @@ export async function getCreatorData({
 }: GetCreatorDataProps): Promise<CreatorData> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/accounts?accountId=${accountId}&platform=${platform}`
+      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/accounts?accountId=${accountId}&platform=${platform}`,
     );
     return response.data;
   } catch (error) {
