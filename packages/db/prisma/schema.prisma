@@ -50,6 +50,11 @@ model Account {
   keywords_en     String?
   categories      CategoryMapping[] @relation("AccountToCategoryMapping") 
   ytData          Json?
+  redditData      Json?
+  xData           Json?
+  tiktokData      Json?
+  twitchData      Json?
+  instagramData   Json?
   isSeeded        Boolean    @default(false)
   isSuspended     Boolean    @default(false)
   ranking         Json?
@@ -61,6 +66,9 @@ model Account {
   reviewCount     Int?
   isSubCategoryFailed Boolean? @default(false)
   lastIndexedAt   DateTime?
+  isDeleted       Boolean? @default(false)
+  isCategoryFailed Boolean? @default(false)
+  isTranslationFailed Boolean? @default(false)
   
   @@unique([platform, accountId])
   @@index([platform])
@@ -80,7 +88,12 @@ model Account {
   @@index([rating])
   @@index([isSubCategoryFailed])
   @@index([lastIndexedAt])
+  @@index([isDeleted])
+  @@index([isCategoryFailed])
+  @@index([isTranslationFailed])
+  @@index([isSeeded])
 }
+
 
 
 model CategoryMapping {

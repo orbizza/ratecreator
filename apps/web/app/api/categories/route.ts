@@ -17,7 +17,7 @@ const prisma = getPrismaClient();
 
 export async function GET(request: NextRequest) {
   const redis = getRedisClient();
-  //await redis.flushall();
+  // await redis.flushall();
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
@@ -137,13 +137,12 @@ async function fetchAccountsForPopularCategories(
     // await redis.del(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedCategories) {
-      // console.log("Returning cached popular categories");
       return NextResponse.json(JSON.parse(cachedCategories));
     }
+
     const popularCategoriesResponse = await handlePopularCategories(redis);
     const popularCategories: PopularCategory[] =
       await popularCategoriesResponse.json();
-    // console.log("Popular Categories Received");
 
     const database = client.db("ratecreator");
     const categoryMappingCollection = database.collection("CategoryMapping");
@@ -152,20 +151,45 @@ async function fetchAccountsForPopularCategories(
     const accountsByCategory = await Promise.all(
       popularCategories.map(async (category) => {
         try {
-          const categoryMappings = await categoryMappingCollection
-            .find({ categoryId: category.id })
+          // Convert category.id to ObjectId for querying
+          const categoryObjectId = new ObjectId(category.id);
 
+          // First get category mappings
+          const categoryMappings = await categoryMappingCollection
+            .find({ categoryId: categoryObjectId })
             .toArray();
 
-          const accountIds: ObjectId[] = categoryMappings.map(
+          if (categoryMappings.length === 0) {
+            console.log(`No mappings found for category ${category.id}`);
+            return {
+              category: {
+                id: category.id,
+                name: category.name,
+                slug: category.slug,
+              },
+              accounts: [],
+            };
+          }
+
+          // Get account IDs from mappings
+          const accountObjectIds = categoryMappings.map(
             (mapping) => new ObjectId(mapping.accountId),
           );
 
+          // Fetch accounts using the ObjectIds
           const accounts = await accountCollection
-            .find({ _id: { $in: accountIds } })
+            .find({
+              _id: { $in: accountObjectIds },
+              // isDeleted: { $ne: true }, // Exclude deleted accounts
+              // isSuspended: { $ne: true }, // Exclude suspended accounts
+            })
             .sort({ followerCount: -1 })
             .limit(20)
             .toArray();
+
+          console.log(
+            `Found ${accounts.length} accounts for category ${category.id}`,
+          );
 
           return {
             category: {
@@ -173,16 +197,16 @@ async function fetchAccountsForPopularCategories(
               name: category.name,
               slug: category.slug,
             },
-            accounts: accounts.map((account: Account) => ({
-              id: account.id,
-              name: account.name,
-              handle: account.handle,
+            accounts: accounts.map((account) => ({
+              id: account._id.toString(),
+              name: account.name || "",
+              handle: account.handle || "",
               platform: account.platform,
               accountId: account.accountId,
-              followerCount: account.followerCount,
-              rating: account.rating,
-              reviewCount: account.reviewCount,
-              imageUrl: account.imageUrl,
+              followerCount: account.followerCount || 0,
+              rating: account.rating || 0,
+              reviewCount: account.reviewCount || 0,
+              imageUrl: account.imageUrl || "",
             })),
           };
         } catch (error) {
@@ -201,6 +225,7 @@ async function fetchAccountsForPopularCategories(
         }
       }),
     );
+
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
