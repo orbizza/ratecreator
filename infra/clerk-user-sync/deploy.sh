@@ -55,6 +55,9 @@ echo "🔐 Setting up registry authentication..."
 cp config.json ~/.docker/config.json
 chmod 600 ~/.docker/config.json
 
+# Set platform for Docker
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+
 # Pull the images (this will use the auth config we just set up)
 echo "📥 Pulling Docker images..."
 docker-compose pull
