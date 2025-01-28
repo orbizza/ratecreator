@@ -20,6 +20,12 @@ docker buildx use multiarch-builder
 echo "🔐 Logging into DigitalOcean registry..."
 docker login registry.digitalocean.com
 
+# Generate Prisma client with correct binary targets
+echo "🔄 Generating Prisma client..."
+cd packages/db
+yarn prisma generate
+cd ../..
+
 echo "🏭 Building and pushing clerk-consumer..."
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
