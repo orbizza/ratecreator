@@ -16,6 +16,7 @@ services:
       - "3010"
     environment:
       - PORT=3010
+      - CLERK_WEBHOOK_SECRET=${CLERK_WEBHOOK_SECRET}
     networks:
       - clerk-network
     volumes:

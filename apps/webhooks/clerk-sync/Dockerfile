@@ -7,10 +7,10 @@ WORKDIR /app
 # Copy the entire monorepo
 COPY . .
 
-# Install dependencies at the repo root (assuming Yarn workspace)
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Build the entire repo (this ensures dependencies for clerk-sync)
+# Generate Prisma Client with correct binary targets
 RUN yarn build
 
 # Stage 2: Runtime
@@ -21,11 +21,17 @@ WORKDIR /app
 # Copy just the needed parts from builder
 COPY --from=builder /app/apps/webhooks/clerk-sync/dist ./apps/webhooks/clerk-sync/dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/db ./packages/db
+COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Create directory for logs
+RUN mkdir -p /var/log/clerk-sync && \
+    chown -R node:node /var/log/clerk-sync
+
+# Use non-root user
+USER node
 
 ENV NODE_ENV=production
 
-# Assuming your app listens on port 3000
-EXPOSE 3010
-
+# Start the webhook server
 CMD ["node", "apps/webhooks/clerk-sync/dist/index.js"]
