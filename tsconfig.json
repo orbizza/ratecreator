@@ -1,13 +1,15 @@
 {
+  "extends": "@ratecreator/typescript-config/base.json",
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
-    "strict": true,
+    "module": "Node16",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": "."
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["apps/**/*.ts", "packages/**/*.ts"],
+  "exclude": ["node_modules", "**/dist"]
 }
