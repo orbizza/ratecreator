@@ -1,7 +1,7 @@
-import { getKafkaConsumer } from "@ratecreator/db/src/clients/kafka-client";
-import { PrismaClient } from "@prisma/client";
+import { getKafkaConsumer } from "@ratecreator/db/kafka-client";
+import { getPrismaClient } from "@ratecreator/db/client";
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 let consumer: ReturnType<typeof getKafkaConsumer>;
 
 async function processMessage(message: any) {
