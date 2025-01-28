@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import {
   createTopicIfNotExists,
   getKafkaProducer,
-} from "@ratecreator/db/kafka-client";
+} from "@ratecreator/db/src/clients/kafka-client";
 import { serve } from "@hono/node-server";
 
 const app = new Hono();

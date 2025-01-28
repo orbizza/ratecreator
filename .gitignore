@@ -52,5 +52,11 @@ dist/
 .idea/usage.statistics.xml
 .idea/shelf
 
+# Kubernetes secrets
+infra/**/secrets.yaml
+infra/**/*secret*.yaml
+infra/**/*secrets*.yaml
+infra/webhook/clerk-sync/secrets.yaml
+
 
 
