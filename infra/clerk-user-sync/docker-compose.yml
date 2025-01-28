@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  clerk-consumer:
+    image: registry.digitalocean.com/orbizza/clerk-consumer:latest
+    restart: always
+    networks:
+      - clerk-network
+    volumes:
+      - ${HOME}/.docker/config.json:/root/.docker/config.json:ro
+
+  clerk-producer:
+    image: registry.digitalocean.com/orbizza/clerk-producer:latest
+    restart: always
+    expose:
+      - "3010"
+    environment:
+      - PORT=3010
+    networks:
+      - clerk-network
+    volumes:
+      - ${HOME}/.docker/config.json:/root/.docker/config.json:ro
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - clerk-producer
+    networks:
+      - clerk-network
+    restart: always
+
+networks:
+  clerk-network:
+    driver: bridge
