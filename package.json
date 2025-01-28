@@ -15,9 +15,6 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "prisma-generate": "npx dotenv -e .env -- npx prisma generate --schema=packages/db/prisma/schema.prisma",
-    "category-dev": "yarn workspace @ratecreator/category dev",
-    "category-build": "yarn workspace @ratecreator/category build",
-    "category-start": "yarn workspace @ratecreator/category start",
     "npm-clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +",
     "dist-clean": "find . -name \"dist\" -type d -prune -exec rm -rf '{}' +",
     "full-clean": "yarn npm-clean && yarn dist-clean"

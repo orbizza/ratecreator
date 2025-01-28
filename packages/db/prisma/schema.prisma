@@ -131,7 +131,7 @@ model User {
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
   webhookPayload  Json?
-  role            UserRole  @default(USER)
+  role            UserRole[]  @default([USER])
 
   @@index([name])
   @@index([username])
