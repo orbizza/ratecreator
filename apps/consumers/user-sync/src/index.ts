@@ -61,7 +61,7 @@ async function processMessage(message: any) {
 
         if (!user) {
           console.log(
-            `User ${payload.id} not found in database for deletion. Skipping.`
+            `User ${payload.id} not found in database for deletion. Skipping.`,
           );
           return;
         }
