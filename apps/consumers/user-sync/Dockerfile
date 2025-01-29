@@ -4,16 +4,23 @@ FROM node:18-bullseye-slim as builder
 WORKDIR /app
 
 # Install dependencies needed for Prisma
-RUN apt-get update && apt-get install -y openssl
+RUN apt-get update && apt-get install -y openssl libssl-dev && apt-get clean
 
-# Copy monorepo and install dependencies
+# Copy package files first for better caching
 COPY . .
+
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Build the project and generate Prisma Client
-RUN yarn build && \
-    cd packages/db && \
-    npx prisma generate
+# Build only the user-sync package
+RUN cd apps/consumers/user-sync && \
+    yarn build-user-sync
+
+# Ensure Prisma Query Engine is available for both arm64 & amd64
+RUN cd packages/db && \
+    PRISMA_CLI_QUERY_ENGINE_TYPE=binary \
+    npx prisma generate --schema=prisma/schema.prisma
+
 
 # Stage 2: Runtime
 FROM node:18-bullseye-slim as runtime
@@ -21,17 +28,17 @@ FROM node:18-bullseye-slim as runtime
 WORKDIR /app
 
 # Install dependencies needed for runtime
-RUN apt-get update && apt-get install -y openssl && apt-get clean
+RUN apt-get update && apt-get install -y openssl libssl-dev && apt-get clean
 
-# Copy necessary files from the builder stage
+# Copy necessary files from builder
 COPY --from=builder /app/apps/consumers/user-sync/dist ./apps/consumers/user-sync/dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/db ./packages/db
 COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
 
-# Set environment variables
+# Set environment variables for Prisma binary
 ENV NODE_ENV=production
-ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-debian-openssl-1.1.x.so.node
+ENV PRISMA_BINARY_PLATFORM="debian-openssl-1.1.x"
 
-# Set default command
+# Default command
 CMD ["node", "apps/consumers/user-sync/dist/index.js"]
