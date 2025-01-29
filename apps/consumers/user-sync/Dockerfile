@@ -1,40 +1,37 @@
 # Stage 1: Builder
 FROM node:18-bullseye-slim as builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy the entire monorepo
-COPY . .
+# Install dependencies needed for Prisma
+RUN apt-get update && apt-get install -y openssl
 
-# Install dependencies at the repo root (assuming Yarn workspace)
+# Copy monorepo and install dependencies
+COPY . .
 RUN yarn install --frozen-lockfile
 
-# Generate Prisma Client with correct binary targets
-RUN cd packages/db && \
-    npx prisma generate && \
-    cd ../.. && \
-    yarn build
+# Build the project and generate Prisma Client
+RUN yarn build && \
+    cd packages/db && \
+    npx prisma generate
 
 # Stage 2: Runtime
 FROM node:18-bullseye-slim as runtime
 
 WORKDIR /app
 
-# Copy just the needed parts from builder
+# Install dependencies needed for runtime
+RUN apt-get update && apt-get install -y openssl && apt-get clean
+
+# Copy necessary files from the builder stage
 COPY --from=builder /app/apps/consumers/user-sync/dist ./apps/consumers/user-sync/dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/packages/db ./packages/db
+COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
 
-# Create directory for logs
-RUN mkdir -p /var/log/user-sync && \
-    chown -R node:node /var/log/user-sync
-
-# Use non-root user
-USER node
-
+# Set environment variables
 ENV NODE_ENV=production
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-debian-openssl-1.1.x.so.node
 
-# Start the consumer
-CMD ["node", "apps/consumers/user-sync/dist/index.js"] 
+# Set default command
+CMD ["node", "apps/consumers/user-sync/dist/index.js"]
