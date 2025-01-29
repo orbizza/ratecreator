@@ -126,8 +126,9 @@ model User {
   id              String    @id @default(auto()) @map("_id") @db.ObjectId // MongoDB's default ObjectId 
   clerkId         String    @unique
   email           String    @unique
-  name            String?
-  username        String?
+  firstName       String?   @default("")
+  lastName        String?   @default("")
+  username        String?   @default("")
   isDeleted       Boolean   @default(false) // Soft delete indicator
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -135,10 +136,12 @@ model User {
   webhookPayload  Json?
   role            UserRole[]  @default([USER])
 
-  @@index([name])
+  @@index([firstName])
+  @@index([lastName])
   @@index([username])
   @@index([isDeleted])
   @@index([role])
+  
 }
 
 enum UserRole {

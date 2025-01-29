@@ -11,37 +11,73 @@ async function processMessage(message: any) {
   }
 
   const payload = JSON.parse(message.value.toString());
-  const eventType = message.key.toString();
+  console.log("Processing message with payload:", JSON.stringify(payload));
+  const [eventType] = message.key.toString().split(":");
 
   try {
     if (eventType === "user.created") {
-      await prisma.user.create({
-        data: {
+      const email = payload.email_addresses[0].email_address;
+      await prisma.user.upsert({
+        where: { email },
+        create: {
           clerkId: payload.id,
-          email: payload.email,
-          name: payload.name,
-          username: payload.username,
+          email,
+          firstName: payload.first_name || "",
+          lastName: payload.last_name || "",
+          username: payload.username || "",
           webhookPayload: payload,
+          isDeleted: false,
+          deletedAt: null,
+        },
+        update: {
+          clerkId: payload.id,
+          firstName: payload.first_name || "",
+          lastName: payload.last_name || "",
+          username: payload.username || "",
+          webhookPayload: payload,
+          isDeleted: false,
+          deletedAt: null,
         },
       });
-      console.log(`Created user: ${payload.id}`);
+      console.log(`Upserted user with email ${email}`);
     } else if (eventType === "user.updated") {
       await prisma.user.update({
         where: { clerkId: payload.id },
         data: {
-          email: payload.email,
-          name: payload.name,
+          email: payload.email_addresses[0].email_address,
+          firstName: payload.first_name,
+          lastName: payload.last_name,
           username: payload.username,
           webhookPayload: payload,
         },
       });
       console.log(`Updated user: ${payload.id}`);
     } else if (eventType === "user.deleted") {
-      await prisma.user.update({
-        where: { clerkId: payload.id },
-        data: { isDeleted: true, deletedAt: new Date() },
-      });
-      console.log(`Marked user as deleted: ${payload.id}`);
+      try {
+        // First try to find the user
+        const user = await prisma.user.findUnique({
+          where: { clerkId: payload.id },
+        });
+
+        if (!user) {
+          console.log(
+            `User ${payload.id} not found in database for deletion. Skipping.`
+          );
+          return;
+        }
+
+        await prisma.user.update({
+          where: { clerkId: payload.id },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date(),
+            // webhookPayload: payload,
+          },
+        });
+        console.log(`Marked user as deleted: ${payload.id}`);
+      } catch (error) {
+        console.error(`Error processing delete for user ${payload.id}:`, error);
+      }
     } else {
       console.log(`Unhandled event type: ${eventType}`);
     }

@@ -62,14 +62,8 @@ app.post("/webhook/clerk", async (c) => {
       topic: topicName,
       messages: [
         {
-          key: type, // Event type as the key
-          value: JSON.stringify({
-            id: data.id,
-            email: data.email,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
-            eventType: type,
-          }),
+          key: `${type}:${data.id}`, // Combine event type and user ID
+          value: JSON.stringify(data),
         },
       ],
     });
