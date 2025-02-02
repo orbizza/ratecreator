@@ -305,7 +305,7 @@ export const CategoriesSearchResults: React.FC = () => {
       </div>
       <div className="flex flex-row">
         <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
-          {!loading && <FilterSidebar />}
+          {!creatorLoading && <FilterSidebar />}
           {!loading && (
             <>
               <SubCategoriesList

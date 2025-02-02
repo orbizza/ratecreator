@@ -30,9 +30,9 @@ export function CardLandingVertical({
       case "youtube":
         return <SiYoutube className="text-red-500" />;
       case "twitter":
-        return <SiX />;
+        return <SiX className="text-black" />;
       case "reddit":
-        return <SiReddit />;
+        return <SiReddit className="text-orange-500" />;
       case "tiktok":
         return <SiTiktok />;
       case "twitch":

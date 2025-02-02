@@ -41,28 +41,32 @@ export const Footer = () => {
             {/* Social icons now on the same row for md and sm, at the bottom for lg */}
             <div className="flex space-x-4  lg:mt-auto">
               <Link
-                href="#"
+                href="https://x.com/ratecreator"
+                target="_blank"
                 aria-label="Twitter"
                 className="text-muted-foreground hover:text-primary-foreground/80"
               >
                 <SiX size={20} />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/_orbizza"
+                target="_blank"
                 aria-label="Instagram"
                 className="text-muted-foreground hover:text-primary-foreground/80"
               >
                 <SiInstagram size={20} />
               </Link>
               <Link
-                href="#"
+                href="https://www.youtube.com/@orbizza"
+                target="_blank"
                 aria-label="YouTube"
                 className="text-muted-foreground hover:text-primary-foreground/80"
               >
                 <SiYoutube size={20} />
               </Link>
               <Link
-                href="#"
+                href="https://www.linkedin.com/company/orbizza"
+                target="_blank"
                 aria-label="LinkedIn"
                 className="text-muted-foreground hover:text-primary-foreground/80"
               >
@@ -84,19 +88,19 @@ export const Footer = () => {
               <h3 className="font-normal mb-5">Community</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Trust in reviews</Link>
+                  <Link href="/wip">Trust in reviews</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Help Center</Link>
+                  <Link href="/wip">Help Center</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Log in</Link>
+                  <Link href="/sign-in">Log in</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Get Started</Link>
+                  <Link href="/sign-up">Get Started</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Guidelines for reviews</Link>
+                  <Link href="/wip">Guidelines for reviews</Link>
                 </li>
               </ul>
             </div>
@@ -104,19 +108,29 @@ export const Footer = () => {
               <h3 className="font-normal mb-5">Creators</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">For Creators</Link>
+                  <Link href="https://creator.ratecreator.com" target="_blank">
+                    For Creators
+                  </Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Features</Link>
+                  <Link href="https://creator.ratecreator.com" target="_blank">
+                    Features
+                  </Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Pricing</Link>
+                  <Link href="https://creator.ratecreator.com" target="_blank">
+                    Pricing
+                  </Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Creator login</Link>
+                  <Link href="https://creator.ratecreator.com" target="_blank">
+                    Creator login
+                  </Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Blog for creators</Link>
+                  <Link href="https://creator.ratecreator.com" target="_blank">
+                    Blog for creators
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -124,25 +138,25 @@ export const Footer = () => {
               <h3 className="font-normal mb-5">Company</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Why we&apos;re here</Link>
+                  <Link href="/wip">Why we&apos;re here</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Our Story</Link>
+                  <Link href="/wip">Our Story</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">How it works</Link>
+                  <Link href="/wip">How it works</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Changelog</Link>
+                  <Link href="/wip">Changelog</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Roadmap</Link>
+                  <Link href="/wip">Roadmap</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Brand</Link>
+                  <Link href="/wip">Brand</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Contact</Link>
+                  <Link href="/contact">Contact</Link>
                 </li>
               </ul>
             </div>
@@ -150,19 +164,19 @@ export const Footer = () => {
               <h3 className="font-normal mb-5">Resources</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Blog</Link>
+                  <Link href="/wip">Blog</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Creator Economy Glossary</Link>
+                  <Link href="/wip">Creator Economy Glossary</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Categories Glossary</Link>
+                  <Link href="/wip">Categories Glossary</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Newsletter</Link>
+                  <Link href="/wip">Newsletter</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="#">Report a vulnerability</Link>
+                  <Link href="/wip">Report a vulnerability</Link>
                 </li>
               </ul>
             </div>
@@ -172,29 +186,33 @@ export const Footer = () => {
         {/* Bottom section with copyright and links */}
         <div className="flex flex-col-reverse gap-y-5 md:gap-y-0 md:flex-row justify-between items-center mt-16 pt-8 border-t border-gray-800">
           <div className="text-primary-foreground text-[11px]">
-            &copy; 2024 Orbizza, Inc. All rights reserved.
+            &copy; 2024{" "}
+            <Link href="https://orbizza.com" target="_blank">
+              Orbizza, Inc.
+            </Link>{" "}
+            All rights reserved.
           </div>
           <div className="flex flex-wrap justify-center md:justify-start space-x-4  text-[11px]  mb-4 md:mb-0">
             <Link
-              href="#"
+              href="/wip"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Privacy policy
             </Link>
             <Link
-              href="#"
+              href="/wip"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Terms
             </Link>
             <Link
-              href="#"
+              href="/wip"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Status
             </Link>
             <Link
-              href="#"
+              href="/wip"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Cookie Settings
