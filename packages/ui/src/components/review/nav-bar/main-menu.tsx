@@ -53,7 +53,7 @@ export function MainMenu() {
           <Button variant={"ghost"} onClick={() => router.push("/categories")}>
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/blog")}>
+          <Button variant={"ghost"} onClick={() => router.push("/wip")}>
             Blog
           </Button>
 
@@ -93,41 +93,41 @@ export function MainMenu() {
 
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/user-profile")}>
                   <User className="mr-2 size-4" />
                   <span>Profile</span>
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/wip")}>
                   <Star className="mr-2 size-4" />
                   <span>My Reviews</span>
                   <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/wip")}>
                   <ClipboardList className="mr-2 size-4" />
                   <span>My Lists</span>
                   <DropdownMenuShortcut>⌘L</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <Settings className="mr-2 size-4" />
                 <span>Settings</span>
                 <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <LifeBuoy className="mr-2 size-4" />
                 <span>Help</span>
                 <DropdownMenuShortcut>⌘H</DropdownMenuShortcut>
               </DropdownMenuItem>
               {/* Enable when billing feature is added */}
-              {/* <DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <CreditCard className='mr-2 size-4' />
                 <span>Billing</span>
                 <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
               </DropdownMenuItem> */}
 
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <Keyboard className="mr-2 size-4" />
                 <span>Keyboard shortcuts</span>
                 <DropdownMenuShortcut>⇧⌘K</DropdownMenuShortcut>
@@ -154,7 +154,7 @@ export function MainMenu() {
           <Button variant={"ghost"} onClick={() => router.push("/categories")}>
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/blog")}>
+          <Button variant={"ghost"} onClick={() => router.push("/wip")}>
             Blog
           </Button>
           <Button variant={"outline"} onClick={() => router.push("/sign-in")}>

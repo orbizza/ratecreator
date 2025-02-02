@@ -106,7 +106,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/user-profile")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -119,7 +119,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -132,7 +132,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -147,7 +147,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"link"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -173,7 +173,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => router.push("/blog")}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -189,7 +189,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -202,7 +202,7 @@ export function MobileSideNav() {
               {/* <SheetClose asChild>
                   <Button
                     variant={"ghost"}
-                    onClick={() => {}}
+                    onClick={() => router.push("/wip")}
                     className='flex justify-between '
                   >
                     <div className='flex items-center'>
@@ -215,7 +215,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -229,7 +229,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => {}}
+                  onClick={() => router.push("/wip")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -292,7 +292,7 @@ export function MobileSideNav() {
                   Categories
                 </Button>
               </SheetClose>
-              <Button variant={"ghost"} onClick={() => router.push("/blog")}>
+              <Button variant={"ghost"} onClick={() => router.push("/wip")}>
                 Blog
               </Button>
               <Separator className="" />

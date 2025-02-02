@@ -91,20 +91,66 @@ export const CreatorProfileYoutube = ({
     );
   }
 
+  const renderPlatformContent = () => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return (
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              <ChannelHeader account={data.account} />
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              <UserRatingCard accountId={accountId} />
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              <ChannelDetailsSection
+                account={data.account}
+                categories={data.categories}
+              />
+            </Suspense>
+          </>
+        );
+      case "twitter":
+        return (
+          <div className="text-center py-8">
+            Twitter profile view coming soon
+          </div>
+        );
+      case "reddit":
+        return (
+          <div className="text-center py-8">
+            Sub Reddit community view coming soon
+          </div>
+        );
+      case "tiktok":
+        return (
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              TikTok profile view coming soon
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              {/* <UserRatingCard accountId={accountId} /> */}
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              {/* <ChannelDetailsSection
+                account={data.account}
+                categories={data.categories}
+              /> */}
+            </Suspense>
+          </>
+        );
+      default:
+        return (
+          <div className="text-center py-8">
+            Unsupported platform: {platform}
+          </div>
+        );
+    }
+  };
+
   return (
     <main className="container mx-auto p-4 mt-10">
-      <Suspense fallback={<ChannelHeaderSkeleton />}>
-        <ChannelHeader account={data.account} />
-      </Suspense>
-      <Suspense fallback={<UserRatingCardSkeleton />}>
-        <UserRatingCard accountId={accountId} />
-      </Suspense>
-      <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
-        <ChannelDetailsSection
-          account={data.account}
-          categories={data.categories}
-        />
-      </Suspense>
+      {renderPlatformContent()}
       <Suspense fallback={""}>
         {/* Review Section */}
         <div id="reviews" className="mt-10 text-2xl font-bold">

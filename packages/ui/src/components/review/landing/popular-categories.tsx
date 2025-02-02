@@ -116,7 +116,7 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
       {displayedAccounts.map((item, idx) => (
         <Link
           href={`/review/${item?.platform.toLowerCase()}/${item?.accountId}`}
-          key={item?.handle}
+          key={item?.platform + item?.handle}
           className="relative group  block p-2 h-full w-full"
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
@@ -342,7 +342,7 @@ const CreatorLoadingCard: React.FC = () => {
           <ChevronRight className="ml-1" size={16} />
         </Button>
       </div>
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  gap-4">
         {[...Array(skeletonCount)].map((_, index) => (
           <div key={index} className="flex flex-col space-y-3">
             <Skeleton className="h-[125px] w-full rounded-xl" />
