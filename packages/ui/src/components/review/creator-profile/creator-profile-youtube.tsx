@@ -37,7 +37,7 @@ export const CreatorProfileYoutube = ({
         // Try to get data from IndexedDB cache
         const cachedData = await creatorCache.getCachedCreator(
           platform,
-          accountId,
+          accountId
         );
 
         if (cachedData) {
@@ -54,7 +54,7 @@ export const CreatorProfileYoutube = ({
         await creatorCache.setCachedCreator(platform, accountId, result);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch creator data",
+          err instanceof Error ? err.message : "Failed to fetch creator data"
         );
         router.push("/error");
       } finally {
@@ -67,7 +67,7 @@ export const CreatorProfileYoutube = ({
 
   if (loading) {
     return (
-      <main className="container mx-auto p-4 mt-10">
+      <main className='container mx-auto p-4 mt-10'>
         <ChannelHeaderSkeleton />
         <UserRatingCardSkeleton />
         <ChannelDetailsSectionSkeleton />
@@ -77,7 +77,7 @@ export const CreatorProfileYoutube = ({
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 mt-16 text-red-500">
+      <div className='container mx-auto p-4 mt-16 text-red-500'>
         Error: {error}
       </div>
     );
@@ -85,29 +85,75 @@ export const CreatorProfileYoutube = ({
 
   if (!data) {
     return (
-      <div className="container mx-auto p-4 mt-10">
+      <div className='container mx-auto p-4 mt-10'>
         No data found for this creator
       </div>
     );
   }
 
+  const renderPlatformContent = () => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return (
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              <ChannelHeader account={data.account} />
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              <UserRatingCard accountId={accountId} />
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              <ChannelDetailsSection
+                account={data.account}
+                categories={data.categories}
+              />
+            </Suspense>
+          </>
+        );
+      case "twitter":
+        return (
+          <div className='text-center py-8'>
+            Twitter profile view coming soon
+          </div>
+        );
+      case "reddit":
+        return (
+          <div className='text-center py-8'>
+            Sub Reddit community view coming soon
+          </div>
+        );
+      case "tiktok":
+        return (
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              TikTok profile view coming soon
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              {/* <UserRatingCard accountId={accountId} /> */}
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              {/* <ChannelDetailsSection
+                account={data.account}
+                categories={data.categories}
+              /> */}
+            </Suspense>
+          </>
+        );
+      default:
+        return (
+          <div className='text-center py-8'>
+            Unsupported platform: {platform}
+          </div>
+        );
+    }
+  };
+
   return (
-    <main className="container mx-auto p-4 mt-10">
-      <Suspense fallback={<ChannelHeaderSkeleton />}>
-        <ChannelHeader account={data.account} />
-      </Suspense>
-      <Suspense fallback={<UserRatingCardSkeleton />}>
-        <UserRatingCard accountId={accountId} />
-      </Suspense>
-      <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
-        <ChannelDetailsSection
-          account={data.account}
-          categories={data.categories}
-        />
-      </Suspense>
+    <main className='container mx-auto p-4 mt-10'>
+      {renderPlatformContent()}
       <Suspense fallback={""}>
         {/* Review Section */}
-        <div id="reviews" className="mt-10 text-2xl font-bold">
+        <div id='reviews' className='mt-10 text-2xl font-bold'>
           Reviews
           {/* <ReviewsSection account={data} /> */}
         </div>
