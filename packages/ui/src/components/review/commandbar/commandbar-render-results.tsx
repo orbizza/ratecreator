@@ -7,6 +7,7 @@ import { Button, Separator } from "@ratecreator/ui";
 import { CreatorCard, CategoryCard } from "@ratecreator/ui/review";
 
 import { FilteredCategory, TabType } from "@ratecreator/types/review";
+import { useKBar } from "kbar";
 
 interface RenderResultsProps {
   filteredData: FilteredCategory[];
@@ -18,6 +19,7 @@ export const RenderResults: React.FC<RenderResultsProps> = ({
   activeTab,
 }) => {
   const router = useRouter();
+  const { query } = useKBar();
 
   const handleCategoryClick = (categoryName: string) => {
     router.push(`/categories/${encodeURIComponent(categoryName)}`);

@@ -17,6 +17,8 @@ import {
   PenLine,
   Library,
   Layers3,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -113,7 +115,6 @@ export function MobileSideNav() {
                     <User className="mr-4 size-4" />
                     <span>Profile</span>
                   </div>
-                  <span>⇧⌘P</span>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
@@ -126,7 +127,6 @@ export function MobileSideNav() {
                     <Star className="mr-4 size-4" />
                     <span>My Reviews</span>
                   </div>
-                  <span>⌘R</span>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
@@ -139,7 +139,6 @@ export function MobileSideNav() {
                     <ClipboardList className="mr-4 size-4" />
                     <span>My Lists</span>
                   </div>
-                  <span>⌘L</span>
                 </Button>
               </SheetClose>
               <Separator className="w-[270px]" />
@@ -154,7 +153,6 @@ export function MobileSideNav() {
                     <PenLine className="mr-4 size-4" />
                     <span>Write a review</span>
                   </div>
-                  <span>⌘W</span>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
@@ -167,7 +165,6 @@ export function MobileSideNav() {
                     <Layers3 className="mr-4 size-4" />
                     <span>Categories</span>
                   </div>
-                  <span>GC</span>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
@@ -180,7 +177,6 @@ export function MobileSideNav() {
                     <Library className="mr-4 size-4" />
                     <span>Blog</span>
                   </div>
-                  <span>GB</span>
                 </Button>
               </SheetClose>
 
@@ -196,22 +192,8 @@ export function MobileSideNav() {
                     <Settings className="mr-4 size-4" />
                     <span>Settings</span>
                   </div>
-                  <span>⌘S</span>
                 </Button>
               </SheetClose>
-              {/* <SheetClose asChild>
-                  <Button
-                    variant={"ghost"}
-                    onClick={() => router.push("/wip")}
-                    className='flex justify-between '
-                  >
-                    <div className='flex items-center'>
-                      <CreditCard className='mr-4 size-4' />
-                      <span>Billing</span>
-                    </div>
-                    <span>⌘B</span>
-                  </Button>
-                </SheetClose> */}
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
@@ -222,7 +204,6 @@ export function MobileSideNav() {
                     <LifeBuoy className="mr-4 size-4" />
                     <span>Help</span>
                   </div>
-                  <span>⌘H</span>
                 </Button>
               </SheetClose>
 
@@ -236,23 +217,17 @@ export function MobileSideNav() {
                     <Keyboard className="mr-4 size-4" />
                     <span>Keyboard shortcuts</span>
                   </div>
-                  <span>⇧⌘K</span>
                 </Button>
               </SheetClose>
 
               <Separator className="" />
 
               <SheetClose asChild>
-                <Button
-                  variant={"default"}
-                  onClick={() => signOut()}
-                  className="flex justify-between "
-                >
+                <Button variant={"default"} onClick={() => signOut()}>
                   <div className="flex items-center">
-                    <LogOut className="mr-4 size-4" />
+                    {/* <LogOut className='mr-4 size-4' /> */}
                     <span>Log out</span>
                   </div>
-                  <span>⇧⌘Q</span>
                 </Button>
               </SheetClose>
             </div>
@@ -281,35 +256,66 @@ export function MobileSideNav() {
             </SheetTitle>
             <Separator className="my-4 w-[270px]" />
             <div className="grid gap-2 py-4 w-[270px]">
-              <Button variant={"ghost"}>For creators</Button>
-              {/* <Separator className='my-4 w-[270px]' /> */}
-              <Button variant={"link"}>Write a review</Button>
+              <SheetClose asChild>
+                <Button variant={"default"} className="w-[270px]">
+                  For creators
+                </Button>
+              </SheetClose>
+              <Separator className="my-4 w-[270px]" />
+
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
                   onClick={() => router.push("/categories")}
+                  className="flex justify-between"
                 >
-                  Categories
+                  <div className="flex items-center">
+                    <Layers3 className="mr-4 size-4" />
+                    <span>Categories</span>
+                  </div>
                 </Button>
               </SheetClose>
-              <Button variant={"ghost"} onClick={() => router.push("/wip")}>
-                Blog
-              </Button>
-              <Separator className="" />
+              <SheetClose asChild>
+                <Button variant={"link"} className="flex justify-between">
+                  <div className="flex items-center">
+                    <PenLine className="mr-4 size-4" />
+                    <span>Write a review</span>
+                  </div>
+                </Button>
+              </SheetClose>
               <SheetClose asChild>
                 <Button
-                  variant={"outline"}
-                  onClick={() => router.push("/sign-in")}
+                  variant={"ghost"}
+                  onClick={() => router.push("/wip")}
+                  className="flex justify-between"
                 >
-                  Log in
+                  <div className="flex items-center">
+                    <Library className="mr-4 size-4" />
+                    <span>Blog</span>
+                  </div>
                 </Button>
               </SheetClose>
+              <Separator className=" w-[270px]" />
               <SheetClose asChild>
                 <Button
                   variant={"default"}
                   onClick={() => router.push("/sign-up")}
                 >
-                  Sign up
+                  <div className="flex items-center">
+                    {/* <UserPlus className='mr-4 size-4' /> */}
+                    <span>Get Started</span>
+                  </div>
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button
+                  variant={"outline"}
+                  onClick={() => router.push("/sign-in")}
+                >
+                  <div className="flex items-center">
+                    {/* <LogIn className='mr-4 size-4' /> */}
+                    <span>Log in</span>
+                  </div>
                 </Button>
               </SheetClose>
             </div>

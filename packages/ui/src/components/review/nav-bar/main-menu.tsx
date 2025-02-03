@@ -96,29 +96,29 @@ export function MainMenu() {
                 <DropdownMenuItem onClick={() => router.push("/user-profile")}>
                   <User className="mr-2 size-4" />
                   <span>Profile</span>
-                  <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>MP</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/wip")}>
                   <Star className="mr-2 size-4" />
                   <span>My Reviews</span>
-                  <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>MR</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/wip")}>
                   <ClipboardList className="mr-2 size-4" />
                   <span>My Lists</span>
-                  <DropdownMenuShortcut>⌘L</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>ML</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <Settings className="mr-2 size-4" />
                 <span>Settings</span>
-                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                <DropdownMenuShortcut>GS</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <LifeBuoy className="mr-2 size-4" />
                 <span>Help</span>
-                <DropdownMenuShortcut>⌘H</DropdownMenuShortcut>
+                <DropdownMenuShortcut>GH</DropdownMenuShortcut>
               </DropdownMenuItem>
               {/* Enable when billing feature is added */}
               {/* <DropdownMenuItem onClick={() => router.push("/wip")}>
@@ -130,13 +130,13 @@ export function MainMenu() {
               <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <Keyboard className="mr-2 size-4" />
                 <span>Keyboard shortcuts</span>
-                <DropdownMenuShortcut>⇧⌘K</DropdownMenuShortcut>
+                <DropdownMenuShortcut>GK</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()}>
                 <LogOut className="mr-2 size-4" />
                 <span>Log out</span>
-                <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                <DropdownMenuShortcut>SO</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
