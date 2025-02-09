@@ -109,17 +109,17 @@ export const ChannelDetailsSection = ({
     {
       icon: Video,
       label: "Videos",
-      value: account.ytData.statistics?.videoCount || 0,
+      value: account.ytData?.statistics?.videoCount || 0,
     },
     {
       icon: Eye,
       label: "Total Views",
-      value: account.ytData.statistics?.viewCount || 0,
+      value: account.ytData?.statistics?.viewCount || 0,
     },
     {
       icon: Calendar,
       label: "Joined",
-      value: account.ytData.snippet?.publishedAt ?? "",
+      value: account.ytData?.snippet?.publishedAt ?? "",
     },
   ];
 

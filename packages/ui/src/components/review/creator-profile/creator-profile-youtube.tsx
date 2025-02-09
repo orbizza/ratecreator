@@ -100,7 +100,7 @@ export const CreatorProfileYoutube = ({
               <ChannelHeader account={data.account} />
             </Suspense>
             <Suspense fallback={<UserRatingCardSkeleton />}>
-              <UserRatingCard accountId={accountId} />
+              <UserRatingCard accountId={accountId} platform={platform} />
             </Suspense>
             <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
               <ChannelDetailsSection

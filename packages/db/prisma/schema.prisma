@@ -10,22 +10,22 @@ generator client {
 
 
 model Category {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId 
-  name         String   
-  slug         String @unique
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  slug              String            @unique
   shortDescription  String?
-  longDescription String?
-  keywords      String[]
-  parentId     String? @db.ObjectId
-  parent       Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subcategories Category[] @relation("CategoryHierarchy")
-  accounts     CategoryMapping[] @relation("CategoryToCategoryMapping") // Added @relation attribute
-  popular      Boolean    @default(false)
-  depth        Int        @default(0)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  deletedAt    DateTime?
- 
+  longDescription   String?
+  keywords          String[]
+  parentId          String?           @db.ObjectId
+  parent            Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subcategories     Category[]        @relation("CategoryHierarchy")
+  accounts          CategoryMapping[] @relation("CategoryToCategoryMapping")
+  popular           Boolean           @default(false)
+  depth             Int               @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
   @@index([name])
   @@index([parentId])
   @@index([shortDescription])
@@ -34,44 +34,45 @@ model Category {
   @@index([popular])
 }
 
-
-
 model Account {
-  id              String     @id @default(auto()) @map("_id") @db.ObjectId
-  platform        Platform
-  accountId       String
-  handle          String?
-  name            String?
-  name_en         String?
-  followerCount   Int?
-  imageUrl        String?
-  country         String?   
-  description     String?
-  description_en  String?
-  keywords        String?
-  keywords_en     String?
-  categories      CategoryMapping[] @relation("AccountToCategoryMapping") 
-  ytData          Json?
-  redditData      Json?
-  xData           Json?
-  tiktokData      Json?
-  twitchData      Json?
-  instagramData   Json?
-  isSeeded        Boolean    @default(false)
-  isSuspended     Boolean    @default(false)
-  ranking         Json?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  language_code   String?
+  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  platform             Platform
+  accountId            String
+  handle               String?
+  name                 String?
+  name_en              String?
+  followerCount        Int?
+  imageUrl             String?
+  country              String?
+  description          String?
+  description_en       String?
+  keywords             String?
+  keywords_en          String?
+  categories           CategoryMapping[] @relation("AccountToCategoryMapping")
+  ytData               Json?
+  redditData           Json?
+  xData                Json?
+  tiktokData           Json?
+  twitchData           Json?
+  instagramData        Json?
+  isSeeded             Boolean           @default(false)
+  isSuspended          Boolean           @default(false)
+  ranking              Json?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  language_code        String?
   lang_confidence_score Float?
-  rating          Float?
-  reviewCount     Int?
-  isSubCategoryFailed Boolean? @default(false)
-  lastIndexedAt   DateTime?
-  isDeleted       Boolean? @default(false)
-  isCategoryFailed Boolean? @default(false)
-  isTranslationFailed Boolean? @default(false)
-  
+  rating               Float?
+  reviewCount          Int?
+  isSubCategoryFailed  Boolean?          @default(false)
+  lastIndexedAt        DateTime?
+  isDeleted            Boolean?          @default(false)
+  isCategoryFailed     Boolean?          @default(false)
+  isTranslationFailed  Boolean?          @default(false)
+
+  reviews              Review[]
+  subscriptions        Subscription[]
+
   @@unique([platform, accountId])
   @@index([platform])
   @@index([accountId])
@@ -96,14 +97,12 @@ model Account {
   @@index([isSeeded])
 }
 
-
-
 model CategoryMapping {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   accountId  String   @db.ObjectId
   categoryId String   @db.ObjectId
-  account    Account  @relation("AccountToCategoryMapping", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  category   Category @relation("CategoryToCategoryMapping", fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  account    Account  @relation("AccountToCategoryMapping", fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category   Category @relation("CategoryToCategoryMapping", fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -112,6 +111,133 @@ model CategoryMapping {
   @@index([categoryId])
 }
 
+model User {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId        String         @unique
+  email          String         @unique
+  firstName      String?        @default("")
+  lastName       String?        @default("")
+  username       String?        @default("")
+  isDeleted      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  webhookPayload Json?
+  role           UserRole[]     @default([USER])
+
+  reviews        Review[]
+  comments       Comment[]
+  votes          Vote[]
+  commentVotes   CommentVote[]
+  subscriptions  Subscription[]
+
+  @@index([firstName])
+  @@index([lastName])
+  @@index([username])
+  @@index([isDeleted])
+  @@index([role])
+}
+
+model Subscription {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  account    Account  @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accountId  String   @db.ObjectId
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, accountId])
+  @@index([userId])
+  @@index([accountId])
+}
+
+model Review {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  stars              Int
+  content            Json?
+  contentUrl         String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  author             User                 @relation(fields: [authorId], references: [id])
+  authorId           String               @db.ObjectId
+  account            Account              @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accountId          String               @db.ObjectId
+  comments           Comment[]
+  votes              Vote[]
+  verificationStatus VerificationStatus   @default(IN_PROGRESS)
+  isEdited           Boolean              @default(false)
+  editHistory        Json?                // Store edit history
+  status             ReviewStatus         @default(PUBLISHED)
+  reportCount        Int                  @default(0)
+  lastActivityAt     DateTime             @default(now())  // For sorting/trending
+  viewCount          Int                  @default(0)
+
+  @@index([authorId])
+  @@index([accountId])
+  @@index([status])
+  @@index([lastActivityAt])
+  @@index([reportCount])
+  @@index([viewCount])
+}
+
+model Comment {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  text               String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  author             User                 @relation(fields: [authorId], references: [id])
+  authorId           String               @db.ObjectId
+  review             Review               @relation(fields: [reviewId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewId           String               @db.ObjectId
+  replyToId          String?              @db.ObjectId
+  replyTo            Comment?             @relation("CommentReplies", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies            Comment[]            @relation("CommentReplies")
+  votes              CommentVote[]
+  verificationStatus VerificationStatus   @default(IN_PROGRESS)
+  isEdited           Boolean              @default(false)
+  editHistory        Json?                // Store edit history
+  status             CommentStatus        @default(PUBLISHED)
+  reportCount        Int                  @default(0)
+
+  @@index([authorId])
+  @@index([reviewId])
+  @@index([replyToId])
+  @@index([status])
+  @@index([reportCount])
+}
+
+model Vote {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @db.ObjectId
+  review   Review   @relation(fields: [reviewId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewId String   @db.ObjectId
+  type     VoteType
+
+  @@unique([userId, reviewId])
+  @@index([userId])
+  @@index([reviewId])
+}
+
+model CommentVote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commentId String   @db.ObjectId
+  type      VoteType
+
+  @@unique([userId, commentId])
+  @@index([userId])
+  @@index([commentId])
+}
+
+
+
+// -----------------------
+// Enums
+// -----------------------
 
 enum Platform {
   YOUTUBE
@@ -122,28 +248,6 @@ enum Platform {
   TWITCH
 }
 
-model User {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId // MongoDB's default ObjectId 
-  clerkId         String    @unique
-  email           String    @unique
-  firstName       String?   @default("")
-  lastName        String?   @default("")
-  username        String?   @default("")
-  isDeleted       Boolean   @default(false) // Soft delete indicator
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-  webhookPayload  Json?
-  role            UserRole[]  @default([USER])
-
-  @@index([firstName])
-  @@index([lastName])
-  @@index([username])
-  @@index([isDeleted])
-  @@index([role])
-  
-}
-
 enum UserRole {
   USER
   ADMIN
@@ -151,5 +255,34 @@ enum UserRole {
   BRAND
 }
 
+enum VoteType {
+  UP
+  DOWN
+}
 
+// New enum for LLM verification statuses.
+enum VerificationStatus {
+  VERIFIED
+  NOT_VERIFIED
+  FLAGGED
+  SPAM
+  BOT
+  IN_PROGRESS
+}
 
+enum ReviewStatus {
+  DRAFT
+  PUBLISHED
+  PENDING
+  HIDDEN
+  DELETED
+  FLAGGED
+}
+
+enum CommentStatus {
+  PUBLISHED
+  HIDDEN
+  DELETED
+  PENDING
+  FLAGGED
+}

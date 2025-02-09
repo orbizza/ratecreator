@@ -239,7 +239,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
           <Avatar className="w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg">
             <AvatarImage
               src={
-                account.ytData.snippet?.thumbnails?.high?.url ||
+                account.ytData?.snippet?.thumbnails?.high?.url ||
                 account.imageUrl
               }
             />
@@ -380,7 +380,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
                     <Avatar className="w-12 h-12 rounded-lg border border-border">
                       <AvatarImage
                         src={
-                          account.ytData.snippet?.thumbnails?.high?.url ||
+                          account.ytData?.snippet?.thumbnails?.high?.url ||
                           account.imageUrl
                         }
                       />
