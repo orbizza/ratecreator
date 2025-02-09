@@ -16,13 +16,13 @@ export async function GET(request: NextRequest) {
     if (!platform) {
       return NextResponse.json(
         { error: "Platform is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     switch (platform) {
@@ -31,21 +31,21 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: "Invalid platform" },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
     // Check cache first
@@ -76,7 +76,7 @@ async function handleYoutubeAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     // Format response to match CreatorData type
@@ -86,8 +86,11 @@ async function handleYoutubeAccount(
         platform: account.platform,
         accountId: account.accountId,
         handle: account.handle ?? "",
+        name: account.name ?? "",
         name_en: account.name_en ?? "",
+        description: account.description ?? "",
         description_en: account.description_en ?? "",
+        keywords: account.keywords ?? "",
         keywords_en: account.keywords_en ?? "",
         followerCount: account.followerCount ?? 0,
         imageUrl: account.imageUrl ?? "",
@@ -96,6 +99,7 @@ async function handleYoutubeAccount(
         rating: account.rating ?? 0,
         reviewCount: account.reviewCount ?? 0,
         ytData: (account.ytData as any) ?? {},
+        tiktokData: (account.tiktokData as any) ?? {},
       },
       categories: categorySlugs,
     };
@@ -103,7 +107,7 @@ async function handleYoutubeAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
-      JSON.stringify(responseData),
+      JSON.stringify(responseData)
     );
 
     return NextResponse.json(responseData);
@@ -111,7 +115,7 @@ async function handleYoutubeAccount(
     console.error("Error fetching YouTube account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
