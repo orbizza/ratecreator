@@ -36,7 +36,13 @@ const Star = ({ filled, color }: { filled: boolean; color: string }) => {
   );
 };
 
-const UserRatingCard = ({ accountId }: { accountId: string }) => {
+const UserRatingCard = ({
+  accountId,
+  platform,
+}: {
+  accountId: string;
+  platform: string;
+}) => {
   const router = useRouter();
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
 
@@ -44,11 +50,15 @@ const UserRatingCard = ({ accountId }: { accountId: string }) => {
   const { user } = useUser();
 
   const handleStarClick = (rating: number) => {
-    router.push(`/review/create?stars=${rating}&accountId=${accountId}`);
+    router.push(
+      `/review/create?stars=${rating}&platform=${platform}&accountId=${accountId}`,
+    );
   };
 
   const handleWriteReviewClick = () => {
-    router.push(`/review/create?stars=0&accountId=${accountId}`);
+    router.push(
+      `/review/create?stars=0&platform=${platform}&accountId=${accountId}`,
+    );
   };
 
   return (
