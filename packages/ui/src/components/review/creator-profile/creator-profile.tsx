@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import { getCreatorData } from "@ratecreator/actions/review";
 import { CreatorData } from "@ratecreator/types/review";
 import { creatorCache } from "@ratecreator/db/utils";
-import ChannelHeader from "./header-youtube";
+import ChannelHeader from "./youtube/header-youtube";
 import UserRatingCard from "./user-rating-card";
-import { ChannelDetailsSection } from "./channel-details-section";
+import { ChannelDetailsSection } from "./youtube/channel-details-section";
 import {
   ChannelHeaderSkeleton,
   UserRatingCardSkeleton,
   ChannelDetailsSectionSkeleton,
 } from "../skeletons/creator-profile-skeletons";
 
-export const CreatorProfileYoutube = ({
+export const CreatorProfile = ({
   accountId,
   platform,
   user,
@@ -37,7 +37,7 @@ export const CreatorProfileYoutube = ({
         // Try to get data from IndexedDB cache
         const cachedData = await creatorCache.getCachedCreator(
           platform,
-          accountId,
+          accountId
         );
 
         if (cachedData) {
@@ -54,7 +54,7 @@ export const CreatorProfileYoutube = ({
         await creatorCache.setCachedCreator(platform, accountId, result);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch creator data",
+          err instanceof Error ? err.message : "Failed to fetch creator data"
         );
         router.push("/error");
       } finally {
@@ -67,7 +67,7 @@ export const CreatorProfileYoutube = ({
 
   if (loading) {
     return (
-      <main className="container mx-auto p-4 mt-10">
+      <main className='container mx-auto p-4 mt-10'>
         <ChannelHeaderSkeleton />
         <UserRatingCardSkeleton />
         <ChannelDetailsSectionSkeleton />
@@ -77,7 +77,7 @@ export const CreatorProfileYoutube = ({
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 mt-16 text-red-500">
+      <div className='container mx-auto p-4 mt-16 text-red-500'>
         Error: {error}
       </div>
     );
@@ -85,7 +85,7 @@ export const CreatorProfileYoutube = ({
 
   if (!data) {
     return (
-      <div className="container mx-auto p-4 mt-10">
+      <div className='container mx-auto p-4 mt-10'>
         No data found for this creator
       </div>
     );
@@ -112,13 +112,13 @@ export const CreatorProfileYoutube = ({
         );
       case "twitter":
         return (
-          <div className="text-center py-8">
+          <div className='text-center py-8'>
             Twitter profile view coming soon
           </div>
         );
       case "reddit":
         return (
-          <div className="text-center py-8">
+          <div className='text-center py-8'>
             Sub Reddit community view coming soon
           </div>
         );
@@ -141,7 +141,7 @@ export const CreatorProfileYoutube = ({
         );
       default:
         return (
-          <div className="text-center py-8">
+          <div className='text-center py-8'>
             Unsupported platform: {platform}
           </div>
         );
@@ -149,11 +149,11 @@ export const CreatorProfileYoutube = ({
   };
 
   return (
-    <main className="container mx-auto p-4 mt-10">
+    <main className='container mx-auto p-4 mt-10'>
       {renderPlatformContent()}
       <Suspense fallback={""}>
         {/* Review Section */}
-        <div id="reviews" className="mt-10 text-2xl font-bold">
+        <div id='reviews' className='mt-10 text-2xl font-bold'>
           Reviews
           {/* <ReviewsSection account={data} /> */}
         </div>

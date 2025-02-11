@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { ICloud, SimpleIcon } from "react-icon-cloud";
 import { Cloud, fetchSimpleIcons, renderSimpleIcon } from "react-icon-cloud";
@@ -59,21 +58,30 @@ export interface DynamicCloudProps {
 
 type IconData = Awaited<ReturnType<typeof fetchSimpleIcons>>;
 
-export default function IconCloud({ iconSlugs }: DynamicCloudProps) {
+export function IconCloud({ iconSlugs }: DynamicCloudProps) {
   const [data, setData] = useState<IconData | null>(null);
-  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { theme, resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchSimpleIcons({ slugs: iconSlugs }).then(setData);
   }, [iconSlugs]);
 
   const renderedIcons = useMemo(() => {
-    if (!data) return null;
+    if (!data || !mounted) return null;
 
+    // Use resolvedTheme to get the actual theme being applied
+    const currentTheme = resolvedTheme || theme || "light";
     return Object.values(data.simpleIcons).map((icon) =>
-      renderCustomIcon(icon, theme || "light"),
+      renderCustomIcon(icon, currentTheme)
     );
-  }, [data, theme]);
+  }, [data, theme, resolvedTheme, mounted]);
+
+  if (!mounted) return null;
 
   return (
     // @ts-expect-error is fine
@@ -82,3 +90,5 @@ export default function IconCloud({ iconSlugs }: DynamicCloudProps) {
     </Cloud>
   );
 }
+
+export default IconCloud;

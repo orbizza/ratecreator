@@ -39,14 +39,14 @@ export function MainMenu() {
   const { user } = useUser();
 
   return (
-    <div className="flex items-center h-8 gap-x-2 xl:gap-3">
+    <div className='flex items-center h-8 gap-x-2 xl:gap-3'>
       {isSignedIn ? (
         // Render menu when user is signed in
         <>
           <Button variant={"ghost"} onClick={() => router.push("/")}>
             For creators
           </Button>
-          <Separator orientation="vertical" />
+          <Separator orientation='vertical' />
           <Button variant={"link"} onClick={() => router.push("/")}>
             Write a review
           </Button>
@@ -60,23 +60,21 @@ export function MainMenu() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
-                className="hover:outline-none hover:bg-transparent focus-within:outline-none focus-within:bg-transparent"
+                variant='ghost'
+                className='hover:outline-none hover:bg-transparent focus-within:outline-none focus-within:bg-transparent'
               >
-                <Avatar className="">
+                <Avatar className=''>
                   <AvatarImage src={user?.imageUrl} />
                   <AvatarFallback>
                     {getInitials(
-                      user?.fullName ||
-                        user?.emailAddresses[0].toString() ||
-                        "",
+                      user?.fullName || user?.emailAddresses[0].toString() || ""
                     )}
                   </AvatarFallback>
                 </Avatar>
                 {/* <ChevronDown className='ml-2' /> */}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mt-2 mr-4">
+            <DropdownMenuContent className='w-56 mt-2 mr-4'>
               <DropdownMenuLabel>
                 {user?.fullName
                   ? user.fullName
@@ -84,7 +82,7 @@ export function MainMenu() {
                       .map(
                         (namePart) =>
                           namePart.charAt(0).toUpperCase() +
-                          namePart.slice(1).toLowerCase(),
+                          namePart.slice(1).toLowerCase()
                       )
                       .join(" ")
                   : user?.emailAddresses[0].toString().toLowerCase() ||
@@ -94,29 +92,29 @@ export function MainMenu() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => router.push("/user-profile")}>
-                  <User className="mr-2 size-4" />
+                  <User className='mr-2 size-4' />
                   <span>Profile</span>
                   <DropdownMenuShortcut>MP</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/wip")}>
-                  <Star className="mr-2 size-4" />
+                  <Star className='mr-2 size-4' />
                   <span>My Reviews</span>
                   <DropdownMenuShortcut>MR</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/wip")}>
-                  <ClipboardList className="mr-2 size-4" />
+                  <ClipboardList className='mr-2 size-4' />
                   <span>My Lists</span>
                   <DropdownMenuShortcut>ML</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push("/wip")}>
-                <Settings className="mr-2 size-4" />
+                <Settings className='mr-2 size-4' />
                 <span>Settings</span>
                 <DropdownMenuShortcut>GS</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/wip")}>
-                <LifeBuoy className="mr-2 size-4" />
+                <LifeBuoy className='mr-2 size-4' />
                 <span>Help</span>
                 <DropdownMenuShortcut>GH</DropdownMenuShortcut>
               </DropdownMenuItem>
@@ -128,13 +126,18 @@ export function MainMenu() {
               </DropdownMenuItem> */}
 
               <DropdownMenuItem onClick={() => router.push("/wip")}>
-                <Keyboard className="mr-2 size-4" />
+                <Keyboard className='mr-2 size-4' />
                 <span>Keyboard shortcuts</span>
                 <DropdownMenuShortcut>GK</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className="mr-2 size-4" />
+              <DropdownMenuItem
+                onClick={async () => {
+                  await signOut();
+                  router.push("/");
+                }}
+              >
+                <LogOut className='mr-2 size-4' />
                 <span>Log out</span>
                 <DropdownMenuShortcut>SO</DropdownMenuShortcut>
               </DropdownMenuItem>
@@ -147,7 +150,7 @@ export function MainMenu() {
           <Button variant={"ghost"} onClick={() => router.push("/")}>
             For creators
           </Button>
-          <Separator orientation="vertical" />
+          <Separator orientation='vertical' />
           <Button variant={"link"} onClick={() => router.push("/")}>
             Write a review
           </Button>

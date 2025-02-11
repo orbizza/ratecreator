@@ -6,7 +6,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
 
 import { ny } from "@ratecreator/ui/utils";
-import { Dialog, DialogContent } from "@ratecreator/ui";
+import { Dialog, DialogContent } from "./dialog";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -16,7 +16,7 @@ const Command = React.forwardRef<
     ref={ref}
     className={ny(
       "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden rounded-md",
-      className,
+      className
     )}
     {...props}
   />
@@ -36,11 +36,11 @@ function CommandDialog({
 }: CommandDialogProps) {
   return (
     <Dialog {...props}>
-      <DialogContent className="overflow-hidden p-0 shadow-lg">
+      <DialogContent className='overflow-hidden p-0 shadow-lg'>
         <Command
           shouldFilter={shouldFilter}
           filter={filter}
-          className="[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:size-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:size-5"
+          className='[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:size-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:size-5'
         >
           {children}
         </Command>
@@ -53,13 +53,13 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Search className="mr-2 size-4 shrink-0 opacity-50" />
+  <div className='flex items-center border-b px-3' cmdk-input-wrapper=''>
+    <Search className='mr-2 size-4 shrink-0 opacity-50' />
     <CommandPrimitive.Input
       ref={ref}
       className={ny(
         "placeholder:text-muted-foreground flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        className
       )}
       {...props}
     />
@@ -87,7 +87,7 @@ const CommandEmpty = React.forwardRef<
 >((props, ref) => (
   <CommandPrimitive.Empty
     ref={ref}
-    className="py-6 text-center text-sm"
+    className='py-6 text-center text-sm'
     {...props}
   />
 ));
@@ -102,7 +102,7 @@ const CommandGroup = React.forwardRef<
     ref={ref}
     className={ny(
       "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
-      className,
+      className
     )}
     {...props}
   />
@@ -130,7 +130,7 @@ const CommandItem = React.forwardRef<
     ref={ref}
     className={ny(
       "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-      className,
+      className
     )}
     {...props}
   />
@@ -146,7 +146,7 @@ function CommandShortcut({
     <span
       className={ny(
         "text-muted-foreground ml-auto text-xs tracking-widest",
-        className,
+        className
       )}
       {...props}
     />
