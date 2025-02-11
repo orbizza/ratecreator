@@ -9,7 +9,6 @@ import { createPortal } from "react-dom";
 
 import { ny } from "@ratecreator/ui/utils";
 import {
-  Badge,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -17,11 +16,16 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
+} from "./command";
+
+import { Badge } from "./badge";
+
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@ratecreator/ui";
+} from "./tooltip";
 
 export interface MultiSelectOptionItem {
   value: string;

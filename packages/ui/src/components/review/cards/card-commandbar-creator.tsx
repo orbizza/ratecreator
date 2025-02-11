@@ -34,7 +34,7 @@ export const CreatorCard: React.FC<
 
   const handleClick = () => {
     setOpen();
-    router.push(`/review/${platform.toLowerCase()}/${accountId}`);
+    router.push(`/profile/${platform.toLowerCase()}/${accountId}`);
   };
 
   return (

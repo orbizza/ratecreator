@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { CreatorProfileYoutube } from "@ratecreator/ui/review";
+import { CreatorProfile } from "@ratecreator/ui/review";
 
 export default function ReviewProfile({
   params: { accountId, platform },
@@ -11,9 +11,7 @@ export default function ReviewProfile({
 }) {
   return (
     <main className="min-h-[calc(100vh-20vh)]">
-      {platform === "youtube" && (
-        <CreatorProfileYoutube accountId={accountId} platform={platform} />
-      )}
+      <CreatorProfile accountId={accountId} platform={platform} />
     </main>
   );
 }

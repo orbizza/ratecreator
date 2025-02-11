@@ -127,7 +127,7 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
   const remainingCount = Math.max(0, categories.length - 5);
   return (
     <div className="max-w-xs relative group/card h-96 cursor-pointer hover:shadow-lg transition-shadow duration-200">
-      <Link href={`/review/${platform.toLowerCase()}/${objectID}`}>
+      <Link href={`/profile/${platform.toLowerCase()}/${objectID}`}>
         {/* Top section with creator info */}
         <div
           className={cn("rounded-t-lg p-4 border-x border-t h-1/4", defaultBg)}

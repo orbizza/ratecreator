@@ -310,7 +310,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
             </div>
             <div className="hidden md:flex flex-col lg:flex-row items-center space-x-4 space-y-5 lg:space-y-0">
               <Link
-                href={`/review/create?stars=0&accountId=${account.accountId}`}
+                href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
               >
                 <button className="block text-left py-2 px-5 md:ml-3 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                   Write a Review
@@ -340,7 +340,9 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
         </CardHeader>
 
         <div className="grid grid-cols-2 md:hidden w-full items-center justify-center gap-2 mb-2">
-          <Link href={`/review/create?stars=0&accountId=${account.accountId}`}>
+          <Link
+            href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
+          >
             <button className="block w-full text-center py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
               Write a Review
             </button>
@@ -419,7 +421,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
 
                 <div className="hidden md:flex md:flex-row items-center md:gap-2">
                   <Link
-                    href={`/review/create?stars=0&accountId=${account.accountId}`}
+                    href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
                   >
                     <button className="hidden md:block text-left py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                       Write a Review

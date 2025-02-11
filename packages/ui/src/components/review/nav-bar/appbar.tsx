@@ -17,7 +17,6 @@ import { usePathname } from "next/navigation";
 
 import { SearchPlaceholders } from "@ratecreator/store";
 import { useKBar } from "kbar";
-import { useAuth } from "@clerk/nextjs";
 
 export function Appbar() {
   const [isHeroVisible, setIsHeroVisible] = useState(true);
@@ -69,8 +68,6 @@ export function Appbar() {
     posthog.capture("Search Bar Clicked", { property: "value" });
     query.toggle();
   }, [query]);
-
-  const { isSignedIn, signOut } = useAuth();
 
   return (
     <header className="px-4 py-2">
