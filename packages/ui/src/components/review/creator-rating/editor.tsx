@@ -9,8 +9,8 @@ import "react-quill/dist/quill.snow.css";
 const ReactQuill = dynamic(() => import("react-quill"), {
   ssr: false,
   loading: () => (
-    <div className='flex items-center justify-center h-[200px] bg-muted rounded-md'>
-      <Loader2 className='w-6 h-6 animate-spin' />
+    <div className="flex items-center justify-center h-[200px] bg-muted rounded-md">
+      <Loader2 className="w-6 h-6 animate-spin" />
     </div>
   ),
 });
@@ -183,8 +183,8 @@ export const Editor = ({
 
   if (!mounted) {
     return (
-      <div className='min-h-[200px] bg-muted rounded-md flex items-center justify-center'>
-        <Loader2 className='w-6 h-6 animate-spin' />
+      <div className="min-h-[200px] bg-muted rounded-md flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
   }
@@ -198,7 +198,7 @@ export const Editor = ({
         modules={modules}
         formats={formats}
         placeholder={placeholder}
-        theme='snow'
+        theme="snow"
         className={className || "h-[200px]"}
       />
     </div>

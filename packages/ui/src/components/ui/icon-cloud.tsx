@@ -77,7 +77,7 @@ export function IconCloud({ iconSlugs }: DynamicCloudProps) {
     // Use resolvedTheme to get the actual theme being applied
     const currentTheme = resolvedTheme || theme || "light";
     return Object.values(data.simpleIcons).map((icon) =>
-      renderCustomIcon(icon, currentTheme)
+      renderCustomIcon(icon, currentTheme),
     );
   }, [data, theme, resolvedTheme, mounted]);
 

@@ -43,7 +43,7 @@ const getRedditPostId = (url: string) => {
 async function getYouTubeMetadata(videoId: string): Promise<Metadata> {
   try {
     const response = await axios.get(
-      `https://www.youtube.com/watch?v=${videoId}`
+      `https://www.youtube.com/watch?v=${videoId}`,
     );
     const $ = load(response.data);
 
@@ -66,7 +66,7 @@ async function getTwitterMetadata(tweetId: string): Promise<Metadata> {
         headers: {
           Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
         },
-      }
+      },
     );
 
     return {
@@ -167,7 +167,7 @@ async function getRedditMetadata(postId: string): Promise<Metadata> {
           ? postData.thumbnail
           : postData.preview?.images?.[0]?.source?.url?.replace(
               /&amp;/g,
-              "&"
+              "&",
             ) || postData.media?.oembed?.thumbnail_url?.replace(/&amp;/g, "&");
 
       return {
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest) {
     console.error("Error processing metadata request:", error);
     return NextResponse.json(
       { error: "Failed to fetch metadata" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
