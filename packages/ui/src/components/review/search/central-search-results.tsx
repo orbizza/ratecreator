@@ -233,10 +233,19 @@ export const CentralSearchResults: React.FC<{
   return (
     <div className="container mx-auto p-4 mt-16">
       <div className="flex flex-col">
-        <div className="flex flex-col justify-center items-center w-full m-8 gap-4">
-          <div className="flex flex-wrap justify-center items-baseline lg:text-5xl font-bold">
-            <span className="mr-2">Results for</span>
-            <span className="text-primary">"{searchQuery}"</span>
+        <div className="flex flex-col justify-center items-center w-full mx-auto m-8 gap-4">
+          <div className="flex flex-wrap justify-center items-baseline text-3xl sm:text-4xl lg:text-5xl font-bold">
+            {searchQuery && searchQuery !== " " ? (
+              <>
+                <span className="mr-2">Results for</span>
+                <span className="text-primary">"{searchQuery}"</span>
+              </>
+            ) : (
+              <>
+                <span className="mr-2">Find a </span>
+                <span className="text-primary">Creator</span>
+              </>
+            )}
           </div>
         </div>
         <Separator className="my-[2rem] xl:my-[4rem]" />

@@ -146,7 +146,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"link"}
-                  onClick={() => router.push("/wip")}
+                  onClick={() => router.push("/search")}
                   className="flex justify-between "
                 >
                   <div className="flex items-center">
@@ -282,7 +282,11 @@ export function MobileSideNav() {
                 </Button>
               </SheetClose>
               <SheetClose asChild>
-                <Button variant={"link"} className="flex justify-between">
+                <Button
+                  variant={"link"}
+                  className="flex justify-between"
+                  onClick={() => router.push("/search")}
+                >
                   <div className="flex items-center">
                     <PenLine className="mr-4 size-4" />
                     <span>Write a review</span>
