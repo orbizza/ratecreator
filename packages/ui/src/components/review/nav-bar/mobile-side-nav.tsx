@@ -223,7 +223,13 @@ export function MobileSideNav() {
               <Separator className="" />
 
               <SheetClose asChild>
-                <Button variant={"default"} onClick={() => signOut()}>
+                <Button
+                  variant={"default"}
+                  onClick={async () => {
+                    await signOut();
+                    router.push("/");
+                  }}
+                >
                   <div className="flex items-center">
                     {/* <LogOut className='mr-4 size-4' /> */}
                     <span>Log out</span>

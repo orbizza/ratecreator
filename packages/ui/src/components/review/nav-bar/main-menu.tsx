@@ -133,7 +133,12 @@ export function MainMenu() {
                 <DropdownMenuShortcut>GK</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem
+                onClick={async () => {
+                  await signOut();
+                  router.push("/");
+                }}
+              >
                 <LogOut className="mr-2 size-4" />
                 <span>Log out</span>
                 <DropdownMenuShortcut>SO</DropdownMenuShortcut>

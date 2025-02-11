@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import { getCreatorData } from "@ratecreator/actions/review";
 import { CreatorData } from "@ratecreator/types/review";
 import { creatorCache } from "@ratecreator/db/utils";
-import ChannelHeader from "./header-youtube";
+import ChannelHeader from "./youtube/header-youtube";
 import UserRatingCard from "./user-rating-card";
-import { ChannelDetailsSection } from "./channel-details-section";
+import { ChannelDetailsSection } from "./youtube/channel-details-section";
 import {
   ChannelHeaderSkeleton,
   UserRatingCardSkeleton,
   ChannelDetailsSectionSkeleton,
 } from "../skeletons/creator-profile-skeletons";
 
-export const CreatorProfileYoutube = ({
+export const CreatorProfile = ({
   accountId,
   platform,
   user,

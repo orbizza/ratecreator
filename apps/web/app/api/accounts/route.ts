@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
     switch (platform) {
       case "youtube":
         return await handleYoutubeAccount(redis, accountId);
+      case "twitter":
+        return await handleTwitterAccount(redis, accountId);
       default:
         return NextResponse.json(
           { error: "Invalid platform" },
@@ -100,6 +102,8 @@ async function handleYoutubeAccount(
         reviewCount: account.reviewCount ?? 0,
         ytData: (account.ytData as any) ?? {},
         tiktokData: (account.tiktokData as any) ?? {},
+        xData: (account.xData as any) ?? {},
+        redditData: (account.redditData as any) ?? {},
       },
       categories: categorySlugs,
     };
@@ -113,6 +117,71 @@ async function handleYoutubeAccount(
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching YouTube account:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch account data" },
+      { status: 500 },
+    );
+  }
+}
+
+async function handleTwitterAccount(
+  redis: ReturnType<typeof getRedisClient>,
+  accountId: string,
+) {
+  try {
+    const account = await prisma.account.findFirst({
+      where: {
+        accountId: accountId,
+        platform: "TWITTER",
+      },
+    });
+
+    if (!account) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    const categoryMappings = await prisma.categoryMapping.findMany({
+      where: { accountId: account.id },
+      include: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    const categorySlugs = categoryMappings.map(
+      (mapping) => mapping.category.slug,
+    );
+
+    const responseData: CreatorData = {
+      account: {
+        id: account.id,
+        platform: account.platform,
+        accountId: account.accountId,
+        handle: account.handle ?? "",
+        name: account.name ?? "",
+        name_en: account.name_en ?? "",
+        description: account.description ?? "",
+        description_en: account.description_en ?? "",
+        keywords: account.keywords ?? "",
+        keywords_en: account.keywords_en ?? "",
+        followerCount: account.followerCount ?? 0,
+        imageUrl: account.imageUrl ?? "",
+        country: account.country ?? null,
+        language_code: account.language_code ?? "",
+        rating: account.rating ?? 0,
+        reviewCount: account.reviewCount ?? 0,
+        ytData: (account.ytData as any) ?? {},
+        tiktokData: (account.tiktokData as any) ?? {},
+        xData: (account.xData as any) ?? {},
+        redditData: (account.redditData as any) ?? {},
+      },
+      categories: categorySlugs,
+    };
+
+    return NextResponse.json(responseData);
+  } catch (error) {
+    console.error("Error fetching Twitter account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
       { status: 500 },

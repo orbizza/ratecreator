@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@ratecreator/ui";
-import { defaultBg } from "../creator-profile/header-youtube";
+import { defaultBg } from "../creator-profile/youtube/header-youtube";
 
 export const ChannelHeaderSkeleton = () => {
   return (
