@@ -175,6 +175,7 @@ model Review {
 
   @@index([authorId])
   @@index([accountId])
+  @@index([authorId, accountId])
   @@index([status])
   @@index([lastActivityAt])
   @@index([reportCount])
