@@ -87,13 +87,15 @@ const CategoryCard = ({ categories }: { categories: string[] }) => {
 };
 
 const KeywordBadge = ({ keyword }: { keyword: string }) => (
-  <Badge
-    variant="secondary"
-    className="px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors"
-  >
-    <Hash className="w-3 h-3 -mr-1" />
-    {keyword.trim()}
-  </Badge>
+  <Link href={`/search?q=${keyword}`}>
+    <Badge
+      variant="secondary"
+      className="px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors"
+    >
+      <Hash className="w-3 h-3 -mr-1" />
+      {keyword.trim()}
+    </Badge>
+  </Link>
 );
 
 export const ChannelDetailsSection = ({
