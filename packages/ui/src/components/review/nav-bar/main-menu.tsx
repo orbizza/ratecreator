@@ -47,7 +47,7 @@ export function MainMenu() {
             For creators
           </Button>
           <Separator orientation="vertical" />
-          <Button variant={"link"} onClick={() => router.push("/")}>
+          <Button variant={"link"} onClick={() => router.push("/search")}>
             Write a review
           </Button>
           <Button variant={"ghost"} onClick={() => router.push("/categories")}>
@@ -153,7 +153,7 @@ export function MainMenu() {
             For creators
           </Button>
           <Separator orientation="vertical" />
-          <Button variant={"link"} onClick={() => router.push("/")}>
+          <Button variant={"link"} onClick={() => router.push("/search")}>
             Write a review
           </Button>
           <Button variant={"ghost"} onClick={() => router.push("/categories")}>
