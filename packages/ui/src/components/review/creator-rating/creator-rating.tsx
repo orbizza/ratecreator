@@ -9,15 +9,23 @@ import {
   Card,
   Input,
   Textarea,
+  ToastAction,
+  useToast,
 } from "@ratecreator/ui";
-import { getCreatorData } from "@ratecreator/actions/review";
-import { CreatorData, ReviewFormData } from "@ratecreator/types/review";
+import { getCreatorData, createReview } from "@ratecreator/actions/review";
+import {
+  CreatorData,
+  ReviewFormData,
+  ReviewValidator,
+} from "@ratecreator/types/review";
 import { getInitials, truncateText } from "@ratecreator/db/utils";
 import { Loader2 } from "lucide-react";
 import { Editor } from "./editor";
 import { TweetCard } from "@ratecreator/ui";
 import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const extractTweetId = (url: string) => {
   const regex = /\/status\/(\d+)/;
@@ -79,7 +87,8 @@ export const CreatorRating = ({
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [isCreatorDataLoading, setIsCreatorDataLoading] = useState(false);
-
+  const router = useRouter();
+  const { toast } = useToast();
   useEffect(() => {
     const fetchCreatorData = async () => {
       setIsCreatorDataLoading(true);
@@ -107,15 +116,50 @@ export const CreatorRating = ({
     setFormData((prev) => ({
       ...prev,
       stars,
-      platform,
+      platform: platform.toUpperCase(),
       accountId,
     }));
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement review submission logic
-    console.log("Submitting review:", formData);
+
+    try {
+      // Validate form data
+      const validatedData = ReviewValidator.parse(formData);
+
+      // Call the server action directly
+      const result = await createReview(validatedData);
+
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to submit review",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show success message
+      toast({
+        title: "Success",
+        description: "Your review has been submitted successfully!",
+      });
+
+      // Redirect to the creator's page
+      router.push(`/profile/${platform}/${accountId}`);
+      router.refresh(); // Refresh the page to show the new review
+    } catch (error) {
+      console.error("Error submitting review:", error);
+
+      // Show error message to user
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to submit review",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleUrlChange = async (url: string) => {
@@ -147,21 +191,24 @@ export const CreatorRating = ({
     try {
       setIsLoadingMetadata(true);
 
-      const response = await fetch(
-        `/api/metadata?url=${encodeURIComponent(cleanUrl)}`,
-      );
+      const { data } = await axios.get(`/api/metadata`, {
+        params: {
+          url: cleanUrl,
+        },
+      });
 
-      const metadata = await response.json();
-
-      if (response.ok) {
-        setUrlMetadata({
-          title: metadata.title,
-          description: metadata.description,
-          image: metadata.image,
-        });
-      }
+      setUrlMetadata({
+        title: data.title,
+        description: data.description,
+        image: data.image,
+      });
     } catch (error) {
       console.error("Failed to fetch metadata:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch URL metadata",
+        variant: "destructive",
+      });
     } finally {
       setIsLoadingMetadata(false);
     }
