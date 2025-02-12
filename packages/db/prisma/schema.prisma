@@ -72,6 +72,7 @@ model Account {
 
   reviews              Review[]
   subscriptions        Subscription[]
+  videos              YouTubeVideo[]
 
   @@unique([platform, accountId])
   @@index([platform])
@@ -163,6 +164,7 @@ model Review {
   authorId           String               @db.ObjectId
   account            Account              @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   accountId          String               @db.ObjectId
+  platform           Platform
   comments           Comment[]
   votes              Vote[]
   verificationStatus VerificationStatus   @default(IN_PROGRESS)
@@ -180,6 +182,7 @@ model Review {
   @@index([lastActivityAt])
   @@index([reportCount])
   @@index([viewCount])
+  @@index([platform])
 }
 
 model Comment {
@@ -232,6 +235,41 @@ model CommentVote {
   @@unique([userId, commentId])
   @@index([userId])
   @@index([commentId])
+}
+
+model YouTubeVideo {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  videoId              String   // YouTube video ID
+  account              Account  @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accountId            String   @db.ObjectId
+  title                String
+  description          String?
+  channelId            String?
+  channelTitle         String?
+  playlistId           String?
+  position             Int?
+  privacyStatus        String?
+  thumbnails           Json?    // Store all thumbnail variations
+  viewCount            Int      @default(0)
+  likeCount            Int      @default(0)
+  duration             String?  // Video duration in ISO 8601 format
+  publishedAt          DateTime
+  videoPublishedAt     DateTime?
+  lastFetchedAt        DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  isDeleted            Boolean  @default(false)
+
+  @@unique([accountId, videoId])
+  @@index([accountId])
+  @@index([videoId])
+  @@index([publishedAt])
+  @@index([videoPublishedAt])
+  @@index([viewCount])
+  @@index([likeCount])
+  @@index([channelId])
+  @@index([isDeleted])
+  @@index([lastFetchedAt])
 }
 
 

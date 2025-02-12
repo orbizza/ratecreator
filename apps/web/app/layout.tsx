@@ -6,6 +6,7 @@ import "@ratecreator/ui/styles.css";
 import "./globals.css";
 import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
+import { Toaster } from "@ratecreator/ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
               <Appbar />
               {children}
               <Footer />
+              <Toaster />
             </Providers>
           </body>
         </CSPostHogProvider>

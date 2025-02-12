@@ -1,5 +1,14 @@
 import { CategoryMapping } from "./category-mapping-types";
 
+export enum Platform {
+  YOUTUBE = "YOUTUBE",
+  TWITTER = "TWITTER",
+  INSTAGRAM = "INSTAGRAM",
+  REDDIT = "REDDIT",
+  TIKTOK = "TIKTOK",
+  TWITCH = "TWITCH",
+}
+
 export interface Account {
   id: string;
   platform: string;
