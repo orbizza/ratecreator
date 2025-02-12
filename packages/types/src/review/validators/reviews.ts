@@ -27,7 +27,7 @@ export const ReviewValidator = z.object({
       message: "Title must be less than 128 characters long",
     }),
   accountId: z.string(),
-  platform: z.string(),
+  platform: z.string().toUpperCase(),
   stars: z.number().min(1).max(5),
   authorId: z.string(),
   content: z.any(),

@@ -164,6 +164,7 @@ model Review {
   authorId           String               @db.ObjectId
   account            Account              @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   accountId          String               @db.ObjectId
+  platform           Platform
   comments           Comment[]
   votes              Vote[]
   verificationStatus VerificationStatus   @default(IN_PROGRESS)
@@ -181,6 +182,7 @@ model Review {
   @@index([lastActivityAt])
   @@index([reportCount])
   @@index([viewCount])
+  @@index([platform])
 }
 
 model Comment {
