@@ -58,30 +58,21 @@ export interface DynamicCloudProps {
 
 type IconData = Awaited<ReturnType<typeof fetchSimpleIcons>>;
 
-export function IconCloud({ iconSlugs }: DynamicCloudProps) {
+export default function IconCloud({ iconSlugs }: DynamicCloudProps) {
   const [data, setData] = useState<IconData | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const { theme, resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetchSimpleIcons({ slugs: iconSlugs }).then(setData);
   }, [iconSlugs]);
 
   const renderedIcons = useMemo(() => {
-    if (!data || !mounted) return null;
+    if (!data) return null;
 
-    // Use resolvedTheme to get the actual theme being applied
-    const currentTheme = resolvedTheme || theme || "light";
     return Object.values(data.simpleIcons).map((icon) =>
-      renderCustomIcon(icon, currentTheme),
+      renderCustomIcon(icon, theme || "light")
     );
-  }, [data, theme, resolvedTheme, mounted]);
-
-  if (!mounted) return null;
+  }, [data, theme]);
 
   return (
     // @ts-expect-error is fine
@@ -90,5 +81,3 @@ export function IconCloud({ iconSlugs }: DynamicCloudProps) {
     </Cloud>
   );
 }
-
-export default IconCloud;
