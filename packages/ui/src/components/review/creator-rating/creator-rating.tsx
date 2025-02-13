@@ -15,6 +15,7 @@ import {
 import { getCreatorData, createReview } from "@ratecreator/actions/review";
 import {
   CreatorData,
+  Platform,
   ReviewFormData,
   ReviewValidator,
 } from "@ratecreator/types/review";
@@ -73,7 +74,7 @@ export const CreatorRating = ({
   const [creatorData, setCreatorData] = useState<CreatorData | null>(null);
   const [formData, setFormData] = useState<ReviewFormData>({
     stars: stars,
-    platform: platform,
+    platform: platform as Platform,
     accountId: accountId,
     content: "",
     title: "",
@@ -116,7 +117,7 @@ export const CreatorRating = ({
     setFormData((prev) => ({
       ...prev,
       stars,
-      platform: platform.toUpperCase(),
+      platform: platform.toUpperCase() as Platform,
       accountId,
     }));
   }, [searchParams]);

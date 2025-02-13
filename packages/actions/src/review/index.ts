@@ -4,3 +4,4 @@ export * from "./categories/mostPopularCategoryActions";
 export * from "./search/searchCreator";
 export * from "./creators/creatorActions";
 export * from "./reviews/createReview";
+export * from "./reviews/fetchReviewsActions";

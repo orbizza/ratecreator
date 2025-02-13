@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import {
   useRecoilValue,
   useRecoilState,
@@ -26,7 +25,6 @@ import {
   Toggle,
   Button,
 } from "@ratecreator/ui";
-import { getCategoryDetails } from "@ratecreator/actions/review";
 import { searchCreators } from "@ratecreator/actions/review";
 
 import { CreatorGrid } from "../cards/category-search-creator-grid";

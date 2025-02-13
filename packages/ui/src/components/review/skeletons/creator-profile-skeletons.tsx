@@ -5,7 +5,7 @@ import { defaultBg } from "../creator-profile/youtube/header-youtube";
 
 export const ChannelHeaderSkeleton = () => {
   return (
-    <div className="relative max-w-screen-2xl mx-auto">
+    <div className="relative max-w-screen-xl mx-auto">
       {/* Banner Skeleton */}
       <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg shadow-lg">
         <div className={defaultBg + " w-full h-full rounded-lg"} />
@@ -90,6 +90,53 @@ export const ChannelDetailsSectionSkeleton = () => {
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32 w-full rounded-lg" />
           ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ReviewCardSkeleton = () => {
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="p-6 border rounded-xl space-y-6 bg-background shadow-sm">
+        {/* Header with avatar and user info */}
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-12 w-12 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-40 sm:w-48" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-20" />
+              <div className="w-1.5 h-1.5 rounded-full bg-muted" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          </div>
+        </div>
+
+        {/* Star rating */}
+        <div className="flex gap-1.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-6" />
+          ))}
+        </div>
+
+        {/* Review title */}
+        <Skeleton className="h-6 w-48 sm:w-64" />
+
+        {/* Review content */}
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
+        </div>
+
+        {/* Date and actions */}
+        <div className="flex items-center justify-between pt-4 border-t">
+          <Skeleton className="h-4 w-32 sm:w-40" />
+          <div className="flex items-center gap-6">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+          </div>
         </div>
       </div>
     </div>

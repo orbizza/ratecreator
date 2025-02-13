@@ -12,7 +12,11 @@ import {
   ChannelHeaderSkeleton,
   UserRatingCardSkeleton,
   ChannelDetailsSectionSkeleton,
+  ReviewCardSkeleton,
 } from "../skeletons/creator-profile-skeletons";
+import { ReviewsYoutube } from "./youtube/reviews-youtube";
+import { MessagesSquare } from "lucide-react";
+import { Info } from "lucide-react";
 
 export const CreatorProfile = ({
   accountId,
@@ -108,6 +112,18 @@ export const CreatorProfile = ({
                 categories={data.categories}
               />
             </Suspense>
+            <Suspense fallback={<ReviewCardSkeleton />}>
+              {/* Review Section */}
+              <div id="reviews" className="mt-10 text-2xl font-bold">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
+                  <MessagesSquare size={28} />
+                  <span className="">Reviews</span>
+                  <Info size={14} className="text-muted-foreground" />
+                </div>
+
+                <ReviewsYoutube accountId={accountId} platform={platform} />
+              </div>
+            </Suspense>
           </>
         );
       case "twitter":
@@ -149,15 +165,8 @@ export const CreatorProfile = ({
   };
 
   return (
-    <main className="container mx-auto p-4 mt-10">
+    <main className="container max-w-screen-xl mx-auto p-4 mt-10">
       {renderPlatformContent()}
-      <Suspense fallback={""}>
-        {/* Review Section */}
-        <div id="reviews" className="mt-10 text-2xl font-bold">
-          Reviews
-          {/* <ReviewsSection account={data} /> */}
-        </div>
-      </Suspense>
     </main>
   );
 };

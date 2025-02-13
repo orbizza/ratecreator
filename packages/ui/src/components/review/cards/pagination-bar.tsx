@@ -33,9 +33,9 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   const isDisabled = true;
 
   const handleSignInRedirect = () => {
-    const currentPath = window.location.pathname;
-    const searchParams = window.location.search;
-    const returnUrl = encodeURIComponent(`${currentPath}${searchParams}`);
+    const returnUrl = encodeURIComponent(
+      window.location.pathname + window.location.search,
+    );
     router.push(`/sign-in?redirect_url=${returnUrl}`);
   };
   const handlePageClick = (page: number) => {
@@ -95,12 +95,13 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
                 href="#"
                 isActive
                 onClick={() => handlePageClick(displayPage - 1)}
+                className="bg-neutral-600"
               >
                 {displayPage}
               </PaginationLink>
             </PaginationItem>
 
-            {displayPage < maxPage && (
+            {displayPage < maxPage + 1 && (
               <PaginationItem>
                 <PaginationLink
                   href="#"
@@ -111,7 +112,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
-            {displayPage < maxPage - 1 && (
+            {displayPage < maxPage && (
               <PaginationItem>
                 <PaginationEllipsis />
               </PaginationItem>
@@ -212,7 +213,9 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
         <div className="text-center mt-4 text-muted-foreground text-sm">
           Please{" "}
           <Link
-            href={`/sign-in?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+            href={`/sign-in?redirect_url=${encodeURIComponent(
+              window.location.pathname + window.location.search,
+            )}`}
             className="text-primary hover:underline"
           >
             sign in
