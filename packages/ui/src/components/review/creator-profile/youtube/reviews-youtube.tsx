@@ -38,7 +38,7 @@ export const ReviewsYoutube = ({
   const fetchTotalReviews = async () => {
     const totalReviews = await fetchTotalReviewsAction(
       accountId,
-      platform.toUpperCase() as Platform
+      platform.toUpperCase() as Platform,
     );
     setTotalReviews(totalReviews);
   };
@@ -56,7 +56,7 @@ export const ReviewsYoutube = ({
           accountId,
           platform.toUpperCase() as Platform,
           currentPage,
-          reviewsPerPage
+          reviewsPerPage,
         );
 
         setReviews(fetchedReviews);
