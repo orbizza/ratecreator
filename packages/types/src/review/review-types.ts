@@ -1,8 +1,10 @@
+import { Platform } from "./account-types";
+
 export interface ReviewFormData {
   stars: number;
-  platform: string;
+  platform: Platform;
   accountId: string;
-  content: string;
+  content?: any; // Json type in Prisma
   title: string;
   contentUrl?: string;
   authorId: string;
@@ -26,4 +28,17 @@ export enum VerificationStatus {
   SPAM = "SPAM",
   BOT = "BOT",
   IN_PROGRESS = "IN_PROGRESS",
+}
+
+export interface ReviewType extends ReviewFormData {
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isEdited: boolean;
+  editHistory?: any; // Json type in Prisma
+  reportCount: number;
+  lastActivityAt: Date;
+  viewCount: number;
+  comments?: any[]; // Relation field
+  votes?: any[]; // Relation field
 }
