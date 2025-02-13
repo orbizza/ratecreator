@@ -11,7 +11,7 @@ export async function fetchReviewsAction(
   accountId: string,
   platform: Platform,
   currentPage: number,
-  reviewsPerPage: number
+  reviewsPerPage: number,
 ) {
   const pageSize = reviewsPerPage;
   const offset = currentPage * pageSize;
@@ -56,7 +56,7 @@ export async function fetchReviewsAction(
 
 export async function fetchTotalReviewsAction(
   accountId: string,
-  platform: Platform
+  platform: Platform,
 ) {
   const account = await prisma.account.findUnique({
     where: {
