@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { ReviewCardSkeleton } from "../../skeletons/creator-profile-skeletons";
 import { ReviewListCardGrid } from "../../cards/review-list-card-grid";
 import { Platform, ReviewType } from "@ratecreator/types/review";
@@ -25,6 +25,12 @@ export const ReviewsYoutube = ({
   const [totalReviews, setTotalReviews] = useState<number>(0);
   const reviewsPerPage = 2;
 
+  const resetPageNumber = useResetRecoilState(pageNumberState);
+
+  useEffect(() => {
+    resetPageNumber();
+  }, [resetPageNumber]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -32,7 +38,7 @@ export const ReviewsYoutube = ({
   const fetchTotalReviews = async () => {
     const totalReviews = await fetchTotalReviewsAction(
       accountId,
-      platform.toUpperCase() as Platform,
+      platform.toUpperCase() as Platform
     );
     setTotalReviews(totalReviews);
   };
@@ -50,7 +56,7 @@ export const ReviewsYoutube = ({
           accountId,
           platform.toUpperCase() as Platform,
           currentPage,
-          reviewsPerPage,
+          reviewsPerPage
         );
 
         setReviews(fetchedReviews);
