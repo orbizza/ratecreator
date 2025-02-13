@@ -7,11 +7,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@clerk/clerk-sdk-node": "^5.0.35",
-    "@clerk/nextjs": "^5.4.1",
-    "typescript": "^5.5.4"
+    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@clerk/nextjs": "^5.7.5",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.3"
   }
 }

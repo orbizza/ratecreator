@@ -5,11 +5,11 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "5.13.0",
-    "@types/node": "^20.12.12",
+    "@types/node": "^20.17.18",
     "kafkajs": "^2.2.4",
     "prisma": "5.13.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   },
   "exports": {
     "./client": "./src/clients/index.ts",
