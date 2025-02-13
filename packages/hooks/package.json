@@ -6,11 +6,11 @@
   "dependencies": {
     "@ratecreator/store": "*",
     "@ratecreator/types": "*",
-    "@types/node": "^22.10.1",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.13.2",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   },
   "exports": {
     ".": "./src/index.ts"
