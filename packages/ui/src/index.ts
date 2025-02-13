@@ -1,4 +1,4 @@
-import { IconCloud } from "./components/ui/icon-cloud";
+import IconCloud from "./components/ui/icon-cloud";
 import LinearGradient from "./components/ui/linear-gradient";
 import RadialGradient from "./components/ui/radial-gradient";
 

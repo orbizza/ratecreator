@@ -69,6 +69,7 @@ model Account {
   isDeleted            Boolean?          @default(false)
   isCategoryFailed     Boolean?          @default(false)
   isTranslationFailed  Boolean?          @default(false)
+  videoFetch           Boolean?          
 
   reviews              Review[]
   subscriptions        Subscription[]
@@ -96,6 +97,7 @@ model Account {
   @@index([isCategoryFailed])
   @@index([isTranslationFailed])
   @@index([isSeeded])
+  @@index([videoFetch])
 }
 
 model CategoryMapping {

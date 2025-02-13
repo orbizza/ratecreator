@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
 import {
   ArrowDownZA,
   ArrowRightLeft,
@@ -54,7 +53,7 @@ import {
   pageNumberState,
 } from "@ratecreator/store/review";
 import { useDebounce } from "@ratecreator/hooks";
-
+import { useRecoilValue, useRecoilState, useResetRecoilState } from "recoil";
 import {
   CategoryLoadingCard,
   CreatorLoadingCard,
@@ -279,8 +278,8 @@ export const CategoriesSearchResults: React.FC = () => {
           </div>
         )}
         {!loading && <CategoryBreadcrumb categories={categories} />}
-        <div className="flex flex-col justify-center items-center w-full mx-auto m-8 gap-4">
-          <div className="flex flex-wrap justify-center items-baseline text-xl sm:text-4xl lg:text-5xl font-bold">
+        <div className="flex flex-col justify-center items-center w-full m-8 gap-4">
+          <div className="flex flex-wrap justify-center items-baseline lg:text-5xl font-bold">
             <span className="mr-2">Best in</span>
             {loading ? (
               <Skeleton className="h-8 w-[250px] inline-block" /> // Adjust width as needed
@@ -288,18 +287,16 @@ export const CategoriesSearchResults: React.FC = () => {
               <span>{currentCategory?.name}</span>
             )}
           </div>
-          <div className="flex flex-row mx-auto items-center gap-x-2 text-muted-foreground">
+          <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
             {loading ? (
               <Skeleton className="h-4 w-[250px]" />
             ) : (
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-x-2 sm:gap-y-0">
-                <div className="text-[12px] sm:text-[13px] md:text-sm lg:text-xl">
+              <>
+                <span className="text-[13px] md:text-sm lg:text-xl">
                   {currentCategory?.shortDescription}
-                </div>
-                <div className="text-muted-foreground">
-                  <Info size={14} />
-                </div>
-              </div>
+                </span>
+                <Info size={14} />
+              </>
             )}
           </div>
         </div>
@@ -307,7 +304,7 @@ export const CategoriesSearchResults: React.FC = () => {
       </div>
       <div className="flex flex-row">
         <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
-          {!creatorLoading && <FilterSidebar />}
+          {!loading && <FilterSidebar />}
           {!loading && (
             <>
               <SubCategoriesList

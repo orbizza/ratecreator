@@ -146,17 +146,19 @@ export const CategoryListPage: React.FC = () => {
   return (
     <div className="container mx-auto p-4 mt-10">
       <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
-        <div className="text-3xl md:text-5xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
+        <div className="text-2xl md:text-3xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
           What are you looking for?
         </div>
         <div className="w-full">
           <SearchBar />
         </div>
       </div>
-      <Separator className="my-4" />
-      <div className="mt-20 my-[4rem]">
-        <h2 className="text-2xl font-semibold my-4 mb-10">
-          Explore companies by category
+      <Separator className="my-0 md:my-4" />
+      <div className="mt-10 lg:mt-20 my-[4rem]">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold my-4 mb-10">
+          Explore{" "}
+          <span className="text-primary">Creators &amp; Communities</span> by
+          category
         </h2>
         {!loading && (
           <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
