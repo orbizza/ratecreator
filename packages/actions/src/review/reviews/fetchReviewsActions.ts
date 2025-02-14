@@ -11,7 +11,7 @@ export async function fetchReviewsAction(
   accountId: string,
   platform: Platform,
   currentPage: number,
-  reviewsPerPage: number,
+  reviewsPerPage: number
 ) {
   const pageSize = reviewsPerPage;
   const offset = currentPage * pageSize;
@@ -24,8 +24,6 @@ export async function fetchReviewsAction(
     },
     select: { id: true },
   });
-
-  console.log("in All reviews user", user?.id);
 
   const account = await prisma.account.findUnique({
     where: {
@@ -90,7 +88,7 @@ export async function fetchReviewsAction(
 
 export async function fetchSelfReviewsAction(
   accountId: string,
-  platform: Platform,
+  platform: Platform
 ) {
   const { userId } = auth();
 
@@ -100,8 +98,6 @@ export async function fetchSelfReviewsAction(
     },
     select: { id: true },
   });
-
-  console.log("user", user?.id);
 
   const account = await prisma.account.findUnique({
     where: {
@@ -144,7 +140,7 @@ export async function fetchSelfReviewsAction(
 
 export async function fetchTotalReviewsAction(
   accountId: string,
-  platform: Platform,
+  platform: Platform
 ) {
   const account = await prisma.account.findUnique({
     where: {

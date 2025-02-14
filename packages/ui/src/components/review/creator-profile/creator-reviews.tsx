@@ -1,16 +1,17 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRecoilState, useResetRecoilState } from "recoil";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { SwitchCamera, UserPen, Loader2 } from "lucide-react";
+import { useIntersection } from "@mantine/hooks";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
 import { ReviewCardSkeleton } from "../skeletons/creator-profile-skeletons";
 import { ReviewListCardGridPublic } from "../cards/review-list-card-grid-public";
 import { Platform, ReviewType } from "@ratecreator/types/review";
-import { pageNumberState } from "@ratecreator/store/review";
-import { PaginationBar } from "../cards/pagination-bar";
+
 import {
   fetchReviewsAction,
   fetchSelfReviewsAction,
-  fetchTotalReviewsAction,
 } from "@ratecreator/actions/review";
 import { useAuth } from "@clerk/nextjs";
 import { ReviewListCardGridSelf } from "../cards/review-list-card-grid-self";
@@ -21,7 +22,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@ratecreator/ui";
-import { Info, ChartColumn, SwitchCamera, UserPen } from "lucide-react";
 
 export const ReviewsYoutube = ({
   accountId,
@@ -31,38 +31,54 @@ export const ReviewsYoutube = ({
   platform: string;
 }) => {
   const { isSignedIn } = useAuth();
-  const [loadingReviews, setLoadingReviews] = useState(false);
   const [loadingSelfReviews, setLoadingSelfReviews] = useState(false);
-  const [reviews, setReviews] = useState<ReviewType[]>([]);
   const [selfReviews, setSelfReviews] = useState<ReviewType[]>([]);
-  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
-  const [totalReviews, setTotalReviews] = useState<number>(0);
-  const reviewsPerPage = 2;
 
-  const resetPageNumber = useResetRecoilState(pageNumberState);
+  const reviewsPerPage = 10;
+
+  const lastPostRef = useRef<HTMLElement>(null);
+  const { ref, entry } = useIntersection({
+    root: lastPostRef.current,
+    threshold: 1,
+  });
+
+  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ["reviews", accountId, platform],
+      queryFn: async ({ pageParam = 0 }) => {
+        const fetchedReviews = await fetchReviewsAction(
+          accountId,
+          platform.toUpperCase() as Platform,
+          pageParam,
+          reviewsPerPage
+        );
+        return fetchedReviews;
+      },
+      getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage || lastPage.length < reviewsPerPage) return undefined;
+        return allPages.length;
+      },
+      initialPageParam: 0,
+    });
 
   useEffect(() => {
-    resetPageNumber();
-  }, [resetPageNumber]);
+    if (entry?.isIntersecting && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [entry, fetchNextPage, hasNextPage]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const fetchTotalReviews = async () => {
-    const totalReviews = await fetchTotalReviewsAction(
-      accountId,
-      platform.toUpperCase() as Platform,
-    );
-    setTotalReviews(totalReviews);
-  };
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchSelfReviews();
+    }
+  }, [isSignedIn]);
 
   const fetchSelfReviews = async () => {
     try {
       setLoadingSelfReviews(true);
       const selfReviews = await fetchSelfReviewsAction(
         accountId,
-        platform.toUpperCase() as Platform,
+        platform.toUpperCase() as Platform
       );
 
       setSelfReviews(selfReviews);
@@ -73,56 +89,26 @@ export const ReviewsYoutube = ({
     }
   };
 
-  useEffect(() => {
-    fetchTotalReviews();
-    if (isSignedIn) {
-      fetchSelfReviews();
-    }
-    setCurrentPage(0);
-  }, [isSignedIn]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setLoadingReviews(true);
-
-        const fetchedReviews = await fetchReviewsAction(
-          accountId,
-          platform.toUpperCase() as Platform,
-          currentPage,
-          reviewsPerPage,
-        );
-
-        setReviews(fetchedReviews);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
-
-    fetchReviews();
-  }, [currentPage]);
-
-  if (loadingReviews && (isSignedIn ? loadingSelfReviews : false)) {
+  if (loadingSelfReviews && isSignedIn) {
     return <ReviewCardSkeleton />;
   }
+
+  const allReviews = data?.pages.flatMap((page) => page) ?? [];
 
   return (
     <Suspense fallback={<ReviewCardSkeleton />}>
       {/* Summary Card */}
       {/* Sorting and Filtering */}
 
-      <div className="text-2xl font-bold">Review Summary with Filters</div>
+      <div className='text-2xl font-bold'>Review Summary with Filters</div>
       {isSignedIn && selfReviews.length > 0 && (
         <>
-          <Accordion type="single" collapsible defaultValue="channel-stats">
-            <AccordionItem value="channel-stats" className="border-0">
-              <AccordionTrigger className="text-lg lg:text-xl font-bold hover:no-underline lg:px-1">
-                <div className="flex flex-row gap-x-2 items-center text-primary">
+          <Accordion type='single' collapsible defaultValue='channel-stats'>
+            <AccordionItem value='channel-stats' className='border-0'>
+              <AccordionTrigger className='text-lg lg:text-xl font-bold hover:no-underline lg:px-1'>
+                <div className='flex flex-row gap-x-2 items-center text-primary'>
                   <SwitchCamera size={20} />
-                  <span className="">My Reviews</span>
-                  {/* <Info size={14} className='text-muted-foreground' /> */}
+                  <span className=''>My Reviews</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -130,27 +116,36 @@ export const ReviewsYoutube = ({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <Separator className="my-4" />
+          <Separator className='my-4' />
         </>
       )}
-      {reviews && reviews.length > 0 && (
+      {!data ? (
+        <div className='space-y-4'>
+          <ReviewCardSkeleton />
+          <ReviewCardSkeleton />
+        </div>
+      ) : allReviews.length > 0 ? (
         <>
-          <div className="flex flex-row gap-x-2 items-center text-primary">
+          <div className='flex flex-row gap-x-2 items-center text-primary'>
             <UserPen size={20} />
-            <span className="text-lg lg:text-xl">User Reviews</span>
-            {/* <Info size={14} className='text-muted-foreground' /> */}
+            <span className='text-lg lg:text-xl'>User Reviews</span>
           </div>
-          <ReviewListCardGridPublic reviews={reviews} />
-          <PaginationBar
-            currentPage={currentPage}
-            totalPages={Math.ceil(
-              (totalReviews - selfReviews.length) / reviewsPerPage,
+          <ReviewListCardGridPublic reviews={allReviews} />
+          <div ref={ref} className='w-full flex justify-center py-4'>
+            {isFetchingNextPage && (
+              <Loader2 className='w-6 h-6 text-zinc-500 animate-spin' />
             )}
-            onPageChange={handlePageChange}
-            totalItems={totalReviews - selfReviews.length}
-            itemsPerPage={reviewsPerPage}
-          />
+            {!hasNextPage && allReviews.length > 0 && (
+              <span className='text-sm text-muted-foreground'>
+                No more reviews found
+              </span>
+            )}
+          </div>
         </>
+      ) : (
+        <div className='text-center text-muted-foreground py-8'>
+          No reviews found
+        </div>
       )}
     </Suspense>
   );
