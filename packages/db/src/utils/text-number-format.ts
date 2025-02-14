@@ -30,6 +30,10 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
+export const convertToEmbeddedUrl = (youtubeUrl: string): string => {
+  return youtubeUrl.replace("watch?v=", "embed/");
+};
+
 export const getInitials = (nameOrEmail: string) => {
   if (!nameOrEmail) return "SD";
 
