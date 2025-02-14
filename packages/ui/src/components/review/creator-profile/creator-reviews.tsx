@@ -52,7 +52,7 @@ export const ReviewsYoutube = ({
   const fetchTotalReviews = async () => {
     const totalReviews = await fetchTotalReviewsAction(
       accountId,
-      platform.toUpperCase() as Platform
+      platform.toUpperCase() as Platform,
     );
     setTotalReviews(totalReviews);
   };
@@ -62,7 +62,7 @@ export const ReviewsYoutube = ({
       setLoadingSelfReviews(true);
       const selfReviews = await fetchSelfReviewsAction(
         accountId,
-        platform.toUpperCase() as Platform
+        platform.toUpperCase() as Platform,
       );
 
       setSelfReviews(selfReviews);
@@ -90,7 +90,7 @@ export const ReviewsYoutube = ({
           accountId,
           platform.toUpperCase() as Platform,
           currentPage,
-          reviewsPerPage
+          reviewsPerPage,
         );
 
         setReviews(fetchedReviews);
@@ -113,15 +113,15 @@ export const ReviewsYoutube = ({
       {/* Summary Card */}
       {/* Sorting and Filtering */}
 
-      <div className='text-2xl font-bold'>Review Summary with Filters</div>
+      <div className="text-2xl font-bold">Review Summary with Filters</div>
       {isSignedIn && selfReviews.length > 0 && (
         <>
-          <Accordion type='single' collapsible defaultValue='channel-stats'>
-            <AccordionItem value='channel-stats' className='border-0'>
-              <AccordionTrigger className='text-lg lg:text-xl font-bold hover:no-underline lg:px-1'>
-                <div className='flex flex-row gap-x-2 items-center text-primary'>
+          <Accordion type="single" collapsible defaultValue="channel-stats">
+            <AccordionItem value="channel-stats" className="border-0">
+              <AccordionTrigger className="text-lg lg:text-xl font-bold hover:no-underline lg:px-1">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
                   <SwitchCamera size={20} />
-                  <span className=''>My Reviews</span>
+                  <span className="">My Reviews</span>
                   {/* <Info size={14} className='text-muted-foreground' /> */}
                 </div>
               </AccordionTrigger>
@@ -130,21 +130,21 @@ export const ReviewsYoutube = ({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <Separator className='my-4' />
+          <Separator className="my-4" />
         </>
       )}
       {reviews && reviews.length > 0 && (
         <>
-          <div className='flex flex-row gap-x-2 items-center text-primary'>
+          <div className="flex flex-row gap-x-2 items-center text-primary">
             <UserPen size={20} />
-            <span className='text-lg lg:text-xl'>User Reviews</span>
+            <span className="text-lg lg:text-xl">User Reviews</span>
             {/* <Info size={14} className='text-muted-foreground' /> */}
           </div>
           <ReviewListCardGridPublic reviews={reviews} />
           <PaginationBar
             currentPage={currentPage}
             totalPages={Math.ceil(
-              (totalReviews - selfReviews.length) / reviewsPerPage
+              (totalReviews - selfReviews.length) / reviewsPerPage,
             )}
             onPageChange={handlePageChange}
             totalItems={totalReviews - selfReviews.length}
