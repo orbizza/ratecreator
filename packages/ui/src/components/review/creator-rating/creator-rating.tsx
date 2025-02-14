@@ -6,6 +6,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
+  Button,
   Card,
   Input,
   Textarea,
@@ -90,6 +91,9 @@ export const CreatorRating = ({
   const [isCreatorDataLoading, setIsCreatorDataLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const [disabled, setDisabled] = useState(true);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     const fetchCreatorData = async () => {
       setIsCreatorDataLoading(true);
@@ -130,6 +134,7 @@ export const CreatorRating = ({
       const validatedData = ReviewValidator.parse(formData);
 
       // Call the server action directly
+      setIsSubmitting(true);
       const result = await createReview(validatedData);
 
       if (!result.success) {
@@ -156,10 +161,11 @@ export const CreatorRating = ({
       // Show error message to user
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to submit review",
+        description: "Failed to submit review",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -214,6 +220,14 @@ export const CreatorRating = ({
       setIsLoadingMetadata(false);
     }
   };
+
+  useEffect(() => {
+    if (formData.title && formData.stars > 0) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [formData]);
 
   return (
     <>
@@ -378,12 +392,13 @@ export const CreatorRating = ({
             </div>
 
             <div className="flex justify-end">
-              <button
+              <Button
                 type="submit"
                 className="w-full md:w-auto px-6 py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium"
+                disabled={disabled}
               >
-                Submit Review
-              </button>
+                {isSubmitting ? "Submitting..." : "Submit Review"}
+              </Button>
             </div>
           </form>
         </Card>

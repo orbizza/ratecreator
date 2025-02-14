@@ -3,25 +3,31 @@
 import React from "react";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { ThemeProvider, TooltipProvider } from "@ratecreator/ui";
 import { CommandBar } from "@ratecreator/ui/review";
 import { RecoilRoot } from "recoil";
 
+// Create a client
+const queryClient = new QueryClient();
+
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <RecoilRoot>
-        <CommandBar>
-          <TooltipProvider>{children}</TooltipProvider>
-        </CommandBar>
-      </RecoilRoot>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <RecoilRoot>
+          <CommandBar>
+            <TooltipProvider>{children}</TooltipProvider>
+          </CommandBar>
+        </RecoilRoot>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

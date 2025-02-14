@@ -14,7 +14,7 @@ import {
   ChannelDetailsSectionSkeleton,
   ReviewCardSkeleton,
 } from "../skeletons/creator-profile-skeletons";
-import { ReviewsYoutube } from "./youtube/reviews-youtube";
+import { ReviewsYoutube } from "./creator-reviews";
 import { MessagesSquare } from "lucide-react";
 import { Info } from "lucide-react";
 
