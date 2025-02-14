@@ -40,5 +40,7 @@ export * from "./components/ui/textarea";
 export * from "./components/ui/tweet-card";
 export * from "./components/ui/toaster";
 export * from "./components/ui/toast";
+export * from "./components/ui/animated-tooltip";
+export * from "./components/ui/hover-card";
 export * from "./hooks/use-toast";
 export { IconCloud, LinearGradient, RadialGradient };

@@ -28,7 +28,7 @@ export const ReviewValidator = z.object({
     }),
   accountId: z.string(),
   platform: z.string().toUpperCase(),
-  stars: z.number().min(1).max(5),
+  stars: z.number({ message: "Star rating is required" }).min(1).max(5),
   authorId: z.string(),
   content: z.any(),
   contentUrl: z.string().url().optional(),

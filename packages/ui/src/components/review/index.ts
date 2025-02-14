@@ -13,3 +13,4 @@ export * from "./creator-profile/creator-profile";
 export * from "./error-page/error-message";
 export * from "./error-page/wip";
 export * from "./creator-rating/creator-rating";
+export * from "./contact/contact";

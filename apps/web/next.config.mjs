@@ -6,6 +6,8 @@ const nextConfig = {
       "lh3.googleusercontent.com",
       "yt4.ggpht.com",
       "ratecreator.nyc3.cdn.digitaloceanspaces.com",
+      "img.clerk.com",
+      "img.clerk.com/avatars",
       // ... any other domains you're using
     ],
   },

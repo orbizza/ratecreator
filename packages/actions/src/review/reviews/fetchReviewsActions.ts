@@ -11,10 +11,22 @@ export async function fetchReviewsAction(
   accountId: string,
   platform: Platform,
   currentPage: number,
-  reviewsPerPage: number,
+  reviewsPerPage: number
 ) {
   const pageSize = reviewsPerPage;
   const offset = currentPage * pageSize;
+
+  const { userId } = auth();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      clerkId: userId || "",
+    },
+    select: { id: true },
+  });
+
+  console.log("in All reviews user", user?.id);
+
   const account = await prisma.account.findUnique({
     where: {
       platform_accountId: {
@@ -26,12 +38,88 @@ export async function fetchReviewsAction(
   });
 
   const reviews = await prisma.review.findMany({
-    where: { accountId: account?.id, status: "PUBLISHED" },
+    where: {
+      accountId: account?.id,
+      status: "PUBLISHED",
+      ...(user?.id && {
+        NOT: {
+          authorId: user.id,
+        },
+      }),
+    },
     skip: offset,
     take: pageSize,
+    include: {
+      author: true,
+    },
   });
 
-  console.log("reviews", reviews);
+  return reviews.map((review) => ({
+    _id: review.id,
+    stars: review.stars,
+    platform: review.platform,
+    accountId: review.accountId,
+    content: review.content,
+    title: review.title,
+    contentUrl: review.contentUrl,
+    authorId: review.authorId,
+    author: review.author
+      ? {
+          id: review.author.id,
+          firstName: review.author.firstName || "",
+          lastName: review.author.lastName || "",
+          username: review.author.username || "",
+          clerkId: review.author.clerkId,
+          imageUrl:
+            (review.author.webhookPayload as { image_url?: string })
+              ?.image_url || "",
+          email: review.author.email || "",
+        }
+      : undefined,
+    status: review.status,
+    verificationStatus: review.verificationStatus,
+    createdAt: review.createdAt,
+    updatedAt: review.updatedAt,
+    isEdited: review.isEdited,
+    editHistory: review.editHistory,
+    reportCount: review.reportCount,
+    lastActivityAt: review.lastActivityAt,
+    viewCount: review.viewCount,
+  })) as ReviewType[];
+}
+
+export async function fetchSelfReviewsAction(
+  accountId: string,
+  platform: Platform
+) {
+  const { userId } = auth();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      clerkId: userId || "",
+    },
+    select: { id: true },
+  });
+
+  console.log("user", user?.id);
+
+  const account = await prisma.account.findUnique({
+    where: {
+      platform_accountId: {
+        platform,
+        accountId,
+      },
+    },
+    select: { id: true },
+  });
+
+  const reviews = await prisma.review.findMany({
+    where: {
+      accountId: account?.id,
+      status: "PUBLISHED",
+      authorId: user?.id,
+    },
+  });
 
   return reviews.map((review) => ({
     _id: review.id,
@@ -56,7 +144,7 @@ export async function fetchReviewsAction(
 
 export async function fetchTotalReviewsAction(
   accountId: string,
-  platform: Platform,
+  platform: Platform
 ) {
   const account = await prisma.account.findUnique({
     where: {

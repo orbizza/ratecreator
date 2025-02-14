@@ -176,6 +176,7 @@ model Review {
   reportCount        Int                  @default(0)
   lastActivityAt     DateTime             @default(now())  // For sorting/trending
   viewCount          Int                  @default(0)
+  isDeleted          Boolean              @default(false)
 
   @@index([authorId])
   @@index([accountId])
@@ -185,11 +186,18 @@ model Review {
   @@index([reportCount])
   @@index([viewCount])
   @@index([platform])
+  @@index([title])
+  @@index([stars])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([isEdited])
+  @@index([verificationStatus])
+  @@index([isDeleted])
 }
 
 model Comment {
   id                 String               @id @default(auto()) @map("_id") @db.ObjectId
-  text               String
+  content            Json?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   author             User                 @relation(fields: [authorId], references: [id])
@@ -205,12 +213,17 @@ model Comment {
   editHistory        Json?                // Store edit history
   status             CommentStatus        @default(PUBLISHED)
   reportCount        Int                  @default(0)
+  isDeleted          Boolean              @default(false)
 
   @@index([authorId])
   @@index([reviewId])
   @@index([replyToId])
   @@index([status])
   @@index([reportCount])
+  @@index([isDeleted])
+  @@index([verificationStatus])
+  @@index([isEdited])
+
 }
 
 model Vote {
