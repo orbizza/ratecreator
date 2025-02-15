@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   Separator,
   Badge,
@@ -12,19 +11,24 @@ import {
 import { CreatorData } from "@ratecreator/types/review";
 import { formatDate, formatValue, fromSlug } from "@ratecreator/db/utils";
 import {
-  Youtube,
   Users,
-  Video,
-  Eye,
+  Twitter,
   Calendar,
   Hash,
-  ChevronDown,
   AppWindow,
   Info,
   Globe,
   Languages,
   ChartColumn,
   SquareStack,
+  Heart,
+  Camera,
+  UserPlus,
+  SquareMenu,
+  Handshake,
+  Video,
+  ThumbsUp,
+  Shovel,
 } from "lucide-react";
 import Link from "next/link";
 import { countryCodes, languageCodes } from "@ratecreator/store";
@@ -98,30 +102,44 @@ const KeywordBadge = ({ keyword }: { keyword: string }) => (
   </Link>
 );
 
-export const ChannelDetailsSection = ({
+export const TiktokDetailsSection = ({
   account,
   categories,
 }: ChannelDetailsSectionProps) => {
-  const stats = [
+  const stats: Array<{
+    icon: any;
+    label: string;
+    value: string | number;
+  }> = [
     {
       icon: Users,
-      label: "Subscribers",
+      label: "Followers",
       value: account.followerCount || 0,
     },
     {
       icon: Video,
       label: "Videos",
-      value: account.ytData?.statistics?.videoCount || 0,
+      value: account.tiktokData?.videos || 0,
     },
     {
-      icon: Eye,
-      label: "Total Views",
-      value: account.ytData?.statistics?.viewCount || 0,
+      icon: Handshake,
+      label: "Friends",
+      value: account.tiktokData?.friendCount || 0,
     },
     {
-      icon: Calendar,
-      label: "Joined",
-      value: account.ytData?.snippet?.publishedAt ?? "",
+      icon: Heart,
+      label: "Total Hearts",
+      value: account.tiktokData?.heart || 0,
+    },
+    {
+      icon: ThumbsUp,
+      label: "Total Likes",
+      value: account.tiktokData?.likes || 0,
+    },
+    {
+      icon: Shovel,
+      label: "Total Diggs",
+      value: account.tiktokData?.diggCount || 0,
     },
   ];
 
@@ -160,7 +178,7 @@ export const ChannelDetailsSection = ({
           <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
             <div className='flex flex-row gap-x-2 items-center text-primary'>
               <ChartColumn size={28} />
-              <span className=''>Channel Statistics</span>
+              <span className=''>User Statistics</span>
               <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
@@ -181,11 +199,14 @@ export const ChannelDetailsSection = ({
           <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
             <div className='flex flex-row gap-x-2 items-center text-primary'>
               <AppWindow size={28} />
-              <span className=''>Channel Description</span>
+              <span className=''>User Details</span>
               <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
           <AccordionContent>
+            <p className='text-sm md:text-lg font-semibold text-primary mb-2'>
+              Description
+            </p>
             <div className='prose dark:prose-invert max-w-none'>
               <p className='whitespace-pre-wrap'>
                 {account.description_en ||
@@ -193,6 +214,22 @@ export const ChannelDetailsSection = ({
                   "No description available"}
               </p>
             </div>
+            {/* Render the url if present in the entity */}
+            {account.tiktokData?.bio_link && (
+              <>
+                <p className='text-sm md:text-lg font-semibold text-primary mb-2 mt-4'>
+                  Bio Link
+                </p>
+                <Link
+                  href={account.tiktokData?.bio_link || ""}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline'
+                >
+                  {account.tiktokData?.bio_link}
+                </Link>
+              </>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>

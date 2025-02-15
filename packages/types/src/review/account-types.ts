@@ -84,11 +84,11 @@ export interface CreatorData {
       verified?: boolean;
       privateAccount?: boolean;
       friendCount?: number;
-      followingCount?: number;
-      likeCount?: number;
-      videoCount?: number;
+      following?: number;
+      likes?: number;
+      videos?: number;
       diggCount?: number;
-      heartCount?: number;
+      heart?: number;
       bio_link?: string;
       is_under_age?: boolean;
       is_secret?: boolean;
