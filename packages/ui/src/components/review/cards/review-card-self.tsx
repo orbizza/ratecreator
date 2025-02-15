@@ -10,6 +10,7 @@ import {
   formatDate,
   convertToEmbeddedUrl,
   extractTweetId,
+  extractTikTokVideoId,
 } from "@ratecreator/db/utils";
 import {
   EllipsisVertical,
@@ -91,6 +92,15 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
               allowFullScreen
             />
           </div>
+        );
+      case "tiktok":
+        return (
+          <iframe
+            src={`https://www.tiktok.com/embed/${extractTikTokVideoId(contentUrl)}`}
+            className="w-full h-full object-cover rounded-md shadow-md"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+            allowFullScreen
+          />
         );
       // Add other platform-specific content renderers here
       default:
