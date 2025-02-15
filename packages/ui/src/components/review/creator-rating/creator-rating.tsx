@@ -20,7 +20,11 @@ import {
   ReviewFormData,
   ReviewValidator,
 } from "@ratecreator/types/review";
-import { getInitials, truncateText } from "@ratecreator/db/utils";
+import {
+  extractTweetId,
+  getInitials,
+  truncateText,
+} from "@ratecreator/db/utils";
 import { Loader2 } from "lucide-react";
 import { Editor } from "./editor";
 import { TweetCard } from "@ratecreator/ui";
@@ -28,12 +32,6 @@ import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
-const extractTweetId = (url: string) => {
-  const regex = /\/status\/(\d+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-};
 
 const getRatingColor = (rating: number) => {
   if (rating >= 4.5) return "text-emerald-500";
@@ -60,6 +58,21 @@ const Star = ({ filled, color }: { filled: boolean; color: string }) => {
       />
     </svg>
   );
+};
+
+const getLabelText = (platform: string) => {
+  switch (platform) {
+    case "youtube":
+      return "Add Video URL (optional)";
+    case "twitter":
+      return "Add Tweet URL (optional)";
+    case "instagram":
+      return "Add Instagram URL (optional)";
+    case "linkedin":
+      return "Add LinkedIn URL (optional)";
+    default:
+      return "Add URL (optional)";
+  }
 };
 
 export const CreatorRating = ({
@@ -340,7 +353,7 @@ export const CreatorRating = ({
 
             <div>
               <label className="block text-xl font-medium mb-2">
-                Add URL (optional)
+                {getLabelText(platform)}
               </label>
               <div className="space-y-4">
                 <Input
@@ -357,13 +370,23 @@ export const CreatorRating = ({
                     <span>Loading URL preview...</span>
                   </div>
                 )}
+                {/* <div className='border rounded-lg p-4 space-y-2'>
+                  {platform === "twitter" && formData.contentUrl && (
+                    <TweetCard id={extractTweetId(formData.contentUrl) || ""} />
+                  )}
+                </div> */}
 
                 {urlMetadata && (
-                  <div className="border rounded-lg p-4 space-y-2">
+                  <div className=" rounded-lg p-4">
                     {platform === "twitter" && formData.contentUrl && (
-                      <TweetCard
-                        id={extractTweetId(formData.contentUrl) || ""}
-                      />
+                      <div className="flex justify-center relative aspect-video">
+                        <iframe
+                          src={`https://platform.twitter.com/embed/Tweet.html?id=${extractTweetId(formData.contentUrl)}`}
+                          className="w-full h-full object-cover rounded-md shadow-md"
+                          allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+                          allowFullScreen
+                        />
+                      </div>
                     )}
                     {platform !== "twitter" && (
                       <>

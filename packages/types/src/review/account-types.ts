@@ -98,6 +98,13 @@ export interface CreatorData {
     xData?: {
       verified?: boolean;
       protected?: boolean;
+      profile_banner_url?: string;
+      verified_type?: string;
+      most_recent_tweet_id?: string;
+      pinned_tweet_id?: string;
+      location_en?: string;
+      location?: string;
+      created_at?: string;
       public_metrics?: {
         followers_count?: number;
         following_count?: number;
@@ -119,7 +126,8 @@ export interface CreatorData {
             url?: string;
             expanded_url?: string;
             display_url?: string;
-            indices?: number[];
+            start?: number;
+            end?: number;
           }[];
           mentions?: {
             username?: string;
@@ -138,11 +146,6 @@ export interface CreatorData {
           }[];
         };
       };
-      verified_type?: string;
-      most_recent_tweet_id?: string;
-      pinned_tweet_id?: string;
-      location_en?: string;
-      created_at?: string;
     };
     redditData?: {
       category_en?: string;
