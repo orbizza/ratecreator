@@ -23,7 +23,7 @@ import {
   AccordionTrigger,
 } from "@ratecreator/ui";
 
-export const ReviewsYoutube = ({
+export const CreatorReviews = ({
   accountId,
   platform,
 }: {
@@ -90,7 +90,12 @@ export const ReviewsYoutube = ({
   };
 
   if (loadingSelfReviews && isSignedIn) {
-    return <ReviewCardSkeleton />;
+    return (
+      <div className="mt-5 space-y-4">
+        <ReviewCardSkeleton />
+        <ReviewCardSkeleton />
+      </div>
+    );
   }
 
   const allReviews = data?.pages.flatMap((page) => page) ?? [];
@@ -120,7 +125,7 @@ export const ReviewsYoutube = ({
         </>
       )}
       {!data ? (
-        <div className="space-y-4">
+        <div className="mt-5 space-y-4">
           <ReviewCardSkeleton />
           <ReviewCardSkeleton />
         </div>
@@ -137,14 +142,14 @@ export const ReviewsYoutube = ({
             )}
             {!hasNextPage && allReviews.length > 0 && (
               <span className="text-sm text-muted-foreground">
-                No more reviews found
+                No more user reviews
               </span>
             )}
           </div>
         </>
       ) : (
         <div className="text-center text-muted-foreground py-8">
-          No reviews found
+          No user reviews found
         </div>
       )}
     </Suspense>

@@ -8,6 +8,8 @@ const nextConfig = {
       "ratecreator.nyc3.cdn.digitaloceanspaces.com",
       "img.clerk.com",
       "img.clerk.com/avatars",
+      "pbs.twimg.com",
+      "x.com",
       // ... any other domains you're using
     ],
   },

@@ -14,9 +14,11 @@ import {
   ChannelDetailsSectionSkeleton,
   ReviewCardSkeleton,
 } from "../skeletons/creator-profile-skeletons";
-import { ReviewsYoutube } from "./creator-reviews";
+import { CreatorReviews } from "./creator-reviews";
 import { MessagesSquare } from "lucide-react";
 import { Info } from "lucide-react";
+import TwitterChannelHeader from "./twitter/header-twitter";
+import { TwitterDetailsSection } from "./twitter/twitter-details-section";
 
 export const CreatorProfile = ({
   accountId,
@@ -121,16 +123,39 @@ export const CreatorProfile = ({
                   <Info size={14} className="text-muted-foreground" />
                 </div>
 
-                <ReviewsYoutube accountId={accountId} platform={platform} />
+                <CreatorReviews accountId={accountId} platform={platform} />
               </div>
             </Suspense>
           </>
         );
       case "twitter":
         return (
-          <div className="text-center py-8">
-            Twitter profile view coming soon
-          </div>
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              <TwitterChannelHeader account={data.account} />
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              <UserRatingCard accountId={accountId} platform={platform} />
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              <TwitterDetailsSection
+                account={data.account}
+                categories={data.categories}
+              />
+            </Suspense>
+            <Suspense fallback={<ReviewCardSkeleton />}>
+              {/* Review Section */}
+              <div id="reviews" className="mt-10 text-2xl font-bold">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
+                  <MessagesSquare size={28} />
+                  <span className="">Reviews</span>
+                  <Info size={14} className="text-muted-foreground" />
+                </div>
+
+                <CreatorReviews accountId={accountId} platform={platform} />
+              </div>
+            </Suspense>
+          </>
         );
       case "reddit":
         return (

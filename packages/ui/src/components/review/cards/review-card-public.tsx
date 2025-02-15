@@ -1,6 +1,14 @@
 import { ReviewType } from "@ratecreator/types/review";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.bubble.css";
+import {
+  EllipsisVertical,
+  ArrowBigDown,
+  ArrowBigUp,
+  MessageCircle,
+  Share2,
+  FlagOff,
+} from "lucide-react";
 
 import {
   Avatar,
@@ -15,16 +23,8 @@ import {
   truncateText,
   formatDate,
   convertToEmbeddedUrl,
+  extractTweetId,
 } from "@ratecreator/db/utils";
-import {
-  EllipsisVertical,
-  ArrowBigDown,
-  ArrowBigUp,
-  MessageCircle,
-  Share2,
-  Flag,
-  FlagOff,
-} from "lucide-react";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -70,7 +70,50 @@ interface ReviewCardPublicProps {
   review: ReviewType;
 }
 
-const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
+const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
+  platform,
+  contentUrl,
+}) => {
+  if (!contentUrl) return null;
+
+  const renderContent = () => {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return (
+          <iframe
+            src={convertToEmbeddedUrl(contentUrl)}
+            title="YouTube video player"
+            className="w-full h-full rounded-md shadow-md"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+            allowFullScreen
+          />
+        );
+      case "twitter":
+        return (
+          <iframe
+            src={`https://platform.twitter.com/embed/Tweet.html?id=${extractTweetId(contentUrl)}`}
+            className="w-full h-full object-cover rounded-md shadow-md"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+            allowFullScreen
+          />
+        );
+      // Add other platform-specific content renderers here
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6">
+      Supporting {platform} Content
+      <div className="relative w-full aspect-video mt-4">{renderContent()}</div>
+    </div>
+  );
+};
+
+export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
+  review,
+}) => {
   return (
     <Card className="w-full h-full lg:w-3/4 lg:h-auto p-6 bg-background border dark:bg-card shadow-lg">
       <div className="flex flex-row gap-4 justify-between">
@@ -108,13 +151,9 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
         </div>
       </div>
       <Separator className="my-4" />
-
       <div className="flex flex-row gap-2 items-center justify-between">
         <div>
           <StarRating rating={review.stars} />
-          {/* <span className='text-sm text-muted-foreground'>
-            {review.stars} out of 5
-          </span> */}
         </div>
         <div className="text-sm sm:text-md md:text-lg lg:text-xl text-muted-foreground font-normal">
           {formatDate(new Date(review.createdAt).toISOString())}
@@ -129,6 +168,7 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
       <h1 className="font-bold mb-8 text-primary text-2xl sm:text-3xl md:text-4xl mt-4">
         {review.title}
       </h1>
+
       {typeof review.content === "object" ? (
         <div className="prose dark:prose-invert prose-2xl max-w-none">
           {JSON.stringify(review.content) === "{}" ? (
@@ -147,7 +187,7 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
                     readOnly={true}
                     theme="bubble"
                     modules={{ toolbar: false }}
-                    // className='[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto'
+                    className="[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto"
                   />
                 </div>
               </div>
@@ -166,7 +206,7 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
                 readOnly={true}
                 theme="bubble"
                 modules={{ toolbar: false }}
-                // className='[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto'
+                className="[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto"
               />
             </div>
           </div>
@@ -174,18 +214,10 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
       )}
 
       {review.contentUrl && (
-        <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6">
-          Supporting Video
-          <div className="relative w-full aspect-video mt-4">
-            <iframe
-              src={convertToEmbeddedUrl(review.contentUrl)}
-              title="YouTube video player"
-              className="w-full h-full rounded-md shadow-md"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
-              allowFullScreen
-            />
-          </div>
-        </div>
+        <PlatformContent
+          platform={review.platform}
+          contentUrl={review.contentUrl}
+        />
       )}
 
       <Separator className="my-4" />
@@ -230,120 +262,4 @@ const YoutubeCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
       </div>
     </Card>
   );
-};
-
-const TwitterCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
-  return (
-    <Card className="p-4 border-purple-200 hover:border-purple-300 transition-colors">
-      <div className="flex items-center gap-2 text-purple-600 mb-2">
-        <span className="font-semibold">{review.title}</span>
-      </div>
-      <div className="mb-2">
-        <StarRating rating={review.stars} />
-      </div>
-      <div className="prose prose-sm max-w-none">
-        {typeof review.content === "object" ? (
-          JSON.stringify(review.content)
-        ) : (
-          <ReactQuill
-            value={review.content}
-            readOnly={true}
-            theme="bubble"
-            modules={{ toolbar: false }}
-          />
-        )}
-      </div>
-    </Card>
-  );
-};
-
-const TikTokCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
-  return (
-    <Card className="p-4 border-pink-200 hover:border-pink-300 transition-colors">
-      <div className="flex items-center gap-2 text-pink-600 mb-2">
-        <span className="font-semibold">{review.title}</span>
-      </div>
-      <div className="mb-2">
-        <StarRating rating={review.stars} />
-      </div>
-      <div className="prose prose-sm max-w-none">
-        {typeof review.content === "object" ? (
-          JSON.stringify(review.content)
-        ) : (
-          <ReactQuill
-            value={review.content}
-            readOnly={true}
-            theme="bubble"
-            modules={{ toolbar: false }}
-          />
-        )}
-      </div>
-    </Card>
-  );
-};
-
-const RedditCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
-  return (
-    <Card className="p-4 border-pink-200 hover:border-pink-300 transition-colors">
-      <div className="flex items-center gap-2 text-pink-600 mb-2">
-        <span className="font-semibold">{review.title}</span>
-      </div>
-      <div className="mb-2">
-        <StarRating rating={review.stars} />
-      </div>
-      <div className="prose prose-sm max-w-none">
-        {typeof review.content === "object" ? (
-          JSON.stringify(review.content)
-        ) : (
-          <ReactQuill
-            value={review.content}
-            readOnly={true}
-            theme="bubble"
-            modules={{ toolbar: false }}
-          />
-        )}
-      </div>
-    </Card>
-  );
-};
-
-const DefaultCard: React.FC<ReviewCardPublicProps> = ({ review }) => {
-  return (
-    <Card className="p-4">
-      <div className="font-semibold mb-2">{review.title}</div>
-      <div className="mb-2">
-        <StarRating rating={review.stars} />
-      </div>
-
-      <div className="prose prose-sm max-w-none">
-        {typeof review.content === "object" ? (
-          JSON.stringify(review.content)
-        ) : (
-          <ReactQuill
-            value={review.content}
-            readOnly={true}
-            theme="bubble"
-            modules={{ toolbar: false }}
-          />
-        )}
-      </div>
-    </Card>
-  );
-};
-
-export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
-  review,
-}) => {
-  switch (review.platform.toLowerCase()) {
-    case "youtube":
-      return <YoutubeCard review={review} />;
-    case "twitter":
-      return <TwitterCard review={review} />;
-    case "tiktok":
-      return <TikTokCard review={review} />;
-    case "reddit":
-      return <RedditCard review={review} />;
-    default:
-      return <DefaultCard review={review} />;
-  }
 };
