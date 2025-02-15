@@ -24,6 +24,7 @@ import {
   formatDate,
   convertToEmbeddedUrl,
   extractTweetId,
+  extractTikTokVideoId,
 } from "@ratecreator/db/utils";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -98,6 +99,15 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
           />
         );
       // Add other platform-specific content renderers here
+      case "tiktok":
+        return (
+          <iframe
+            src={`https://www.tiktok.com/embed/${extractTikTokVideoId(contentUrl)}`}
+            className="w-full h-full object-cover rounded-md shadow-md"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+            allowFullScreen
+          />
+        );
       default:
         return null;
     }

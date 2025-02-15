@@ -196,7 +196,7 @@ const ChannelNavigation = ({
   );
 };
 
-const TwitterChannelHeader = ({
+const TiktokChannelHeader = ({
   account,
 }: {
   account: CreatorData["account"];
@@ -259,23 +259,15 @@ const TwitterChannelHeader = ({
             <div className="items-center">
               <h1 className="text-xl sm:text-2xl font-bold ml-4 flex items-center gap-2">
                 {account.name_en}
-                {account.xData?.verified && (
+                {account.tiktokData?.verified && (
                   <Verified
-                    className={cn(
-                      "w-5 h-5",
-                      account.xData?.verified_type === "business" &&
-                        "fill-[#E2B719] text-secondary-foreground",
-                      account.xData?.verified_type === "government" &&
-                        "fill-[#829AAB] text-secondary-foreground",
-                      account.xData?.verified_type == "blue" &&
-                        "fill-[#1E9BF0] text-secondary-foreground",
-                    )}
+                    className="w-5 h-5 fill-[#1E9BF0]  text-secondary-foreground"
                     strokeWidth={2}
                   />
                 )}
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground ml-4 mb-2">
-                @{account.handle}
+                {account.handle}
               </p>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center sm:gap-2 ml-4">
@@ -327,15 +319,18 @@ const TwitterChannelHeader = ({
             </div>
             <div className="hidden md:flex flex-col lg:flex-row items-center space-x-4 space-y-5 lg:space-y-0">
               <Link
-                href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
+                href={`/review/create?stars=0&accountId=${account.accountId}&platform=tiktok`}
               >
                 <button className="block text-left py-2 px-5 md:ml-3 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                   Write a Review
                 </button>
               </Link>
-              <Link href={`https://x.com/${account.handle}`} target="_blank">
+              <Link
+                href={`https://tiktok.com/${account.handle}`}
+                target="_blank"
+              >
                 <Button variant="secondary" className="gap-2">
-                  <PlatformIcon platform="twitter" />
+                  <PlatformIcon platform="tiktok" />
                   View Profile
                 </Button>
               </Link>
@@ -355,15 +350,15 @@ const TwitterChannelHeader = ({
 
         <div className="grid grid-cols-2 md:hidden w-full items-center justify-center gap-2 mb-2">
           <Link
-            href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
+            href={`/review/create?stars=0&accountId=${account.accountId}&platform=tiktok`}
           >
             <button className="block w-full text-center py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
               Write a Review
             </button>
           </Link>
-          <Link href={`https://x.com/${account.handle}`} target="_blank">
+          <Link href={`https://tiktok.com/${account.handle}`} target="_blank">
             <Button variant="secondary" size="default" className="gap-2 w-full">
-              <PlatformIcon platform="twitter" />
+              <PlatformIcon platform="tiktok" />
               View Profile
             </Button>
           </Link>
@@ -406,7 +401,7 @@ const TwitterChannelHeader = ({
                         {truncateText(account.name_en, 20)}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        @{truncateText(account.handle, 20)}
+                        {truncateText(account.handle, 20)}
                       </span>
                     </div>
                     <div className="flex flex-col items-center">
@@ -432,14 +427,14 @@ const TwitterChannelHeader = ({
 
                 <div className="hidden md:flex md:flex-row items-center md:gap-2">
                   <Link
-                    href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
+                    href={`/review/create?stars=0&accountId=${account.accountId}&platform=tiktok`}
                   >
                     <button className="hidden md:block text-left py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                       Write a Review
                     </button>
                   </Link>
                   <Link
-                    href={`https://x.com/${account.handle}`}
+                    href={`https://tiktok.com/${account.handle}`}
                     target="_blank"
                   >
                     <Button
@@ -447,7 +442,7 @@ const TwitterChannelHeader = ({
                       size="default"
                       className="hidden lg:flex gap-2"
                     >
-                      <PlatformIcon platform="twitter" />
+                      <PlatformIcon platform="tiktok" />
                       View Profile
                     </Button>
                   </Link>
@@ -461,4 +456,4 @@ const TwitterChannelHeader = ({
   );
 };
 
-export default TwitterChannelHeader;
+export default TiktokChannelHeader;

@@ -36,6 +36,13 @@ export const extractTweetId = (url: string) => {
   return match ? match[1] : null;
 };
 
+export const extractTikTokVideoId = (url: string) => {
+  const regex = /tiktok\.com\/@([^/]+)\/video\/(\d+)/;
+  const match = url.match(regex);
+
+  return match ? match[2] : null;
+};
+
 export const removeNormalSuffix = (url: string) => {
   return url.replace(/_normal(\.\w+)$/, "$1");
 };

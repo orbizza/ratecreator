@@ -105,7 +105,7 @@ export const CreatorReviews = ({
       {/* Summary Card */}
       {/* Sorting and Filtering */}
 
-      <div className="text-2xl font-bold">Review Summary with Filters</div>
+      {/* <div className="text-2xl font-bold">Review Summary with Filters</div> */}
       {isSignedIn && selfReviews.length > 0 && (
         <>
           <Accordion type="single" collapsible defaultValue="channel-stats">
@@ -149,7 +149,7 @@ export const CreatorReviews = ({
         </>
       ) : (
         <div className="text-center text-muted-foreground py-8">
-          No user reviews found
+          No user reviews
         </div>
       )}
     </Suspense>

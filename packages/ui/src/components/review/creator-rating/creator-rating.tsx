@@ -66,10 +66,10 @@ const getLabelText = (platform: string) => {
       return "Add Video URL (optional)";
     case "twitter":
       return "Add Tweet URL (optional)";
-    case "instagram":
-      return "Add Instagram URL (optional)";
-    case "linkedin":
-      return "Add LinkedIn URL (optional)";
+    case "tiktok":
+      return "Add Tiktok URL (optional)";
+    case "reddit":
+      return "Add Reddit URL (optional)";
     default:
       return "Add URL (optional)";
   }

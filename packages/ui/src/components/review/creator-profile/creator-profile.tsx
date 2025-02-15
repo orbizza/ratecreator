@@ -19,6 +19,8 @@ import { MessagesSquare } from "lucide-react";
 import { Info } from "lucide-react";
 import TwitterChannelHeader from "./twitter/header-twitter";
 import { TwitterDetailsSection } from "./twitter/twitter-details-section";
+import TiktokChannelHeader from "./tiktok/header-tiktok";
+import { TiktokDetailsSection } from "./tiktok/tiktok-details-section";
 
 export const CreatorProfile = ({
   accountId,
@@ -167,16 +169,28 @@ export const CreatorProfile = ({
         return (
           <>
             <Suspense fallback={<ChannelHeaderSkeleton />}>
-              TikTok profile view coming soon
+              <TiktokChannelHeader account={data.account} />
             </Suspense>
             <Suspense fallback={<UserRatingCardSkeleton />}>
-              {/* <UserRatingCard accountId={accountId} /> */}
+              <UserRatingCard accountId={accountId} platform={platform} />
             </Suspense>
             <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
-              {/* <ChannelDetailsSection
+              <TiktokDetailsSection
                 account={data.account}
                 categories={data.categories}
-              /> */}
+              />
+            </Suspense>
+            <Suspense fallback={<ReviewCardSkeleton />}>
+              {/* Review Section */}
+              <div id="reviews" className="mt-10 text-2xl font-bold">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
+                  <MessagesSquare size={28} />
+                  <span className="">Reviews</span>
+                  <Info size={14} className="text-muted-foreground" />
+                </div>
+
+                <CreatorReviews accountId={accountId} platform={platform} />
+              </div>
             </Suspense>
           </>
         );
