@@ -50,7 +50,7 @@ export const CreatorReviews = ({
           accountId,
           platform.toUpperCase() as Platform,
           pageParam,
-          reviewsPerPage
+          reviewsPerPage,
         );
         return fetchedReviews;
       },
@@ -78,7 +78,7 @@ export const CreatorReviews = ({
       setLoadingSelfReviews(true);
       const selfReviews = await fetchSelfReviewsAction(
         accountId,
-        platform.toUpperCase() as Platform
+        platform.toUpperCase() as Platform,
       );
 
       setSelfReviews(selfReviews);
@@ -91,7 +91,7 @@ export const CreatorReviews = ({
 
   if (loadingSelfReviews && isSignedIn) {
     return (
-      <div className='mt-5 space-y-4'>
+      <div className="mt-5 space-y-4">
         <ReviewCardSkeleton />
         <ReviewCardSkeleton />
       </div>
@@ -108,12 +108,12 @@ export const CreatorReviews = ({
       {/* <div className="text-2xl font-bold">Review Summary with Filters</div> */}
       {isSignedIn && selfReviews.length > 0 && (
         <>
-          <Accordion type='single' collapsible defaultValue='channel-stats'>
-            <AccordionItem value='channel-stats' className='border-0'>
-              <AccordionTrigger className='text-lg lg:text-xl font-bold hover:no-underline lg:px-1'>
-                <div className='flex flex-row gap-x-2 items-center text-primary'>
+          <Accordion type="single" collapsible defaultValue="channel-stats">
+            <AccordionItem value="channel-stats" className="border-0">
+              <AccordionTrigger className="text-lg lg:text-xl font-bold hover:no-underline lg:px-1">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
                   <SwitchCamera size={20} />
-                  <span className=''>My Reviews</span>
+                  <span className="">My Reviews</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -121,34 +121,34 @@ export const CreatorReviews = ({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <Separator className='my-4' />
+          <Separator className="my-4" />
         </>
       )}
       {!data ? (
-        <div className='mt-5 space-y-4'>
+        <div className="mt-5 space-y-4">
           <ReviewCardSkeleton />
           <ReviewCardSkeleton />
         </div>
       ) : allReviews.length > 0 ? (
         <>
-          <div className='flex flex-row gap-x-2 items-center text-primary'>
+          <div className="flex flex-row gap-x-2 items-center text-primary">
             <UserPen size={20} />
-            <span className='text-lg lg:text-xl'>User Reviews</span>
+            <span className="text-lg lg:text-xl">User Reviews</span>
           </div>
           <ReviewListCardGridPublic reviews={allReviews} />
-          <div ref={ref} className='w-full flex justify-center py-4'>
+          <div ref={ref} className="w-full flex justify-center py-4">
             {isFetchingNextPage && (
-              <Loader2 className='w-6 h-6 text-zinc-500 animate-spin' />
+              <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
             )}
             {!hasNextPage && allReviews.length > 0 && (
-              <span className='text-sm text-muted-foreground'>
+              <span className="text-sm text-muted-foreground">
                 No more user reviews
               </span>
             )}
           </div>
         </>
       ) : (
-        <div className='text-center text-muted-foreground py-8'>
+        <div className="text-center text-muted-foreground py-8">
           No user reviews
         </div>
       )}
