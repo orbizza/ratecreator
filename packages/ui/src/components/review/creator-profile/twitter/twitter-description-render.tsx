@@ -27,7 +27,7 @@ interface TwitterCashtag extends TwitterEntity {
 
 const formatDescription = (
   description: string,
-  xData?: CreatorData["account"]["xData"]
+  xData?: CreatorData["account"]["xData"],
 ) => {
   if (!description) return "No description available";
   if (!xData?.entities?.description) return description;
@@ -112,13 +112,13 @@ const DescriptionRenderer = ({
   account: CreatorData["account"];
 }) => {
   return (
-    <div className='prose dark:prose-invert max-w-none'>
+    <div className="prose dark:prose-invert max-w-none">
       <p
-        className='whitespace-pre-wrap'
+        className="whitespace-pre-wrap"
         dangerouslySetInnerHTML={{
           __html: formatDescription(
             account.description_en || account.description,
-            account.xData
+            account.xData,
           ),
         }}
       />

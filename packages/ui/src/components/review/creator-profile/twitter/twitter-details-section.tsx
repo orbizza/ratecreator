@@ -44,13 +44,13 @@ const StatCard = ({
   label: string;
   value: string | number;
 }) => (
-  <div className='flex items-center gap-3 p-4 rounded-lg border bg-card'>
-    <div className='p-2 rounded-full bg-primary/10'>
-      <Icon className='w-5 h-5 text-primary' />
+  <div className="flex items-center gap-3 p-4 rounded-lg border bg-card">
+    <div className="p-2 rounded-full bg-primary/10">
+      <Icon className="w-5 h-5 text-primary" />
     </div>
     <div>
-      <p className='text-sm text-muted-foreground'>{label}</p>
-      <p className='text-lg font-semibold'>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-lg font-semibold">
         {(() => {
           switch (label) {
             case "Joined":
@@ -70,15 +70,15 @@ const StatCard = ({
 
 const CategoryCard = ({ categories }: { categories: string[] }) => {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => (
         <Link
           key={category}
           href={`/categories/${category}`}
-          className='block transition-colors hover:bg-accent hover:shadow-md hover:rounded-lg'
+          className="block transition-colors hover:bg-accent hover:shadow-md hover:rounded-lg"
         >
-          <div className='p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors duration-200 '>
-            <h4 className='font-semibold mb-2'>{fromSlug(category)}</h4>
+          <div className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors duration-200 ">
+            <h4 className="font-semibold mb-2">{fromSlug(category)}</h4>
             {/* <p className='text-sm text-muted-foreground'>{description}</p> */}
           </div>
         </Link>
@@ -90,10 +90,10 @@ const CategoryCard = ({ categories }: { categories: string[] }) => {
 const KeywordBadge = ({ keyword }: { keyword: string }) => (
   <Link href={`/search?q=${keyword}`}>
     <Badge
-      variant='secondary'
-      className='px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors'
+      variant="secondary"
+      className="px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors"
     >
-      <Hash className='w-3 h-3 -mr-1' />
+      <Hash className="w-3 h-3 -mr-1" />
       {keyword.trim()}
     </Badge>
   </Link>
@@ -165,23 +165,23 @@ export const TwitterDetailsSection = ({
     ?.map((keyword) =>
       keyword
         .replace(/\\?"|\\?"/g, "") // Remove any quotes or escaped quotes
-        .trim()
+        .trim(),
     )
     .filter((keyword) => keyword.length > 0);
 
   return (
-    <div id='channel-details' className='mt-10 space-y-8'>
-      <Accordion type='single' collapsible defaultValue='channel-stats'>
-        <AccordionItem value='channel-stats' className='border-0'>
-          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
-            <div className='flex flex-row gap-x-2 items-center text-primary'>
+    <div id="channel-details" className="mt-10 space-y-8">
+      <Accordion type="single" collapsible defaultValue="channel-stats">
+        <AccordionItem value="channel-stats" className="border-0">
+          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <ChartColumn size={28} />
-              <span className=''>User Statistics</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="">User Statistics</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {stats.map((stat, index) => (
                 <StatCard key={index} {...stat} />
               ))}
@@ -192,32 +192,32 @@ export const TwitterDetailsSection = ({
 
       <Separator />
 
-      <Accordion type='single' collapsible defaultValue='channel-description'>
-        <AccordionItem value='channel-description' className='border-0'>
-          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
-            <div className='flex flex-row gap-x-2 items-center text-primary'>
+      <Accordion type="single" collapsible defaultValue="channel-description">
+        <AccordionItem value="channel-description" className="border-0">
+          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <AppWindow size={28} />
-              <span className=''>User Details</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="">User Details</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <p className='text-sm md:text-lg font-semibold text-primary mb-2'>
+            <p className="text-sm md:text-lg font-semibold text-primary mb-2">
               Description
             </p>
             <DescriptionRenderer account={account} />
             {/* Render the url if present in the entity */}
             {account.xData?.entities?.url?.urls?.map((url) => (
               <>
-                <p className='text-sm md:text-lg font-semibold text-primary mb-2 mt-4'>
+                <p className="text-sm md:text-lg font-semibold text-primary mb-2 mt-4">
                   List of URLs
                 </p>
                 <div key={url.url}>
                   <Link
                     href={url.url || ""}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline'
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline"
                   >
                     {url.expanded_url}
                   </Link>
@@ -225,9 +225,9 @@ export const TwitterDetailsSection = ({
               </>
             ))}
             {!account.xData?.location_en && account.xData?.location && (
-              <p className='text-sm md:text-lg font-semibold text-primary mb-2 mt-4'>
+              <p className="text-sm md:text-lg font-semibold text-primary mb-2 mt-4">
                 Location <br />
-                <span className='font-normal text-secondary-foreground'>
+                <span className="font-normal text-secondary-foreground">
                   {account.xData?.location}
                 </span>
               </p>
@@ -252,17 +252,17 @@ export const TwitterDetailsSection = ({
       {keywords && keywords.length > 0 && (
         <>
           <Separator />
-          <Accordion type='single' collapsible defaultValue='channel-keywords'>
-            <AccordionItem value='channel-keywords' className='border-0'>
-              <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
-                <div className='flex flex-row gap-x-2 items-center text-primary'>
+          <Accordion type="single" collapsible defaultValue="channel-keywords">
+            <AccordionItem value="channel-keywords" className="border-0">
+              <AccordionTrigger className="text-2xl font-bold hover:no-underline">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
                   <Hash size={28} />
-                  <span className=''>Channel Keywords</span>
-                  <Info size={14} className='text-muted-foreground' />
+                  <span className="">Channel Keywords</span>
+                  <Info size={14} className="text-muted-foreground" />
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className='flex flex-wrap gap-2'>
+                <div className="flex flex-wrap gap-2">
                   {keywords.map((keyword, index) => (
                     <KeywordBadge key={index} keyword={keyword} />
                   ))}
@@ -275,13 +275,13 @@ export const TwitterDetailsSection = ({
 
       <Separator />
 
-      <Accordion type='single' collapsible defaultValue='categories'>
-        <AccordionItem value='categories' id='categories' className='border-0'>
-          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
-            <div className='flex flex-row gap-x-2 items-center text-primary'>
+      <Accordion type="single" collapsible defaultValue="categories">
+        <AccordionItem value="categories" id="categories" className="border-0">
+          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
+            <div className="flex flex-row gap-x-2 items-center text-primary">
               <SquareStack size={28} />
-              <span className=''>Categories</span>
-              <Info size={14} className='text-muted-foreground' />
+              <span className="">Categories</span>
+              <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
           <AccordionContent>
