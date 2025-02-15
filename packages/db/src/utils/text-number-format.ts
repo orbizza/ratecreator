@@ -30,6 +30,16 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
+export const extractTweetId = (url: string) => {
+  const regex = /\/status\/(\d+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
+
+export const removeNormalSuffix = (url: string) => {
+  return url.replace(/_normal(\.\w+)$/, "$1");
+};
+
 export const convertToEmbeddedUrl = (youtubeUrl: string): string => {
   return youtubeUrl.replace("watch?v=", "embed/");
 };
