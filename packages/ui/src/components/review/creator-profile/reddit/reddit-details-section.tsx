@@ -46,13 +46,13 @@ const StatCard = ({
   label: string;
   value: string | number;
 }) => (
-  <div className="flex items-center gap-3 p-4 rounded-lg border bg-card">
-    <div className="p-2 rounded-full bg-primary/10">
-      <Icon className="w-5 h-5 text-primary" />
+  <div className='flex items-center gap-3 p-4 rounded-lg border bg-card'>
+    <div className='p-2 rounded-full bg-primary/10'>
+      <Icon className='w-5 h-5 text-primary' />
     </div>
     <div>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-lg font-semibold">
+      <p className='text-sm text-muted-foreground'>{label}</p>
+      <p className='text-lg font-semibold'>
         {(() => {
           switch (label) {
             case "Joined":
@@ -72,15 +72,15 @@ const StatCard = ({
 
 const CategoryCard = ({ categories }: { categories: string[] }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
       {categories.map((category) => (
         <Link
           key={category}
           href={`/categories/${category}`}
-          className="block transition-colors hover:bg-accent hover:shadow-md hover:rounded-lg"
+          className='block transition-colors hover:bg-accent hover:shadow-md hover:rounded-lg'
         >
-          <div className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors duration-200 ">
-            <h4 className="font-semibold mb-2">{fromSlug(category)}</h4>
+          <div className='p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors duration-200 '>
+            <h4 className='font-semibold mb-2'>{fromSlug(category)}</h4>
             {/* <p className='text-sm text-muted-foreground'>{description}</p> */}
           </div>
         </Link>
@@ -121,18 +121,18 @@ export const RedditDetailsSection = ({
   }
 
   return (
-    <div id="channel-details" className="mt-10 space-y-8">
-      <Accordion type="single" collapsible defaultValue="channel-stats">
-        <AccordionItem value="channel-stats" className="border-0">
-          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center text-primary">
+    <div id='channel-details' className='mt-10 space-y-8'>
+      <Accordion type='single' collapsible defaultValue='channel-stats'>
+        <AccordionItem value='channel-stats' className='border-0'>
+          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
+            <div className='flex flex-row gap-x-2 items-center text-primary'>
               <ChartColumn size={28} />
-              <span className="">Subreddit Statistics</span>
-              <Info size={14} className="text-muted-foreground" />
+              <span className=''>Subreddit Statistics</span>
+              <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
               {stats.map((stat, index) => (
                 <StatCard key={index} {...stat} />
               ))}
@@ -143,44 +143,44 @@ export const RedditDetailsSection = ({
 
       <Separator />
 
-      <Accordion type="single" collapsible defaultValue="channel-description">
-        <AccordionItem value="channel-description" className="border-0">
-          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center text-primary">
+      <Accordion type='single' collapsible defaultValue='channel-description'>
+        <AccordionItem value='channel-description' className='border-0'>
+          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
+            <div className='flex flex-row gap-x-2 items-center text-primary'>
               <AppWindow size={28} />
-              <span className="">Subreddit Description</span>
-              <Info size={14} className="text-muted-foreground" />
+              <span className=''>Subreddit Description</span>
+              <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-col">
-              <p className="text-sm md:text-lg font-semibold text-primary mt-2">
+            <div className='flex flex-col'>
+              <p className='text-sm md:text-lg font-semibold text-primary mt-2'>
                 Public Description
               </p>
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap">
+              <div className='prose dark:prose-invert max-w-none'>
+                <p className='whitespace-pre-wrap'>
                   {account.description_en ||
                     account.description ||
                     "No description available"}
                 </p>
               </div>
             </div>
-            <div className="flex flex-col">
-              <p className="text-sm md:text-lg font-semibold text-primary mt-2">
+            <div className='flex flex-col'>
+              <p className='text-sm md:text-lg font-semibold text-primary mt-2'>
                 Advertiser Category
               </p>
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap">
+              <div className='prose dark:prose-invert max-w-none'>
+                <p className='whitespace-pre-wrap'>
                   {account.redditData?.about?.data?.advertiser_category ||
                     "No advertiser category available"}
                 </p>
               </div>
             </div>
-            <div className="flex flex-col">
-              <p className="text-sm md:text-lg font-semibold text-primary mt-4 md:mt-7">
+            <div className='flex flex-col'>
+              <p className='text-sm md:text-lg font-semibold text-primary mt-4 md:mt-7'>
                 Detailed Description
               </p>
-              <div className="prose dark:prose-invert max-w-none">
+              <div className='prose dark:prose-invert max-w-none'>
                 <ReactMarkdown
                   // 1. Enable GFM (tables, strikethrough, etc.)
                   remarkPlugins={[remarkGfm]}
@@ -210,7 +210,7 @@ export const RedditDetailsSection = ({
                     }
                     // Handle markdown-style Reddit links that might be getting processed incorrectly
                     const redditLinkMatch = cleanUrl.match(
-                      /\[?(\/r\/[^\]]+)\]?\(https:\/\/reddit\.com.*\)/,
+                      /\[?(\/r\/[^\]]+)\]?\(https:\/\/reddit\.com.*\)/
                     );
                     if (redditLinkMatch) {
                       return `https://reddit.com${redditLinkMatch[1]}`;
@@ -221,7 +221,7 @@ export const RedditDetailsSection = ({
                       if (cleanUrl.includes("reddit.com")) {
                         return cleanUrl.replace(
                           /^@?https?:\/\/(www\.)?reddit\.com/,
-                          "https://reddit.com",
+                          "https://reddit.com"
                         );
                       }
                       return `https://reddit.com${cleanUrl.replace("http://localhost:3000", "")}`;
@@ -233,26 +233,26 @@ export const RedditDetailsSection = ({
                   components={{
                     // Example: custom headings
                     h1: ({ node, ...props }) => (
-                      <h1 {...props} className="text-2xl font-bold mb-4">
+                      <h1 {...props} className='text-2xl font-bold mb-4'>
                         {props.children}
                       </h1>
                     ),
                     h2: ({ node, ...props }) => (
-                      <h2 {...props} className="text-xl font-semibold mb-3">
+                      <h2 {...props} className='text-xl font-semibold mb-3'>
                         {props.children}
                       </h2>
                     ),
                     h3: ({ node, ...props }) => (
-                      <h3 {...props} className="text-lg font-semibold mb-2">
+                      <h3 {...props} className='text-lg font-semibold mb-2'>
                         {props.children}
                       </h3>
                     ),
                     a: ({ node, ...props }) => (
                       <a
                         {...props}
-                        className="text-blue-600 hover:underline hover:text-blue-800"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        className='text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
                       >
                         {props.children}
                       </a>
@@ -260,24 +260,24 @@ export const RedditDetailsSection = ({
 
                     // Example: custom table styling
                     table: ({ node, ...props }) => (
-                      <div className="overflow-x-auto mb-4">
+                      <div className='overflow-x-auto mb-4'>
                         <table
                           {...props}
-                          className="border-collapse table-auto w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                          className='border-collapse table-auto w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
                         >
                           {props.children}
                         </table>
                       </div>
                     ),
                     thead: ({ node, ...props }) => (
-                      <thead {...props} className="bg-gray-50 dark:bg-gray-800">
+                      <thead {...props} className='bg-gray-50 dark:bg-gray-800'>
                         {props.children}
                       </thead>
                     ),
                     tbody: ({ node, ...props }) => (
                       <tbody
                         {...props}
-                        className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900"
+                        className='divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900'
                       >
                         {props.children}
                       </tbody>
@@ -285,7 +285,7 @@ export const RedditDetailsSection = ({
                     tr: ({ node, ...props }) => (
                       <tr
                         {...props}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className='hover:bg-gray-50 dark:hover:bg-gray-800'
                       >
                         {props.children}
                       </tr>
@@ -293,7 +293,7 @@ export const RedditDetailsSection = ({
                     td: ({ node, ...props }) => (
                       <td
                         {...props}
-                        className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100"
+                        className='px-6 py-4 whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100'
                       >
                         {props.children}
                       </td>
@@ -301,7 +301,7 @@ export const RedditDetailsSection = ({
                     th: ({ node, ...props }) => (
                       <th
                         {...props}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                       >
                         {props.children}
                       </th>
@@ -309,24 +309,24 @@ export const RedditDetailsSection = ({
 
                     // Example: override <p> to preserve line breaks
                     p: ({ node, ...props }) => (
-                      <p {...props} className="mb-4 whitespace-pre-line">
+                      <p {...props} className='mb-4 whitespace-pre-line'>
                         {props.children}
                       </p>
                     ),
 
                     // Handle lists properly
                     ul: ({ node, ...props }) => (
-                      <ul {...props} className="list-disc pl-6 mb-4">
+                      <ul {...props} className='list-disc pl-6 mb-4'>
                         {props.children}
                       </ul>
                     ),
                     ol: ({ node, ...props }) => (
-                      <ol {...props} className="list-decimal pl-6 mb-4">
+                      <ol {...props} className='list-decimal pl-6 mb-4'>
                         {props.children}
                       </ol>
                     ),
                     li: ({ node, ...props }) => (
-                      <li {...props} className="mb-1">
+                      <li {...props} className='mb-1'>
                         {props.children}
                       </li>
                     ),
@@ -335,7 +335,7 @@ export const RedditDetailsSection = ({
                     blockquote: ({ node, ...props }) => (
                       <blockquote
                         {...props}
-                        className="border-l-4 border-gray-200 dark:border-gray-700 pl-4 my-4 italic"
+                        className='border-l-4 border-gray-200 dark:border-gray-700 pl-4 my-4 italic'
                       >
                         {props.children}
                       </blockquote>
@@ -344,7 +344,7 @@ export const RedditDetailsSection = ({
                 >
                   {(account.redditData?.about?.data?.description || "").replace(
                     /(?<![\[\\])(\/r\/[a-zA-Z0-9_]+)/g,
-                    "[$1](https://reddit.com$1)",
+                    "[$1](https://reddit.com$1)"
                   )}
                 </ReactMarkdown>
               </div>
@@ -355,13 +355,13 @@ export const RedditDetailsSection = ({
 
       <Separator />
 
-      <Accordion type="single" collapsible defaultValue="categories">
-        <AccordionItem value="categories" id="categories" className="border-0">
-          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center text-primary">
+      <Accordion type='single' collapsible defaultValue='categories'>
+        <AccordionItem value='categories' id='categories' className='border-0'>
+          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
+            <div className='flex flex-row gap-x-2 items-center text-primary'>
               <SquareStack size={28} />
-              <span className="">Categories</span>
-              <Info size={14} className="text-muted-foreground" />
+              <span className=''>Categories</span>
+              <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
           <AccordionContent>
