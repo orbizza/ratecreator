@@ -62,6 +62,7 @@
     "react-icon-cloud": "^4.1.7",
     "react-spring": "^9.7.5",
     "react-tweet": "^3.2.1",
+    "remark-gfm": "^4.0.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"

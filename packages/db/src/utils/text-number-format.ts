@@ -30,6 +30,15 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
+export const formatUtcTimestamp = (utcTimestamp: number): string => {
+  const date = new Date(utcTimestamp * 1000); // Convert Unix timestamp (seconds) to milliseconds
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short", // "Jan", "Feb", etc.
+    day: "numeric",
+  });
+};
+
 export const extractTweetId = (url: string) => {
   const regex = /\/status\/(\d+)/;
   const match = url.match(regex);
@@ -49,6 +58,15 @@ export const removeNormalSuffix = (url: string) => {
 
 export const convertToEmbeddedUrl = (youtubeUrl: string): string => {
   return youtubeUrl.replace("watch?v=", "embed/");
+};
+
+export const stripUrlParams = (url: string) => {
+  if (!url) return url;
+  const pngIndex = url.indexOf(".png");
+  if (pngIndex !== -1) {
+    return url.substring(0, pngIndex + 4); // +4 to include '.png'
+  }
+  return url;
 };
 
 export const getInitials = (nameOrEmail: string) => {

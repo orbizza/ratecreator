@@ -340,7 +340,7 @@ export const CreatorRating = ({
 
             <div>
               <label className="block text-xl font-medium mb-2">
-                Review Content
+                What you had to say
               </label>
               <Editor
                 value={formData.content}

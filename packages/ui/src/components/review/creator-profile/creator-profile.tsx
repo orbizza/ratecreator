@@ -21,6 +21,8 @@ import TwitterChannelHeader from "./twitter/header-twitter";
 import { TwitterDetailsSection } from "./twitter/twitter-details-section";
 import TiktokChannelHeader from "./tiktok/header-tiktok";
 import { TiktokDetailsSection } from "./tiktok/tiktok-details-section";
+import RedditHeader from "./reddit/header-reddit";
+import { RedditDetailsSection } from "./reddit/reddit-details-section";
 
 export const CreatorProfile = ({
   accountId,
@@ -161,9 +163,32 @@ export const CreatorProfile = ({
         );
       case "reddit":
         return (
-          <div className="text-center py-8">
-            Sub Reddit community view coming soon
-          </div>
+          <>
+            <Suspense fallback={<ChannelHeaderSkeleton />}>
+              <RedditHeader account={data.account} />
+            </Suspense>
+            <Suspense fallback={<UserRatingCardSkeleton />}>
+              <UserRatingCard accountId={accountId} platform={platform} />
+            </Suspense>
+            <Suspense fallback={<ChannelDetailsSectionSkeleton />}>
+              <RedditDetailsSection
+                account={data.account}
+                categories={data.categories}
+              />
+            </Suspense>
+            <Suspense fallback={<ReviewCardSkeleton />}>
+              {/* Review Section */}
+              <div id="reviews" className="mt-10 text-2xl font-bold">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
+                  <MessagesSquare size={28} />
+                  <span className="">Reviews</span>
+                  <Info size={14} className="text-muted-foreground" />
+                </div>
+
+                <CreatorReviews accountId={accountId} platform={platform} />
+              </div>
+            </Suspense>
+          </>
         );
       case "tiktok":
         return (

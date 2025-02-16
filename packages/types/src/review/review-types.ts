@@ -61,6 +61,7 @@ export interface AuthorData {
   id: string;
   firstName?: string;
   lastName?: string;
+  fullName?: string;
   username?: string;
   clerkId?: string;
   imageUrl?: string;
