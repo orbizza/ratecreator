@@ -9,6 +9,8 @@ import {
   Share2,
   FlagOff,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 import {
   Avatar,
@@ -75,6 +77,40 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
   platform,
   contentUrl,
 }) => {
+  const [urlMetadata, setUrlMetadata] = useState<{
+    title?: string;
+    description?: string;
+    image?: string;
+  }>();
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (!contentUrl || platform.toLowerCase() !== "reddit") return;
+
+      try {
+        setIsLoadingMetadata(true);
+        const { data } = await axios.get(`/api/metadata`, {
+          params: {
+            url: contentUrl,
+          },
+        });
+
+        setUrlMetadata({
+          title: data.title,
+          description: data.description,
+          image: data.image,
+        });
+      } catch (error) {
+        console.error("Failed to fetch metadata:", error);
+      } finally {
+        setIsLoadingMetadata(false);
+      }
+    };
+
+    fetchMetadata();
+  }, [contentUrl, platform]);
+
   if (!contentUrl) return null;
 
   const renderContent = () => {
@@ -98,7 +134,6 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
             allowFullScreen
           />
         );
-      // Add other platform-specific content renderers here
       case "tiktok":
         return (
           <iframe
@@ -108,6 +143,47 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
             allowFullScreen
           />
         );
+      case "reddit":
+        return (
+          <>
+            {isLoadingMetadata ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {urlMetadata?.image && (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={urlMetadata.image}
+                      alt={urlMetadata.title || "Reddit content"}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                {urlMetadata?.title && (
+                  <h3 className="font-medium text-lg text-secondary-foreground">
+                    {urlMetadata.title}
+                  </h3>
+                )}
+                {urlMetadata?.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {urlMetadata.description}
+                  </p>
+                )}
+
+                <a
+                  href={contentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  View on Reddit
+                </a>
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -115,7 +191,20 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
 
   return (
     <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6">
-      Supporting {platform} Content
+      {(() => {
+        switch (platform.toLowerCase()) {
+          case "youtube":
+            return "Supporting YouTube Video";
+          case "twitter":
+            return "Supporting X (Twitter) Post/Article";
+          case "tiktok":
+            return "Supporting TikTok Video";
+          case "reddit":
+            return "Supporting Reddit Post";
+          default:
+            return "Supporting Content";
+        }
+      })()}
       <div className="relative w-full aspect-video mt-4">{renderContent()}</div>
     </div>
   );
@@ -143,8 +232,9 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
 
           <div>
             <div className="font-medium">{`${truncateText(
-              review.author?.firstName + " " + review.author?.lastName ||
-                review.author?.email ||
+              review.author?.fullName ||
+                review.author?.firstName + " " + review.author?.lastName ||
+                getInitials(review.author?.email || "") ||
                 "",
               20,
             )}`}</div>
@@ -183,13 +273,32 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         <div className="prose dark:prose-invert prose-2xl max-w-none">
           {JSON.stringify(review.content) === "{}" ? (
             <span className="text-lg sm:text-xl text-muted-foreground">
-              No review content
+              <span className="italic text-primary">
+                {`${truncateText(
+                  review.author?.firstName ||
+                    review.author?.username ||
+                    getInitials(review.author?.email || "") ||
+                    "",
+                  20,
+                )}`}
+              </span>{" "}
+              said nothing
             </span>
           ) : (
             <>
               <div className="flex flex-col gap-4">
                 <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
-                  Review Content
+                  What{" "}
+                  <span className="italic text-primary">
+                    {`${truncateText(
+                      review.author?.firstName ||
+                        review.author?.username ||
+                        getInitials(review.author?.email || "") ||
+                        "",
+                      20,
+                    )}`}
+                  </span>{" "}
+                  had to say
                 </div>
                 <div className="prose dark:prose-invert prose-2xl max-w-none">
                   <ReactQuill
@@ -208,7 +317,17 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         <>
           <div className="flex flex-col gap-4">
             <div className="text-lg sm:text-xl text-primary/70 font-semibold">
-              Review Content
+              What{" "}
+              <span className="italic text-primary">
+                {`${truncateText(
+                  review.author?.firstName ||
+                    review.author?.username ||
+                    getInitials(review.author?.email || "") ||
+                    "",
+                  20,
+                )}`}
+              </span>{" "}
+              had to say
             </div>
             <div className="prose dark:prose-invert prose-2xl max-w-none">
               <ReactQuill

@@ -10,6 +10,13 @@ const nextConfig = {
       "img.clerk.com/avatars",
       "pbs.twimg.com",
       "x.com",
+      "i.redd.it",
+      "a.thumbs.redditmedia.com",
+      "b.thumbs.redditmedia.com",
+      "external-preview.redd.it",
+      "reddit.com",
+      "redditmedia.com",
+      "styles.redditmedia.com",
       // ... any other domains you're using
     ],
   },

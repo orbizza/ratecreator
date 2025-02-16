@@ -1,20 +1,9 @@
 "use client";
 
-import {
-  Separator,
-  Badge,
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@ratecreator/ui";
-import { CreatorData } from "@ratecreator/types/review";
-import { formatDate, formatValue, fromSlug } from "@ratecreator/db/utils";
+import Link from "next/link";
+
 import {
   Users,
-  Twitter,
-  Calendar,
-  Hash,
   AppWindow,
   Info,
   Globe,
@@ -22,15 +11,22 @@ import {
   ChartColumn,
   SquareStack,
   Heart,
-  Camera,
-  UserPlus,
-  SquareMenu,
   Handshake,
   Video,
   ThumbsUp,
   Shovel,
 } from "lucide-react";
-import Link from "next/link";
+
+import {
+  Separator,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@ratecreator/ui";
+import { CreatorData } from "@ratecreator/types/review";
+import { formatDate, formatValue, fromSlug } from "@ratecreator/db/utils";
+
 import { countryCodes, languageCodes } from "@ratecreator/store";
 
 interface ChannelDetailsSectionProps {
@@ -90,18 +86,6 @@ const CategoryCard = ({ categories }: { categories: string[] }) => {
   );
 };
 
-const KeywordBadge = ({ keyword }: { keyword: string }) => (
-  <Link href={`/search?q=${keyword}`}>
-    <Badge
-      variant="secondary"
-      className="px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors"
-    >
-      <Hash className="w-3 h-3 -mr-1" />
-      {keyword.trim()}
-    </Badge>
-  </Link>
-);
-
 export const TiktokDetailsSection = ({
   account,
   categories,
@@ -160,16 +144,6 @@ export const TiktokDetailsSection = ({
       value: account.language_code,
     });
   }
-
-  // Split keywords string into array and clean up each keyword
-  const keywords = account.keywords_en
-    ?.match(/\\?"([^"]+)\\?"|[^\s]+/g) // Match quoted phrases or single words
-    ?.map((keyword) =>
-      keyword
-        .replace(/\\?"|\\?"/g, "") // Remove any quotes or escaped quotes
-        .trim(),
-    )
-    .filter((keyword) => keyword.length > 0);
 
   return (
     <div id="channel-details" className="mt-10 space-y-8">
@@ -233,30 +207,6 @@ export const TiktokDetailsSection = ({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-      {keywords && keywords.length > 0 && (
-        <>
-          <Separator />
-          <Accordion type="single" collapsible defaultValue="channel-keywords">
-            <AccordionItem value="channel-keywords" className="border-0">
-              <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-                <div className="flex flex-row gap-x-2 items-center text-primary">
-                  <Hash size={28} />
-                  <span className="">Channel Keywords</span>
-                  <Info size={14} className="text-muted-foreground" />
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-wrap gap-2">
-                  {keywords.map((keyword, index) => (
-                    <KeywordBadge key={index} keyword={keyword} />
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </>
-      )}
 
       <Separator />
 
