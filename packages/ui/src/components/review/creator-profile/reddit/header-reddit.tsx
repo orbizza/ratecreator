@@ -25,7 +25,11 @@ import {
 } from "lucide-react";
 import { cn } from "@ratecreator/ui/utils";
 import type { CreatorData } from "@ratecreator/types/review";
-import { getInitials, truncateText } from "@ratecreator/db/utils";
+import {
+  getInitials,
+  truncateText,
+  stripUrlParams,
+} from "@ratecreator/db/utils";
 import { PlatformIcon } from "../../creator-rating/platform-icons";
 
 export const defaultBg = cn(
@@ -148,7 +152,7 @@ const ChannelNavigation = ({
 }) => {
   const tabs = [
     { name: "About", id: "channel-header" },
-    { name: "Channel Details", id: "channel-details" },
+    { name: "Subreddit Details", id: "channel-details" },
     { name: "Reviews", id: "reviews" },
     { name: "Categories", id: "categories" },
     // "Videos",
@@ -192,7 +196,7 @@ const ChannelNavigation = ({
   );
 };
 
-const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
+const RedditHeader = ({ account }: { account: CreatorData["account"] }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [activeTab, setActiveTab] = useState("About");
   const navigationRef = useRef<HTMLDivElement>(null);
@@ -220,13 +224,21 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
     >
       {/* Banner Section */}
       <div className='relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg '>
-        {account.ytData?.brandingSettings?.image?.bannerExternalUrl ? (
+        {account.redditData?.about?.data?.banner_img ? (
           <Image
-            src={
-              account.ytData.brandingSettings.image.bannerExternalUrl +
-              "=w1707-fcrop64=1"
-            }
-            alt={`${account.name_en}'s banner`}
+            src={stripUrlParams(account.redditData.about.data.banner_img)}
+            alt={`${account.name}'s banner`}
+            fill
+            priority
+            className='object-cover rounded-lg drop-shadow-2xl'
+            sizes='100vw'
+          />
+        ) : account.redditData?.about?.data?.banner_background_image ? (
+          <Image
+            src={stripUrlParams(
+              account.redditData.about.data.banner_background_image
+            )}
+            alt={`${account.name}'s banner`}
             fill
             priority
             className='object-cover rounded-lg drop-shadow-2xl'
@@ -240,12 +252,11 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
           <Avatar className='w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg'>
             <AvatarImage
               src={
-                account.ytData?.snippet?.thumbnails?.high?.url ||
-                account.imageUrl
+                account.redditData?.about?.data?.icon_img || account.imageUrl
               }
             />
             <AvatarFallback className='w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg'>
-              {getInitials(account.name_en)}
+              {getInitials(account.name)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -256,10 +267,10 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
           <div className='flex flex-col space-y-4 md:space-y-6 md:flex-row justify-between lg:items-start'>
             <div className='items-center'>
               <h1 className='text-xl sm:text-2xl font-bold ml-4'>
-                {account.name_en}
+                {account.redditData?.about?.data?.display_name}
               </h1>
               <p className='text-sm sm:text-base text-muted-foreground ml-4 mb-2'>
-                {account.handle}
+                {account.name}
               </p>
 
               <div className='flex flex-col sm:flex-row items-start sm:items-center sm:gap-2 ml-4'>
@@ -311,19 +322,16 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
             </div>
             <div className='hidden md:flex flex-col lg:flex-row items-center space-x-4 space-y-5 lg:space-y-0'>
               <Link
-                href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
+                href={`/review/create?stars=0&accountId=${account.accountId}&platform=reddit`}
               >
                 <button className='block text-left py-2 px-5 md:ml-3 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
                   Write a Review
                 </button>
               </Link>
-              <Link
-                href={`https://youtube.com/channel/${account.accountId}`}
-                target='_blank'
-              >
-                <Button variant='secondary' className='gap-2'>
-                  <PlatformIcon platform='youtube' />
-                  View Channel
+              <Link href={`https://reddit.com/${account.name}`} target='_blank'>
+                <Button variant='secondary' size='default' className=' gap-2'>
+                  <PlatformIcon platform='reddit' />
+                  View Subreddit
                 </Button>
               </Link>
             </div>
@@ -342,19 +350,16 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
 
         <div className='grid grid-cols-2 md:hidden w-full items-center justify-center gap-2 mb-2'>
           <Link
-            href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
+            href={`/review/create?stars=0&accountId=${account.accountId}&platform=reddit`}
           >
             <button className='block w-full text-center py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
               Write a Review
             </button>
           </Link>
-          <Link
-            href={`https://youtube.com/channel/${account.accountId}`}
-            target='_blank'
-          >
-            <Button variant='secondary' size='default' className='gap-2 w-full'>
-              <PlatformIcon platform='youtube' />
-              View Channel
+          <Link href={`https://reddit.com/${account.name}`} target='_blank'>
+            <Button variant='secondary' size='default' className='w-full gap-2'>
+              <PlatformIcon platform='reddit' />
+              View Subreddit
             </Button>
           </Link>
         </div>
@@ -383,20 +388,24 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
                     <Avatar className='w-12 h-12 rounded-lg border border-border'>
                       <AvatarImage
                         src={
-                          account.ytData?.snippet?.thumbnails?.high?.url ||
-                          account.imageUrl
+                          account.imageUrl ||
+                          account.redditData?.about?.data?.icon_img
                         }
                       />
                       <AvatarFallback className='bg-primary/10 text-primary rounded-lg w-12 h-12'>
-                        {getInitials(account.name_en)}
+                        {getInitials(account.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className='flex flex-col'>
                       <span className='font-medium'>
-                        {truncateText(account.name_en, 20)}
+                        {truncateText(
+                          account.redditData?.about?.data?.display_name ||
+                            account.name,
+                          20
+                        )}
                       </span>
                       <span className='text-sm text-muted-foreground'>
-                        {truncateText(account.handle, 20)}
+                        {truncateText(account.name, 20)}
                       </span>
                     </div>
                     <div className='flex flex-col items-center'>
@@ -422,23 +431,23 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
 
                 <div className='hidden md:flex md:flex-row items-center md:gap-2'>
                   <Link
-                    href={`/review/create?stars=0&accountId=${account.accountId}&platform=youtube`}
+                    href={`/review/create?stars=0&accountId=${account.accountId}&platform=reddit`}
                   >
                     <button className='hidden md:block text-left py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
                       Write a Review
                     </button>
                   </Link>
                   <Link
-                    href={`https://youtube.com/channel/${account.accountId}`}
+                    href={`https://reddit.com/${account.name}`}
                     target='_blank'
                   >
                     <Button
                       variant='secondary'
                       size='default'
-                      className='hidden lg:flex gap-2'
+                      className='hidden lg:flex gap-2 '
                     >
-                      <PlatformIcon platform='youtube' />
-                      View Channel
+                      <PlatformIcon platform='reddit' />
+                      View Subreddit
                     </Button>
                   </Link>
                 </div>
@@ -451,4 +460,4 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
   );
 };
 
-export default ChannelHeader;
+export default RedditHeader;

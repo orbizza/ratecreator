@@ -16,13 +16,13 @@ export async function GET(request: NextRequest) {
     if (!platform) {
       return NextResponse.json(
         { error: "Platform is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     switch (platform) {
@@ -32,24 +32,26 @@ export async function GET(request: NextRequest) {
         return await handleTwitterAccount(redis, accountId);
       case "tiktok":
         return await handleTiktokAccount(redis, accountId);
+      case "reddit":
+        return await handleRedditAccount(redis, accountId);
       default:
         return NextResponse.json(
           { error: "Invalid platform" },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
     // Check cache first
@@ -80,7 +82,7 @@ async function handleYoutubeAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     // Format response to match CreatorData type
@@ -103,9 +105,6 @@ async function handleYoutubeAccount(
         rating: account.rating ?? 0,
         reviewCount: account.reviewCount ?? 0,
         ytData: (account.ytData as any) ?? {},
-        tiktokData: (account.tiktokData as any) ?? {},
-        xData: (account.xData as any) ?? {},
-        redditData: (account.redditData as any) ?? {},
       },
       categories: categorySlugs,
     };
@@ -113,7 +112,7 @@ async function handleYoutubeAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
-      JSON.stringify(responseData),
+      JSON.stringify(responseData)
     );
 
     return NextResponse.json(responseData);
@@ -121,14 +120,14 @@ async function handleYoutubeAccount(
     console.error("Error fetching YouTube account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleTwitterAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
     const account = await prisma.account.findFirst({
@@ -152,7 +151,7 @@ async function handleTwitterAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     const responseData: CreatorData = {
@@ -173,10 +172,7 @@ async function handleTwitterAccount(
         language_code: account.language_code ?? "",
         rating: account.rating ?? 0,
         reviewCount: account.reviewCount ?? 0,
-        ytData: (account.ytData as any) ?? {},
-        tiktokData: (account.tiktokData as any) ?? {},
         xData: (account.xData as any) ?? {},
-        redditData: (account.redditData as any) ?? {},
       },
       categories: categorySlugs,
     };
@@ -186,14 +182,14 @@ async function handleTwitterAccount(
     console.error("Error fetching Twitter account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleTiktokAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
     const account = await prisma.account.findFirst({
@@ -217,7 +213,7 @@ async function handleTiktokAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     const responseData: CreatorData = {
@@ -238,10 +234,7 @@ async function handleTiktokAccount(
         language_code: account.language_code ?? "",
         rating: account.rating ?? 0,
         reviewCount: account.reviewCount ?? 0,
-        ytData: (account.ytData as any) ?? {},
         tiktokData: (account.tiktokData as any) ?? {},
-        xData: (account.xData as any) ?? {},
-        redditData: (account.redditData as any) ?? {},
       },
       categories: categorySlugs,
     };
@@ -251,7 +244,69 @@ async function handleTiktokAccount(
     console.error("Error fetching Tiktok account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account tiktok data" },
-      { status: 500 },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleRedditAccount(
+  redis: ReturnType<typeof getRedisClient>,
+  accountId: string
+) {
+  try {
+    const account = await prisma.account.findFirst({
+      where: {
+        accountId: accountId,
+        platform: "REDDIT",
+      },
+    });
+
+    if (!account) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    const categoryMappings = await prisma.categoryMapping.findMany({
+      where: { accountId: account.id },
+      include: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    const categorySlugs = categoryMappings.map(
+      (mapping) => mapping.category.slug
+    );
+
+    const responseData: CreatorData = {
+      account: {
+        id: account.id,
+        platform: account.platform,
+        accountId: account.accountId,
+        handle: account.handle ?? "",
+        name: account.name ?? "",
+        name_en: account.name_en ?? "",
+        description: account.description ?? "",
+        description_en: account.description_en ?? "",
+        keywords: account.keywords ?? "",
+        keywords_en: account.keywords_en ?? "",
+        followerCount: account.followerCount ?? 0,
+        imageUrl: account.imageUrl ?? "",
+        country: account.country ?? null,
+        language_code: account.language_code ?? "",
+        rating: account.rating ?? 0,
+        reviewCount: account.reviewCount ?? 0,
+        redditData: (account.redditData as any) ?? {},
+      },
+      categories: categorySlugs,
+    };
+
+    return NextResponse.json(responseData);
+  } catch (error) {
+    console.error("Error fetching Reddit account:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch account reddit data" },
+      { status: 500 }
     );
   }
 }
