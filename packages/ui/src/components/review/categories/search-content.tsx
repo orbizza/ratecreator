@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSearchBox, useHits } from "react-instantsearch";
 import debounce from "lodash/debounce";
+import { useRouter } from "next/navigation";
 import AlgoliaSearchWithAnimations from "./search-algolia-placeholder";
 import SearchResults from "./search-results";
 import { SearchResult } from "@ratecreator/types/review";
@@ -36,6 +37,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
   setSearchTerm,
   placeholders,
 }) => {
+  const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { refine } = useSearchBox();
   const { hits } = useHits<AlgoliaHit>();
@@ -66,6 +68,9 @@ const SearchContent: React.FC<SearchContentProps> = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (searchTerm) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
     setSearchTerm("");
     refine("");
     setIsSearchOpen(false);

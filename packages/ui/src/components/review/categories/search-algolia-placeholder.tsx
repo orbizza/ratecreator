@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   useSearchBox,
   UseSearchBoxProps,
@@ -32,6 +33,7 @@ export function AlgoliaSearchWithAnimations({
   onSearch,
   value,
 }: AlgoliaSearchWithAnimationsProps) {
+  const router = useRouter();
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [animating, setAnimating] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -186,7 +188,8 @@ export function AlgoliaSearchWithAnimations({
     draw();
 
     const value = inputRef.current?.value || "";
-    if (value && inputRef.current) {
+    if (value) {
+      router.push(`/search?q=${encodeURIComponent(value)}`);
       const maxX = newDataRef.current.reduce(
         (prev, current) => (current.x > prev ? current.x : prev),
         0,
