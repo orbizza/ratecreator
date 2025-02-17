@@ -120,9 +120,6 @@ export function Appbar() {
                 </div>
               )}
 
-              {/* {!isSignedIn && <ModeToggle />} */}
-              <ModeToggle />
-
               <div className="block 2xl:hidden">
                 <MobileSideNav />
               </div>

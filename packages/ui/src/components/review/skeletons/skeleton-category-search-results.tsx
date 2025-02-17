@@ -1,13 +1,19 @@
 "use client";
 
 import React from "react";
-import { ArrowRightLeft, SlidersHorizontal, SquareStack } from "lucide-react";
+import {
+  ArrowRightLeft,
+  ChevronRight,
+  SlidersHorizontal,
+  SquareStack,
+} from "lucide-react";
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  Button,
   Skeleton,
 } from "@ratecreator/ui";
 
@@ -94,5 +100,80 @@ export const CreatorLoadingCard: React.FC = () => {
         </div>
       ))}
     </div>
+  );
+};
+
+export const CategoryListLoadingCard: React.FC = () => {
+  const skeletonCount = 7;
+
+  return (
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-8">
+      {[...Array(skeletonCount)].map((_, index) => (
+        <>
+          <div key={index} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+          <div key={index} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </>
+      ))}
+    </div>
+  );
+};
+
+export const MostPopularCategoryLoadingCard: React.FC = () => {
+  const skeletonCount = 6;
+
+  return (
+    <div className="space-y-5 my-[1rem]">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+        Most Popular Categories
+      </h1>
+      {[...Array(skeletonCount)].map((_, index) => (
+        <div key={index} className="flex flex-col space-y-3">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-3/4" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const MostPopularCreatorLoadingCard: React.FC = () => {
+  const skeletonCount = 12;
+
+  return (
+    <>
+      <div className="flex justify-end items-center mb-4">
+        <Button variant={"link"}>
+          See all <Skeleton className="h-4 w-[150px] ml-2" />
+          <ChevronRight className="ml-1" size={16} />
+        </Button>
+      </div>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  gap-4">
+        {[...Array(skeletonCount)].map((_, index) => (
+          <div key={index} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };

@@ -125,7 +125,7 @@ export function CreatorCTA() {
 
   return (
     <section id="cta">
-      <div className="py-14">
+      <div className="py-5 sm:py-14">
         <div className="container flex w-full flex-col items-center justify-center p-4">
           <div className="relative flex w-full  flex-col items-center justify-center overflow-hidden rounded-[2rem] border-none">
             <Marquee

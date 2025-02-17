@@ -5,10 +5,11 @@ import React, { useEffect, useState } from "react";
 import { getCategoryData } from "@ratecreator/actions/review";
 
 import { CategoryWithColor } from "@ratecreator/types/review";
-import { Separator, Skeleton } from "@ratecreator/ui";
+import { Separator } from "@ratecreator/ui";
 
 import SearchBar from "./search-bar";
 import { CategoryCardListPage } from "./category-card-list-page";
+import { CategoryListLoadingCard } from "../skeletons/skeleton-category-search-results";
 
 const lightBgColors = [
   "bg-green-200",
@@ -172,35 +173,6 @@ export const CategoryListPage: React.FC = () => {
         {loading && <CategoryListLoadingCard />}
         {error && <p>Error: {error}</p>}
       </div>
-    </div>
-  );
-};
-
-const CategoryListLoadingCard: React.FC = () => {
-  const skeletonCount = 7;
-
-  return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-8">
-      {[...Array(skeletonCount)].map((_, index) => (
-        <>
-          <div key={index} className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
-          <div key={index} className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
-        </>
-      ))}
     </div>
   );
 };
