@@ -42,7 +42,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
   const { refine } = useSearchBox();
   const { hits } = useHits<AlgoliaHit>();
   const [cachedResults, setCachedResults] = useState<SearchResult[] | null>(
-    null
+    null,
   );
 
   const debouncedRefine = useCallback(
@@ -57,7 +57,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
         setIsSearchOpen(value.length > 0);
       }
     }, 300),
-    [refine]
+    [refine],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,8 +124,8 @@ const SearchContent: React.FC<SearchContentProps> = ({
         (displayResults.length > 0 ? (
           <SearchResults results={displayResults} />
         ) : (
-          <div className='mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4'>
-            <p className='text-center text-muted-foreground'>
+          <div className="mt-2 w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden border border-border p-4">
+            <p className="text-center text-muted-foreground">
               No category or sub-category found
             </p>
           </div>
