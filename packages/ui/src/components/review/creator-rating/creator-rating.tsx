@@ -10,7 +10,6 @@ import {
   Card,
   Input,
   Textarea,
-  ToastAction,
   useToast,
 } from "@ratecreator/ui";
 import { getCreatorData, createReview } from "@ratecreator/actions/review";
@@ -27,7 +26,6 @@ import {
 } from "@ratecreator/db/utils";
 import { Loader2 } from "lucide-react";
 import { Editor } from "./editor";
-import { TweetCard } from "@ratecreator/ui";
 import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
 import axios from "axios";

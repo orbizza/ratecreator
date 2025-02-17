@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings,
   User,
+  SunMoon,
 } from "lucide-react";
 
 import {
@@ -30,6 +31,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
+  ModeToggle,
+  IconToggle,
 } from "@ratecreator/ui";
 import { getInitials } from "@ratecreator/db/utils";
 
@@ -132,6 +135,13 @@ export function MainMenu() {
                 <span>Keyboard shortcuts</span>
                 <DropdownMenuShortcut>GK</DropdownMenuShortcut>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.preventDefault()}>
+                <SunMoon className="mr-2 size-4" />
+                <span>Theme</span>
+                <DropdownMenuShortcut className="opacity-100">
+                  <IconToggle />
+                </DropdownMenuShortcut>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={async () => {
@@ -168,6 +178,9 @@ export function MainMenu() {
           <Button variant={"default"} onClick={() => router.push("/sign-up")}>
             Get Started
           </Button>
+          <div className="hidden lg:block">
+            <ModeToggle />
+          </div>
         </>
       )}
     </div>

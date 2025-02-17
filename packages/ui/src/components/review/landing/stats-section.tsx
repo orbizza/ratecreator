@@ -21,12 +21,38 @@ import {
 import { formatValue } from "@ratecreator/db/utils";
 
 const stats = [
-  { value: 700000, label: "YouTube Channels", icon: SiYoutube },
-  { value: 1200000, label: "X Profiles", icon: SiX },
-  { value: 800000, label: "Instagram Accounts", icon: SiInstagram },
-  { value: 400000, label: "TikTok Profiles", icon: SiTiktok },
-  { value: 70000, label: "Twitch Broadcasters", icon: SiTwitch },
-  { value: 400000, label: "Reddit Communities", icon: SiReddit },
+  {
+    value: 710000,
+    label: "YouTube Channels",
+    icon: SiYoutube,
+    isAvailable: true,
+  },
+  { value: 1196918, label: "X Profiles", icon: SiX, isAvailable: true },
+
+  {
+    value: 316935,
+    label: "TikTok Profiles",
+    icon: SiTiktok,
+    isAvailable: true,
+  },
+  {
+    value: 370079,
+    label: "SubReddit Communities",
+    icon: SiReddit,
+    isAvailable: true,
+  },
+  {
+    value: 810152,
+    label: "Instagram Profiles",
+    icon: SiInstagram,
+    isAvailable: false,
+  },
+  {
+    value: 72671,
+    label: "Twitch Broadcasters",
+    icon: SiTwitch,
+    isAvailable: false,
+  },
 ];
 
 const CountingNumber = ({
@@ -80,7 +106,7 @@ export function StatsSection() {
 
   return (
     <section id="stats">
-      <div className="container mx-auto px-4 ">
+      <div className="container mx-auto px-1 sm:px-4 ">
         <div className="text-center space-y-4 py-4 mx-auto">
           <h2 className="text-[14px]  font-mono font-medium tracking-tight">
             PLATFORM WISE CREATORS & COMMUNITIES
@@ -90,7 +116,7 @@ export function StatsSection() {
           </h4>
         </div>
         <div
-          className="grid grid-cols-1 mx-20 md:mx-0 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8"
+          className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8"
           ref={ref}
         >
           {stats.map((stat, index) => (
@@ -100,14 +126,21 @@ export function StatsSection() {
               animate={controls}
               variants={itemVariants}
               custom={index}
-              className="flex flex-col sm:flex-row sm:mx-24 md:mx-10 items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-4"
+              className="flex flex-col items-center space-y-2 px-2 sm:px-4 lg:flex-row lg:items-start lg:space-y-0 lg:space-x-4"
             >
-              <stat.icon className="w-10 h-10 lg:w-12 lg:h-12 text-primary" />
-              <div className="text-center sm:text-left">
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1">
+              <stat.icon className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-primary" />
+              <div className="text-center lg:text-left">
+                <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1">
                   <CountingNumber value={stat.value} />
                 </h3>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="hidden sm:block text-sm text-muted-foreground">
+                  {stat.label}
+                </p>
+                {!stat.isAvailable && (
+                  <p className="text-xs sm:text-sm text-yellow-300 dark:text-yellow-500 italic">
+                    Coming Soon
+                  </p>
+                )}
               </div>
             </motion.div>
           ))}

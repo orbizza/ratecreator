@@ -291,7 +291,6 @@ const CommandBarContent = ({
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [activeTab, setActiveTab] = useState<TabType>("All");
-  const [showSearch, setShowSearch] = useState<boolean>(true);
 
   const resetSearch = useCallback(() => {
     setSearchTerm("");

@@ -49,12 +49,12 @@ export const LandingPage = () => {
 
       {/* ToDo: Reviews card */}
 
-      <Separator className="my-4" />
+      <Separator className="my-0 sm:my-4" />
       {/* Why use RC */}
       <WhyRateCreator />
 
       {/* Border */}
-      <div className="mb-10">
+      <div className="mb-0 sm:mb-10">
         {/* <hr className='my-4 border-t border-gray-300 dark:border-gray-700' /> */}
         <SphereMask />
       </div>
@@ -62,7 +62,7 @@ export const LandingPage = () => {
       {/* Creator CTA */}
       <div
         ref={creatorCtaRef}
-        className={`total-accounts w-full mt-10 p-8 transition-opacity duration-1000  ${
+        className={`total-accounts w-full mt-0 sm:mt-10 p-8 transition-opacity duration-1000  ${
           isCreatorCtaVisible ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -70,7 +70,7 @@ export const LandingPage = () => {
       </div>
 
       {/* Pre Footer */}
-      <div className="h-[10rem] -my-[2rem] flex items-center justify-center">
+      <div className="ml-1 sm:ml-0 h-[10rem] -my-[2rem] flex items-center justify-center">
         <SparklesText
           text="RATE CREATORS"
           className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-rose-200"

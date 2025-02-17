@@ -19,6 +19,7 @@ import {
   Layers3,
   LogIn,
   UserPlus,
+  SunMoon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -35,6 +36,8 @@ import {
   AvatarImage,
   AvatarFallback,
   SheetHeader,
+  ModeToggle,
+  IconToggle,
 } from "@ratecreator/ui";
 import { useKBar } from "kbar";
 
@@ -223,6 +226,19 @@ export function MobileSideNav() {
               <Separator className="" />
 
               <SheetClose asChild>
+                <div className="flex justify-between px-2 py-2 ml-2">
+                  <div className="flex items-center">
+                    <SunMoon className="mr-4 size-4" />
+                    <span className="text-sm">Theme</span>
+                  </div>
+                  {/* <ModeToggle /> */}
+                  <IconToggle />
+                </div>
+              </SheetClose>
+
+              <Separator className="" />
+
+              <SheetClose asChild>
                 <Button
                   variant={"default"}
                   onClick={async () => {
@@ -305,6 +321,18 @@ export function MobileSideNav() {
                   </div>
                 </Button>
               </SheetClose>
+
+              <SheetClose asChild>
+                <div className="flex justify-between px-2 py-2 ml-2">
+                  <div className="flex items-center">
+                    <SunMoon className="mr-4 size-4" />
+                    <span className="text-sm">Theme</span>
+                  </div>
+                  {/* <ModeToggle /> */}
+                  <IconToggle />
+                </div>
+              </SheetClose>
+
               <Separator className=" w-[270px]" />
               <SheetClose asChild>
                 <Button

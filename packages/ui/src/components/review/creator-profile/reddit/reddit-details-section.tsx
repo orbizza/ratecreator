@@ -250,7 +250,7 @@ export const RedditDetailsSection = ({
                     a: ({ node, ...props }) => (
                       <a
                         {...props}
-                        className="text-blue-600 hover:underline hover:text-blue-800"
+                        className="text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

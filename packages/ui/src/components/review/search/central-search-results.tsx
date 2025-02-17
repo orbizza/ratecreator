@@ -245,6 +245,14 @@ export const CentralSearchResults: React.FC<{
               </>
             )}
           </div>
+          <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
+            <>
+              <span className="text-[13px] md:text-sm lg:text-xl">
+                Apply filters and sort to narrow down your search
+              </span>
+              <Info size={14} />
+            </>
+          </div>
         </div>
         <Separator className="my-[2rem] xl:my-[4rem]" />
       </div>

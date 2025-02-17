@@ -17,10 +17,10 @@ export const Footer = () => {
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row">
           {/* Logo, company name, and social icons */}
-          <div className="flex justify-between items-start lg:flex-col lg:justify-between mb-8 lg:mb-0 lg:mr-44">
+          <div className="flex flex-col gap-y-4 sm:flex-row lg:flex-col justify-between items-start  mb-8 lg:mb-0 lg:mr-44">
             <Link
               className="flex items-center"
-              href={"#"}
+              href="/"
               aria-label="RateCreator Logo"
             >
               <Image
@@ -30,16 +30,13 @@ export const Footer = () => {
                 height={32}
                 className="mr-2"
               />
-              <div className="text-sm lg:text-lg font-semibold">
+              <div className="text-xl font-semibold">
                 RATE
                 <span className="text-[#ff3131] "> CREATOR</span>{" "}
-                {/* <span className='text-muted-foreground'>
-                  - Reviewing the Influencers
-                </span> */}
               </div>
             </Link>
             {/* Social icons now on the same row for md and sm, at the bottom for lg */}
-            <div className="flex space-x-4  lg:mt-auto">
+            <div className="flex space-x-4 lg:mt-auto">
               <Link
                 href="https://x.com/ratecreator"
                 target="_blank"
@@ -156,7 +153,7 @@ export const Footer = () => {
                   <Link href="/wip">Brand</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/contact">Contact</Link>
+                  <Link href="/wip">Contact</Link>
                 </li>
               </ul>
             </div>
@@ -186,7 +183,7 @@ export const Footer = () => {
         {/* Bottom section with copyright and links */}
         <div className="flex flex-col-reverse gap-y-5 md:gap-y-0 md:flex-row justify-between items-center mt-16 pt-8 border-t border-gray-800">
           <div className="text-primary-foreground text-[11px]">
-            &copy; 2024{" "}
+            &copy; 2025{" "}
             <Link href="https://orbizza.com" target="_blank">
               Orbizza, Inc.
             </Link>{" "}

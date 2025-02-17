@@ -7,7 +7,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@ratecreator/ui";
+} from "./toast";
 import { useToast } from "@ratecreator/ui";
 
 export function Toaster() {
