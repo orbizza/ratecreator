@@ -105,39 +105,39 @@ export function StatsSection() {
   };
 
   return (
-    <section id='stats'>
-      <div className='container mx-auto px-1 sm:px-4 '>
-        <div className='text-center space-y-4 py-4 mx-auto'>
-          <h2 className='text-[14px]  font-mono font-medium tracking-tight'>
+    <section id="stats">
+      <div className="container mx-auto px-1 sm:px-4 ">
+        <div className="text-center space-y-4 py-4 mx-auto">
+          <h2 className="text-[14px]  font-mono font-medium tracking-tight">
             PLATFORM WISE CREATORS & COMMUNITIES
           </h2>
-          <h4 className='text-[42px] text-primary font-medium mb-4 lg:mb-8 text-balance max-w-3xl mx-auto tracking-tighter'>
+          <h4 className="text-[42px] text-primary font-medium mb-4 lg:mb-8 text-balance max-w-3xl mx-auto tracking-tighter">
             Total Accounts Catalogued
           </h4>
         </div>
         <div
-          className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8'
+          className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8"
           ref={ref}
         >
           {stats.map((stat, index) => (
             <motion.div
               key={index}
-              initial='hidden'
+              initial="hidden"
               animate={controls}
               variants={itemVariants}
               custom={index}
-              className='flex flex-col items-center space-y-2 px-2 sm:px-4 lg:flex-row lg:items-start lg:space-y-0 lg:space-x-4'
+              className="flex flex-col items-center space-y-2 px-2 sm:px-4 lg:flex-row lg:items-start lg:space-y-0 lg:space-x-4"
             >
-              <stat.icon className='w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-primary' />
-              <div className='text-center lg:text-left'>
-                <h3 className='text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1'>
+              <stat.icon className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-primary" />
+              <div className="text-center lg:text-left">
+                <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1">
                   <CountingNumber value={stat.value} />
                 </h3>
-                <p className='hidden sm:block text-sm text-muted-foreground'>
+                <p className="hidden sm:block text-sm text-muted-foreground">
                   {stat.label}
                 </p>
                 {!stat.isAvailable && (
-                  <p className='text-xs sm:text-sm text-yellow-300 dark:text-yellow-500 italic'>
+                  <p className="text-xs sm:text-sm text-yellow-300 dark:text-yellow-500 italic">
                     Coming Soon
                   </p>
                 )}
