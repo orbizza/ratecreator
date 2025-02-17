@@ -1,14 +1,23 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, List } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@ratecreator/ui/utils";
 
-import { Button, Skeleton } from "@ratecreator/ui";
+import {
+  Button,
+  Skeleton,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@ratecreator/ui";
 import {
   PopularCategory,
   PopularAccount,
@@ -27,15 +36,17 @@ type CategoryListProps = {
   categories: PopularCategory[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  isMobileSheet?: boolean;
 };
 
 const CategoryList = ({
   categories,
   selectedCategory,
   onSelectCategory,
+  isMobileSheet,
 }: CategoryListProps) => (
-  <div className="space-y-2 my-[1rem]">
-    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+  <div className='space-y-2 my-[1rem]'>
+    <h1 className='hidden sm:block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
       Most Popular Categories
     </h1>
     {categories.map((category) => (
@@ -44,6 +55,7 @@ const CategoryList = ({
         category={category.name}
         isSelected={category.name === selectedCategory}
         onSelect={() => onSelectCategory(category.name)}
+        isMobileSheet={isMobileSheet}
       />
     ))}
   </div>
@@ -54,24 +66,34 @@ type CategoryItemProps = {
   category: string;
   isSelected: boolean;
   onSelect: () => void;
+  isMobileSheet?: boolean;
 };
 
-const CategoryItem = ({
+const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
   isSelected,
   onSelect,
-}: CategoryItemProps) => (
-  <button
-    className={`block w-full text-left py-2 px-4 rounded ${
-      isSelected
-        ? "border border-primary bg-background text-primary"
-        : "bg-background text-secondary-foreground hover:bg-primary/90"
-    }`}
-    onClick={onSelect}
-  >
-    {category}
-  </button>
-);
+  isMobileSheet,
+}) => {
+  const buttonContent = (
+    <button
+      className={`block w-full text-left py-2 px-4 rounded ${
+        isSelected
+          ? "border border-primary bg-background text-primary"
+          : "bg-background text-secondary-foreground hover:bg-primary/90"
+      }`}
+      onClick={onSelect}
+    >
+      {category}
+    </button>
+  );
+
+  return isMobileSheet ? (
+    <SheetClose asChild>{buttonContent}</SheetClose>
+  ) : (
+    buttonContent
+  );
+};
 
 // CategoryGrid component
 const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
@@ -117,15 +139,15 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
         <Link
           href={`/profile/${item?.platform.toLowerCase()}/${item?.accountId}`}
           key={item?.platform + item?.handle}
-          className="relative group  block p-2 h-full w-full"
+          className='relative group  block p-2 h-full w-full'
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl"
-                layoutId="hoverBackground"
+                className='absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl'
+                layoutId='hoverBackground'
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -148,10 +170,10 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
 // Main component
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
-    [],
+    []
   );
   const [popularCategories, setPopularCategories] = useState<PopularCategory[]>(
-    [],
+    []
   );
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loadingCategories, setLoadingCategories] = useState<boolean>(true);
@@ -191,12 +213,12 @@ const PopularCategories = () => {
 
         localStorage.setItem(
           "mostPopularCategories",
-          JSON.stringify(category_data),
+          JSON.stringify(category_data)
         );
         const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
         localStorage.setItem(
           "mostPopularCategoriesExpiry",
-          expiryTime.toString(),
+          expiryTime.toString()
         );
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -205,10 +227,10 @@ const PopularCategories = () => {
     const fetchCategoriesWithData = async () => {
       try {
         const cachedCategoryAccount = localStorage.getItem(
-          "mostPopularCategoryAccount",
+          "mostPopularCategoryAccount"
         );
         const cacheAccountExpiry = localStorage.getItem(
-          "mostPopularCategoryAccountExpiry",
+          "mostPopularCategoryAccountExpiry"
         );
         const currentTimeAccount = new Date().getTime();
         if (
@@ -232,12 +254,12 @@ const PopularCategories = () => {
 
         localStorage.setItem(
           "mostPopularCategoryAccount",
-          JSON.stringify(data),
+          JSON.stringify(data)
         );
         const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
         localStorage.setItem(
           "mostPopularCategoryAccountExpiry",
-          expiryTime.toString(),
+          expiryTime.toString()
         );
         if (data.length > 0) {
           setSelectedCategory(data[0].category.name);
@@ -252,7 +274,7 @@ const PopularCategories = () => {
   }, []);
 
   const selectedCategoryData = categories.find(
-    (cat) => cat.category.name === selectedCategory,
+    (cat) => cat.category.name === selectedCategory
   );
 
   const handleSelectCategory = (category: string) => {
@@ -260,51 +282,103 @@ const PopularCategories = () => {
   };
 
   return (
-    <div className="flex flex-col ml-5 my-[5rem]">
-      <div className="flex">
-        <div className="w-2/5 md:w-1/4 pr-4">
-          {loadingCategories ? (
-            <CategoryLoadingCard />
-          ) : (
-            <CategoryList
-              // categories={categories.map((cat) => cat.category)}
-              categories={popularCategories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleSelectCategory}
-            />
-          )}
-          <Button
-            className="w-full mt-4 justify-start"
-            onClick={() => router.push("/categories")}
+    <div className='flex flex-col ml-0 sm:ml-5 my-0 sm:my-[5rem]'>
+      {/* Mobile Sheet Categories */}
+      <div className='sm:hidden ml-3'>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant='default'
+              size='sm'
+              className='flex items-center gap-2'
+            >
+              <List size={20} />
+              <span>Most Popular Categories</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side='left'
+            className='w-[300px] overflow-y-auto max-h-screen pt-10'
           >
-            View All Categories
-          </Button>
+            <SheetTitle className='flex text-primary items-center gap-2 mt-4'>
+              <List size={20} />
+              Most Popular Categories
+            </SheetTitle>
+
+            <div className='mt-6'>
+              {loadingCategories ? (
+                <CategoryLoadingCard />
+              ) : (
+                <CategoryList
+                  categories={popularCategories}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={handleSelectCategory}
+                  isMobileSheet={true}
+                />
+              )}
+            </div>
+            <Button
+              className='w-full mt-4 justify-start'
+              onClick={() => router.push("/categories")}
+            >
+              View All Categories
+            </Button>
+          </SheetContent>
+        </Sheet>
+      </div>
+      <div className='flex '>
+        <div className='hidden sm:block w-2/5 md:w-1/4 pr-4'>
+          {/* Desktop Categories */}
+          <div className='hidden sm:block'>
+            {loadingCategories ? (
+              <CategoryLoadingCard />
+            ) : (
+              <CategoryList
+                categories={popularCategories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+                isMobileSheet={false}
+              />
+            )}
+            <Button
+              className='w-full mt-4 justify-start'
+              onClick={() => router.push("/categories")}
+            >
+              View All Categories
+            </Button>
+          </div>
         </div>
 
-        <div className="mr-5 w-3/5 md:w-3/4">
+        <div className='mr-0 sm:mr-5 w-full sm:w-3/5 md:w-3/4 '>
           {loadingAccounts ? (
             <CreatorLoadingCard />
           ) : selectedCategoryData ? (
             <>
-              <div className="flex justify-end items-center mb-4">
+              <div className='flex justify-start sm:justify-end items-center mt-4 sm:mt-0 mb-2 sm:mb-4 '>
                 <Button
                   variant={"link"}
                   onClick={() =>
                     router.push(
-                      `/categories/${selectedCategoryData.category.slug}`,
+                      `/categories/${selectedCategoryData.category.slug}`
                     )
                   }
                 >
                   See all {selectedCategoryData.category.name}{" "}
-                  <ChevronRight className="ml-1" size={16} />
+                  <ChevronRight className='ml-0 sm:ml-1' size={16} />
                 </Button>
               </div>
               <CategoryGrid accounts={selectedCategoryData.accounts} />
+              <Button
+                className='block sm:hidden w-auto mt-4 ml-3 justify-start'
+                onClick={() => router.push("/categories")}
+              >
+                View All Categories
+              </Button>
             </>
           ) : null}
         </div>
       </div>
-      <div className="my-[5rem]">
+      <div className='my-[5rem]'>
         <WriteReviewCTA />
       </div>
     </div>
@@ -315,15 +389,15 @@ const CategoryLoadingCard: React.FC = () => {
   const skeletonCount = 6;
 
   return (
-    <div className="space-y-5 my-[1rem]">
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+    <div className='space-y-5 my-[1rem]'>
+      <h1 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
         Most Popular Categories
       </h1>
       {[...Array(skeletonCount)].map((_, index) => (
-        <div key={index} className="flex flex-col space-y-3">
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-3/4" />
+        <div key={index} className='flex flex-col space-y-3'>
+          <div className='space-y-2'>
+            <Skeleton className='h-8 w-full' />
+            <Skeleton className='h-8 w-3/4' />
           </div>
         </div>
       ))}
@@ -336,19 +410,19 @@ const CreatorLoadingCard: React.FC = () => {
 
   return (
     <>
-      <div className="flex justify-end items-center mb-4">
+      <div className='flex justify-end items-center mb-4'>
         <Button variant={"link"}>
-          See all <Skeleton className="h-4 w-[150px] ml-2" />
-          <ChevronRight className="ml-1" size={16} />
+          See all <Skeleton className='h-4 w-[150px] ml-2' />
+          <ChevronRight className='ml-1' size={16} />
         </Button>
       </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  gap-4">
+      <div className='w-full grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  gap-4'>
         {[...Array(skeletonCount)].map((_, index) => (
-          <div key={index} className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
+          <div key={index} className='flex flex-col space-y-3'>
+            <Skeleton className='h-[125px] w-full rounded-xl' />
+            <div className='space-y-2'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-3/4' />
             </div>
           </div>
         ))}

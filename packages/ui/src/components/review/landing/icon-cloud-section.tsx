@@ -5,9 +5,9 @@ import { IconCloud } from "@ratecreator/ui";
 const slugs = [
   // Popular Social Media Platforms with messaging apps
   "facebook",
-  "twitter",
+  "x",
   "instagram",
-  "linkedin",
+  // "linkedin",
   "youtube",
   "snapchat",
   "tiktok", // Although owned by ByteDance, it's globally focused
@@ -39,7 +39,7 @@ const slugs = [
 
 export function IconCloudSection() {
   return (
-    <div className="bg-background relative flex size-full max-w-lg lg:max-w-xl items-center justify-center overflow-hidden rounded-lg  px-20 lg:px-8 pb-20 pt-8 lg:pt-0 ">
+    <div className='bg-background relative flex size-full max-w-lg lg:max-w-xl items-center justify-center overflow-hidden rounded-lg  px-20 lg:px-8 pb-20 pt-8 lg:pt-0 '>
       <IconCloud iconSlugs={slugs} />
     </div>
   );
