@@ -37,7 +37,7 @@ export class CreatorCache {
 
   async getCachedCreator(
     platform: string,
-    accountId: string
+    accountId: string,
   ): Promise<CreatorData | null> {
     if (!this.db) await this.init();
 
@@ -102,7 +102,7 @@ export class CreatorCache {
                 const deleteRequest = store.delete(cursor.key);
                 deleteRequest.onerror = () => reject(deleteRequest.error);
                 deleteRequest.onsuccess = () => resolve();
-              })
+              }),
             );
           }
           cursor.continue();
@@ -118,7 +118,7 @@ export class CreatorCache {
   async setCachedCreator(
     platform: string,
     accountId: string,
-    data: CreatorData
+    data: CreatorData,
   ) {
     if (!this.db) await this.init();
 
