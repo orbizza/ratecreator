@@ -4,6 +4,10 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
+const CACHE_TWITTER_CREATOR = "accounts-twitter-";
+const CACHE_TIKTOK_CREATOR = "accounts-tiktok-";
+const CACHE_REDDIT_CREATOR = "accounts-reddit-";
+
 const prisma = getPrismaClient();
 
 export async function GET(request: NextRequest) {
@@ -130,6 +134,12 @@ async function handleTwitterAccount(
   accountId: string,
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_TWITTER_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -177,6 +187,12 @@ async function handleTwitterAccount(
       categories: categorySlugs,
     };
 
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_TWITTER_CREATOR}${accountId}`,
+      JSON.stringify(responseData),
+    );
+
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching Twitter account:", error);
@@ -192,6 +208,12 @@ async function handleTiktokAccount(
   accountId: string,
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_TIKTOK_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -239,6 +261,12 @@ async function handleTiktokAccount(
       categories: categorySlugs,
     };
 
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_TIKTOK_CREATOR}${accountId}`,
+      JSON.stringify(responseData),
+    );
+
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching Tiktok account:", error);
@@ -254,6 +282,12 @@ async function handleRedditAccount(
   accountId: string,
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_REDDIT_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -300,6 +334,12 @@ async function handleRedditAccount(
       },
       categories: categorySlugs,
     };
+
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_REDDIT_CREATOR}${accountId}`,
+      JSON.stringify(responseData),
+    );
 
     return NextResponse.json(responseData);
   } catch (error) {
