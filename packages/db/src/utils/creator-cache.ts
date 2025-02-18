@@ -7,10 +7,12 @@ interface CachedCreatorData {
 
 const DB_NAME = "CreatorCache";
 const STORE_NAME = "creators";
-const CACHE_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_EXPIRATION = 1000 * 60 * 60 * 6; // Reduced to 6 hours
+const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB limit
 
 export class CreatorCache {
   private db: IDBDatabase | null = null;
+  private currentSize: number = 0;
 
   async init() {
     return new Promise<void>((resolve, reject) => {
@@ -35,7 +37,7 @@ export class CreatorCache {
 
   async getCachedCreator(
     platform: string,
-    accountId: string,
+    accountId: string
   ): Promise<CreatorData | null> {
     if (!this.db) await this.init();
 
@@ -59,12 +61,73 @@ export class CreatorCache {
     });
   }
 
+  private async calculateSize(): Promise<number> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORE_NAME], "readonly");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.getAll();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const totalSize = request.result.reduce((size, item) => {
+          return size + new Blob([JSON.stringify(item)]).size;
+        }, 0);
+        this.currentSize = totalSize;
+        resolve(totalSize);
+      };
+    });
+  }
+
+  private async cleanup() {
+    if (!this.db) await this.init();
+
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.db!.transaction([STORE_NAME], "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.openCursor();
+
+      const deletions: Promise<void>[] = [];
+      const now = Date.now();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          const cachedData: CachedCreatorData = cursor.value;
+          if (now - cachedData.timestamp >= CACHE_EXPIRATION) {
+            deletions.push(
+              new Promise<void>((resolve, reject) => {
+                const deleteRequest = store.delete(cursor.key);
+                deleteRequest.onerror = () => reject(deleteRequest.error);
+                deleteRequest.onsuccess = () => resolve();
+              })
+            );
+          }
+          cursor.continue();
+        } else {
+          Promise.all(deletions)
+            .then(() => resolve())
+            .catch(reject);
+        }
+      };
+    });
+  }
+
   async setCachedCreator(
     platform: string,
     accountId: string,
-    data: CreatorData,
+    data: CreatorData
   ) {
     if (!this.db) await this.init();
+
+    const newEntrySize = new Blob([JSON.stringify(data)]).size;
+    const currentSize = await this.calculateSize();
+
+    if (currentSize + newEntrySize > MAX_CACHE_SIZE) {
+      await this.cleanup();
+    }
 
     return new Promise<void>((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], "readwrite");

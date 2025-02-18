@@ -10,7 +10,7 @@ import {
 export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=popular-categories`,
+      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=popular-categories`
     );
     return response.data;
   } catch (error) {
@@ -24,7 +24,7 @@ export async function getMostPopularCategoryWithData(): Promise<
 > {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=popular-cat-data`,
+      `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=popular-cat-data`
     );
     return response.data;
   } catch (error) {

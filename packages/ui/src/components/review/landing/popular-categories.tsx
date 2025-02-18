@@ -49,8 +49,8 @@ const CategoryList = ({
   onSelectCategory,
   isMobileSheet,
 }: CategoryListProps) => (
-  <div className="space-y-2 my-[1rem]">
-    <h1 className="hidden sm:block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+  <div className='space-y-2 my-[1rem]'>
+    <h1 className='hidden sm:block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4'>
       Most Popular Categories
     </h1>
     {categories.map((category) => (
@@ -143,15 +143,15 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
         <Link
           href={`/profile/${item?.platform.toLowerCase()}/${item?.accountId}`}
           key={item?.platform + item?.handle}
-          className="relative group  block p-2 h-full w-full"
+          className='relative group  block p-2 h-full w-full'
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl"
-                layoutId="hoverBackground"
+                className='absolute inset-0 h-full w-full bg-secondary-foreground/[0.5] dark:bg-secondary/[0.8] block  rounded-2xl'
+                layoutId='hoverBackground'
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: 1,
@@ -171,13 +171,63 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   );
 };
 
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_KEYS = {
+  popularCategories: "mostPopularCategories",
+  popularCategoriesExpiry: "mostPopularCategoriesExpiry",
+  categoryAccounts: "mostPopularCategoryAccount",
+  categoryAccountsExpiry: "mostPopularCategoryAccountExpiry",
+};
+
+const isValidCache = (expiryKey: string) => {
+  const cacheExpiry = localStorage.getItem(expiryKey);
+  return cacheExpiry && new Date().getTime() < Number(cacheExpiry);
+};
+
+const setCacheWithExpiry = (key: string, expiryKey: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(
+      expiryKey,
+      (new Date().getTime() + CACHE_TTL).toString()
+    );
+  } catch (error) {
+    console.error("Error setting cache:", error);
+    // If localStorage is full, clear it and try again
+    if (error instanceof Error && error.name === "QuotaExceededError") {
+      localStorage.clear();
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+        localStorage.setItem(
+          expiryKey,
+          (new Date().getTime() + CACHE_TTL).toString()
+        );
+      } catch (retryError) {
+        console.error("Failed to set cache after clearing:", retryError);
+      }
+    }
+  }
+};
+
+const getCachedData = (key: string, expiryKey: string) => {
+  try {
+    const cachedData = localStorage.getItem(key);
+    if (cachedData && isValidCache(expiryKey)) {
+      return JSON.parse(cachedData);
+    }
+  } catch (error) {
+    console.error("Error getting cached data:", error);
+  }
+  return null;
+};
+
 // Main component
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
-    [],
+    []
   );
   const [popularCategories, setPopularCategories] = useState<PopularCategory[]>(
-    [],
+    []
   );
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loadingCategories, setLoadingCategories] = useState<boolean>(true);
@@ -187,25 +237,19 @@ const PopularCategories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // Check for cached data in localStorage
-        const cachedCategories = localStorage.getItem("mostPopularCategories");
-        const cacheExpiry = localStorage.getItem("mostPopularCategoriesExpiry");
-        const currentTime = new Date().getTime();
-        if (
-          cachedCategories &&
-          cacheExpiry &&
-          currentTime < Number(cacheExpiry)
-        ) {
-          // Use cached data if available and not expired
-          const parsedCategories = JSON.parse(cachedCategories);
+        // Check for cached categories
+        const cachedCategories = getCachedData(
+          CACHE_KEYS.popularCategories,
+          CACHE_KEYS.popularCategoriesExpiry
+        );
 
-          setPopularCategories(parsedCategories);
+        if (cachedCategories) {
+          setPopularCategories(cachedCategories);
           setLoadingCategories(false);
-          if (parsedCategories.length > 0) {
-            setSelectedCategory(parsedCategories[0].name);
+          if (cachedCategories.length > 0) {
+            setSelectedCategory(cachedCategories[0].name);
           }
-
-          return; // Exit early since we used cached data
+          return;
         }
 
         const category_data = await getMostPopularCategories();
@@ -215,61 +259,50 @@ const PopularCategories = () => {
           setSelectedCategory(category_data[0].name);
         }
 
-        localStorage.setItem(
-          "mostPopularCategories",
-          JSON.stringify(category_data),
-        );
-        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
-        localStorage.setItem(
-          "mostPopularCategoriesExpiry",
-          expiryTime.toString(),
+        setCacheWithExpiry(
+          CACHE_KEYS.popularCategories,
+          CACHE_KEYS.popularCategoriesExpiry,
+          category_data
         );
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        setLoadingCategories(false);
       }
     };
+
     const fetchCategoriesWithData = async () => {
       try {
-        const cachedCategoryAccount = localStorage.getItem(
-          "mostPopularCategoryAccount",
+        // Check for cached category accounts
+        const cachedCategoryAccount = getCachedData(
+          CACHE_KEYS.categoryAccounts,
+          CACHE_KEYS.categoryAccountsExpiry
         );
-        const cacheAccountExpiry = localStorage.getItem(
-          "mostPopularCategoryAccountExpiry",
-        );
-        const currentTimeAccount = new Date().getTime();
-        if (
-          cachedCategoryAccount &&
-          cacheAccountExpiry &&
-          currentTimeAccount < Number(cacheAccountExpiry)
-        ) {
-          // Use cached data if available and not expired
-          const parsedCategories = JSON.parse(cachedCategoryAccount);
 
-          setCategories(parsedCategories);
+        if (cachedCategoryAccount) {
+          setCategories(cachedCategoryAccount);
           setLoadingAccounts(false);
-          if (parsedCategories.length > 0) {
-            setSelectedCategory(parsedCategories[0].category.name);
+          if (cachedCategoryAccount.length > 0) {
+            setSelectedCategory(cachedCategoryAccount[0].category.name);
           }
-          return; // Exit early since we used cached data
+          return;
         }
+
         const data = await getMostPopularCategoryWithData();
         setCategories(data);
         setLoadingAccounts(false);
 
-        localStorage.setItem(
-          "mostPopularCategoryAccount",
-          JSON.stringify(data),
+        setCacheWithExpiry(
+          CACHE_KEYS.categoryAccounts,
+          CACHE_KEYS.categoryAccountsExpiry,
+          data
         );
-        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
-        localStorage.setItem(
-          "mostPopularCategoryAccountExpiry",
-          expiryTime.toString(),
-        );
+
         if (data.length > 0) {
           setSelectedCategory(data[0].category.name);
         }
       } catch (error) {
         console.error("Failed to fetch categories with accounts:", error);
+        setLoadingAccounts(false);
       }
     };
 
@@ -278,7 +311,7 @@ const PopularCategories = () => {
   }, []);
 
   const selectedCategoryData = categories.find(
-    (cat) => cat.category.name === selectedCategory,
+    (cat) => cat.category.name === selectedCategory
   );
 
   const handleSelectCategory = (category: string) => {
@@ -286,30 +319,30 @@ const PopularCategories = () => {
   };
 
   return (
-    <div className="flex flex-col ml-0 sm:ml-5 my-0 sm:my-[5rem]">
+    <div className='flex flex-col ml-0 sm:ml-5 my-0 sm:my-[5rem]'>
       {/* Mobile Sheet Categories */}
-      <div className="sm:hidden ml-3">
+      <div className='sm:hidden ml-3'>
         <Sheet>
           <SheetTrigger asChild>
             <Button
-              variant="default"
-              size="sm"
-              className="flex items-center gap-2"
+              variant='default'
+              size='sm'
+              className='flex items-center gap-2'
             >
               <List size={20} />
               <span>Most Popular Categories</span>
             </Button>
           </SheetTrigger>
           <SheetContent
-            side="left"
-            className="w-[300px] overflow-y-auto max-h-screen pt-10"
+            side='left'
+            className='w-[300px] overflow-y-auto max-h-screen pt-10'
           >
-            <SheetTitle className="flex text-primary items-center gap-2 mt-4">
+            <SheetTitle className='flex text-primary items-center gap-2 mt-4'>
               <List size={20} />
               Most Popular Categories
             </SheetTitle>
 
-            <div className="mt-6">
+            <div className='mt-6'>
               {loadingCategories ? (
                 <MostPopularCategoryLoadingCard />
               ) : (
@@ -322,7 +355,7 @@ const PopularCategories = () => {
               )}
             </div>
             <Button
-              className="w-full mt-4 justify-start"
+              className='w-full mt-4 justify-start'
               onClick={() => router.push("/categories")}
             >
               View All Categories
@@ -330,10 +363,10 @@ const PopularCategories = () => {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="flex ">
-        <div className="hidden sm:block w-2/5 md:w-1/4 pr-4">
+      <div className='flex '>
+        <div className='hidden sm:block w-2/5 md:w-1/4 pr-4'>
           {/* Desktop Categories */}
-          <div className="hidden sm:block">
+          <div className='hidden sm:block'>
             {loadingCategories ? (
               <MostPopularCategoryLoadingCard />
             ) : (
@@ -345,7 +378,7 @@ const PopularCategories = () => {
               />
             )}
             <Button
-              className="w-full mt-4 justify-start"
+              className='w-full mt-4 justify-start'
               onClick={() => router.push("/categories")}
             >
               View All Categories
@@ -353,27 +386,27 @@ const PopularCategories = () => {
           </div>
         </div>
 
-        <div className="mr-0 sm:mr-5 w-full sm:w-3/5 md:w-3/4 ">
+        <div className='mr-0 sm:mr-5 w-full sm:w-3/5 md:w-3/4 '>
           {loadingAccounts ? (
             <MostPopularCreatorLoadingCard />
           ) : selectedCategoryData ? (
             <>
-              <div className="flex justify-start sm:justify-end items-center mt-4 sm:mt-0 mb-2 sm:mb-4 ">
+              <div className='flex justify-start sm:justify-end items-center mt-4 sm:mt-0 mb-2 sm:mb-4 '>
                 <Button
                   variant={"link"}
                   onClick={() =>
                     router.push(
-                      `/categories/${selectedCategoryData.category.slug}`,
+                      `/categories/${selectedCategoryData.category.slug}`
                     )
                   }
                 >
                   See all {selectedCategoryData.category.name}{" "}
-                  <ChevronRight className="ml-0 sm:ml-1" size={16} />
+                  <ChevronRight className='ml-0 sm:ml-1' size={16} />
                 </Button>
               </div>
               <CategoryGrid accounts={selectedCategoryData.accounts} />
               <Button
-                className="block sm:hidden w-auto mt-4 ml-3 justify-start"
+                className='block sm:hidden w-auto mt-4 ml-3 justify-start'
                 onClick={() => router.push("/categories")}
               >
                 View All Categories
@@ -382,7 +415,7 @@ const PopularCategories = () => {
           ) : null}
         </div>
       </div>
-      <div className="my-[5rem]">
+      <div className='my-[5rem]'>
         <WriteReviewCTA />
       </div>
     </div>
