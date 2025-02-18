@@ -229,7 +229,7 @@ export function MobileSideNav() {
                 <div className="flex justify-between px-2 py-2 ml-2">
                   <div className="flex items-center">
                     <SunMoon className="mr-4 size-4" />
-                    <span className="text-sm">Theme</span>
+                    <span className="text-sm">Dark Mode</span>
                   </div>
                   {/* <ModeToggle /> */}
                   <IconToggle />
@@ -326,7 +326,7 @@ export function MobileSideNav() {
                 <div className="flex justify-between px-2 py-2 ml-2">
                   <div className="flex items-center">
                     <SunMoon className="mr-4 size-4" />
-                    <span className="text-sm">Theme</span>
+                    <span className="text-sm">Dark Mode</span>
                   </div>
                   {/* <ModeToggle /> */}
                   <IconToggle />

@@ -12,6 +12,8 @@ const CACHE_ROOT_CATEGORIES = "category-root";
 const CACHE_ALL_CATEGORIES = "category-all";
 const CACHE_POPULAR_CATEGORIES = "category-popular";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
+const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
+const CACHE_TTL = 24 * 60 * 60; // 24 hours in seconds
 
 const prisma = getPrismaClient();
 
@@ -134,10 +136,10 @@ async function fetchAccountsForPopularCategories(
   const client = await getMongoClient();
 
   try {
-    // await redis.del(CACHE_POPULAR_CATEGORY_ACCOUNTS);
-    const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
-    if (cachedCategories) {
-      return NextResponse.json(JSON.parse(cachedCategories));
+    // Try to get cached full response first
+    const cachedFullResponse = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
+    if (cachedFullResponse) {
+      return NextResponse.json(JSON.parse(cachedFullResponse));
     }
 
     const popularCategoriesResponse = await handlePopularCategories(redis);
@@ -148,89 +150,105 @@ async function fetchAccountsForPopularCategories(
     const categoryMappingCollection = database.collection("CategoryMapping");
     const accountCollection = database.collection<Account>("Account");
 
-    const accountsByCategory = await Promise.all(
-      popularCategories.map(async (category) => {
-        try {
-          // Convert category.id to ObjectId for querying
-          const categoryObjectId = new ObjectId(category.id);
+    const accountsByCategory = [];
+    const pipeline = [];
 
-          // First get category mappings
-          const categoryMappings = await categoryMappingCollection
-            .find({ categoryId: categoryObjectId })
-            .toArray();
+    // Process each category, potentially in parallel
+    for (const category of popularCategories) {
+      try {
+        const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${category.id}`;
 
-          if (categoryMappings.length === 0) {
-            console.log(`No mappings found for category ${category.id}`);
-            return {
+        // Try to get cached category data
+        const cachedCategoryAccounts = await redis.get(categoryCacheKey);
+        if (cachedCategoryAccounts) {
+          accountsByCategory.push(JSON.parse(cachedCategoryAccounts));
+          continue;
+        }
+
+        // If not cached, prepare fetch operation
+        pipeline.push(
+          (async () => {
+            const categoryObjectId = new ObjectId(category.id);
+            const categoryMappings = await categoryMappingCollection
+              .find({ categoryId: categoryObjectId })
+              .toArray();
+
+            if (categoryMappings.length === 0) {
+              const emptyCategory = {
+                category: {
+                  id: category.id,
+                  name: category.name,
+                  slug: category.slug,
+                },
+                accounts: [],
+              };
+              await redis.set(categoryCacheKey, JSON.stringify(emptyCategory));
+              return emptyCategory;
+            }
+
+            const accountObjectIds = categoryMappings.map(
+              (mapping) => new ObjectId(mapping.accountId),
+            );
+
+            const accounts = await accountCollection
+              .find({
+                _id: { $in: accountObjectIds },
+              })
+              .sort({ followerCount: -1 })
+              .limit(20)
+              .toArray();
+
+            const categoryWithAccounts = {
               category: {
                 id: category.id,
                 name: category.name,
                 slug: category.slug,
               },
-              accounts: [],
+              accounts: accounts.map((account) => ({
+                id: account._id.toString(),
+                name: account.name || "",
+                handle: account.handle || "",
+                platform: account.platform,
+                accountId: account.accountId,
+                followerCount: account.followerCount || 0,
+                rating: account.rating || 0,
+                reviewCount: account.reviewCount || 0,
+                imageUrl: account.imageUrl || "",
+              })),
             };
-          }
 
-          // Get account IDs from mappings
-          const accountObjectIds = categoryMappings.map(
-            (mapping) => new ObjectId(mapping.accountId),
-          );
+            // Cache individual category data with TTL
+            await redis.set(
+              categoryCacheKey,
+              JSON.stringify(categoryWithAccounts),
+            );
 
-          // Fetch accounts using the ObjectIds
-          const accounts = await accountCollection
-            .find({
-              _id: { $in: accountObjectIds },
-              // isDeleted: { $ne: true }, // Exclude deleted accounts
-              // isSuspended: { $ne: true }, // Exclude suspended accounts
-            })
-            .sort({ followerCount: -1 })
-            .limit(20)
-            .toArray();
+            return categoryWithAccounts;
+          })(),
+        );
+      } catch (error) {
+        console.error(`Error processing category ${category.id}:`, error);
+        // Add empty category result on error
+        accountsByCategory.push({
+          category: {
+            id: category.id,
+            name: category.name,
+            slug: category.slug,
+          },
+          accounts: [],
+        });
+      }
+    }
 
-          console.log(
-            `Found ${accounts.length} accounts for category ${category.id}`,
-          );
+    // Execute all pending category fetches in parallel
+    const results = await Promise.all(pipeline);
+    accountsByCategory.push(...results);
 
-          return {
-            category: {
-              id: category.id,
-              name: category.name,
-              slug: category.slug,
-            },
-            accounts: accounts.map((account) => ({
-              id: account._id.toString(),
-              name: account.name || "",
-              handle: account.handle || "",
-              platform: account.platform,
-              accountId: account.accountId,
-              followerCount: account.followerCount || 0,
-              rating: account.rating || 0,
-              reviewCount: account.reviewCount || 0,
-              imageUrl: account.imageUrl || "",
-            })),
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching accounts for category ${category.id}:`,
-            error,
-          );
-          return {
-            category: {
-              id: category.id,
-              name: category.name,
-              slug: category.slug,
-            },
-            accounts: [],
-          };
-        }
-      }),
-    );
-
+    // Cache the full response with TTL
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
     );
-    console.log("Account and Categories cached in Redis");
 
     return NextResponse.json(accountsByCategory);
   } catch (error) {

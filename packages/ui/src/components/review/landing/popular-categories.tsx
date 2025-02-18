@@ -171,6 +171,56 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   );
 };
 
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_KEYS = {
+  popularCategories: "mostPopularCategories",
+  popularCategoriesExpiry: "mostPopularCategoriesExpiry",
+  categoryAccounts: "mostPopularCategoryAccount",
+  categoryAccountsExpiry: "mostPopularCategoryAccountExpiry",
+};
+
+const isValidCache = (expiryKey: string) => {
+  const cacheExpiry = localStorage.getItem(expiryKey);
+  return cacheExpiry && new Date().getTime() < Number(cacheExpiry);
+};
+
+const setCacheWithExpiry = (key: string, expiryKey: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(
+      expiryKey,
+      (new Date().getTime() + CACHE_TTL).toString(),
+    );
+  } catch (error) {
+    console.error("Error setting cache:", error);
+    // If localStorage is full, clear it and try again
+    if (error instanceof Error && error.name === "QuotaExceededError") {
+      localStorage.clear();
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+        localStorage.setItem(
+          expiryKey,
+          (new Date().getTime() + CACHE_TTL).toString(),
+        );
+      } catch (retryError) {
+        console.error("Failed to set cache after clearing:", retryError);
+      }
+    }
+  }
+};
+
+const getCachedData = (key: string, expiryKey: string) => {
+  try {
+    const cachedData = localStorage.getItem(key);
+    if (cachedData && isValidCache(expiryKey)) {
+      return JSON.parse(cachedData);
+    }
+  } catch (error) {
+    console.error("Error getting cached data:", error);
+  }
+  return null;
+};
+
 // Main component
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
@@ -187,25 +237,19 @@ const PopularCategories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // Check for cached data in localStorage
-        const cachedCategories = localStorage.getItem("mostPopularCategories");
-        const cacheExpiry = localStorage.getItem("mostPopularCategoriesExpiry");
-        const currentTime = new Date().getTime();
-        if (
-          cachedCategories &&
-          cacheExpiry &&
-          currentTime < Number(cacheExpiry)
-        ) {
-          // Use cached data if available and not expired
-          const parsedCategories = JSON.parse(cachedCategories);
+        // Check for cached categories
+        const cachedCategories = getCachedData(
+          CACHE_KEYS.popularCategories,
+          CACHE_KEYS.popularCategoriesExpiry,
+        );
 
-          setPopularCategories(parsedCategories);
+        if (cachedCategories) {
+          setPopularCategories(cachedCategories);
           setLoadingCategories(false);
-          if (parsedCategories.length > 0) {
-            setSelectedCategory(parsedCategories[0].name);
+          if (cachedCategories.length > 0) {
+            setSelectedCategory(cachedCategories[0].name);
           }
-
-          return; // Exit early since we used cached data
+          return;
         }
 
         const category_data = await getMostPopularCategories();
@@ -215,61 +259,50 @@ const PopularCategories = () => {
           setSelectedCategory(category_data[0].name);
         }
 
-        localStorage.setItem(
-          "mostPopularCategories",
-          JSON.stringify(category_data),
-        );
-        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
-        localStorage.setItem(
-          "mostPopularCategoriesExpiry",
-          expiryTime.toString(),
+        setCacheWithExpiry(
+          CACHE_KEYS.popularCategories,
+          CACHE_KEYS.popularCategoriesExpiry,
+          category_data,
         );
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        setLoadingCategories(false);
       }
     };
+
     const fetchCategoriesWithData = async () => {
       try {
-        const cachedCategoryAccount = localStorage.getItem(
-          "mostPopularCategoryAccount",
+        // Check for cached category accounts
+        const cachedCategoryAccount = getCachedData(
+          CACHE_KEYS.categoryAccounts,
+          CACHE_KEYS.categoryAccountsExpiry,
         );
-        const cacheAccountExpiry = localStorage.getItem(
-          "mostPopularCategoryAccountExpiry",
-        );
-        const currentTimeAccount = new Date().getTime();
-        if (
-          cachedCategoryAccount &&
-          cacheAccountExpiry &&
-          currentTimeAccount < Number(cacheAccountExpiry)
-        ) {
-          // Use cached data if available and not expired
-          const parsedCategories = JSON.parse(cachedCategoryAccount);
 
-          setCategories(parsedCategories);
+        if (cachedCategoryAccount) {
+          setCategories(cachedCategoryAccount);
           setLoadingAccounts(false);
-          if (parsedCategories.length > 0) {
-            setSelectedCategory(parsedCategories[0].category.name);
+          if (cachedCategoryAccount.length > 0) {
+            setSelectedCategory(cachedCategoryAccount[0].category.name);
           }
-          return; // Exit early since we used cached data
+          return;
         }
+
         const data = await getMostPopularCategoryWithData();
         setCategories(data);
         setLoadingAccounts(false);
 
-        localStorage.setItem(
-          "mostPopularCategoryAccount",
-          JSON.stringify(data),
+        setCacheWithExpiry(
+          CACHE_KEYS.categoryAccounts,
+          CACHE_KEYS.categoryAccountsExpiry,
+          data,
         );
-        const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
-        localStorage.setItem(
-          "mostPopularCategoryAccountExpiry",
-          expiryTime.toString(),
-        );
+
         if (data.length > 0) {
           setSelectedCategory(data[0].category.name);
         }
       } catch (error) {
         console.error("Failed to fetch categories with accounts:", error);
+        setLoadingAccounts(false);
       }
     };
 

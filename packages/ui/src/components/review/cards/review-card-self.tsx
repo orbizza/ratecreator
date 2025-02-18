@@ -289,7 +289,7 @@ export const ReviewCardSelf: React.FC<ReviewCardSelfProps> = ({ review }) => {
             <Button variant="ghost" size="icon" className="rounded-full">
               <ArrowBigUp className="w-6 h-6" />
             </Button>
-            10
+            <span className="text-sm">0</span>
             <Button variant="ghost" size="icon" className="rounded-full">
               <ArrowBigDown className="w-6 h-6" />
             </Button>
@@ -301,7 +301,7 @@ export const ReviewCardSelf: React.FC<ReviewCardSelfProps> = ({ review }) => {
               className="hover:text-foreground transition-colors rounded-full p-2 gap-2 sm:ml-2"
             >
               <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-sm">10</span>
+              <span className="text-sm">0</span>
             </Button>
             <Button
               variant="ghost"

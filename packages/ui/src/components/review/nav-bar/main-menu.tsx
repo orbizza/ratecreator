@@ -137,7 +137,7 @@ export function MainMenu() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => e.preventDefault()}>
                 <SunMoon className="mr-2 size-4" />
-                <span>Theme</span>
+                <span>Dark Mode</span>
                 <DropdownMenuShortcut className="opacity-100">
                   <IconToggle />
                 </DropdownMenuShortcut>
