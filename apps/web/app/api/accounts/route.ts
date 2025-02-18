@@ -20,13 +20,13 @@ export async function GET(request: NextRequest) {
     if (!platform) {
       return NextResponse.json(
         { error: "Platform is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     switch (platform) {
@@ -41,21 +41,21 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: "Invalid platform" },
-          { status: 400 }
+          { status: 400 },
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -86,7 +86,7 @@ async function handleYoutubeAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     // Format response to match CreatorData type
@@ -116,7 +116,7 @@ async function handleYoutubeAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return NextResponse.json(responseData);
@@ -124,14 +124,14 @@ async function handleYoutubeAccount(
     console.error("Error fetching YouTube account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function handleTwitterAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -161,7 +161,7 @@ async function handleTwitterAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -190,7 +190,7 @@ async function handleTwitterAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_TWITTER_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return NextResponse.json(responseData);
@@ -198,14 +198,14 @@ async function handleTwitterAccount(
     console.error("Error fetching Twitter account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function handleTiktokAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -235,7 +235,7 @@ async function handleTiktokAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -264,7 +264,7 @@ async function handleTiktokAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_TIKTOK_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return NextResponse.json(responseData);
@@ -272,14 +272,14 @@ async function handleTiktokAccount(
     console.error("Error fetching Tiktok account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account tiktok data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function handleRedditAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -309,7 +309,7 @@ async function handleRedditAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -338,7 +338,7 @@ async function handleRedditAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_REDDIT_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return NextResponse.json(responseData);
@@ -346,7 +346,7 @@ async function handleRedditAccount(
     console.error("Error fetching Reddit account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account reddit data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
