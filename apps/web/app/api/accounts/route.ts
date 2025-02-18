@@ -4,6 +4,10 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
+const CACHE_TWITTER_CREATOR = "accounts-twitter-";
+const CACHE_TIKTOK_CREATOR = "accounts-tiktok-";
+const CACHE_REDDIT_CREATOR = "accounts-reddit-";
+
 const prisma = getPrismaClient();
 
 export async function GET(request: NextRequest) {
@@ -16,13 +20,13 @@ export async function GET(request: NextRequest) {
     if (!platform) {
       return NextResponse.json(
         { error: "Platform is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     switch (platform) {
@@ -37,21 +41,21 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: "Invalid platform" },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return NextResponse.json(
       { error: "Failed to fetch categories" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
     // Check cache first
@@ -82,7 +86,7 @@ async function handleYoutubeAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     // Format response to match CreatorData type
@@ -112,7 +116,7 @@ async function handleYoutubeAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
-      JSON.stringify(responseData),
+      JSON.stringify(responseData)
     );
 
     return NextResponse.json(responseData);
@@ -120,16 +124,22 @@ async function handleYoutubeAccount(
     console.error("Error fetching YouTube account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleTwitterAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_TWITTER_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -151,7 +161,7 @@ async function handleTwitterAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     const responseData: CreatorData = {
@@ -177,21 +187,33 @@ async function handleTwitterAccount(
       categories: categorySlugs,
     };
 
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_TWITTER_CREATOR}${accountId}`,
+      JSON.stringify(responseData)
+    );
+
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching Twitter account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleTiktokAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_TIKTOK_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -213,7 +235,7 @@ async function handleTiktokAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     const responseData: CreatorData = {
@@ -239,21 +261,33 @@ async function handleTiktokAccount(
       categories: categorySlugs,
     };
 
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_TIKTOK_CREATOR}${accountId}`,
+      JSON.stringify(responseData)
+    );
+
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching Tiktok account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account tiktok data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function handleRedditAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string,
+  accountId: string
 ) {
   try {
+    // Check cache first
+    const cachedData = await redis.get(`${CACHE_REDDIT_CREATOR}${accountId}`);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         accountId: accountId,
@@ -275,7 +309,7 @@ async function handleRedditAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug,
+      (mapping) => mapping.category.slug
     );
 
     const responseData: CreatorData = {
@@ -301,12 +335,18 @@ async function handleRedditAccount(
       categories: categorySlugs,
     };
 
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_REDDIT_CREATOR}${accountId}`,
+      JSON.stringify(responseData)
+    );
+
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching Reddit account:", error);
     return NextResponse.json(
       { error: "Failed to fetch account reddit data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
