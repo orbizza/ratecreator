@@ -10,10 +10,65 @@ import { Toaster } from "@ratecreator/ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// Export metadata
 export const metadata: Metadata = {
-  title: "Rate Creator",
-  description: "Search and review Content Creators",
+  title: {
+    default: "Rate Creator - Search and Review Creators and Communities",
+    template: "%s - Rate Creator",
+  },
+  description:
+    "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
+  keywords: [
+    "content creators",
+    "creator reviews",
+    "influencer ratings",
+    "social media creators",
+    "content review platform",
+  ],
+  authors: [{ name: "Rate Creator" }],
+  creator: "Rate Creator",
+  publisher: "Rate Creator",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://ratecreator.com"),
+  openGraph: {
+    title: "Rate Creator - Search and Review Content Creators",
+    description:
+      "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
+    url: "https://ratecreator.com",
+    siteName: "Rate Creator",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/ratecreator-dark.svg",
+        width: 1200,
+        height: 630,
+        alt: "Rate Creator Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rate Creator - Search and Review Content Creators",
+    description:
+      "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
+    creator: "@ratecreator",
+    images: ["/ratecreator-dark.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 // Mark this component as a client component
@@ -24,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
             <Providers>
