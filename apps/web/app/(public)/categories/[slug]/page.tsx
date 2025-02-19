@@ -62,7 +62,7 @@ export async function generateMetadata({
 
 export default function CategoriesList() {
   return (
-    <div className='min-h-[calc(100vh-20vh)]'>
+    <div className="min-h-[calc(100vh-20vh)]">
       <CategoriesSearchResults />
     </div>
   );
