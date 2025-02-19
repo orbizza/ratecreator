@@ -11,7 +11,6 @@ import { CreatorData } from "@ratecreator/types/review";
 import { formatDate, formatValue, fromSlug } from "@ratecreator/db/utils";
 import {
   Users,
-  Twitter,
   Calendar,
   AppWindow,
   Info,
@@ -23,6 +22,7 @@ import {
   Camera,
   UserPlus,
   SquareMenu,
+  ScrollText,
 } from "lucide-react";
 import Link from "next/link";
 import { countryCodes, languageCodes } from "@ratecreator/store";
@@ -96,8 +96,8 @@ export const TwitterDetailsSection = ({
       value: account.followerCount || 0,
     },
     {
-      icon: Twitter,
-      label: "Tweets",
+      icon: ScrollText,
+      label: "Posts",
       value: account.xData?.public_metrics?.tweet_count || 0,
     },
     {

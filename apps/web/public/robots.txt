@@ -1,0 +1,12 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /admin/*
+Disallow: /private/*
+
+# Host
+Host: https://ratecreator.com
+
+# Sitemaps
+Sitemap: https://ratecreator.com/sitemap.xml 

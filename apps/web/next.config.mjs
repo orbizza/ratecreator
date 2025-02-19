@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   images: {
+    unoptimized: true,
     domains: [
       "yt3.googleusercontent.com",
       "lh3.googleusercontent.com",
