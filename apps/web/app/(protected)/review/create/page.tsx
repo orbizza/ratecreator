@@ -1,20 +1,73 @@
-"use client";
+import { Metadata } from "next";
+import { getPrismaClient } from "@ratecreator/db/client";
+import { Platform } from "@ratecreator/types/review";
+import { CreateReviewContent } from "./create-review-content";
 
-import { useSearchParams } from "next/navigation";
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { accountId?: string; platform?: string };
+}): Promise<Metadata> {
+  const prisma = getPrismaClient();
+  let creatorName = "Creator";
 
-import { CreatorRating } from "@ratecreator/ui/review";
+  const platform = searchParams.platform;
+  const accountId = searchParams.accountId;
+
+  if (platform && accountId) {
+    try {
+      const creator = await prisma.account.findFirst({
+        where: {
+          platform: platform.toUpperCase() as Platform,
+          accountId: accountId,
+        },
+        select: {
+          name_en: true,
+          name: true,
+        },
+      });
+
+      if (creator) {
+        creatorName = creator.name_en || creator.name || "Creator";
+      }
+    } catch (error) {
+      console.error("Error fetching creator:", error);
+      // Fallback to default creator name
+    }
+  }
+
+  const title = `${creatorName}'s Review`;
+  const description = `Share your experience and rate ${creatorName}. Your feedback helps the community make informed decisions.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [
+        {
+          url: "/ratecreator-dark.svg",
+          width: 1200,
+          height: 630,
+          alt: `Review ${creatorName} on RateCreator`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/ratecreator-dark.svg"],
+    },
+  };
+}
 
 export default function CreateReviewPage() {
-  const searchParams = useSearchParams();
-  const platform = searchParams.get("platform");
-  const accountId = searchParams.get("accountId");
-  const stars = Number(searchParams.get("stars")) || 0;
-
   return (
-    <CreatorRating
-      platform={platform || ""}
-      accountId={accountId || ""}
-      stars={stars}
-    />
+    <main className="min-h-[calc(100vh-20vh)]">
+      <CreateReviewContent />
+    </main>
   );
 }
