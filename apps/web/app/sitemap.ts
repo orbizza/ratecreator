@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const accountRoutes = accounts.map((account) => ({
-    url: `${baseUrl}/${account.platform.toLowerCase()}/${account.accountId}`,
+    url: `${baseUrl}/profile/${account.platform.toLowerCase()}/${account.accountId}`,
     lastModified: account.updatedAt,
     changeFrequency: "daily" as const,
     priority: 0.6,
