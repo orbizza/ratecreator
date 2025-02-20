@@ -11,7 +11,9 @@ import {
   convertToEmbeddedUrl,
   extractTweetId,
   extractTikTokVideoId,
+  getRedditPostId,
 } from "@ratecreator/db/utils";
+import { getRedditPostData } from "@ratecreator/actions/review";
 import {
   EllipsisVertical,
   ArrowBigDown,
@@ -19,8 +21,7 @@ import {
   MessageCircle,
   Share2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -66,43 +67,13 @@ interface ReviewCardSelfProps {
   review: ReviewType;
 }
 
-const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
-  platform,
-  contentUrl,
-}) => {
-  const [urlMetadata, setUrlMetadata] = useState<{
-    title?: string;
-    description?: string;
-    image?: string;
-  }>();
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
-
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!contentUrl || platform.toLowerCase() !== "reddit") return;
-
-      try {
-        setIsLoadingMetadata(true);
-        const { data } = await axios.get(`/api/metadata`, {
-          params: {
-            url: contentUrl,
-          },
-        });
-
-        setUrlMetadata({
-          title: data.title,
-          description: data.description,
-          image: data.image,
-        });
-      } catch (error) {
-        console.error("Failed to fetch metadata:", error);
-      } finally {
-        setIsLoadingMetadata(false);
-      }
-    };
-
-    fetchMetadata();
-  }, [contentUrl, platform]);
+const PlatformContent: React.FC<{
+  platform: string;
+  contentUrl: string;
+  review: ReviewType;
+}> = ({ platform, contentUrl, review }) => {
+  // Get Reddit metadata from review content if available
+  const redditMetadata = review.content?.redditMetadata;
 
   if (!contentUrl) return null;
 
@@ -138,49 +109,37 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
             allowFullScreen
           />
         );
-
       case "reddit":
         return (
-          <>
-            {isLoadingMetadata ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {urlMetadata?.image && (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={urlMetadata.image}
-                      alt={urlMetadata.title || "Reddit content"}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                )}
-                {urlMetadata?.title && (
-                  <h3 className="font-medium text-lg text-secondary-foreground">
-                    {urlMetadata.title}
-                  </h3>
-                )}
-                {urlMetadata?.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {urlMetadata.description}
-                  </p>
-                )}
-
+          <div className="flex flex-col gap-3 p-4 bg-muted rounded-lg">
+            {redditMetadata ? (
+              <>
+                <h3 className="font-medium text-lg">{redditMetadata.title}</h3>
+                <div className="text-sm text-muted-foreground">
+                  Posted by u/{redditMetadata.author} in{" "}
+                  {redditMetadata.subreddit}
+                </div>
                 <a
                   href={contentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
+                  className="text-primary hover:underline text-sm mt-2"
                 >
-                  View on Reddit
+                  View on Reddit →
                 </a>
-              </div>
+              </>
+            ) : (
+              <a
+                href={contentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                View Reddit Post
+              </a>
             )}
-          </>
+          </div>
         );
-
       default:
         return null;
     }
@@ -202,7 +161,11 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
             return "Supporting Content";
         }
       })()}
-      <div className="relative w-full aspect-video mt-4">{renderContent()}</div>
+      <div
+        className={`relative w-full mt-4 ${platform.toLowerCase() === "reddit" ? "h-auto" : "aspect-video"}`}
+      >
+        {renderContent()}
+      </div>
     </div>
   );
 };
@@ -278,6 +241,7 @@ export const ReviewCardSelf: React.FC<ReviewCardSelfProps> = ({ review }) => {
         <PlatformContent
           platform={review.platform}
           contentUrl={review.contentUrl}
+          review={review}
         />
       )}
 
