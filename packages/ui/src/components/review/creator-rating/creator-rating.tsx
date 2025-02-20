@@ -12,23 +12,30 @@ import {
   Textarea,
   useToast,
 } from "@ratecreator/ui";
-import { getCreatorData, createReview } from "@ratecreator/actions/review";
+import {
+  getCreatorData,
+  createReview,
+  getRedditPostData,
+} from "@ratecreator/actions/review";
+
 import {
   CreatorData,
   Platform,
   ReviewFormData,
   ReviewValidator,
 } from "@ratecreator/types/review";
+
 import {
-  extractTweetId,
   getInitials,
   truncateText,
+  convertToEmbeddedUrl,
+  extractTweetId,
+  extractTikTokVideoId,
+  getRedditPostId,
 } from "@ratecreator/db/utils";
-import { Loader2 } from "lucide-react";
 import { Editor } from "./editor";
 import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 
 const getRatingColor = (rating: number) => {
@@ -92,19 +99,20 @@ export const CreatorRating = ({
     title: "",
     authorId: "",
   });
-  const [urlMetadata, setUrlMetadata] = useState<{
-    title?: string;
-    description?: string;
-    image?: string;
-  }>();
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [isCreatorDataLoading, setIsCreatorDataLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const [disabled, setDisabled] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redditPostData, setRedditPostData] = useState<{
+    title?: string;
+    author?: string;
+    subreddit?: string;
+  } | null>(null);
+  const [isLoadingRedditData, setIsLoadingRedditData] = useState(false);
+
   useEffect(() => {
     const fetchCreatorData = async () => {
       setIsCreatorDataLoading(true);
@@ -137,12 +145,52 @@ export const CreatorRating = ({
     }));
   }, [searchParams]);
 
+  useEffect(() => {
+    const fetchRedditPostData = async (url: string) => {
+      setIsLoadingRedditData(true);
+      try {
+        const data = await getRedditPostData(url);
+        if (data.success) {
+          setRedditPostData({
+            title: data.title,
+            author: data.author,
+            subreddit: data.subreddit,
+          });
+        } else {
+          setRedditPostData(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Reddit post data:", error);
+        setRedditPostData(null);
+      } finally {
+        setIsLoadingRedditData(false);
+      }
+    };
+
+    if (platform === "reddit" && formData.contentUrl) {
+      fetchRedditPostData(formData.contentUrl);
+    }
+  }, [platform, formData.contentUrl]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       // Validate form data
-      const validatedData = ReviewValidator.parse(formData);
+      const validatedData = ReviewValidator.parse({
+        ...formData,
+        content: {
+          ...formData.content,
+          redditMetadata:
+            platform === "reddit" && redditPostData
+              ? {
+                  title: redditPostData.title,
+                  author: redditPostData.author,
+                  subreddit: redditPostData.subreddit,
+                }
+              : undefined,
+        },
+      });
 
       // Call the server action directly
       setIsSubmitting(true);
@@ -184,52 +232,6 @@ export const CreatorRating = ({
     // Clean the URL if it starts with @ or has other prefixes
     const cleanUrl = url.replace(/^@/, "").trim();
     setFormData((prev) => ({ ...prev, contentUrl: cleanUrl }));
-
-    if (!cleanUrl) {
-      setUrlMetadata(undefined);
-      return;
-    }
-
-    // Check if it's a Twitter/X URL
-    if (
-      platform.toLowerCase() === "twitter" ||
-      cleanUrl.includes("twitter.com") ||
-      cleanUrl.includes("x.com")
-    ) {
-      const tweetId = extractTweetId(cleanUrl);
-      if (tweetId) {
-        setUrlMetadata({
-          title: `Tweet ID: ${tweetId}`,
-          description: cleanUrl,
-        });
-        return;
-      }
-    }
-
-    try {
-      setIsLoadingMetadata(true);
-
-      const { data } = await axios.get(`/api/metadata`, {
-        params: {
-          url: cleanUrl,
-        },
-      });
-
-      setUrlMetadata({
-        title: data.title,
-        description: data.description,
-        image: data.image,
-      });
-    } catch (error) {
-      console.error("Failed to fetch metadata:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch URL metadata",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingMetadata(false);
-    }
   };
 
   useEffect(() => {
@@ -362,51 +364,78 @@ export const CreatorRating = ({
                   className="w-full"
                 />
 
-                {isLoadingMetadata && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Loading URL preview...</span>
-                  </div>
-                )}
-                {/* <div className='border rounded-lg p-4 space-y-2'>
-                  {platform === "twitter" && formData.contentUrl && (
-                    <TweetCard id={extractTweetId(formData.contentUrl) || ""} />
-                  )}
-                </div> */}
-
-                {urlMetadata && (
-                  <div className=" rounded-lg p-4">
-                    {platform === "twitter" && formData.contentUrl && (
+                {formData.contentUrl && (
+                  <div className="rounded-lg p-4">
+                    {platform === "twitter" &&
+                      extractTweetId(formData.contentUrl) && (
+                        <div className="flex justify-center relative aspect-video">
+                          <iframe
+                            src={`https://platform.twitter.com/embed/Tweet.html?id=${extractTweetId(formData.contentUrl)}`}
+                            className="w-full h-full object-cover rounded-md shadow-md"
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+                            allowFullScreen
+                          />
+                        </div>
+                      )}
+                    {platform === "youtube" && (
                       <div className="flex justify-center relative aspect-video">
                         <iframe
-                          src={`https://platform.twitter.com/embed/Tweet.html?id=${extractTweetId(formData.contentUrl)}`}
+                          src={convertToEmbeddedUrl(formData.contentUrl)}
                           className="w-full h-full object-cover rounded-md shadow-md"
-                          allow="accelerometer; clipboard-write; encrypted-media; gyroscope;"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         />
                       </div>
                     )}
-                    {platform !== "twitter" && (
-                      <>
-                        {urlMetadata.image && (
-                          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-                            <img
-                              src={urlMetadata.image}
-                              alt={urlMetadata.title || "URL preview"}
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                        {urlMetadata.title && (
-                          <h3 className="font-medium">{urlMetadata.title}</h3>
-                        )}
-                        {urlMetadata.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {urlMetadata.description}
-                          </p>
-                        )}
-                      </>
-                    )}
+                    {platform === "tiktok" &&
+                      extractTikTokVideoId(formData.contentUrl) && (
+                        <div className="flex justify-center relative aspect-video">
+                          <iframe
+                            src={`https://www.tiktok.com/embed/v2/${extractTikTokVideoId(formData.contentUrl)}`}
+                            className="w-full h-full object-cover rounded-md shadow-md"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      )}
+                    {platform === "reddit" &&
+                      getRedditPostId(formData.contentUrl) && (
+                        <div className="flex flex-col gap-3 p-4 bg-muted rounded-lg">
+                          {isLoadingRedditData ? (
+                            <div className="animate-pulse space-y-2">
+                              <div className="h-4 bg-muted-foreground/20 rounded w-3/4"></div>
+                              <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
+                            </div>
+                          ) : redditPostData ? (
+                            <>
+                              <h3 className="font-medium text-lg">
+                                {redditPostData.title}
+                              </h3>
+                              <div className="text-sm text-muted-foreground">
+                                Posted by u/{redditPostData.author} in{" "}
+                                {redditPostData.subreddit}
+                              </div>
+                              <a
+                                href={formData.contentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline text-sm mt-2"
+                              >
+                                View on Reddit →
+                              </a>
+                            </>
+                          ) : (
+                            <a
+                              href={formData.contentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              View Reddit Post
+                            </a>
+                          )}
+                        </div>
+                      )}
                   </div>
                 )}
               </div>

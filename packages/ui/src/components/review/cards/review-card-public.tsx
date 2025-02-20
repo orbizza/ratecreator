@@ -9,8 +9,6 @@ import {
   Share2,
   FlagOff,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import axios from "axios";
 
 import {
   Avatar,
@@ -27,7 +25,10 @@ import {
   convertToEmbeddedUrl,
   extractTweetId,
   extractTikTokVideoId,
+  getRedditPostId,
 } from "@ratecreator/db/utils";
+import { getRedditPostData } from "@ratecreator/actions/review";
+import { useState, useEffect } from "react";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -73,43 +74,13 @@ interface ReviewCardPublicProps {
   review: ReviewType;
 }
 
-const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
-  platform,
-  contentUrl,
-}) => {
-  const [urlMetadata, setUrlMetadata] = useState<{
-    title?: string;
-    description?: string;
-    image?: string;
-  }>();
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
-
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!contentUrl || platform.toLowerCase() !== "reddit") return;
-
-      try {
-        setIsLoadingMetadata(true);
-        const { data } = await axios.get(`/api/metadata`, {
-          params: {
-            url: contentUrl,
-          },
-        });
-
-        setUrlMetadata({
-          title: data.title,
-          description: data.description,
-          image: data.image,
-        });
-      } catch (error) {
-        console.error("Failed to fetch metadata:", error);
-      } finally {
-        setIsLoadingMetadata(false);
-      }
-    };
-
-    fetchMetadata();
-  }, [contentUrl, platform]);
+const PlatformContent: React.FC<{
+  platform: string;
+  contentUrl: string;
+  review: ReviewType;
+}> = ({ platform, contentUrl, review }) => {
+  // Get Reddit metadata from review content if available
+  const redditMetadata = review.content?.redditMetadata;
 
   if (!contentUrl) return null;
 
@@ -145,44 +116,34 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
         );
       case "reddit":
         return (
-          <>
-            {isLoadingMetadata ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {urlMetadata?.image && (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={urlMetadata.image}
-                      alt={urlMetadata.title || "Reddit content"}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                )}
-                {urlMetadata?.title && (
-                  <h3 className="font-medium text-lg text-secondary-foreground">
-                    {urlMetadata.title}
-                  </h3>
-                )}
-                {urlMetadata?.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {urlMetadata.description}
-                  </p>
-                )}
-
+          <div className="flex flex-col gap-3 p-4 bg-muted rounded-lg">
+            {redditMetadata ? (
+              <>
+                <h3 className="font-medium text-lg">{redditMetadata.title}</h3>
+                <div className="text-sm text-muted-foreground">
+                  Posted by u/{redditMetadata.author} in{" "}
+                  {redditMetadata.subreddit}
+                </div>
                 <a
                   href={contentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
+                  className="text-primary hover:underline text-sm mt-2"
                 >
-                  View on Reddit
+                  View on Reddit →
                 </a>
-              </div>
+              </>
+            ) : (
+              <a
+                href={contentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                View Reddit Post
+              </a>
             )}
-          </>
+          </div>
         );
       default:
         return null;
@@ -190,7 +151,7 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
   };
 
   return (
-    <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6">
+    <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6 ">
       {(() => {
         switch (platform.toLowerCase()) {
           case "youtube":
@@ -205,7 +166,11 @@ const PlatformContent: React.FC<{ platform: string; contentUrl: string }> = ({
             return "Supporting Content";
         }
       })()}
-      <div className="relative w-full aspect-video mt-4">{renderContent()}</div>
+      <div
+        className={`relative w-full mt-4 ${platform.toLowerCase() === "reddit" ? "h-auto" : "aspect-video"}`}
+      >
+        {renderContent()}
+      </div>
     </div>
   );
 };
@@ -273,120 +238,51 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         <div className="prose dark:prose-invert prose-2xl max-w-none">
           {JSON.stringify(review.content) === "{}" ? (
             <span className="text-lg sm:text-xl text-muted-foreground">
-              <span className="italic text-primary">
-                {`${truncateText(
-                  review.author?.firstName ||
-                    review.author?.username ||
-                    getInitials(review.author?.email || "") ||
-                    "",
-                  20,
-                )}`}
-              </span>{" "}
-              said nothing
+              No content provided
             </span>
           ) : (
             <>
               <div className="flex flex-col gap-4">
                 <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
-                  What{" "}
-                  <span className="italic text-primary">
-                    {`${truncateText(
-                      review.author?.firstName ||
-                        review.author?.username ||
-                        getInitials(review.author?.email || "") ||
-                        "",
-                      20,
-                    )}`}
-                  </span>{" "}
-                  had to say
+                  Review
                 </div>
-                <div className="prose dark:prose-invert prose-2xl max-w-none">
-                  <ReactQuill
-                    value={review.content}
-                    readOnly={true}
-                    theme="bubble"
-                    modules={{ toolbar: false }}
-                    className="[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto"
-                  />
-                </div>
+                <ReactQuill
+                  value={review.content}
+                  readOnly={true}
+                  theme="bubble"
+                />
               </div>
             </>
           )}
         </div>
       ) : (
-        <>
-          <div className="flex flex-col gap-4">
-            <div className="text-lg sm:text-xl text-primary/70 font-semibold">
-              What{" "}
-              <span className="italic text-primary">
-                {`${truncateText(
-                  review.author?.firstName ||
-                    review.author?.username ||
-                    getInitials(review.author?.email || "") ||
-                    "",
-                  20,
-                )}`}
-              </span>{" "}
-              had to say
-            </div>
-            <div className="prose dark:prose-invert prose-2xl max-w-none">
-              <ReactQuill
-                value={review.content}
-                readOnly={true}
-                theme="bubble"
-                modules={{ toolbar: false }}
-                className="[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto"
-              />
-            </div>
-          </div>
-        </>
+        <div className="prose dark:prose-invert prose-2xl max-w-none">
+          <span className="text-lg sm:text-xl text-muted-foreground">
+            No content provided
+          </span>
+        </div>
       )}
 
       {review.contentUrl && (
         <PlatformContent
           platform={review.platform}
           contentUrl={review.contentUrl}
+          review={review}
         />
       )}
 
-      <Separator className="my-4" />
-
-      <div className="text-sm mt-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1 sm:gap-4">
-          <div className="flex flex-row items-center gap-1 rounded-full p-0 border border-gray-200 dark:border-gray-800">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowBigUp className="w-6 h-6" />
-            </Button>
-            <span className="text-sm">0</span>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowBigDown className="w-6 h-6" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-foreground transition-colors rounded-full p-2 gap-2 sm:ml-2"
-            >
-              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-sm">0</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-foreground transition-colors rounded-full p-2 gap-1 sm:gap-2"
-            >
-              <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-sm">Share</span>
-            </Button>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="hover:text-foreground transition-colors rounded-full p-2"
-        >
-          <FlagOff className="w-5 h-5 sm:w-6 sm:h-6" />
+      <div className="flex flex-row gap-4 mt-8">
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <ArrowBigUp className="w-4 h-4 sm:w-6 sm:h-6" />
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <ArrowBigDown className="w-4 h-4 sm:w-6 sm:h-6" />
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Share2 className="w-4 h-4 sm:w-6 sm:h-6" />
         </Button>
       </div>
     </Card>
