@@ -53,7 +53,7 @@ export async function getCreatorData({
 }
 async function handleYoutubeAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -84,7 +84,7 @@ async function handleYoutubeAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     // Format response to match CreatorData type
@@ -114,7 +114,7 @@ async function handleYoutubeAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return responseData;
@@ -126,7 +126,7 @@ async function handleYoutubeAccount(
 
 async function handleTwitterAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -156,7 +156,7 @@ async function handleTwitterAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -185,7 +185,7 @@ async function handleTwitterAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_TWITTER_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return responseData;
@@ -197,7 +197,7 @@ async function handleTwitterAccount(
 
 async function handleTiktokAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -227,7 +227,7 @@ async function handleTiktokAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -256,7 +256,7 @@ async function handleTiktokAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_TIKTOK_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return responseData;
@@ -268,7 +268,7 @@ async function handleTiktokAccount(
 
 async function handleRedditAccount(
   redis: ReturnType<typeof getRedisClient>,
-  accountId: string
+  accountId: string,
 ) {
   try {
     // Check cache first
@@ -298,7 +298,7 @@ async function handleRedditAccount(
     });
 
     const categorySlugs = categoryMappings.map(
-      (mapping) => mapping.category.slug
+      (mapping) => mapping.category.slug,
     );
 
     const responseData: CreatorData = {
@@ -327,7 +327,7 @@ async function handleRedditAccount(
     // Cache the response for 1 hour
     await redis.set(
       `${CACHE_REDDIT_CREATOR}${accountId}`,
-      JSON.stringify(responseData)
+      JSON.stringify(responseData),
     );
 
     return responseData;
