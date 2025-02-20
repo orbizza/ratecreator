@@ -39,24 +39,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Fetch all active accounts
-  const accounts = await prisma.account.findMany({
-    where: {
-      isSuspended: false,
-    },
-    select: {
-      platform: true,
-      accountId: true,
-      updatedAt: true,
-    },
-  });
-
-  const accountRoutes = accounts.map((account) => ({
-    url: `${baseUrl}/profile/${account.platform.toLowerCase()}/${account.accountId}`,
-    lastModified: account.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.6,
-  }));
-
-  return [...routes, ...categoryRoutes, ...accountRoutes];
+  return [...routes, ...categoryRoutes];
 }
