@@ -63,7 +63,7 @@ export async function createReview(formData: unknown) {
 
     // Revalidate the creator's page
     revalidatePath(
-      `/profile/${validatedData.platform}/${validatedData.accountId}`
+      `/profile/${validatedData.platform}/${validatedData.accountId}`,
     );
 
     return { success: true, data: review };
