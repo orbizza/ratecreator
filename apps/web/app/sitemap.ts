@@ -43,7 +43,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const accounts = await prisma.account.findMany({
     where: {
       isSuspended: false,
-      isDeleted: false,
     },
     select: {
       platform: true,
