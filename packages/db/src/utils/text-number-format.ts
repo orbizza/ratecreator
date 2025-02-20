@@ -39,6 +39,12 @@ export const formatUtcTimestamp = (utcTimestamp: number): string => {
   });
 };
 
+export const getRedditPostId = (url: string) => {
+  const regex = /\/comments\/([a-zA-Z0-9]+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
+
 export const extractTweetId = (url: string) => {
   const regex = /\/status\/(\d+)/;
   const match = url.match(regex);
