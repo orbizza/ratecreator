@@ -471,8 +471,8 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
     {
       id: "help",
       name: "Help",
-      shortcut: ["g", "h"],
-      keywords: "go-help",
+      shortcut: ["m", "h"],
+      keywords: "my-help",
       section: "General",
       perform: () => router.push("/help"),
       icon: <HelpCircle size={20} />,

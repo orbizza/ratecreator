@@ -2,6 +2,9 @@
 
 import axios from "axios";
 import { load } from "cheerio";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 interface Metadata {
   title?: string;
@@ -14,6 +17,47 @@ const getYouTubeVideoId = (url: string) => {
     /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
   const match = url.match(regExp);
   return match && match[7].length === 11 ? match[7] : null;
+};
+
+const getYouTubeChannelId = async (videoId: string): Promise<string | null> => {
+  try {
+    const response = await axios.get(
+      `https://www.youtube.com/watch?v=${videoId}`,
+    );
+    const $ = load(response.data);
+
+    // Try to find channel handle and look up channel ID
+    const channelHandle = $(
+      '[itemtype="http://schema.org/Person"] [itemprop="url"]',
+    ).attr("href");
+    // console.log("response.data: ", response.data);
+    // console.log("channelHandle: ", channelHandle);
+
+    if (channelHandle) {
+      const handleMatch = channelHandle.match(/@([\w-]+)/);
+      if (handleMatch) {
+        const handle = handleMatch[1];
+        // Look up the channel ID from the database using the handle
+        const account = await prisma.account.findFirst({
+          where: {
+            handle: handle,
+            platform: "YOUTUBE",
+          },
+          select: {
+            accountId: true,
+          },
+        });
+        if (account?.accountId) {
+          return account.accountId;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching YouTube channel ID:", error);
+    return null;
+  }
 };
 
 const getTwitterTweetId = (url: string) => {
@@ -231,6 +275,7 @@ async function getGenericMetadata(url: string): Promise<Metadata> {
 // Export the ID extraction functions
 export {
   getYouTubeVideoId,
+  getYouTubeChannelId,
   getTwitterTweetId,
   getTikTokVideoId,
   getRedditPostId,

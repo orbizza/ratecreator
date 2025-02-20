@@ -119,10 +119,11 @@ const PlatformContent: React.FC<{
           <div className="flex flex-col gap-3 p-4 bg-muted rounded-lg">
             {redditMetadata ? (
               <>
-                <h3 className="font-medium text-lg">{redditMetadata.title}</h3>
+                <h3 className="font-medium text-secondary-foreground text-lg">
+                  {redditMetadata.title}
+                </h3>
                 <div className="text-sm text-muted-foreground">
                   Posted by u/{redditMetadata.author} in{" "}
-                  {redditMetadata.subreddit}
                 </div>
                 <a
                   href={contentUrl}
@@ -230,7 +231,7 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         </div>
       </div>
 
-      <h1 className="font-bold mb-8 text-primary text-2xl sm:text-3xl md:text-4xl mt-4">
+      <h1 className="font-bold mb-8 text-2xl sm:text-3xl md:text-4xl mt-4">
         {review.title}
       </h1>
 

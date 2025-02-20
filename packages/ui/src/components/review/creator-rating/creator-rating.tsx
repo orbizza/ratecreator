@@ -12,10 +12,13 @@ import {
   Textarea,
   useToast,
 } from "@ratecreator/ui";
+
 import {
   getCreatorData,
   createReview,
   getRedditPostData,
+  getYouTubeVideoId,
+  getYouTubeChannelId,
 } from "@ratecreator/actions/review";
 
 import {
@@ -154,7 +157,6 @@ export const CreatorRating = ({
           setRedditPostData({
             title: data.title,
             author: data.author,
-            subreddit: data.subreddit,
           });
         } else {
           setRedditPostData(null);
@@ -192,39 +194,180 @@ export const CreatorRating = ({
         },
       });
 
-      // Call the server action directly
-      setIsSubmitting(true);
-      const result = await createReview(validatedData);
+      if (platform === "youtube" && validatedData.contentUrl) {
+        if (
+          !validatedData.contentUrl.includes("youtube.com") &&
+          !validatedData.contentUrl?.includes("youtu.be")
+        ) {
+          toast({
+            title: "Error",
+            description: "Not a YouTube URL",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to submit review",
-          variant: "destructive",
-        });
-        return;
+        // Extract video ID and validate channel
+        // const videoId = getYouTubeVideoId(validatedData.contentUrl);
+        // if (videoId) {
+        //   const channelId = await getYouTubeChannelId(videoId);
+
+        //   // if (!channelId) {
+        //   //   toast({
+        //   //     title: "Error",
+        //   //     description: "Invalid YouTube Video URL",
+        //   //     variant: "destructive",
+        //   //   });
+        //   //   return;
+        //   // }
+        //   // if (channelId !== creatorData?.account.accountId) {
+        //   //   toast({
+        //   //     title: "Error",
+        //   //     description:
+        //   //       "The video url must be from the channel you are reviewing",
+        //   //     variant: "destructive",
+        //   //   });
+        //   //   return;
+        //   // }
+        //   return;
+        // } else {
+        //   toast({
+        //     title: "Error",
+        //     description: "Not a YouTube Video URL",
+        //     variant: "destructive",
+        //   });
+        // }
       }
 
-      // Show success message
-      toast({
-        title: "Success",
-        description: "Your review has been submitted successfully!",
-      });
+      if (platform === "twitter" && validatedData.contentUrl) {
+        if (
+          !validatedData.contentUrl.includes("twitter.com") &&
+          !validatedData.contentUrl.includes("x.com")
+        ) {
+          toast({
+            title: "Error",
+            description: "Not a X Post URL",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      // Redirect to the creator's page
-      router.push(`/profile/${platform}/${accountId}`);
-      router.refresh(); // Refresh the page to show the new review
+        // Check if the URL contains the creator's handle
+        const urlHandle =
+          validatedData.contentUrl
+            .split("/")
+            .find((part) => part.startsWith("@"))
+            ?.substring(1) || validatedData.contentUrl.split("/")[3]; // For URLs without @
+        if (
+          urlHandle &&
+          urlHandle.toLowerCase() !== creatorData?.account.handle?.toLowerCase()
+        ) {
+          toast({
+            title: "Error",
+            description:
+              "The post URL must be from the creator you are reviewing",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      if (platform === "tiktok" && validatedData.contentUrl) {
+        if (!validatedData.contentUrl.includes("tiktok.com")) {
+          toast({
+            title: "Error",
+            description: "Invalid TikTok URL",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Check if the URL contains the creator's handle
+        const urlHandle = validatedData.contentUrl
+          .split("/")
+          .find((part) => part.startsWith("@"))
+          ?.substring(1);
+        if (
+          urlHandle &&
+          urlHandle.toLowerCase() !== creatorData?.account.handle?.toLowerCase()
+        ) {
+          toast({
+            title: "Error",
+            description:
+              "The TikTok Video URL must be from the creator you are reviewing",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      if (platform === "reddit" && validatedData.contentUrl) {
+        if (!validatedData.contentUrl.includes("reddit.com")) {
+          toast({
+            title: "Error",
+            description: "Invalid Reddit URL",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Check if the subreddit from metadata matches the creator's account
+        if (
+          creatorData?.account.name &&
+          !validatedData.contentUrl.includes(creatorData?.account.name)
+        ) {
+          toast({
+            title: "Error",
+            description:
+              "The Reddit post must be from the subreddit you are reviewing",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      try {
+        // Call the server action directly
+        setIsSubmitting(true);
+        const result = await createReview(validatedData);
+
+        if (!result.success) {
+          toast({
+            title: "Error",
+            description: result.error || "Failed to submit review",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Show success message
+        toast({
+          title: "Success",
+          description: "Your review has been submitted successfully!",
+        });
+
+        // Redirect to the creator's page
+        router.push(`/profile/${platform}/${accountId}`);
+        router.refresh(); // Refresh the page to show the new review
+      } catch (error) {
+        console.error("Error submitting review:", error);
+
+        // Show error message to user
+        toast({
+          title: "Error",
+          description: "Failed to submit review",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     } catch (error) {
-      console.error("Error submitting review:", error);
-
-      // Show error message to user
+      console.error("Validation error:", error);
       toast({
         title: "Error",
-        description: "Failed to submit review",
+        description: "Please check your review details and try again",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
