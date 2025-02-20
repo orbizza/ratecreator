@@ -28,7 +28,26 @@ let prisma: PrismaClient;
 
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
-    prisma = globalThis.prisma || new PrismaClient();
+    prisma =
+      globalThis.prisma ||
+      new PrismaClient({
+        log: [
+          { level: "error", emit: "event" },
+          { level: "warn", emit: "event" },
+        ],
+        errorFormat: "pretty",
+      });
+
+    // Add event listeners for connection issues
+    // @ts-ignore - Types are not properly exposed in Prisma
+    prisma.$on("error", (e) => {
+      console.error("Prisma Client error:", e);
+    });
+
+    // @ts-ignore - Types are not properly exposed in Prisma
+    prisma.$on("warn", (e) => {
+      console.warn("Prisma Client warning:", e);
+    });
 
     if (process.env.NODE_ENV !== "production") {
       globalThis.prisma = prisma;

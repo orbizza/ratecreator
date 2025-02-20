@@ -15,7 +15,8 @@
     "build": "tailwindcss -i ./src/styles.css -o ./dist/index.css",
     "lint": "eslint src/",
     "dev": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "generate:component": "turbo gen react-component"
   },
   "peerDependencies": {
     "react": "^18.3.1"

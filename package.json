@@ -59,6 +59,7 @@
     "framer-motion": "^11.18.2",
     "ioredis": "^5.5.0",
     "mongodb": "^6.13.0",
+    "next-sitemap": "^4.2.3",
     "posthog-js": "^1.217.2",
     "quill": "^2.0.3",
     "react-icons": "^5.4.0",

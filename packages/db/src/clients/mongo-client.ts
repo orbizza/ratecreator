@@ -23,11 +23,31 @@ function createMongoClient(): Promise<MongoClient> {
   const newClient = new MongoClient(uri, {
     connectTimeoutMS: 10000,
     socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 10000,
+    heartbeatFrequencyMS: 5000,
+    maxPoolSize: 10,
+    minPoolSize: 1,
+    retryWrites: true,
+    retryReads: true,
   });
+
   return newClient
     .connect()
     .then((client) => {
       // console.log("MongoDB connected successfully");
+
+      client.on("error", (error) => {
+        console.error("MongoDB client error:", error);
+      });
+
+      client.on("timeout", () => {
+        console.warn("MongoDB operation timeout");
+      });
+
+      client.on("close", () => {
+        console.warn("MongoDB connection closed");
+      });
+
       return client;
     })
     .catch((error) => {
