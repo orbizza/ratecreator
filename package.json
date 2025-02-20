@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "yarn workspace @ratecreator/ui build && yarn prisma-generate && turbo build",
     "start": "turbo start",
     "dev": "turbo dev",
     "test": "vitest",
