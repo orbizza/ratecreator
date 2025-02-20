@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     console.error("Error processing metadata request:", error);
     return NextResponse.json(
       { error: "Failed to fetch metadata" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
