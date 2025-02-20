@@ -15,12 +15,12 @@ interface RedditPostDataResponse {
 }
 
 export async function getRedditPostData(
-  url: string,
+  url: string
 ): Promise<RedditPostDataResponse> {
   try {
     // Use node-fetch on the server side
     const response = await fetch(
-      `https://www.reddit.com/oembed?url=${encodeURIComponent(url)}`,
+      `https://www.reddit.com/oembed?url=${encodeURIComponent(url)}`
     );
 
     if (!response.ok) {
