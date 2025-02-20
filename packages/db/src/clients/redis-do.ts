@@ -9,45 +9,28 @@ export const getRedisClient = (): Redis => {
       port: parseInt(process.env.REDIS_PORT || "6379", 10),
       username: process.env.REDIS_USERNAME || "",
       password: process.env.REDIS_PASSWORD || "",
-      tls: {
-        rejectUnauthorized: false, // For self-signed certificates
-      },
-      retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      maxRetriesPerRequest: 3,
+      tls: {},
     });
 
     redisClient.on("error", (err) => {
       console.error("Redis client error:", err);
-      // Don't throw the error, just log it
-      // The client will automatically try to reconnect
     });
 
     redisClient.on("connect", () => {
-      console.log("Connected to Redis");
+      // console.log("Connected to Redis");
     });
 
-    redisClient.on("ready", () => {
-      console.log("Redis client is ready");
-    });
+    // process.on("SIGINT", async () => {
+    //   console.log("Gracefully shutting down...");
+    //   await closeRedisConnection();
+    //   process.exit(0);
+    // });
 
-    redisClient.on("reconnecting", () => {
-      console.log("Redis client is reconnecting");
-    });
-
-    process.on("SIGINT", async () => {
-      console.log("Gracefully shutting down Redis connection...");
-      await closeRedisConnection();
-      process.exit(0);
-    });
-
-    process.on("SIGTERM", async () => {
-      console.log("Gracefully shutting down Redis connection...");
-      await closeRedisConnection();
-      process.exit(0);
-    });
+    // process.on("SIGTERM", async () => {
+    //   console.log("Gracefully shutting down...");
+    //   await closeRedisConnection();
+    //   process.exit(0);
+    // });
   }
 
   return redisClient;

@@ -46,13 +46,24 @@ export async function createReview(formData: unknown) {
         authorId: user.id,
         platform: account?.platform as Platform,
         accountId: account?.id as string,
-        content: validatedData.content || {},
+        content: {
+          ...validatedData.content,
+          redditMetadata:
+            validatedData.platform === "REDDIT" && validatedData.contentUrl
+              ? {
+                  postUrl: validatedData.contentUrl,
+                  title: validatedData.content?.redditMetadata?.title,
+                  author: validatedData.content?.redditMetadata?.author,
+                  subreddit: validatedData.content?.redditMetadata?.subreddit,
+                }
+              : undefined,
+        },
       },
     });
 
     // Revalidate the creator's page
     revalidatePath(
-      `/profile/${validatedData.platform}/${validatedData.accountId}`,
+      `/profile/${validatedData.platform}/${validatedData.accountId}`
     );
 
     return { success: true, data: review };

@@ -6,3 +6,4 @@ export * from "./creators/creatorActions";
 export * from "./reviews/createReview";
 export * from "./reviews/fetchReviewsActions";
 export * from "./metadata/metadata";
+export * from "./metadata/reddit";

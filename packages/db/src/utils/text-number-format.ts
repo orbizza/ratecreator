@@ -40,9 +40,9 @@ export const formatUtcTimestamp = (utcTimestamp: number): string => {
 };
 
 export const getRedditPostId = (url: string) => {
-  const regex = /\/comments\/([a-zA-Z0-9]+)/;
+  const regex = /\/r\/([^/]+)\/comments\/([a-zA-Z0-9]+)\/([^/]+)/;
   const match = url.match(regex);
-  return match ? match[1] : null;
+  return match ? `r/${match[1]}/comments/${match[2]}/${match[3]}/` : null;
 };
 
 export const extractTweetId = (url: string) => {
