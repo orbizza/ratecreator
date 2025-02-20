@@ -22,13 +22,13 @@ const getYouTubeVideoId = (url: string) => {
 const getYouTubeChannelId = async (videoId: string): Promise<string | null> => {
   try {
     const response = await axios.get(
-      `https://www.youtube.com/watch?v=${videoId}`
+      `https://www.youtube.com/watch?v=${videoId}`,
     );
     const $ = load(response.data);
 
     // Try to find channel handle and look up channel ID
     const channelHandle = $(
-      '[itemtype="http://schema.org/Person"] [itemprop="url"]'
+      '[itemtype="http://schema.org/Person"] [itemprop="url"]',
     ).attr("href");
     // console.log("response.data: ", response.data);
     // console.log("channelHandle: ", channelHandle);
@@ -88,7 +88,7 @@ const getRedditPostId = (url: string) => {
 const getYouTubeMetadata = async (videoId: string): Promise<Metadata> => {
   try {
     const response = await axios.get(
-      `https://www.youtube.com/watch?v=${videoId}`
+      `https://www.youtube.com/watch?v=${videoId}`,
     );
     const $ = load(response.data);
 
@@ -111,7 +111,7 @@ const getTwitterMetadata = async (tweetId: string): Promise<Metadata> => {
         headers: {
           Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
         },
-      }
+      },
     );
 
     return {
@@ -212,7 +212,7 @@ const getRedditMetadata = async (postId: string): Promise<Metadata> => {
           ? postData.thumbnail
           : postData.preview?.images?.[0]?.source?.url?.replace(
               /&amp;/g,
-              "&"
+              "&",
             ) || postData.media?.oembed?.thumbnail_url?.replace(/&amp;/g, "&");
 
       return {
