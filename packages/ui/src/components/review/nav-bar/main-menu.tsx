@@ -121,7 +121,7 @@ export function MainMenu() {
               <DropdownMenuItem onClick={() => router.push("/wip")}>
                 <LifeBuoy className="mr-2 size-4" />
                 <span>Help</span>
-                <DropdownMenuShortcut>GH</DropdownMenuShortcut>
+                <DropdownMenuShortcut>MH</DropdownMenuShortcut>
               </DropdownMenuItem>
               {/* Enable when billing feature is added */}
               {/* <DropdownMenuItem onClick={() => router.push("/wip")}>
