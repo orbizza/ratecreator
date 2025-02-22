@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/ratecreator-dark.svg",
+        url: "https://ratecreator.com/ratecreator-dark.svg",
         width: 1200,
         height: 630,
         alt: "Rate Creator Categories",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Categories",
     description:
       "Explore and discover content creators across different categories. Find creators in gaming, education, entertainment, and more.",
-    images: ["/ratecreator-dark.svg"],
+    images: ["https://ratecreator.com/ratecreator-dark.svg"],
   },
 };
 
