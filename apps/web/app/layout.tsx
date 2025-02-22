@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/ratecreator-dark.svg",
+        url: "https://ratecreator.com/ratecreator-dark.svg",
         width: 1200,
         height: 630,
         alt: "Rate Creator Logo",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     description:
       "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
     creator: "@ratecreator",
-    images: ["/ratecreator-dark.svg"],
+    images: ["https://ratecreator.com/ratecreator-dark.svg"],
   },
   robots: {
     index: true,
@@ -79,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
             <Providers>

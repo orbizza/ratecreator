@@ -51,7 +51,8 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: account.imageUrl || "/ratecreator-dark.svg",
+          url:
+            account.imageUrl || "https://ratecreator.com/ratecreator-dark.svg",
           width: 1200,
           height: 630,
           alt: `${name}'s profile picture`,
@@ -63,7 +64,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${name} on ${platform}`,
       description,
-      images: [account.imageUrl || "/ratecreator-dark.svg"],
+      images: [
+        account.imageUrl || "https://ratecreator.com/ratecreator-dark.svg",
+      ],
       creator: "@ratecreator",
     },
     other: {
@@ -81,7 +84,7 @@ export default function ReviewProfile({
   params: { accountId: string; platform: string };
 }) {
   return (
-    <main className="min-h-[calc(100vh-20vh)]">
+    <main className='min-h-[calc(100vh-20vh)]'>
       <CreatorProfile accountId={accountId} platform={platform} />
     </main>
   );
