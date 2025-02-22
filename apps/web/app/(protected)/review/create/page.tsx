@@ -66,7 +66,7 @@ export async function generateMetadata({
 
 export default function CreateReviewPage() {
   return (
-    <main className='min-h-[calc(100vh-20vh)]'>
+    <main className="min-h-[calc(100vh-20vh)]">
       <CreateReviewContent />
     </main>
   );
