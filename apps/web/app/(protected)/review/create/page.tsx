@@ -48,7 +48,7 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "/ratecreator-dark.svg",
+          url: "https://ratecreator.com/ratecreator-dark.svg",
           width: 1200,
           height: 630,
           alt: `Review ${creatorName} on RateCreator`,
@@ -59,7 +59,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/ratecreator-dark.svg"],
+      images: ["https://ratecreator.com/ratecreator-dark.svg"],
     },
   };
 }

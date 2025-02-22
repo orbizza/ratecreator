@@ -35,6 +35,14 @@ export const Footer = () => {
                 <span className="text-[#ff3131] "> CREATOR</span>{" "}
               </div>
             </Link>
+            <iframe
+              src="https://status.ratecreator.com/badge?theme=dark"
+              width="250"
+              height="30"
+              frameBorder="0"
+              scrolling="no"
+              style={{ colorScheme: "normal" }}
+            ></iframe>
             {/* Social icons now on the same row for md and sm, at the bottom for lg */}
             <div className="flex space-x-4 lg:mt-auto">
               <Link

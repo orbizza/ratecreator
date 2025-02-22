@@ -272,18 +272,42 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         />
       )}
 
-      <div className="flex flex-row gap-4 mt-8">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <ArrowBigUp className="w-4 h-4 sm:w-6 sm:h-6" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <ArrowBigDown className="w-4 h-4 sm:w-6 sm:h-6" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Share2 className="w-4 h-4 sm:w-6 sm:h-6" />
+      <div className="text-sm mt-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
+          <div className="flex flex-row items-center gap-1 rounded-full p-0 border border-gray-200 dark:border-gray-800">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ArrowBigUp className="w-6 h-6" />
+            </Button>
+            <span className="text-sm">0</span>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ArrowBigDown className="w-6 h-6" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:text-foreground transition-colors rounded-full p-2 gap-2 sm:ml-2"
+            >
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-sm">0</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:text-foreground transition-colors rounded-full p-2 gap-1 sm:gap-2"
+            >
+              <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-sm">Share</span>
+            </Button>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:text-foreground transition-colors rounded-full p-2"
+        >
+          <FlagOff className="w-5 h-5 sm:w-6 sm:h-6" />
         </Button>
       </div>
     </Card>
