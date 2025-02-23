@@ -16,7 +16,7 @@ const BATCH_SIZE = 1000; // Process 10k accounts at a time
 const ALGOLIA_BATCH_SIZE = 1000; // Algolia recommends max 1000 objects per batch
 const CHECKPOINT_FILE = path.resolve(
   __dirname,
-  "twitter_accounts_checkpoint.json"
+  "twitter_accounts_checkpoint.json",
 );
 console.log("Checkpoint file location:", CHECKPOINT_FILE);
 
@@ -100,7 +100,7 @@ const saveCheckpoint = (checkpoint: Checkpoint) => {
 
 const getCategorySlugs = async (
   categoryIds: string[],
-  db: Db
+  db: Db,
 ): Promise<string[]> => {
   const uncachedIds = categoryIds.filter((id) => !categorySlugCache.has(id));
 
@@ -134,14 +134,14 @@ const processAccountBatch = async (
   accounts: Account[],
   db: Db,
   client: any,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
 ) => {
   let algoliaObjects = []; // Changed to let since we'll reassign
 
   for (const account of accounts) {
     try {
       const categoryMappingIds = account.categories.map(
-        (category) => category.categoryId
+        (category) => category.categoryId,
       );
       const categorySlugs = await getCategorySlugs(categoryMappingIds, db);
 
@@ -187,7 +187,7 @@ const processAccountBatch = async (
                   .map((a) => new ObjectId(a.id)),
               },
             },
-            { $set: { lastIndexedAt: new Date() } }
+            { $set: { lastIndexedAt: new Date() } },
           );
 
           algoliaObjects = []; // Reset array after processing
@@ -224,7 +224,7 @@ const seedAccounts = async () => {
 
   const checkpoint = loadCheckpoint();
   console.log(
-    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`
+    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`,
   );
 
   try {
@@ -235,7 +235,7 @@ const seedAccounts = async () => {
 
     while (true) {
       console.log(
-        `Querying accounts with lastProcessedId: ${checkpoint.lastProcessedId}`
+        `Querying accounts with lastProcessedId: ${checkpoint.lastProcessedId}`,
       );
       try {
         console.log("Building query...");
@@ -278,7 +278,7 @@ const seedAccounts = async () => {
         const rate = processedCount / elapsedMinutes;
 
         console.log(
-          `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`
+          `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`,
         );
         saveCheckpoint(checkpoint);
       } catch (error) {

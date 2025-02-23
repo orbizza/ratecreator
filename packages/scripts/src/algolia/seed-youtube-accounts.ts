@@ -15,7 +15,7 @@ const limit = pLimit(20); // Adjust concurrency limit as needed
 
 // Helper function to fetch category slugs based on CategoryMapping
 const getCategorySlugs = async (
-  categoryMappingIds: string[]
+  categoryMappingIds: string[],
 ): Promise<string[]> => {
   try {
     // Get a MongoDB client
@@ -104,7 +104,7 @@ const seedAccounts = async () => {
       if (accounts.length === 0) {
         console.log(
           "No more accounts found for seeding. Total processed:",
-          processedCount
+          processedCount,
         );
         hasMoreAccounts = false;
         break;
@@ -114,7 +114,7 @@ const seedAccounts = async () => {
         try {
           // Extract category IDs from the account
           const categoryMappingIds = account.categories.map(
-            (category) => category.id
+            (category) => category.id,
           );
           const categorySlugs = categoryMappingIds.length
             ? await getCategorySlugs(categoryMappingIds)
@@ -140,7 +140,7 @@ const seedAccounts = async () => {
                 madeForKids:
                   (account.ytData as YTData)?.status?.madeForKids ?? false,
                 videoCount: Number(
-                  (account.ytData as YTData)?.statistics?.videoCount ?? 0
+                  (account.ytData as YTData)?.statistics?.videoCount ?? 0,
                 ),
                 bannerURL:
                   account.bannerUrl ??
@@ -151,7 +151,7 @@ const seedAccounts = async () => {
                 createdDate:
                   (account.ytData as YTData)?.snippet?.publishedAt ?? null,
               },
-            })
+            }),
           );
 
           // Update the lastIndexedAt timestamp using Prisma
@@ -159,14 +159,14 @@ const seedAccounts = async () => {
             .collection("Account")
             .updateOne(
               { _id: new ObjectId(account.id) },
-              { $set: { lastIndexedAt: new Date() } }
+              { $set: { lastIndexedAt: new Date() } },
             );
 
           console.log(`Account ${account.accountId} indexed successfully`);
         } catch (error) {
           console.error(
             `Error processing account ${account.accountId}:`,
-            error
+            error,
           );
         }
       });
@@ -175,13 +175,13 @@ const seedAccounts = async () => {
       processedCount += responses.length;
       console.log(
         "Batch completed. Total accounts processed so far:",
-        processedCount
+        processedCount,
       );
     }
 
     console.log(
       "All accounts have been processed. Total count:",
-      processedCount
+      processedCount,
     );
   } catch (error) {
     console.error("Error seeding accounts:", error);
