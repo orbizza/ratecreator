@@ -3580,6 +3580,11 @@
     loupe "^3.1.2"
     tinyrainbow "^2.0.0"
 
+"@wojtekmaj/react-hooks@^1.19.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@wojtekmaj/react-hooks/-/react-hooks-1.22.0.tgz#3793c3a68dc97bf32462edaaceb25fd681979e59"
+  integrity sha512-DtYasEbduZqTjlZRcAuX9CafESUtNwhO2eCPJ5/r8HfXqqUbsUDoRg4IecCNRaPEdiqC6V2syhAWaW0J3Ry4uw==
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
