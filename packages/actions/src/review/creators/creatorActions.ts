@@ -106,6 +106,7 @@ async function handleYoutubeAccount(
         language_code: account.language_code ?? "",
         rating: account.rating ?? 0,
         reviewCount: account.reviewCount ?? 0,
+        bannerURL: account.bannerUrl ?? "",
         ytData: (account.ytData as any) ?? {},
       },
       categories: categorySlugs,

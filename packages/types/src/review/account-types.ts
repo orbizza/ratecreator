@@ -58,6 +58,7 @@ export interface CreatorData {
     language_code: string;
     rating: number;
     reviewCount: number;
+    bannerURL?: string;
     ytData?: {
       snippet?: {
         publishedAt: string;
@@ -162,44 +163,6 @@ export interface CreatorData {
           banner_background_image?: string;
         };
       };
-      // rules?: {
-      //   rules?: {
-      //     description?: string;
-      //     short_name?: string;
-      //     violation_reason?: string;
-      //     created_utc?: number;
-      //     priority?: number;
-      //     kind?: string;
-      //   }[];
-      //   siteRules?: [];
-      // };
-      // sticky?: {
-      //   kind?: string; // Listing
-      //   data?: {
-      //     children?: {
-      //       kind?: string; // Only T3
-      //       data?: {
-      //         title?: string;
-      //         created_utc?: number;
-      //         selftext?: string;
-      //         author?: string;
-      //         author_fullname?: string;
-      //         url?: string;
-      //         ups?: number;
-      //         num_crossposts?: number;
-      //         num_comments?: number;
-      //         stickied?: boolean;
-      //         preview?: {
-      //           images?: {
-      //             source?: {
-      //               url?: string;
-      //             };
-      //           }[];
-      //         };
-      //       };
-      //     }[];
-      //   }[];
-      // }[];
     };
   };
   categories: string[];

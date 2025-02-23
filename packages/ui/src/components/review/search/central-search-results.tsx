@@ -103,7 +103,9 @@ export const CentralSearchResults: React.FC<{
 
   // Add useEffect to reset all states on mount
   useEffect(() => {
-    resetPlatform();
+    if (!initialPlatform) {
+      resetPlatform();
+    }
     resetFollowers();
     resetRating();
     resetVideoCount();
@@ -130,13 +132,31 @@ export const CentralSearchResults: React.FC<{
     resetIsDescending,
     resetPageNumber,
     resetRootCategory,
+    initialPlatform,
   ]);
 
+  // Handle platform filter initialization
   useEffect(() => {
-    if (initialPlatform && !platform.includes(initialPlatform.toLowerCase())) {
-      setPlatformFilter([initialPlatform.toUpperCase()]);
+    if (initialPlatform) {
+      // Normalize the platform name to match the expected format
+      const normalizedPlatform = initialPlatform.toUpperCase();
+
+      // Only set if it's a valid platform
+      if (
+        [
+          "YOUTUBE",
+          "INSTAGRAM",
+          "TWITTER",
+          "TIKTOK",
+          "TWITCH",
+          "REDDIT",
+          "X",
+        ].includes(normalizedPlatform)
+      ) {
+        setPlatformFilter([normalizedPlatform]);
+      }
     }
-  }, [initialPlatform, platform, setPlatformFilter]);
+  }, [initialPlatform, setPlatformFilter]);
 
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
@@ -327,8 +347,7 @@ export const CentralSearchResults: React.FC<{
                     <SelectItem value="new-account">New Account</SelectItem>
                     <SelectItem value="rated">Rated</SelectItem>
                     <SelectItem value="review-count">Review Count</SelectItem>
-                    <SelectItem value="videos">Videos</SelectItem>
-                    <SelectItem value="views">Views</SelectItem>
+                    <SelectItem value="videos">Videos/Posts</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

@@ -201,18 +201,14 @@ export const Footer = () => {
 
           <div className="flex flex-wrap justify-center md:justify-start space-x-4  text-[11px]  mb-4 md:mb-0">
             <Link
-
               href="https://www.orbizza.com/privacy"
-
               target="_blank"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Privacy policy
             </Link>
             <Link
-
               href="https://www.orbizza.com/terms"
-
               target="_blank"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >

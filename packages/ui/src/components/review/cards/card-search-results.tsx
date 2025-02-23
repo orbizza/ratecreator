@@ -159,13 +159,13 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {platform === "reddit" ? (
+                  {platform.toLowerCase() === "reddit" ? (
                     <>
                       <StickyNote size={16} className="text-primary" />
                       <Minus size={12} className="text-secondary-foreground" />
                       <CircleSlash2 size={12} />
                     </>
-                  ) : platform === "twitter" ? (
+                  ) : platform.toLowerCase() === "twitter" ? (
                     <>
                       <ScrollText size={16} className="text-primary" />
                       <span className="text-sm">
@@ -194,10 +194,10 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
                 <MessageSquareMore size={16} className="text-primary" />
                 <span className="text-sm">{formatValue(reviewCount)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <View size={16} className="text-primary" />
-                <span className="text-sm">{formatValue(viewCount)}</span>
-              </div>
+              {/* <div className='flex items-center gap-2'>
+                <View size={16} className='text-primary' />
+                <span className='text-sm'>{formatValue(viewCount)}</span>
+              </div> */}
             </div>
           </div>
         </div>
@@ -215,15 +215,22 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
           <div className="absolute w-full h-full top-0 left-0 transition duration-300 dark:group-hover/card:bg-black dark:group-hover/card:opacity-60 group-hover/card:bg-gray-100 group-hover/card:opacity-40 grou-hover/card:rounded-b-lg"></div>
 
           <div className="relative z-10 flex flex-col justify-between h-full">
-            <div className="flex justify-between items-center">
-              <Badge
-                variant="secondary"
-                className="bg-opacity-20 hover:bg-opacity-30 text-[10px]"
-              >
-                Joined {formatDate(createdDate)}
-              </Badge>
-              {getPlatformIcon(platform)}
-            </div>
+            {platform.toLowerCase() !== "tiktok" ? (
+              <div className="flex justify-between items-center">
+                <Badge
+                  variant="secondary"
+                  className="bg-opacity-20 hover:bg-opacity-30 text-[10px]"
+                >
+                  Joined {formatDate(createdDate)}
+                </Badge>
+                ){getPlatformIcon(platform)}
+              </div>
+            ) : (
+              <div className="flex justify-end items-center">
+                {getPlatformIcon(platform)}
+              </div>
+            )}
+
             {/* Categories at the bottom */}
             <div className="flex flex-wrap gap-2">
               {displayCategories.map((category) => (
