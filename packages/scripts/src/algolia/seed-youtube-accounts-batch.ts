@@ -102,10 +102,10 @@ const saveCheckpoint = (checkpoint: Checkpoint) => {
 
 const getCategorySlugs = async (
   categoryMappingIds: string[],
-  db: Db
+  db: Db,
 ): Promise<string[]> => {
   const uncachedIds = categoryMappingIds.filter(
-    (id) => !categorySlugCache.has(id)
+    (id) => !categorySlugCache.has(id),
   );
 
   if (uncachedIds.length === 0) {
@@ -120,7 +120,7 @@ const getCategorySlugs = async (
       .toArray();
 
     const categoryIds = categoryMappings.map(
-      (mapping: CategoryMapping) => mapping.categoryId
+      (mapping: CategoryMapping) => mapping.categoryId,
     );
 
     // Fetch all categories in one query
@@ -133,7 +133,7 @@ const getCategorySlugs = async (
     // Update cache for all fetched mappings
     categoryMappings.forEach((mapping: CategoryMapping) => {
       const category = categories.find(
-        (c) => c._id.toString() === mapping.categoryId.toString()
+        (c) => c._id.toString() === mapping.categoryId.toString(),
       );
       const mappingId = mapping._id.toString();
       categorySlugCache.set(mappingId, category ? [category.slug] : []);
@@ -151,14 +151,14 @@ const processAccountBatch = async (
   accounts: Account[],
   db: Db,
   client: any,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
 ) => {
   let algoliaObjects = []; // Changed to let since we'll reassign
 
   for (const account of accounts) {
     try {
       const categoryMappingIds = account.categories.map(
-        (category) => category.id
+        (category) => category.id,
       );
       const categorySlugs = await getCategorySlugs(categoryMappingIds, db);
 
@@ -208,7 +208,7 @@ const processAccountBatch = async (
                   .map((a) => new ObjectId(a.id)),
               },
             },
-            { $set: { lastIndexedAt: new Date() } }
+            { $set: { lastIndexedAt: new Date() } },
           );
 
           algoliaObjects = []; // Reset array after processing
@@ -235,7 +235,7 @@ const seedAccounts = async () => {
 
   const checkpoint = loadCheckpoint();
   console.log(
-    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`
+    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`,
   );
 
   try {
@@ -269,7 +269,7 @@ const seedAccounts = async () => {
       const rate = processedCount / elapsedMinutes;
 
       console.log(
-        `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`
+        `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`,
       );
       saveCheckpoint(checkpoint);
     }

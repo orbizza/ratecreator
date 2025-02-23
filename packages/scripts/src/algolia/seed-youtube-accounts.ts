@@ -15,7 +15,7 @@ const limit = pLimit(20); // Adjust concurrency limit as needed
 
 // Helper function to fetch category slugs based on CategoryMapping
 const getCategorySlugs = async (
-  categoryMappingIds: string[]
+  categoryMappingIds: string[],
 ): Promise<string[]> => {
   try {
     // Get a MongoDB client
@@ -117,7 +117,7 @@ const seedAccounts = async () => {
       try {
         // Extract category IDs from the account
         const categoryMappingIds = account.categories.map(
-          (category) => category.id
+          (category) => category.id,
         );
         const categorySlugs = categoryMappingIds.length
           ? await getCategorySlugs(categoryMappingIds)
@@ -143,7 +143,7 @@ const seedAccounts = async () => {
               madeForKids:
                 (account.ytData as YTData)?.status?.madeForKids ?? false,
               videoCount: Number(
-                (account.ytData as YTData)?.statistics?.videoCount ?? 0
+                (account.ytData as YTData)?.statistics?.videoCount ?? 0,
               ),
               bannerURL:
                 account.bannerUrl ??
@@ -154,7 +154,7 @@ const seedAccounts = async () => {
               createdDate:
                 (account.ytData as YTData)?.snippet?.publishedAt ?? null,
             },
-          })
+          }),
         );
 
         // Update the lastIndexedAt timestamp using Prisma
@@ -162,7 +162,7 @@ const seedAccounts = async () => {
           .collection("Account")
           .updateOne(
             { _id: new ObjectId(account.id) },
-            { $set: { lastIndexedAt: new Date() } }
+            { $set: { lastIndexedAt: new Date() } },
           );
 
         console.log(`Account ${account.accountId} indexed successfully`);
