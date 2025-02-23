@@ -112,6 +112,20 @@ function isSearchHit(hit: any): hit is SearchResult {
     ["YOUTUBE", "X", "REDDIT"].includes(hit.platform)
   );
 }
+const getPlatformValue = (platform: TabType): string => {
+  switch (platform) {
+    case "X":
+      return "twitter";
+    case "TikTok":
+      return "tiktok";
+    case "YouTube":
+      return "youtube";
+    case "Reddit":
+      return "reddit";
+    default:
+      return platform.toLowerCase();
+  }
+};
 
 // Results rendering components
 const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
@@ -206,22 +220,43 @@ const SearchComponent = ({
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const { query } = useKBar();
 
+  // Map UI platform names to backend platform values
+
   useEffect(() => {
-    refine(searchTerm);
-  }, [searchTerm, refine]);
+    // When tab or search term changes, update the search query
+    const platformValue =
+      activeTab !== "All" ? getPlatformValue(activeTab) : "";
+    let searchQuery = searchTerm || "";
+
+    // Only add platform filter if a specific platform is selected
+    if (platformValue) {
+      // Remove any existing platform filter first
+      searchQuery = searchQuery.replace(/\bplatform:\S+\b/g, "").trim();
+      searchQuery =
+        `${searchQuery} platform:${platformValue.toUpperCase()}`.trim();
+    }
+
+    refine(searchQuery);
+  }, [searchTerm, activeTab, refine]);
 
   useEffect(() => {
     const validHits = hits.filter(isSearchHit);
     let filtered = [...validHits];
 
     if (activeTab !== "All") {
+      const platformValue = getPlatformValue(activeTab);
       filtered = filtered.filter(
-        (result) => result.platform === activeTab.toUpperCase(),
+        (result) => result.platform.toLowerCase() === platformValue,
       );
     }
 
+    // Sort all results by follower count
+    const sortedResults = filtered.sort((a, b) => {
+      return b.followerCount - a.followerCount;
+    });
+
     setFilteredResults(
-      filtered.map((hit) => ({
+      sortedResults.map((hit) => ({
         accountId: hit.objectID,
         platform: hit.platform as Platform,
         handle: hit.handle,
@@ -301,16 +336,25 @@ const CommandBarContent = ({
     setSearchTerm(event.target.value);
   };
 
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+  };
+
   const handleSearchRedirect = () => {
     if (searchTerm) {
       query.toggle();
-      router.push(
-        `/search?q=${encodeURIComponent(searchTerm)}${
-          activeTab !== "All"
-            ? `&platform=${encodeURIComponent(activeTab)}`
-            : ""
-        }`,
-      );
+      const searchParams = new URLSearchParams();
+      searchParams.set("q", searchTerm);
+
+      if (activeTab !== "All") {
+        searchParams.set("platform", getPlatformValue(activeTab).toUpperCase());
+      }
+
+      // Add default sorting
+      // searchParams.set("sortBy", "followerCount");
+      // searchParams.set("sortOrder", "desc");
+
+      router.push(`/search?${searchParams.toString()}`);
     }
   };
 
@@ -363,7 +407,7 @@ const CommandBarContent = ({
                         ? "border-t-2 border-primary"
                         : "bg-secondary text-muted-foreground hover:bg-primary hover:opacity-75 hover:text-accent-foreground"
                     }`}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => handleTabChange(tab)}
                   >
                     {tab}
                   </button>

@@ -1,7 +1,12 @@
 import pLimit from "p-limit";
 import { getWriteClient } from "@ratecreator/db/algolia-client";
 import { getPrismaClient } from "@ratecreator/db/client";
-import { ObjectId } from "mongodb"; // Import the ObjectId type if using MongoDB
+
+import dotenv from "dotenv";
+import path from "path";
+
+// Load the main .env file
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const prisma = getPrismaClient();
 const client = getWriteClient();

@@ -110,7 +110,7 @@ export function WriteReviewCTA() {
                 <div className="h-10 w-10 rounded-full bg-pink-300">
                   <img
                     className="h-full w-full rounded-full object-cover"
-                    src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s88-c-k-c0x00ffffff-no-rj"
+                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCX6OQ3DkcsbYNE6H8uQQuVA_1740264523.jpg"
                     alt="MrBeast"
                   />
                 </div>
@@ -159,7 +159,7 @@ export function WriteReviewCTA() {
                 <div className="h-10 w-10 rounded-full bg-pink-300">
                   <img
                     className="h-full w-full rounded-full object-cover"
-                    src="https://yt3.ggpht.com/ytc/AIdro_lPfVIUJedPeT8Sa0sR1OoH3ehJFJC16RcyvFgvduFPp_k=s88-c-k-c0x00ffffff-no-rj"
+                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCbCmjCuTUZos6Inko4u57UQ_1740264516.jpg"
                     alt="Cocomelon - Nursery Rhymes"
                   />
                 </div>
@@ -208,7 +208,7 @@ export function WriteReviewCTA() {
                 <div className="h-10 w-10 rounded-full bg-pink-300">
                   <img
                     className="h-full w-full rounded-full object-cover"
-                    src="https://yt3.ggpht.com/VunTf0NzCeboiPjbesBdnQuxaF3Lja7UGRbBGQAWRJgMSTj9TTLO3pS1X9qPOJGCNnmPrXeY=s88-c-k-c0x00ffffff-no-rj"
+                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCq-Fj5jknLsUf-MWSy4_brA_1740264532.jpg"
                     alt="tseries"
                   />
                 </div>

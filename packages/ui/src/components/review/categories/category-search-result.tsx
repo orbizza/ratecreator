@@ -424,8 +424,7 @@ export const CategoriesSearchResults: React.FC = () => {
                     <SelectItem value="new-account">New Account</SelectItem>
                     <SelectItem value="rated">Rated</SelectItem>
                     <SelectItem value="review-count">Review Count</SelectItem>
-                    <SelectItem value="videos">Videos</SelectItem>
-                    <SelectItem value="views">Views</SelectItem>
+                    <SelectItem value="videos">Videos/Posts</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

@@ -41,7 +41,7 @@ const platformFilters = [
     color: "text-red-500",
   },
   {
-    id: "x",
+    id: "twitter",
     label: "X",
     icon: SiX,
     color: "text-neutral-900 dark:text-neutral-100",
