@@ -42,6 +42,7 @@ export const Footer = () => {
               frameBorder="0"
               scrolling="no"
               style={{ colorScheme: "normal" }}
+              className="hidden lg:block"
             ></iframe>
             {/* Social icons now on the same row for md and sm, at the bottom for lg */}
             <div className="flex space-x-4 lg:mt-auto">
@@ -197,25 +198,28 @@ export const Footer = () => {
             </Link>{" "}
             All rights reserved.
           </div>
+
           <div className="flex flex-wrap justify-center md:justify-start space-x-4  text-[11px]  mb-4 md:mb-0">
             <Link
-              href="/wip"
+              href="/docs/privacy.pdf"
+              target="_blank"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Privacy policy
             </Link>
             <Link
-              href="/wip"
+              href="/docs/terms.pdf"
+              target="_blank"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Terms
             </Link>
-            <Link
-              href="/wip"
-              className="text-muted-foreground hover:text-primary-foreground/80"
+            {/* <Link
+              href='/wip'
+              className='text-muted-foreground hover:text-primary-foreground/80'
             >
               Status
-            </Link>
+            </Link> */}
             <Link
               href="/wip"
               className="text-muted-foreground hover:text-primary-foreground/80"
@@ -223,6 +227,17 @@ export const Footer = () => {
               Cookie Settings
             </Link>
           </div>
+        </div>
+        <div className="block lg:hidden justify-center text-[11px] ml-10 mt-8">
+          <iframe
+            src="https://status.ratecreator.com/badge?theme=dark"
+            width="250"
+            height="30"
+            frameBorder="0"
+            scrolling="no"
+            style={{ colorScheme: "normal" }}
+            className="mx-auto"
+          ></iframe>
         </div>
       </div>
     </footer>
