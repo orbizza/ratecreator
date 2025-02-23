@@ -5,27 +5,28 @@ import { ObjectId, Db } from "mongodb";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
-
+import { Platform } from "@ratecreator/types/review";
 // Load the main .env file
 dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
-const BATCH_SIZE = 10000; // Process 10k accounts at a time
+console.log("Starting script...");
+// console.log("DATABASE_URL_ONLINE:", process.env.DATABASE_URL_ONLINE);
+
+const BATCH_SIZE = 1000; // Process 10k accounts at a time
 const ALGOLIA_BATCH_SIZE = 1000; // Algolia recommends max 1000 objects per batch
-const CHECKPOINT_FILE = "twitter_accounts_checkpoint.json";
+const CHECKPOINT_FILE = path.resolve(
+  __dirname,
+  "twitter_accounts_checkpoint.json"
+);
+console.log("Checkpoint file location:", CHECKPOINT_FILE);
 
 interface XData {
   verified?: boolean;
   protected?: boolean;
   profile_banner_url?: string;
-  verified_type?: string;
   created_at?: string;
   public_metrics?: {
-    followers_count?: number;
-    following_count?: number;
     tweet_count?: number;
-    listed_count?: number;
-    like_count?: number;
-    media_count?: number;
   };
 }
 
@@ -91,52 +92,38 @@ const loadCheckpoint = (): Checkpoint => {
 const saveCheckpoint = (checkpoint: Checkpoint) => {
   try {
     fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify(checkpoint, null, 2));
+    console.log("Checkpoint saved successfully at:", CHECKPOINT_FILE);
   } catch (error) {
     console.error("Error saving checkpoint:", error);
   }
 };
 
 const getCategorySlugs = async (
-  categoryMappingIds: string[],
-  db: Db,
+  categoryIds: string[],
+  db: Db
 ): Promise<string[]> => {
-  const uncachedIds = categoryMappingIds.filter(
-    (id) => !categorySlugCache.has(id),
-  );
+  const uncachedIds = categoryIds.filter((id) => !categorySlugCache.has(id));
 
   if (uncachedIds.length === 0) {
-    return categoryMappingIds.flatMap((id) => categorySlugCache.get(id) || []);
+    return categoryIds.flatMap((id) => categorySlugCache.get(id) || []);
   }
 
   try {
-    // Fetch all uncached category mappings in one query
-    const categoryMappings = await db
-      .collection<CategoryMapping>("CategoryMapping")
-      .find({ _id: { $in: uncachedIds.map((id) => new ObjectId(id)) } })
-      .toArray();
-
-    const categoryIds = categoryMappings.map(
-      (mapping: CategoryMapping) => mapping.categoryId,
-    );
-
     // Fetch all categories in one query
-    const categories = await db
+    const categories = (await db
       .collection<Category>("Category")
-      .find({ _id: { $in: categoryIds } })
+      .find({ _id: { $in: uncachedIds.map((id) => new ObjectId(id)) } })
       .project({ slug: 1, _id: 1 })
-      .toArray();
+      .toArray()) as Category[];
 
-    // Update cache for all fetched mappings
-    categoryMappings.forEach((mapping: CategoryMapping) => {
-      const category = categories.find(
-        (c) => c._id.toString() === mapping.categoryId.toString(),
-      );
-      const mappingId = mapping._id.toString();
-      categorySlugCache.set(mappingId, category ? [category.slug] : []);
+    // Update cache for all fetched categories
+    categories.forEach((category: Category) => {
+      const categoryId = category._id.toString();
+      categorySlugCache.set(categoryId, [category.slug]);
     });
 
     // Return all slugs including previously cached ones
-    return categoryMappingIds.flatMap((id) => categorySlugCache.get(id) || []);
+    return categoryIds.flatMap((id) => categorySlugCache.get(id) || []);
   } catch (error) {
     console.error("Error fetching category slugs:", error);
     return [];
@@ -147,14 +134,14 @@ const processAccountBatch = async (
   accounts: Account[],
   db: Db,
   client: any,
-  checkpoint: Checkpoint,
+  checkpoint: Checkpoint
 ) => {
   let algoliaObjects = []; // Changed to let since we'll reassign
 
   for (const account of accounts) {
     try {
       const categoryMappingIds = account.categories.map(
-        (category) => category.id,
+        (category) => category.categoryId
       );
       const categorySlugs = await getCategorySlugs(categoryMappingIds, db);
 
@@ -200,7 +187,7 @@ const processAccountBatch = async (
                   .map((a) => new ObjectId(a.id)),
               },
             },
-            { $set: { lastIndexedAt: new Date() } },
+            { $set: { lastIndexedAt: new Date() } }
           );
 
           algoliaObjects = []; // Reset array after processing
@@ -220,50 +207,87 @@ const processAccountBatch = async (
 };
 
 const seedAccounts = async () => {
+  console.log("Initializing connections...");
+
   const prisma = getPrismaClient();
+  console.log("Prisma client initialized");
+
   const client = getWriteClient();
+  console.log("Algolia client initialized");
+
+  console.log("Connecting to MongoDB...");
   const mongo_client = await getMongoClient();
+  console.log("MongoDB client connected");
+
   const db = mongo_client.db("ratecreator");
+  console.log("MongoDB database selected");
 
   const checkpoint = loadCheckpoint();
   console.log(
-    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`,
+    `Resuming from checkpoint: ${checkpoint.totalProcessed} accounts processed`
   );
 
   try {
+    console.log("Starting to fetch accounts...");
+    console.log("Fetching first batch of accounts...");
     let processedCount = 0;
     let startTime = Date.now();
 
     while (true) {
-      const accounts = await prisma.account.findMany({
-        where: {
-          id: checkpoint.lastProcessedId
-            ? { gt: checkpoint.lastProcessedId }
-            : undefined,
-          platform: "TWITTER",
-          isSuspended: false,
-        },
-        orderBy: {
-          id: "asc",
-        },
-        take: BATCH_SIZE,
-        include: {
-          categories: true,
-        },
-      });
-
-      if (accounts.length === 0) break;
-
-      await processAccountBatch(accounts, db, client, checkpoint);
-
-      processedCount += accounts.length;
-      const elapsedMinutes = (Date.now() - startTime) / 60000;
-      const rate = processedCount / elapsedMinutes;
-
       console.log(
-        `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`,
+        `Querying accounts with lastProcessedId: ${checkpoint.lastProcessedId}`
       );
-      saveCheckpoint(checkpoint);
+      try {
+        console.log("Building query...");
+        const query = {
+          where: {
+            ...(checkpoint.lastProcessedId && {
+              id: { gt: checkpoint.lastProcessedId },
+            }),
+            platform: "TWITTER" as Platform,
+            isSuspended: false,
+          },
+          orderBy: {
+            id: "asc",
+          },
+          take: BATCH_SIZE,
+          include: {
+            categories: true,
+          },
+        } as const;
+        console.log("Query structure:", JSON.stringify(query, null, 2));
+        console.log("Executing query...");
+        console.time("Query execution time");
+        const accounts = await prisma.account.findMany(query);
+        console.timeEnd("Query execution time");
+        console.log(`Found ${accounts.length} accounts to process`);
+
+        if (accounts.length === 0) {
+          console.log("No more accounts to process. Exiting...");
+          break;
+        }
+
+        console.log("Processing account batch...");
+        console.time("Batch processing time");
+        await processAccountBatch(accounts, db, client, checkpoint);
+        console.timeEnd("Batch processing time");
+        console.log("Finished processing account batch");
+
+        processedCount += accounts.length;
+        const elapsedMinutes = (Date.now() - startTime) / 60000;
+        const rate = processedCount / elapsedMinutes;
+
+        console.log(
+          `Processed ${processedCount} accounts. Rate: ${rate.toFixed(2)} accounts/minute`
+        );
+        saveCheckpoint(checkpoint);
+      } catch (error) {
+        console.error("Error in main processing loop:", error);
+        if (error instanceof Error) {
+          console.error("Error stack:", error.stack);
+        }
+        break;
+      }
     }
 
     console.log("Finished processing all accounts");
@@ -275,8 +299,14 @@ const seedAccounts = async () => {
     }
   } catch (error) {
     console.error("Fatal error:", error);
+    if (error instanceof Error) {
+      console.error("Error stack:", error.stack);
+    }
   } finally {
+    console.log("Cleaning up connections...");
     await prisma.$disconnect();
+    await mongo_client.close();
+    console.log("Connections closed");
     process.exit(0);
   }
 };
