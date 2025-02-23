@@ -3,6 +3,11 @@ import { getWriteClient } from "@ratecreator/db/algolia-client";
 import { getMongoClient } from "@ratecreator/db/mongo-client";
 import pLimit from "p-limit";
 import { ObjectId } from "mongodb";
+import dotenv from "dotenv";
+import path from "path";
+
+// Load the main .env file
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const prisma = getPrismaClient();
 const client = getWriteClient();
@@ -10,7 +15,7 @@ const limit = pLimit(20); // Adjust concurrency limit as needed
 
 // Helper function to fetch category slugs based on CategoryMapping
 const getCategorySlugs = async (
-  categoryMappingIds: string[],
+  categoryMappingIds: string[]
 ): Promise<string[]> => {
   try {
     // Get a MongoDB client
@@ -57,7 +62,6 @@ interface YTData {
     madeForKids?: boolean;
   };
   statistics?: {
-    viewCount?: number;
     videoCount?: number;
   };
   brandingSettings?: {
@@ -98,7 +102,7 @@ const seedAccounts = async () => {
       orderBy: {
         followerCount: "desc",
       },
-      take: 21982,
+      // take: 21982,
       include: {
         categories: true,
       },
@@ -113,7 +117,7 @@ const seedAccounts = async () => {
       try {
         // Extract category IDs from the account
         const categoryMappingIds = account.categories.map(
-          (category) => category.id,
+          (category) => category.id
         );
         const categorySlugs = categoryMappingIds.length
           ? await getCategorySlugs(categoryMappingIds)
@@ -138,20 +142,19 @@ const seedAccounts = async () => {
               reviewCount: account.reviewCount,
               madeForKids:
                 (account.ytData as YTData)?.status?.madeForKids ?? false,
-              viewCount: Number(
-                (account.ytData as YTData)?.statistics?.viewCount ?? 0,
-              ),
               videoCount: Number(
-                (account.ytData as YTData)?.statistics?.videoCount ?? 0,
+                (account.ytData as YTData)?.statistics?.videoCount ?? 0
               ),
               bannerURL:
+                account.bannerUrl ??
                 (account.ytData as YTData)?.brandingSettings?.image
-                  ?.bannerExternalUrl ?? "",
+                  ?.bannerExternalUrl ??
+                "",
               categories: categorySlugs,
               createdDate:
                 (account.ytData as YTData)?.snippet?.publishedAt ?? null,
             },
-          }),
+          })
         );
 
         // Update the lastIndexedAt timestamp using Prisma
@@ -159,7 +162,7 @@ const seedAccounts = async () => {
           .collection("Account")
           .updateOne(
             { _id: new ObjectId(account.id) },
-            { $set: { lastIndexedAt: new Date() } },
+            { $set: { lastIndexedAt: new Date() } }
           );
 
         console.log(`Account ${account.accountId} indexed successfully`);
