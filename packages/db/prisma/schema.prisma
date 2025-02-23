@@ -43,6 +43,7 @@ model Account {
   name_en              String?
   followerCount        Int?
   imageUrl             String?
+  bannerUrl            String?
   country              String?
   description          String?
   description_en       String?
@@ -98,6 +99,7 @@ model Account {
   @@index([isTranslationFailed])
   @@index([isSeeded])
   @@index([videoFetch])
+  @@index([bannerUrl])
 }
 
 model CategoryMapping {
