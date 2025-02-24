@@ -10,7 +10,7 @@ services:
       - KAFKA_USERNAME=${KAFKA_USERNAME}
       - KAFKA_PASSWORD=${KAFKA_PASSWORD}
       - ALGOLIA_APP_ID=${ALGOLIA_APP_ID}
-      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_WRITE_API_KEY}
+      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
     networks:
       - review-network
     volumes:
