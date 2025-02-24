@@ -12,9 +12,9 @@ COPY . .
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Build only the user-sync package
-RUN cd apps/consumers/user-sync && \
-    yarn build-user-sync
+# Build only the review-calculate package
+RUN cd apps/consumers/review-calculate && \
+    yarn build-review-calculate
 
 # Ensure Prisma Query Engine is available for both arm64 & amd64
 RUN cd packages/db && \
@@ -31,7 +31,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y openssl libssl-dev && apt-get clean
 
 # Copy necessary files from builder
-COPY --from=builder /app/apps/consumers/user-sync/dist ./apps/consumers/user-sync/dist
+COPY --from=builder /app/apps/consumers/review-calculate/dist ./apps/consumers/review-calculate/dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/db ./packages/db
 COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
@@ -41,4 +41,4 @@ ENV NODE_ENV=production
 ENV PRISMA_BINARY_PLATFORM="debian-openssl-1.1.x"
 
 # Default command
-CMD ["node", "apps/consumers/user-sync/dist/index.js"]
+CMD ["node", "apps/consumers/review-calculate/dist/index.js"]

@@ -14,7 +14,7 @@ let consumer: ReturnType<typeof getKafkaConsumer>;
 function simpleAverage(
   currentAvgRating: number,
   newRating: number,
-  reviewCount: number,
+  reviewCount: number
 ) {
   return (currentAvgRating * reviewCount + newRating) / (reviewCount + 1);
 }
@@ -22,13 +22,15 @@ function simpleAverage(
 function bayesianAverage(
   currentAvgRating: number,
   newRating: number,
-  reviewCount: number,
+  reviewCount: number
 ) {
-  const C = 3.5; // Global average rating
-  const m = 50; // Weight threshold
-  const n = reviewCount;
-  const sumRatings = currentAvgRating * reviewCount;
-  return (C * m + sumRatings) / (m + n);
+  const C = 3.5; // Prior mean (global average rating)
+  const m = 10; // Prior weight (confidence parameter)
+  const n = reviewCount + 1; // Include the new rating
+  const R = (currentAvgRating * reviewCount + newRating) / n; // New average including the new rating
+
+  // Bayesian weighted average formula: (C * m + R * n) / (m + n)
+  return (C * m + R * n) / (m + n);
 }
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
@@ -116,7 +118,7 @@ async function processMessage(message: any) {
       await redis.set(cacheKey, JSON.stringify(updatedData));
 
       console.log(
-        `Updated db and redis for account ${accountId} of platform ${platform} with new rating ${newAvgRating}`,
+        `Updated db and redis for account ${accountId} of platform ${platform} with new rating ${newAvgRating}`
       );
     }
 
@@ -143,21 +145,21 @@ async function processMessage(message: any) {
             ],
           });
           console.log(
-            `Sent message to algolia-update for account ${accountId} of platform ${platform}`,
+            `Sent message to algolia-update for account ${accountId} of platform ${platform}`
           );
           break;
         } catch (error) {
           retryCount++;
           console.error(
             `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
-            error,
+            error
           );
           if (retryCount === maxRetries) {
             throw error;
           }
           // Wait before retrying
           await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * retryCount),
+            setTimeout(resolve, 1000 * retryCount)
           );
         }
       }
@@ -167,7 +169,7 @@ async function processMessage(message: any) {
   } catch (error) {
     console.error(
       `Error processing message for rating in ${payload.accountId} of platform ${payload.platform}:`,
-      error,
+      error
     );
   }
 }

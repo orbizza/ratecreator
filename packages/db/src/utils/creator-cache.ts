@@ -7,7 +7,7 @@ interface CachedCreatorData {
 
 const DB_NAME = "CreatorCache";
 const STORE_NAME = "creators";
-const CACHE_EXPIRATION = 1000 * 60 * 60 * 6; // Reduced to 6 hours
+const CACHE_EXPIRATION = 1000 * 60 * 5; // Reduced to 5 minutes
 const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB limit
 
 export class CreatorCache {
@@ -37,7 +37,7 @@ export class CreatorCache {
 
   async getCachedCreator(
     platform: string,
-    accountId: string,
+    accountId: string
   ): Promise<CreatorData | null> {
     if (!this.db) await this.init();
 
@@ -102,7 +102,7 @@ export class CreatorCache {
                 const deleteRequest = store.delete(cursor.key);
                 deleteRequest.onerror = () => reject(deleteRequest.error);
                 deleteRequest.onsuccess = () => resolve();
-              }),
+              })
             );
           }
           cursor.continue();
@@ -118,7 +118,7 @@ export class CreatorCache {
   async setCachedCreator(
     platform: string,
     accountId: string,
-    data: CreatorData,
+    data: CreatorData
   ) {
     if (!this.db) await this.init();
 
