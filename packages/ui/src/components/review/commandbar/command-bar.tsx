@@ -76,7 +76,6 @@ interface ResultItemProps {
 interface SearchComponentProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  activeTab: TabType;
 }
 
 interface CommandBarContentProps {
@@ -109,23 +108,10 @@ function isSearchHit(hit: any): hit is SearchResult {
     hit !== null &&
     typeof hit.objectID === "string" &&
     typeof hit.platform === "string" &&
-    ["YOUTUBE", "X", "REDDIT"].includes(hit.platform)
+    typeof hit.handle === "string" &&
+    typeof hit.name === "string"
   );
 }
-const getPlatformValue = (platform: TabType): string => {
-  switch (platform) {
-    case "X":
-      return "twitter";
-    case "TikTok":
-      return "tiktok";
-    case "YouTube":
-      return "youtube";
-    case "Reddit":
-      return "reddit";
-    default:
-      return platform.toLowerCase();
-  }
-};
 
 // Results rendering components
 const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
@@ -141,16 +127,16 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
             : "text-foreground"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           {action.icon && (
-            <span className="text-muted-foreground">{action.icon}</span>
+            <span className='text-muted-foreground'>{action.icon}</span>
           )}
           <div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               {ancestors.map((ancestor) => (
                 <span
                   key={ancestor.id}
-                  className="text-sm text-muted-foreground"
+                  className='text-sm text-muted-foreground'
                 >
                   {ancestor.name}
                 </span>
@@ -158,18 +144,18 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
               <span>{action.name}</span>
             </div>
             {action.subtitle && (
-              <span className="text-sm text-muted-foreground">
+              <span className='text-sm text-muted-foreground'>
                 {action.subtitle}
               </span>
             )}
           </div>
         </div>
         {action.shortcut?.length ? (
-          <div className="flex items-center uppercase gap-1">
+          <div className='flex items-center uppercase gap-1'>
             {action.shortcut.map((sc) => (
               <kbd
                 key={sc}
-                className="px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground"
+                className='px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground'
               >
                 {sc}
               </kbd>
@@ -178,13 +164,13 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
         ) : null}
       </div>
     );
-  },
+  }
 );
 
 ResultItem.displayName = "ResultItem";
 
 const GroupName = ({ name }: GroupNameProps): JSX.Element => (
-  <div className="px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase">
+  <div className='px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase'>
     {name}
   </div>
 );
@@ -213,45 +199,19 @@ const RenderResults = (): JSX.Element => {
 const SearchComponent = ({
   searchTerm,
   onSearchChange,
-  activeTab,
 }: SearchComponentProps): JSX.Element => {
   const { refine } = useSearchBox();
   const { hits, results } = useHits();
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const { query } = useKBar();
 
-  // Map UI platform names to backend platform values
-
   useEffect(() => {
-    // When tab or search term changes, update the search query
-    const platformValue =
-      activeTab !== "All" ? getPlatformValue(activeTab) : "";
-    let searchQuery = searchTerm || "";
-
-    // Only add platform filter if a specific platform is selected
-    if (platformValue) {
-      // Remove any existing platform filter first
-      searchQuery = searchQuery.replace(/\bplatform:\S+\b/g, "").trim();
-      searchQuery =
-        `${searchQuery} platform:${platformValue.toUpperCase()}`.trim();
-    }
-
-    refine(searchQuery);
-  }, [searchTerm, activeTab, refine]);
+    refine(searchTerm || "");
+  }, [searchTerm, refine]);
 
   useEffect(() => {
     const validHits = hits.filter(isSearchHit);
-    let filtered = [...validHits];
-
-    if (activeTab !== "All") {
-      const platformValue = getPlatformValue(activeTab);
-      filtered = filtered.filter(
-        (result) => result.platform.toLowerCase() === platformValue,
-      );
-    }
-
-    // Sort all results by follower count
-    const sortedResults = filtered.sort((a, b) => {
+    const sortedResults = validHits.sort((a, b) => {
       return b.followerCount - a.followerCount;
     });
 
@@ -267,29 +227,58 @@ const SearchComponent = ({
         categories: hit.categories,
         rating: hit.rating,
         reviews: hit.reviewCount,
-      })),
+      }))
     );
-  }, [hits, activeTab]);
+  }, [hits]);
 
   return (
-    <div className="mt-4 min-h-[300px]">
+    <div className='mt-4 min-h-[300px]'>
       {!results ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2 h-16 w-full">
-                <Skeleton className="size-12 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[240px]" />
-                  <Skeleton className="h-4 w-3/4" />
+        <div className='space-y-4'>
+          <div className='px-4 py-2 text-sm text-muted-foreground'>
+            Loading results... In the meantime, you can:
+          </div>
+          <div className='space-y-2'>
+            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+              <PenLine size={20} className='text-muted-foreground' />
+              <div>
+                <div>Write a Review</div>
+                <div className='text-sm text-muted-foreground'>
+                  Share your experience about a creator
                 </div>
               </div>
-              <Skeleton className="h-20 w-full" />
             </div>
-          ))}
+            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+              <Book size={20} className='text-muted-foreground' />
+              <div>
+                <div>Browse Categories</div>
+                <div className='text-sm text-muted-foreground'>
+                  Explore creators by category
+                </div>
+              </div>
+            </div>
+            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+              <List size={20} className='text-muted-foreground' />
+              <div>
+                <div>Create Lists</div>
+                <div className='text-sm text-muted-foreground'>
+                  Organize creators into custom lists
+                </div>
+              </div>
+            </div>
+            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+              <Newspaper size={20} className='text-muted-foreground' />
+              <div>
+                <div>Read Blog</div>
+                <div className='text-sm text-muted-foreground'>
+                  Latest updates and creator insights
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : filteredResults.length > 0 ? (
-        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+        <div className='space-y-2 max-h-[50vh] overflow-y-auto'>
           {filteredResults.map((result) => (
             <div key={result.accountId}>
               <CreatorCard
@@ -301,21 +290,13 @@ const SearchComponent = ({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          No results found for the current tab.
+        <div className='flex items-center justify-center h-[300px] text-muted-foreground'>
+          No results found.
         </div>
       )}
     </div>
   );
 };
-
-const tabs: readonly TabType[] = [
-  "All",
-  "YouTube",
-  "X",
-  "TikTok",
-  "Reddit",
-] as const;
 
 const CommandBarContent = ({
   children,
@@ -325,19 +306,13 @@ const CommandBarContent = ({
   const { query } = useKBar();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<TabType>("All");
 
   const resetSearch = useCallback(() => {
     setSearchTerm("");
-    setActiveTab("All");
   }, []);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-  };
-
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
   };
 
   const handleSearchRedirect = () => {
@@ -345,15 +320,6 @@ const CommandBarContent = ({
       query.toggle();
       const searchParams = new URLSearchParams();
       searchParams.set("q", searchTerm);
-
-      if (activeTab !== "All") {
-        searchParams.set("platform", getPlatformValue(activeTab).toUpperCase());
-      }
-
-      // Add default sorting
-      // searchParams.set("sortBy", "followerCount");
-      // searchParams.set("sortOrder", "desc");
-
       router.push(`/search?${searchParams.toString()}`);
     }
   };
@@ -366,26 +332,26 @@ const CommandBarContent = ({
 
   return (
     <>
-      <InstantSearch searchClient={searchClient} indexName="accounts">
+      <InstantSearch searchClient={searchClient} indexName='accounts'>
         <KBarPortal>
-          <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
-            <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
-              <div className="p-4 flex-grow overflow-hidden">
-                <div className="relative flex items-center">
+          <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
+            <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
+              <div className='p-4 flex-grow overflow-hidden'>
+                <div className='relative flex items-center'>
                   <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
                     size={20}
                   />
                   <CustomKBarSearch
-                    defaultPlaceholder="Search creators and communities... "
-                    className="w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultPlaceholder='Search creators and communities... '
+                    className='w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
                     onChange={handleSearchChange}
                     value={searchTerm}
                     onKeyDown={handleKeyDown}
                   />
 
                   {searchTerm && (
-                    <div className="flex ml-2">
+                    <div className='flex ml-2'>
                       <Button onClick={handleSearchRedirect}>Search</Button>
                     </div>
                   )}
@@ -394,24 +360,7 @@ const CommandBarContent = ({
                 <SearchComponent
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
-                  activeTab={activeTab}
                 />
-              </div>
-
-              <div className="flex border-t border-border">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab}
-                    className={`flex-1 text-center py-2 ${
-                      activeTab === tab
-                        ? "border-t-2 border-primary"
-                        : "bg-secondary text-muted-foreground hover:bg-primary hover:opacity-75 hover:text-accent-foreground"
-                    }`}
-                    onClick={() => handleTabChange(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
               </div>
             </KBarAnimator>
           </KBarPositioner>
@@ -619,10 +568,10 @@ export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
       ref={query.inputRefSetter}
       className={className}
       autoFocus={visualState === VisualState.showing}
-      role="combobox"
+      role='combobox'
       aria-expanded={visualState === VisualState.showing}
-      aria-controls="kbar-listbox"
-      aria-autocomplete="list"
+      aria-controls='kbar-listbox'
+      aria-autocomplete='list'
       value={value || searchQuery}
       placeholder={defaultPlaceholder}
       onChange={onChange}

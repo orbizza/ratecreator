@@ -40,43 +40,44 @@ export const CreatorCard: React.FC<
   return (
     <button
       onClick={handleClick}
-      className="w-full bg-card hover:bg-accent text-card-foreground p-3 rounded-md flex items-center justify-between transition-colors duration-200"
+      className='w-full bg-card hover:bg-accent text-card-foreground p-3 rounded-md flex items-center justify-between transition-colors duration-200'
     >
-      <div className="flex items-center">
+      <div className='flex items-center'>
         <img
           src={imageUrl}
           alt={name}
-          className="w-10 h-10 rounded-full mr-3"
+          className='w-10 h-10 rounded-full mr-3'
         />
-        <div className="text-left">
-          <h4 className="font-medium">{name}</h4>
-          <p className="text-sm text-muted-foreground">{handle}</p>
+        <div className='text-left'>
+          <h4 className='font-medium'>{name}</h4>
+          <p className='text-sm text-muted-foreground'>{handle}</p>
         </div>
       </div>
-      <div className="flex items-center">
-        <div className="text-right mr-5">
-          <div className="flex flex-row p-1 gap-x-1">
-            <UsersRound size={18} className="text-primary" />
-            <p className="text-sm font-medium">{formatValue(followerCount)}</p>
+      <div className='flex items-center'>
+        <div className='text-right mr-5'>
+          <div className='flex flex-row p-1 gap-x-1'>
+            <UsersRound size={18} className='text-primary' />
+            <p className='text-sm font-medium'>{formatValue(followerCount)}</p>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className='text-xs text-muted-foreground'>
             {formatFloat(rating || 0)} ({formatValue(reviews || 0)} reviews)
           </p>
         </div>
         {(() => {
           switch (platform) {
             case "YOUTUBE":
-              return <SiYoutube className="text-destructive" size={28} />;
+              return <SiYoutube size={28} />;
             case "INSTAGRAM":
-              return <SiInstagram className="text-destructive" size={28} />;
+              return <SiInstagram size={28} />;
             case "X":
-              return <SiX className="text-destructive" size={28} />;
+            case "TWITTER":
+              return <SiX size={28} />;
             case "REDDIT":
-              return <SiReddit className="text-destructive" size={28} />;
+              return <SiReddit size={28} />;
             case "TIKTOK":
-              return <SiTiktok className="text-destructive" size={28} />;
+              return <SiTiktok size={28} />;
             case "TWITCH":
-              return <SiTwitch className="text-destructive" size={28} />;
+              return <SiTwitch size={28} />;
             default:
               return null; // Or you could return a default icon here
           }
