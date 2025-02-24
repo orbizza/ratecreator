@@ -7,7 +7,7 @@ interface CachedCreatorData {
 
 const DB_NAME = "CreatorCache";
 const STORE_NAME = "creators";
-const CACHE_EXPIRATION = 1000 * 60 * 60 * 6; // Reduced to 6 hours
+const CACHE_EXPIRATION = 1000 * 60 * 5; // Reduced to 5 minutes
 const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB limit
 
 export class CreatorCache {

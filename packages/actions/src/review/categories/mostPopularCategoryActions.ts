@@ -11,7 +11,7 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import getRedisClient from "@ratecreator/db/redis-do";
 import getMongoClient from "@ratecreator/db/mongo-client";
 import { ObjectId } from "mongodb";
-
+import { formatValue } from "@ratecreator/db/utils";
 const CACHE_POPULAR_CATEGORIES = "category-popular";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
@@ -136,7 +136,7 @@ export async function getMostPopularCategoryWithData(): Promise<
                 accountId: account.accountId,
                 followerCount: account.followerCount || 0,
                 rating: account.rating || 0,
-                reviewCount: account.reviewCount || 0,
+                reviewCount: formatValue(account.reviewCount || 0),
                 imageUrl: account.imageUrl || "",
               })),
             };

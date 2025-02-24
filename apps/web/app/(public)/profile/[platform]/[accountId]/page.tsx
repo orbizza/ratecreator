@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorProfile } from "@ratecreator/ui/review";
 import { Platform } from "@ratecreator/types/review";
-
+import { formatFloat, formatValue } from "@ratecreator/db/utils";
 // Generate dynamic metadata for creator profiles
 export async function generateMetadata({
   params: { accountId, platform },
@@ -72,8 +72,8 @@ export async function generateMetadata({
     other: {
       "profile:username": account.handle || "",
       "profile:platform": platform,
-      "profile:rating": account.rating?.toString() || "0",
-      "profile:reviews": account.reviewCount?.toString() || "0",
+      "profile:rating": formatFloat(account.rating || 0),
+      "profile:reviews": formatValue(account.reviewCount || 0),
     },
   };
 }

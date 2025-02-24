@@ -1,0 +1,28 @@
+{
+  "name": "@ratecreator/review-algolia-update",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build-review-algolia-update": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js",
+    "build": " yarn build-review-algolia-update",
+    "dev": "yarn build && node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14",
+    "@ratecreator/store": "1.0.0",
+    "@ratecreator/db": "1.0.0",
+    "@ratecreator/actions": "1.0.0",
+    "@ratecreator/auth": "1.0.0",
+    "@ratecreator/types": "1.0.0",
+    "@ratecreator/hooks": "1.0.0",
+    "esbuild": "^0.24.0",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.7.2"
+  }
+}

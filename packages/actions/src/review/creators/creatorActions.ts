@@ -57,6 +57,7 @@ async function handleYoutubeAccount(
 ) {
   try {
     // Check cache first
+    // await redis.del(`${CACHE_YOUTUBE_CREATOR}${accountId}`);
     const cachedData = await redis.get(`${CACHE_YOUTUBE_CREATOR}${accountId}`);
     if (cachedData) {
       return JSON.parse(cachedData);

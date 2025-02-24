@@ -13,7 +13,7 @@ import {
 } from "@icons-pack/react-simple-icons";
 
 import { SearchCreator } from "@ratecreator/types/review";
-import { formatValue } from "@ratecreator/db/utils";
+import { formatFloat, formatValue } from "@ratecreator/db/utils";
 
 export const CreatorCard: React.FC<
   SearchCreator & {
@@ -60,7 +60,7 @@ export const CreatorCard: React.FC<
             <p className="text-sm font-medium">{formatValue(followerCount)}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            {rating} ({reviews} reviews)
+            {formatFloat(rating || 0)} ({formatValue(reviews || 0)} reviews)
           </p>
         </div>
         {(() => {
