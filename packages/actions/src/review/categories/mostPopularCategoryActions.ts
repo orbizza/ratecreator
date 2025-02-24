@@ -135,8 +135,8 @@ export async function getMostPopularCategoryWithData(): Promise<
                 platform: account.platform,
                 accountId: account.accountId,
                 followerCount: account.followerCount || 0,
-                rating: account.rating || 0,
-                reviewCount: formatValue(account.reviewCount || 0),
+                rating: parseFloat((account.rating || 0).toFixed(2)),
+                reviewCount: account.reviewCount || 0,
                 imageUrl: account.imageUrl || "",
               })),
             };
@@ -172,6 +172,8 @@ export async function getMostPopularCategoryWithData(): Promise<
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
+      "EX",
+      3600, // 1 hour TTL
     );
 
     return accountsByCategory;

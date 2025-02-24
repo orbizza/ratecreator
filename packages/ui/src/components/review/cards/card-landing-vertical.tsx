@@ -90,9 +90,9 @@ export function CardLandingVertical({
             </div>
           </div>
           <div className="text-secondary-foreground dark:text-primary-foreground">
-            {rating}{" "}
+            {rating.toFixed(2)}{" "}
             <span className="ml-1 text-sm text-gray-600 items-center">
-              ({reviewCount})
+              ({formatValue(reviewCount)})
             </span>
           </div>
         </div>

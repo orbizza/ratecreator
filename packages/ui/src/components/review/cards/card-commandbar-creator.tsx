@@ -66,17 +66,18 @@ export const CreatorCard: React.FC<
         {(() => {
           switch (platform) {
             case "YOUTUBE":
-              return <SiYoutube className="text-destructive" size={28} />;
+              return <SiYoutube size={28} />;
             case "INSTAGRAM":
-              return <SiInstagram className="text-destructive" size={28} />;
+              return <SiInstagram size={28} />;
             case "X":
-              return <SiX className="text-destructive" size={28} />;
+            case "TWITTER":
+              return <SiX size={28} />;
             case "REDDIT":
-              return <SiReddit className="text-destructive" size={28} />;
+              return <SiReddit size={28} />;
             case "TIKTOK":
-              return <SiTiktok className="text-destructive" size={28} />;
+              return <SiTiktok size={28} />;
             case "TWITCH":
-              return <SiTwitch className="text-destructive" size={28} />;
+              return <SiTwitch size={28} />;
             default:
               return null; // Or you could return a default icon here
           }
