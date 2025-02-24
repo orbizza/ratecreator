@@ -3,13 +3,10 @@ FROM node:18-bullseye-slim as builder
 
 WORKDIR /app
 
-# Install dependencies 
-RUN apt-get update && apt-get install -y openssl libssl-dev && apt-get clean
-
-# Copy package files first for better caching
+# Copy the entire monorepo
 COPY . .
 
-# Install dependencies
+# Install dependencies at the repo root
 RUN yarn install --frozen-lockfile
 
 # Build only the review-algolia-update package
@@ -20,9 +17,6 @@ RUN cd apps/consumers/review-algolia-update && \
 FROM node:18-bullseye-slim as runtime
 
 WORKDIR /app
-
-# Install dependencies 
-RUN apt-get update && apt-get install -y openssl libssl-dev && apt-get clean
 
 # Copy necessary files from builder
 COPY --from=builder /app/apps/consumers/review-algolia-update/dist ./apps/consumers/review-algolia-update/dist

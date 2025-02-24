@@ -40,7 +40,7 @@ DATABASE_URL_ONLINE=<database-url>
 
 # Algolia
 ALGOLIA_APP_ID=<algolia-app-id>
-ALGOLIA_ADMIN_API_KEY=<algolia-admin-api-key>
+ALGOLIA_WRITE_API_KEY=<algolia-admin-api-key>
 ```
 
 ## Building

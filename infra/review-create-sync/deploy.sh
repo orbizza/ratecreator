@@ -3,6 +3,17 @@
 # Exit on error
 set -e
 
+# Check if .env file exists
+if [ ! -f .env ]; then
+    echo "Error: .env file not found!"
+    exit 1
+fi
+
+# Source the environment variables
+set -a
+source .env
+set +a
+
 echo "🚀 Starting deployment of Review Services..."
 
 # Check system requirements
@@ -70,4 +81,7 @@ docker-compose ps
 echo "✅ Deployment complete! Services are running."
 echo "📝 Services deployed:"
 echo "   - review-algolia-update"
-echo "   - review-calculate" 
+echo "   - review-calculate"
+
+# Show the logs
+docker-compose logs -f 

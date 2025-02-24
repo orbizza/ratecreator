@@ -10,7 +10,7 @@ services:
       - KAFKA_USERNAME=${KAFKA_USERNAME}
       - KAFKA_PASSWORD=${KAFKA_PASSWORD}
       - ALGOLIA_APP_ID=${ALGOLIA_APP_ID}
-      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_WRITE_API_KEY}
+      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
     networks:
       - review-network
     volumes:
@@ -25,6 +25,10 @@ services:
       - KAFKA_USERNAME=${KAFKA_USERNAME}
       - KAFKA_PASSWORD=${KAFKA_PASSWORD}
       - DATABASE_URL_ONLINE=${DATABASE_URL_ONLINE}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_USERNAME=${REDIS_USERNAME}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - review-network
     volumes:
