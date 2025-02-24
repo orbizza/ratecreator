@@ -30,6 +30,12 @@ export const getWriteClient = (): SearchClient => {
   return writeClientInstance;
 };
 
+// export const writeAccount = async (account: Account) => {
+//   const client = getWriteClient();
+//   const index = client.initIndex("accounts");
+//   await index.saveObject(account);
+// };
+
 export const getSearchAccounts = async (
   params: SearchAccountsParams,
 ): Promise<SearchResults> => {

@@ -29,6 +29,8 @@ import {
   getInitials,
   removeNormalSuffix,
   truncateText,
+  formatFloat,
+  formatValue,
 } from "@ratecreator/db/utils";
 import { PlatformIcon } from "../../creator-rating/platform-icons";
 
@@ -274,7 +276,7 @@ const TiktokChannelHeader = ({
                 <div className="flex items-center gap-x-1 mb-1 sm:mb-0">
                   <RatingStars count={account.rating || 0} />
                   <span className="text-md text-primary">
-                    ({account.rating || 0})
+                    ({formatFloat(account.rating || 0)})
                   </span>
                   <Separator
                     orientation="vertical"
@@ -283,7 +285,7 @@ const TiktokChannelHeader = ({
                 </div>
                 <div className="flex items-center text-md text-green-500">
                   {account.reviewCount > 1
-                    ? `${account.reviewCount} reviews`
+                    ? `${formatValue(account.reviewCount)} reviews`
                     : `${account.reviewCount} review`}
                 </div>
               </div>
@@ -411,7 +413,7 @@ const TiktokChannelHeader = ({
                       <div className="flex flex-row items-center">
                         <span className="text-sm">
                           {account.reviewCount > 1
-                            ? `${account.reviewCount} reviews`
+                            ? `${formatValue(account.reviewCount)} reviews`
                             : `${account.reviewCount} review`}
                         </span>
                       </div>

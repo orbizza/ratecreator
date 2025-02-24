@@ -98,3 +98,8 @@ export const truncateText = (text: string, maxLength: number): string => {
   }
   return text.slice(0, maxLength - 3) + "...";
 };
+
+//write a function to keep a float number to 2 decimal places
+export const formatFloat = (number: number): string => {
+  return number.toFixed(2);
+};

@@ -5,6 +5,10 @@ import { ReviewValidator } from "@ratecreator/types/review";
 import { Platform } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { revalidatePath } from "next/cache";
+import {
+  createTopicIfNotExists,
+  getKafkaProducer,
+} from "@ratecreator/db/kafka-client";
 
 const prisma = getPrismaClient();
 
@@ -39,13 +43,17 @@ export async function createReview(formData: unknown) {
       select: { platform: true, id: true },
     });
 
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
     // Create the review in the database
     const review = await prisma.review.create({
       data: {
         ...validatedData,
         authorId: user.id,
-        platform: account?.platform as Platform,
-        accountId: account?.id as string,
+        platform: account.platform as Platform,
+        accountId: account.id,
         content: {
           ...validatedData.content,
           redditMetadata:
@@ -60,6 +68,56 @@ export async function createReview(formData: unknown) {
         },
       },
     });
+
+    // Send message to Kafka
+    try {
+      const producer = await getKafkaProducer();
+      const topicName = "new-review-calculate";
+
+      // Create topic if it doesn't exist
+      //await createTopicIfNotExists(topicName);
+
+      // Send the message with retries
+      const maxRetries = 3;
+      let retryCount = 0;
+
+      while (retryCount < maxRetries) {
+        try {
+          await producer.send({
+            topic: topicName,
+            messages: [
+              {
+                key: review.id,
+                value: JSON.stringify({
+                  accountId: validatedData.accountId,
+                  platform: validatedData.platform,
+                  rating: validatedData.stars,
+                }),
+              },
+            ],
+          });
+          console.log("Successfully sent message to Kafka");
+          break;
+        } catch (error) {
+          retryCount++;
+          console.error(
+            `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
+            error,
+          );
+          if (retryCount === maxRetries) {
+            throw error;
+          }
+          // Wait before retrying
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * retryCount),
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error sending message to Kafka:", error);
+      // Don't throw here - we want to return the review even if Kafka fails
+      // The review is already saved in the database
+    }
 
     // Revalidate the creator's page
     revalidatePath(
