@@ -171,7 +171,7 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   );
 };
 
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 const CACHE_KEYS = {
   popularCategories: "mostPopularCategories",
   popularCategoriesExpiry: "mostPopularCategoriesExpiry",

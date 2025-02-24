@@ -4,7 +4,12 @@ import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import { useCallback, useEffect, useState, forwardRef } from "react";
 import type { ReactNode, ChangeEvent, KeyboardEvent } from "react";
-import { InstantSearch, useHits, useSearchBox } from "react-instantsearch";
+import {
+  InstantSearch,
+  useHits,
+  useSearchBox,
+  useInstantSearch,
+} from "react-instantsearch";
 import {
   Link,
   MailOpen,
@@ -76,7 +81,6 @@ interface ResultItemProps {
 interface SearchComponentProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  activeTab: TabType;
 }
 
 interface CommandBarContentProps {
@@ -109,23 +113,10 @@ function isSearchHit(hit: any): hit is SearchResult {
     hit !== null &&
     typeof hit.objectID === "string" &&
     typeof hit.platform === "string" &&
-    ["YOUTUBE", "X", "REDDIT"].includes(hit.platform)
+    typeof hit.handle === "string" &&
+    typeof hit.name === "string"
   );
 }
-const getPlatformValue = (platform: TabType): string => {
-  switch (platform) {
-    case "X":
-      return "twitter";
-    case "TikTok":
-      return "tiktok";
-    case "YouTube":
-      return "youtube";
-    case "Reddit":
-      return "reddit";
-    default:
-      return platform.toLowerCase();
-  }
-};
 
 // Results rendering components
 const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
@@ -213,45 +204,21 @@ const RenderResults = (): JSX.Element => {
 const SearchComponent = ({
   searchTerm,
   onSearchChange,
-  activeTab,
 }: SearchComponentProps): JSX.Element => {
   const { refine } = useSearchBox();
   const { hits, results } = useHits();
+  const { status } = useInstantSearch();
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const { query } = useKBar();
-
-  // Map UI platform names to backend platform values
+  const router = useRouter();
 
   useEffect(() => {
-    // When tab or search term changes, update the search query
-    const platformValue =
-      activeTab !== "All" ? getPlatformValue(activeTab) : "";
-    let searchQuery = searchTerm || "";
-
-    // Only add platform filter if a specific platform is selected
-    if (platformValue) {
-      // Remove any existing platform filter first
-      searchQuery = searchQuery.replace(/\bplatform:\S+\b/g, "").trim();
-      searchQuery =
-        `${searchQuery} platform:${platformValue.toUpperCase()}`.trim();
-    }
-
-    refine(searchQuery);
-  }, [searchTerm, activeTab, refine]);
+    refine(searchTerm || "");
+  }, [searchTerm, refine]);
 
   useEffect(() => {
     const validHits = hits.filter(isSearchHit);
-    let filtered = [...validHits];
-
-    if (activeTab !== "All") {
-      const platformValue = getPlatformValue(activeTab);
-      filtered = filtered.filter(
-        (result) => result.platform.toLowerCase() === platformValue,
-      );
-    }
-
-    // Sort all results by follower count
-    const sortedResults = filtered.sort((a, b) => {
+    const sortedResults = validHits.sort((a, b) => {
       return b.followerCount - a.followerCount;
     });
 
@@ -269,24 +236,77 @@ const SearchComponent = ({
         reviews: hit.reviewCount,
       })),
     );
-  }, [hits, activeTab]);
+  }, [hits]);
 
   return (
     <div className="mt-4 min-h-[300px]">
-      {!results ? (
+      {status === "loading" ? (
         <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2 h-16 w-full">
-                <Skeleton className="size-12 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[240px]" />
-                  <Skeleton className="h-4 w-3/4" />
+          <div className="px-4 py-2 text-sm text-muted-foreground">
+            Loading results... In the meantime, you can:
+          </div>
+          <div className="space-y-2">
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/write-review");
+              }}
+              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+            >
+              <PenLine size={20} className="text-muted-foreground" />
+              <div>
+                <div>Write a Review</div>
+                <div className="text-sm text-muted-foreground">
+                  Share your experience about a creator
                 </div>
               </div>
-              <Skeleton className="h-20 w-full" />
             </div>
-          ))}
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/categories");
+              }}
+              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+            >
+              <Book size={20} className="text-muted-foreground" />
+              <div>
+                <div>Browse Categories</div>
+                <div className="text-sm text-muted-foreground">
+                  Explore creators by category
+                </div>
+              </div>
+            </div>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/my-lists");
+              }}
+              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+            >
+              <List size={20} className="text-muted-foreground" />
+              <div>
+                <div>Create Lists</div>
+                <div className="text-sm text-muted-foreground">
+                  Organize creators into custom lists
+                </div>
+              </div>
+            </div>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/blogs");
+              }}
+              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+            >
+              <Newspaper size={20} className="text-muted-foreground" />
+              <div>
+                <div>Read Blog</div>
+                <div className="text-sm text-muted-foreground">
+                  Latest updates and creator insights
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : filteredResults.length > 0 ? (
         <div className="space-y-2 max-h-[50vh] overflow-y-auto">
@@ -302,20 +322,12 @@ const SearchComponent = ({
         </div>
       ) : (
         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          No results found for the current tab.
+          No results found.
         </div>
       )}
     </div>
   );
 };
-
-const tabs: readonly TabType[] = [
-  "All",
-  "YouTube",
-  "X",
-  "TikTok",
-  "Reddit",
-] as const;
 
 const CommandBarContent = ({
   children,
@@ -325,19 +337,13 @@ const CommandBarContent = ({
   const { query } = useKBar();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<TabType>("All");
 
   const resetSearch = useCallback(() => {
     setSearchTerm("");
-    setActiveTab("All");
   }, []);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-  };
-
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
   };
 
   const handleSearchRedirect = () => {
@@ -345,15 +351,6 @@ const CommandBarContent = ({
       query.toggle();
       const searchParams = new URLSearchParams();
       searchParams.set("q", searchTerm);
-
-      if (activeTab !== "All") {
-        searchParams.set("platform", getPlatformValue(activeTab).toUpperCase());
-      }
-
-      // Add default sorting
-      // searchParams.set("sortBy", "followerCount");
-      // searchParams.set("sortOrder", "desc");
-
       router.push(`/search?${searchParams.toString()}`);
     }
   };
@@ -394,24 +391,7 @@ const CommandBarContent = ({
                 <SearchComponent
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
-                  activeTab={activeTab}
                 />
-              </div>
-
-              <div className="flex border-t border-border">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab}
-                    className={`flex-1 text-center py-2 ${
-                      activeTab === tab
-                        ? "border-t-2 border-primary"
-                        : "bg-secondary text-muted-foreground hover:bg-primary hover:opacity-75 hover:text-accent-foreground"
-                    }`}
-                    onClick={() => handleTabChange(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
               </div>
             </KBarAnimator>
           </KBarPositioner>
