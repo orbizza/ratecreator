@@ -4,7 +4,12 @@ import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import { useCallback, useEffect, useState, forwardRef } from "react";
 import type { ReactNode, ChangeEvent, KeyboardEvent } from "react";
-import { InstantSearch, useHits, useSearchBox } from "react-instantsearch";
+import {
+  InstantSearch,
+  useHits,
+  useSearchBox,
+  useInstantSearch,
+} from "react-instantsearch";
 import {
   Link,
   MailOpen,
@@ -202,8 +207,10 @@ const SearchComponent = ({
 }: SearchComponentProps): JSX.Element => {
   const { refine } = useSearchBox();
   const { hits, results } = useHits();
+  const { status } = useInstantSearch();
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const { query } = useKBar();
+  const router = useRouter();
 
   useEffect(() => {
     refine(searchTerm || "");
@@ -233,13 +240,19 @@ const SearchComponent = ({
 
   return (
     <div className='mt-4 min-h-[300px]'>
-      {!results ? (
+      {status === "loading" ? (
         <div className='space-y-4'>
           <div className='px-4 py-2 text-sm text-muted-foreground'>
             Loading results... In the meantime, you can:
           </div>
           <div className='space-y-2'>
-            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/write-review");
+              }}
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
+            >
               <PenLine size={20} className='text-muted-foreground' />
               <div>
                 <div>Write a Review</div>
@@ -248,7 +261,13 @@ const SearchComponent = ({
                 </div>
               </div>
             </div>
-            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/categories");
+              }}
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
+            >
               <Book size={20} className='text-muted-foreground' />
               <div>
                 <div>Browse Categories</div>
@@ -257,7 +276,13 @@ const SearchComponent = ({
                 </div>
               </div>
             </div>
-            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/my-lists");
+              }}
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
+            >
               <List size={20} className='text-muted-foreground' />
               <div>
                 <div>Create Lists</div>
@@ -266,7 +291,13 @@ const SearchComponent = ({
                 </div>
               </div>
             </div>
-            <div className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'>
+            <div
+              onClick={() => {
+                query.toggle();
+                router.push("/blogs");
+              }}
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
+            >
               <Newspaper size={20} className='text-muted-foreground' />
               <div>
                 <div>Read Blog</div>

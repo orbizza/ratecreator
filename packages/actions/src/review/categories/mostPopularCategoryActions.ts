@@ -44,7 +44,7 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
 
     await redis.set(
       CACHE_POPULAR_CATEGORIES,
-      JSON.stringify(popularCategories),
+      JSON.stringify(popularCategories)
     );
     console.log("Popular Categories cached in Redis");
 
@@ -111,7 +111,7 @@ export async function getMostPopularCategoryWithData(): Promise<
             }
 
             const accountObjectIds = categoryMappings.map(
-              (mapping) => new ObjectId(mapping.accountId),
+              (mapping) => new ObjectId(mapping.accountId)
             );
 
             const accounts = await accountCollection
@@ -135,8 +135,8 @@ export async function getMostPopularCategoryWithData(): Promise<
                 platform: account.platform,
                 accountId: account.accountId,
                 followerCount: account.followerCount || 0,
-                rating: account.rating || 0,
-                reviewCount: formatValue(account.reviewCount || 0),
+                rating: parseFloat((account.rating || 0).toFixed(2)),
+                reviewCount: account.reviewCount || 0,
                 imageUrl: account.imageUrl || "",
               })),
             };
@@ -144,11 +144,11 @@ export async function getMostPopularCategoryWithData(): Promise<
             // Cache individual category data with TTL
             await redis.set(
               categoryCacheKey,
-              JSON.stringify(categoryWithAccounts),
+              JSON.stringify(categoryWithAccounts)
             );
 
             return categoryWithAccounts;
-          })(),
+          })()
         );
       } catch (error) {
         console.error(`Error processing category ${category.id}:`, error);
@@ -172,6 +172,8 @@ export async function getMostPopularCategoryWithData(): Promise<
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
+      "EX",
+      3600 // 1 hour TTL
     );
 
     return accountsByCategory;
