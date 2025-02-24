@@ -30,12 +30,12 @@ async function processMessage(message: any) {
       createIfNotExists: false,
     });
     console.log(
-      `Updated algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`
+      `Updated algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`,
     );
   } catch (error) {
     console.error(
       `Error processing message for rating in ${payload.objectID}:`,
-      error
+      error,
     );
   }
 }
