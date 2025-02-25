@@ -58,33 +58,33 @@ export function HeroTextNew() {
     query.toggle();
   }, [query]);
 
-  const renderShortcut = () => {
-    switch (deviceType) {
-      case "mac":
-        return (
-          <>
-            <Kbd className="gap-1 mx-[0] ml-1 mr-1">⌘</Kbd>
-            <Kbd className="gap-1 mx-[0]">K</Kbd>
-          </>
-        );
-      case "windows":
-        return (
-          <>
-            <Kbd className="gap-1 mx-[0] ml-1 mr-1">Ctrl</Kbd>
-            <Kbd className="gap-1 mx-[0]">K</Kbd>
-          </>
-        );
-      case "touch":
-        return null;
-      default:
-        return (
-          <>
-            <Kbd className="gap-1 mx-[0] ml-1 mr-1">⌘</Kbd>
-            <Kbd className="gap-1 mx-[0]">K</Kbd>
-          </>
-        );
-    }
-  };
+  // const renderShortcut = () => {
+  //   switch (deviceType) {
+  //     case "mac":
+  //       return (
+  //         <>
+  //           <Kbd className='gap-1 mx-[0] ml-1 mr-1'>⌘</Kbd>
+  //           <Kbd className='gap-1 mx-[0]'>K</Kbd>
+  //         </>
+  //       );
+  //     case "windows":
+  //       return (
+  //         <>
+  //           <Kbd className='gap-1 mx-[0] ml-1 mr-1'>Ctrl</Kbd>
+  //           <Kbd className='gap-1 mx-[0]'>K</Kbd>
+  //         </>
+  //       );
+  //     case "touch":
+  //       return null;
+  //     default:
+  //       return (
+  //         <>
+  //           <Kbd className='gap-1 mx-[0] ml-1 mr-1'>⌘</Kbd>
+  //           <Kbd className='gap-1 mx-[0]'>K</Kbd>
+  //         </>
+  //       );
+  //   }
+  // };
 
   return (
     <div ref={ref} className="w-full mb-0">
@@ -138,13 +138,13 @@ export function HeroTextNew() {
               onClick={handleSerarchClick}
               className="px-4 py-2 rounded-lg bg-[#FF3131] w-full sm:w-auto font-bold text-black text-base hover:[transform:rotateX(10deg)] transition duration-200 origin-left hover:shadow-lg"
             >
-              Search {renderShortcut()}
+              Search creators
             </button>
             <button
               className="text-black flex flex-row items-center justify-center gap-2 dark:text-white hover:border-[#FF3131] border border-transparent px-4 py-2 rounded-lg text-base transition duration-200 w-full sm:w-auto"
-              onClick={() => router.push("/search")}
+              onClick={() => router.push("/categories")}
             >
-              Write a review <ChevronRightIcon className="w-4 h-4" />
+              Find by category <ChevronRightIcon className="w-4 h-4" />
             </button>
           </div>
         </div>

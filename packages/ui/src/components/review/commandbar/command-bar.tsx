@@ -374,7 +374,7 @@ const CommandBarContent = ({
                     size={20}
                   />
                   <CustomKBarSearch
-                    defaultPlaceholder="Search creators and communities... "
+                    defaultPlaceholder="Type name, description or category... "
                     className="w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     onChange={handleSearchChange}
                     value={searchTerm}

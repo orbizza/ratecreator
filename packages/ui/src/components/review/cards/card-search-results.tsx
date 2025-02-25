@@ -28,6 +28,7 @@ import { SearchAccount } from "@ratecreator/types/review";
 import { Avatar, AvatarFallback, AvatarImage, Badge } from "@ratecreator/ui";
 import {
   formatDate,
+  formatFloat,
   formatValue,
   fromSlug,
   getInitials,
@@ -188,7 +189,9 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
             <div className="flex z-10 justify-between items-center">
               <div className="flex items-center gap-2 ml-2">
                 <StarRating rating={rating} />{" "}
-                <span className={`font-bold ${colour}`}>{rating}</span>
+                <span className={`font-bold ${colour}`}>
+                  {rating > 0 ? formatFloat(rating) : 0}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MessageSquareMore size={16} className="text-primary" />
