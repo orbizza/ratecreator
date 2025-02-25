@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 
 import {
@@ -36,27 +36,44 @@ import {
 } from "@ratecreator/ui";
 import { getInitials } from "@ratecreator/db/utils";
 
+const isProtectedRoute = (path: string) => {
+  return path.startsWith("/review") || path.startsWith("/user-profile");
+};
+
 export function MainMenu() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
+
+  const handleNavigation = (path: string) => {
+    if (!isSignedIn && isProtectedRoute(path)) {
+      const returnUrl = encodeURIComponent(path);
+      router.push(`/sign-in?redirect_url=${returnUrl}`);
+    } else {
+      router.push(path);
+    }
+  };
 
   return (
     <div className="flex items-center h-8 gap-x-2 xl:gap-3">
       {isSignedIn ? (
         // Render menu when user is signed in
         <>
-          <Button variant={"ghost"} onClick={() => router.push("/")}>
+          <Button variant={"ghost"} onClick={() => handleNavigation("/")}>
             For creators
           </Button>
           <Separator orientation="vertical" />
-          <Button variant={"link"} onClick={() => router.push("/search")}>
+          <Button variant={"link"} onClick={() => handleNavigation("/search")}>
             Write a review
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/categories")}>
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/categories")}
+          >
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/wip")}>
+          <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button>
 
@@ -96,29 +113,31 @@ export function MainMenu() {
 
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => router.push("/user-profile")}>
+                <DropdownMenuItem
+                  onClick={() => handleNavigation("/user-profile")}
+                >
                   <User className="mr-2 size-4" />
                   <span>Profile</span>
                   <DropdownMenuShortcut>MP</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/wip")}>
+                <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
                   <Star className="mr-2 size-4" />
                   <span>My Reviews</span>
                   <DropdownMenuShortcut>MR</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/wip")}>
+                <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
                   <ClipboardList className="mr-2 size-4" />
                   <span>My Lists</span>
                   <DropdownMenuShortcut>ML</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/wip")}>
+              <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
                 <Settings className="mr-2 size-4" />
                 <span>Settings</span>
                 <DropdownMenuShortcut>GS</DropdownMenuShortcut>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/wip")}>
+              <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
                 <LifeBuoy className="mr-2 size-4" />
                 <span>Help</span>
                 <DropdownMenuShortcut>MH</DropdownMenuShortcut>
@@ -130,7 +149,7 @@ export function MainMenu() {
                 <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
               </DropdownMenuItem> */}
 
-              <DropdownMenuItem onClick={() => router.push("/wip")}>
+              <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
                 <Keyboard className="mr-2 size-4" />
                 <span>Keyboard shortcuts</span>
                 <DropdownMenuShortcut>GK</DropdownMenuShortcut>
@@ -159,23 +178,38 @@ export function MainMenu() {
       ) : (
         // Render menu when user is not signed in
         <>
-          <Button variant={"ghost"} onClick={() => router.push("/")}>
+          <Button variant={"ghost"} onClick={() => handleNavigation("/")}>
             For creators
           </Button>
           <Separator orientation="vertical" />
-          <Button variant={"link"} onClick={() => router.push("/search")}>
+          <Button variant={"link"} onClick={() => handleNavigation("/search")}>
             Write a review
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/categories")}>
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/categories")}
+          >
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => router.push("/wip")}>
+          <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button>
-          <Button variant={"outline"} onClick={() => router.push("/sign-in")}>
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              const returnUrl = encodeURIComponent(pathname);
+              router.push(`/sign-in?redirect_url=${returnUrl}`);
+            }}
+          >
             Log in
           </Button>
-          <Button variant={"default"} onClick={() => router.push("/sign-up")}>
+          <Button
+            variant={"default"}
+            onClick={() => {
+              const returnUrl = encodeURIComponent(pathname);
+              router.push(`/sign-up?redirect_url=${returnUrl}`);
+            }}
+          >
             Get Started
           </Button>
           <div className="hidden lg:block">

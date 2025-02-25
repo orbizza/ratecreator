@@ -59,6 +59,7 @@ import {
   CreatorLoadingCard,
   FilterSkeleton,
 } from "../skeletons/skeleton-category-search-results";
+import { truncateText } from "@ratecreator/db/utils";
 
 export const CategoriesSearchResults: React.FC = () => {
   const params = useParams();
@@ -278,25 +279,25 @@ export const CategoriesSearchResults: React.FC = () => {
           </div>
         )}
         {!loading && <CategoryBreadcrumb categories={categories} />}
-        <div className="flex flex-col justify-center items-center w-full m-8 gap-4">
-          <div className="flex flex-wrap justify-center items-baseline lg:text-5xl font-bold">
-            <span className="mr-2">Best in</span>
+        <div className="flex flex-col justify-center items-center w-full m-4 md:m-8 gap-2 md:gap-4">
+          <div className="flex flex-wrap mx-auto justify-center items-baseline lg:text-5xl font-bold">
+            <span className="sm:mr-2">Best in</span>
             {loading ? (
               <Skeleton className="h-8 w-[250px] inline-block" /> // Adjust width as needed
             ) : (
-              <span>{currentCategory?.name}</span>
+              <span>{truncateText(currentCategory?.name, 30)}</span>
             )}
           </div>
-          <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
+          <div className="flex flex-row items-center justify-center md:gap-x-2 text-muted-foreground">
             {loading ? (
               <Skeleton className="h-4 w-[250px]" />
             ) : (
-              <>
+              <div className="flex flex-col sm:flex-row items-center gap-x-2 gap-y-2">
                 <span className="text-[13px] md:text-sm lg:text-xl">
-                  {currentCategory?.shortDescription}
+                  {truncateText(currentCategory?.shortDescription || "", 100)}
                 </span>
                 <Info size={14} />
-              </>
+              </div>
             )}
           </div>
         </div>

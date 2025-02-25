@@ -172,8 +172,8 @@ export async function getMostPopularCategoryWithData(): Promise<
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
-      "EX",
-      3600, // 1 hour TTL
+      // "EX",
+      // 3600, // 1 hour TTL
     );
 
     return accountsByCategory;

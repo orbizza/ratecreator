@@ -40,6 +40,7 @@ import { Editor } from "./editor";
 import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 const getRatingColor = (rating: number) => {
   if (rating >= 4.5) return "text-emerald-500";
@@ -393,7 +394,16 @@ export const CreatorRating = ({
             <CreatorHeaderSkeleton />
           ) : (
             <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    router.push(`/profile/${platform}/${accountId}`)
+                  }
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </Button>
                 <Avatar className="w-10 h-10 md:w-12 md:h-12 rounded-lg border border-border">
                   <AvatarImage
                     src={
@@ -584,7 +594,15 @@ export const CreatorRating = ({
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col-reverse md:flex-row justify-between gap-2">
+              <Button
+                type="submit"
+                className="w-full md:w-auto px-6 py-2.5"
+                onClick={() => router.push(`/profile/${platform}/${accountId}`)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 className="w-full md:w-auto px-6 py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium"
