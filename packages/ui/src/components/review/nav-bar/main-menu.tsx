@@ -56,14 +56,14 @@ export function MainMenu() {
   };
 
   return (
-    <div className='flex items-center h-8 gap-x-2 xl:gap-3'>
+    <div className="flex items-center h-8 gap-x-2 xl:gap-3">
       {isSignedIn ? (
         // Render menu when user is signed in
         <>
           <Button variant={"ghost"} onClick={() => handleNavigation("/")}>
             For creators
           </Button>
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
           <Button variant={"link"} onClick={() => handleNavigation("/search")}>
             Write a review
           </Button>
@@ -80,21 +80,23 @@ export function MainMenu() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant='ghost'
-                className='hover:outline-none hover:bg-transparent focus-within:outline-none focus-within:bg-transparent'
+                variant="ghost"
+                className="hover:outline-none hover:bg-transparent focus-within:outline-none focus-within:bg-transparent"
               >
-                <Avatar className=''>
+                <Avatar className="">
                   <AvatarImage src={user?.imageUrl} />
                   <AvatarFallback>
                     {getInitials(
-                      user?.fullName || user?.emailAddresses[0].toString() || ""
+                      user?.fullName ||
+                        user?.emailAddresses[0].toString() ||
+                        "",
                     )}
                   </AvatarFallback>
                 </Avatar>
                 {/* <ChevronDown className='ml-2' /> */}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-56 mt-2 mr-4'>
+            <DropdownMenuContent className="w-56 mt-2 mr-4">
               <DropdownMenuLabel>
                 {user?.fullName
                   ? user.fullName
@@ -102,7 +104,7 @@ export function MainMenu() {
                       .map(
                         (namePart) =>
                           namePart.charAt(0).toUpperCase() +
-                          namePart.slice(1).toLowerCase()
+                          namePart.slice(1).toLowerCase(),
                       )
                       .join(" ")
                   : user?.emailAddresses[0].toString().toLowerCase() ||
@@ -114,29 +116,29 @@ export function MainMenu() {
                 <DropdownMenuItem
                   onClick={() => handleNavigation("/user-profile")}
                 >
-                  <User className='mr-2 size-4' />
+                  <User className="mr-2 size-4" />
                   <span>Profile</span>
                   <DropdownMenuShortcut>MP</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
-                  <Star className='mr-2 size-4' />
+                  <Star className="mr-2 size-4" />
                   <span>My Reviews</span>
                   <DropdownMenuShortcut>MR</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
-                  <ClipboardList className='mr-2 size-4' />
+                  <ClipboardList className="mr-2 size-4" />
                   <span>My Lists</span>
                   <DropdownMenuShortcut>ML</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
-                <Settings className='mr-2 size-4' />
+                <Settings className="mr-2 size-4" />
                 <span>Settings</span>
                 <DropdownMenuShortcut>GS</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
-                <LifeBuoy className='mr-2 size-4' />
+                <LifeBuoy className="mr-2 size-4" />
                 <span>Help</span>
                 <DropdownMenuShortcut>MH</DropdownMenuShortcut>
               </DropdownMenuItem>
@@ -148,14 +150,14 @@ export function MainMenu() {
               </DropdownMenuItem> */}
 
               <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
-                <Keyboard className='mr-2 size-4' />
+                <Keyboard className="mr-2 size-4" />
                 <span>Keyboard shortcuts</span>
                 <DropdownMenuShortcut>GK</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-                <SunMoon className='mr-2 size-4' />
+                <SunMoon className="mr-2 size-4" />
                 <span>Dark Mode</span>
-                <DropdownMenuShortcut className='opacity-100'>
+                <DropdownMenuShortcut className="opacity-100">
                   <IconToggle />
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
@@ -166,7 +168,7 @@ export function MainMenu() {
                   router.push("/");
                 }}
               >
-                <LogOut className='mr-2 size-4' />
+                <LogOut className="mr-2 size-4" />
                 <span>Log out</span>
                 <DropdownMenuShortcut>SO</DropdownMenuShortcut>
               </DropdownMenuItem>
@@ -179,7 +181,7 @@ export function MainMenu() {
           <Button variant={"ghost"} onClick={() => handleNavigation("/")}>
             For creators
           </Button>
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
           <Button variant={"link"} onClick={() => handleNavigation("/search")}>
             Write a review
           </Button>
@@ -210,7 +212,7 @@ export function MainMenu() {
           >
             Get Started
           </Button>
-          <div className='hidden lg:block'>
+          <div className="hidden lg:block">
             <ModeToggle />
           </div>
         </>
