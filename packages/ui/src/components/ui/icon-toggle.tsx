@@ -42,16 +42,16 @@ const IconToggle = ({
             ? "translate-x-full transform"
             : "translate-x-0 transform",
           theme === "dark" ? "h-5 w-5" : "h-4 w-4",
-          theme === "dark" ? "m-1" : "m-1.5"
+          theme === "dark" ? "m-1" : "m-1.5",
         )}
       >
-        <span className='relative flex h-full w-full'>
+        <span className="relative flex h-full w-full">
           <Moon
             size={13}
             strokeWidth={3}
             className={cn(
               "absolute left-0 top-0 h-full w-full p-1 text-red-500 transition-opacity duration-200",
-              theme === "dark" ? "opacity-100" : "opacity-0"
+              theme === "dark" ? "opacity-100" : "opacity-0",
             )}
           />
           <Sun
@@ -59,7 +59,7 @@ const IconToggle = ({
             strokeWidth={3}
             className={cn(
               "absolute left-0 top-0 h-full w-full p-0.5 text-[#24252d50] transition-opacity duration-200",
-              theme === "dark" ? "opacity-0" : "opacity-100"
+              theme === "dark" ? "opacity-0" : "opacity-100",
             )}
           />
         </span>
