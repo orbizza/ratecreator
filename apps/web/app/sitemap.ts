@@ -10,10 +10,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     "",
     "/categories",
-    "/about",
+    // "/about",
     "/contact",
-    "/terms",
-    "/privacy",
+    // "/terms",
+    // "/privacy",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const categoryRoutes = categories.map((category) => ({
-    url: `${baseUrl}/category/${category.slug}`,
+    url: `${baseUrl}/categories/${category.slug}`,
     lastModified: category.updatedAt,
     changeFrequency: "weekly" as const,
     priority: 0.7,
