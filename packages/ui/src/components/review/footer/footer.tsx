@@ -201,15 +201,13 @@ export const Footer = () => {
 
           <div className="flex flex-wrap justify-center md:justify-start space-x-4  text-[11px]  mb-4 md:mb-0">
             <Link
-              href="https://www.orbizza.com/privacy"
-              target="_blank"
+              href="/privacy"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Privacy policy
             </Link>
             <Link
-              href="https://www.orbizza.com/terms"
-              target="_blank"
+              href="/terms"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
               Terms
@@ -221,10 +219,13 @@ export const Footer = () => {
               Status
             </Link> */}
             <Link
-              href="/wip"
+              href="/cookie-policy"
               className="text-muted-foreground hover:text-primary-foreground/80"
             >
-              Cookie Settings
+              Cookie Policy
+            </Link>
+            <Link href="#" className="termly-display-preferences">
+              Consent Preferences
             </Link>
           </div>
         </div>
