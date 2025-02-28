@@ -43,11 +43,11 @@ export default function TermsOfService() {
       // If there's an error after waiting, show it
       const errorTimer = setTimeout(() => {
         const termlyElement = document.querySelector(
-          '[data-name="termly-embed"]'
+          '[data-name="termly-embed"]',
         );
         if (termlyElement && !termlyElement.innerHTML) {
           setError(
-            "Terms of Service content could not be loaded. Please try refreshing the page or view the terms directly."
+            "Terms of Service content could not be loaded. Please try refreshing the page or view the terms directly.",
           );
         }
       }, 5000);
@@ -62,28 +62,28 @@ export default function TermsOfService() {
   }, []);
 
   return (
-    <div className='container mx-auto py-8 mt-10'>
-      <h1 className='text-2xl font-bold mb-6'>Terms of Service</h1>
+    <div className="container mx-auto py-8 mt-10">
+      <h1 className="text-2xl font-bold mb-6">Terms of Service</h1>
 
       {isLocal && (
-        <div className='bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 mb-6 rounded-md'>
-          <p className='text-yellow-800 dark:text-yellow-200'>
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 mb-6 rounded-md">
+          <p className="text-yellow-800 dark:text-yellow-200">
             <strong>Note:</strong> You are viewing this page in a local
             development environment. The terms of service widget will not
             display correctly on localhost. Please view this page in a
             production environment to see the actual terms of service.
           </p>
-          <p className='text-yellow-800 dark:text-yellow-200 mt-2'>
+          <p className="text-yellow-800 dark:text-yellow-200 mt-2">
             requires a valid domain to function properly and cannot be fully
             tested in a local environment.
           </p>
-          <p className='text-yellow-800 dark:text-yellow-200 mt-2'>
+          <p className="text-yellow-800 dark:text-yellow-200 mt-2">
             You can view the terms of service directly at:{" "}
             <a
               href={TERMLY_POLICY_URL}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline hover:text-yellow-600'
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-yellow-600"
             >
               Terms of Service
             </a>
@@ -92,15 +92,15 @@ export default function TermsOfService() {
       )}
 
       {error && !isLocal && (
-        <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6 rounded-md'>
-          <p className='text-red-800 dark:text-red-200'>{error}</p>
-          <p className='text-red-800 dark:text-red-200 mt-2'>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6 rounded-md">
+          <p className="text-red-800 dark:text-red-200">{error}</p>
+          <p className="text-red-800 dark:text-red-200 mt-2">
             You can view the terms of service directly at:{" "}
             <a
               href={TERMLY_POLICY_URL}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline hover:text-red-600'
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-red-600"
             >
               Terms of Service
             </a>
@@ -109,32 +109,32 @@ export default function TermsOfService() {
       )}
 
       {isLoading && !isLocal && (
-        <div className='flex justify-center items-center min-h-[200px]'>
-          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
+        <div className="flex justify-center items-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       )}
 
       {!isLocal && (
         <div
-          data-name='termly-embed'
+          data-name="termly-embed"
           data-id={TERMLY_SITE_ID}
-          className='min-h-[600px]'
+          className="min-h-[600px]"
         />
       )}
 
       {isLocal && (
-        <div className='border border-gray-200 dark:border-gray-700 p-6 rounded-md min-h-[600px]'>
-          <h2 className='text-xl font-semibold mb-4'>
+        <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-md min-h-[600px]">
+          <h2 className="text-xl font-semibold mb-4">
             Terms of Service Content Preview
           </h2>
-          <p className='mb-3'>
+          <p className="mb-3">
             This is a placeholder for the terms of service content that would
             appear in a production environment.
           </p>
-          <p className='mb-3'>
+          <p className="mb-3">
             The terms of service typically includes information about:
           </p>
-          <ul className='list-disc pl-6 mb-4 space-y-2'>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>User rights and responsibilities</li>
             <li>Acceptable use of the service</li>
             <li>Intellectual property rights</li>
@@ -142,18 +142,18 @@ export default function TermsOfService() {
             <li>Dispute resolution procedures</li>
             <li>Termination of service conditions</li>
           </ul>
-          <p className='mb-4'>
+          <p className="mb-4">
             In production, this content is dynamically loaded from based on your
             configured settings.
           </p>
-          <div className='mt-6 pt-6 border-t border-gray-200 dark:border-gray-700'>
-            <p className='font-medium'>
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <p className="font-medium">
               View the actual terms of service at:{" "}
               <a
                 href={TERMLY_POLICY_URL}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300'
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300"
               >
                 Terms of Service
               </a>
