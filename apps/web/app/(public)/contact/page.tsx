@@ -1,5 +1,5 @@
-import { ContactFormGridWithDetails } from "@ratecreator/ui/review";
+import { ContactFormPage } from "@ratecreator/ui/review";
 
 export default function ContactPage() {
-  return <ContactFormGridWithDetails image="/world.svg" />;
+  return <ContactFormPage />;
 }
