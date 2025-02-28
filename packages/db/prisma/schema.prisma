@@ -289,7 +289,30 @@ model YouTubeVideo {
   @@index([lastFetchedAt])
 }
 
+// -----------------------
+// Waitlist for creator signup
+// -----------------------
 
+model WaitlistEntry {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model ContactForm {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+}
 
 // -----------------------
 // Enums
