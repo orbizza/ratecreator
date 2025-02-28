@@ -224,7 +224,10 @@ export const Footer = () => {
             >
               Cookie Policy
             </Link>
-            <Link href="#" className="termly-display-preferences">
+            <Link
+              href="#"
+              className="termly-display-preferences text-muted-foreground hover:text-primary-foreground/80"
+            >
               Consent Preferences
             </Link>
           </div>

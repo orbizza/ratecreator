@@ -27,6 +27,7 @@ export const TermlyCMP = ({
   }, [autoBlock, masterConsentsOrigin, websiteUUID]);
 
   const isScriptAdded = useRef(false);
+  const isPolicyScriptAdded = useRef(false);
 
   useEffect(() => {
     if (isScriptAdded.current) return;
@@ -34,6 +35,15 @@ export const TermlyCMP = ({
     script.src = scriptSrc;
     document.head.appendChild(script);
     isScriptAdded.current = true;
+
+    // Add the embed-policy script for cookie policy pages
+    if (!isPolicyScriptAdded.current) {
+      const policyScript = document.createElement("script");
+      policyScript.src = `${SCRIPT_SRC_BASE}/embed-policy.min.js`;
+      policyScript.async = true;
+      document.head.appendChild(policyScript);
+      isPolicyScriptAdded.current = true;
+    }
   }, [scriptSrc]);
 
   const pathname = usePathname();
