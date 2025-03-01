@@ -7,8 +7,11 @@ import "./globals.css";
 import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
 import { Toaster } from "@ratecreator/ui";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const metadataBase = new URL("https://ratecreator.com");
 
 export const metadata: Metadata = {
   title: {
@@ -23,6 +26,32 @@ export const metadata: Metadata = {
     "influencer ratings",
     "social media creators",
     "content review platform",
+    "review creators",
+    "review communities",
+    "review content",
+    "review influencers",
+    "review social media",
+    "review youtube",
+    "review tiktok",
+    "review instagram",
+    "review facebook",
+    "review twitter",
+    "review twitch",
+    "review discord",
+    "review reddit",
+    "rate creator",
+    "rate community",
+    "rate content",
+    "rate influencers",
+    "rate social media",
+    "rate youtube",
+    "rate tiktok",
+    "rate instagram",
+    "rate facebook",
+    "rate twitter",
+    "rate twitch",
+    "rate discord",
+    "rate reddit",
   ],
   authors: [{ name: "Rate Creator" }],
   creator: "Rate Creator",
@@ -32,18 +61,17 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://ratecreator.com"),
   openGraph: {
     title: "Rate Creator - Search and Review Content Creators",
     description:
       "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
-    url: "https://ratecreator.com",
+    url: "/",
     siteName: "Rate Creator",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://ratecreator.com/ratecreator-dark.svg",
+        url: "/ratecreator.png", // ✅ metadataBase will automatically prepend this
         width: 1200,
         height: 630,
         alt: "Rate Creator Logo",
@@ -56,7 +84,7 @@ export const metadata: Metadata = {
     description:
       "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
     creator: "@ratecreator",
-    images: ["https://ratecreator.com/ratecreator-dark.svg"],
+    images: ["/ratecreator.png"], // ✅ metadataBase will prepend this
   },
   robots: {
     index: true,
@@ -80,6 +108,19 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <Head>
+          <meta
+            property="og:image"
+            content="https://ratecreator.com/ratecreator.png"
+          />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta
+            name="twitter:image"
+            content="https://ratecreator.com/ratecreator.png"
+          />
+        </Head>
+
         <CSPostHogProvider>
           <body className={inter.className}>
             <Providers>

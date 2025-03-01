@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: "https://ratecreator.com/ratecreator-dark.svg",
+          url: "https://ratecreator.com/ratecreator.png",
           width: 1200,
           height: 630,
           alt: `${userName} Profile on RateCreator`,
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["https://ratecreator.com/ratecreator-dark.svg"],
+      images: ["https://ratecreator.com/ratecreator.png"],
     },
   };
 }
