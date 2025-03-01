@@ -34,12 +34,12 @@ export default function ContactPage() {
     <>
       <Head>
         <meta
-          property='og:image'
-          content='https://ratecreator.com/ratecreator.png'
+          property="og:image"
+          content="https://ratecreator.com/ratecreator.png"
         />
         <meta
-          name='twitter:image'
-          content='https://ratecreator.com/ratecreator.png'
+          name="twitter:image"
+          content="https://ratecreator.com/ratecreator.png"
         />
       </Head>
       <ContactFormPage />

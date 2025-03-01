@@ -107,17 +107,17 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang='en' suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning>
         <Head>
           <meta
-            property='og:image'
-            content='https://ratecreator.com/ratecreator.png'
+            property="og:image"
+            content="https://ratecreator.com/ratecreator.png"
           />
-          <meta property='og:image:width' content='1200' />
-          <meta property='og:image:height' content='630' />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
           <meta
-            name='twitter:image'
-            content='https://ratecreator.com/ratecreator.png'
+            name="twitter:image"
+            content="https://ratecreator.com/ratecreator.png"
           />
         </Head>
 
