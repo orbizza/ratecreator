@@ -44,7 +44,7 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "/ratecreator-dark.svg",
+          url: "/ratecreator.png",
           width: 1200,
           height: 630,
           alt: `${category.name} Creators on Rate Creator`,
@@ -55,14 +55,14 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/ratecreator-dark.svg"],
+      images: ["/ratecreator.png"],
     },
   };
 }
 
 export default function CategoriesList() {
   return (
-    <div className="min-h-[calc(100vh-20vh)]">
+    <div className='min-h-[calc(100vh-20vh)]'>
       <CategoriesSearchResults />
     </div>
   );
