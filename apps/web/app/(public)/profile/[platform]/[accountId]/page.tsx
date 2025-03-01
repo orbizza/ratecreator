@@ -53,7 +53,7 @@ export async function generateMetadata({
         {
           url: new URL(
             account.imageUrl || "/ratecreator.png",
-            "https://ratecreator.com",
+            "https://ratecreator.com"
           ).toString(),
           width: 1200,
           height: 630,
@@ -69,7 +69,7 @@ export async function generateMetadata({
       images: [
         new URL(
           account.imageUrl || "/ratecreator.png",
-          "https://ratecreator.com",
+          "https://ratecreator.com"
         ).toString(),
       ],
       creator: "@ratecreator",
@@ -89,7 +89,7 @@ export default function ReviewProfile({
   params: { accountId: string; platform: string };
 }) {
   return (
-    <main className="min-h-[calc(100vh-20vh)]">
+    <main className='min-h-[calc(100vh-20vh)]'>
       <CreatorProfile accountId={accountId} platform={platform} />
     </main>
   );
