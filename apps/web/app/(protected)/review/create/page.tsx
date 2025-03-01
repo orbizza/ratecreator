@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const prisma = getPrismaClient();
   let creatorName = "Creator";
-
+  let creatorImageUrl = "";
   const platform = searchParams.platform;
   const accountId = searchParams.accountId;
 
@@ -24,11 +24,13 @@ export async function generateMetadata({
         select: {
           name_en: true,
           name: true,
+          imageUrl: true,
         },
       });
 
       if (creator) {
         creatorName = creator.name_en || creator.name || "Creator";
+        creatorImageUrl = creator?.imageUrl || "";
       }
     } catch (error) {
       console.error("Error fetching creator:", error);
@@ -48,7 +50,10 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "https://ratecreator.com/ratecreator.png",
+          url: new URL(
+            creatorImageUrl || "/ratecreator.png",
+            "https://ratecreator.com"
+          ).toString(),
           width: 1200,
           height: 630,
           alt: `Review ${creatorName} on RateCreator`,
@@ -59,14 +64,19 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["https://ratecreator.com/ratecreator.png"],
+      images: [
+        new URL(
+          creatorImageUrl || "/ratecreator.png",
+          "https://ratecreator.com"
+        ).toString(),
+      ],
     },
   };
 }
 
 export default function CreateReviewPage() {
   return (
-    <main className="min-h-[calc(100vh-20vh)]">
+    <main className='min-h-[calc(100vh-20vh)]'>
       <CreateReviewContent />
     </main>
   );
