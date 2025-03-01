@@ -32,20 +32,8 @@ export const metadata: Metadata = {
 
 export default function CategoriesList() {
   return (
-    <>
-      <Head>
-        <meta
-          property="og:image"
-          content="https://ratecreator.com/ratecreator.png"
-        />
-        <meta
-          name="twitter:image"
-          content="https://ratecreator.com/ratecreator.png"
-        />
-      </Head>
-      <div>
-        <CategoryListPage />
-      </div>
-    </>
+    <div>
+      <CategoryListPage />
+    </div>
   );
 }

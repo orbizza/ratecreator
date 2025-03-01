@@ -30,19 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return (
-    <>
-      <Head>
-        <meta
-          property="og:image"
-          content="https://ratecreator.com/ratecreator.png"
-        />
-        <meta
-          name="twitter:image"
-          content="https://ratecreator.com/ratecreator.png"
-        />
-      </Head>
-      <ContactFormPage />
-    </>
-  );
+  return <ContactFormPage />;
 }
