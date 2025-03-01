@@ -53,7 +53,7 @@ export async function generateMetadata({
 
 export default function SearchPage() {
   return (
-    <main className='min-h-[calc(100vh-20vh)]'>
+    <main className="min-h-[calc(100vh-20vh)]">
       <SearchResults />
     </main>
   );
