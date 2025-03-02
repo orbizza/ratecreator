@@ -225,13 +225,22 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
     >
       {/* Banner Section */}
       <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg ">
-        {account.ytData?.brandingSettings?.image?.bannerExternalUrl ? (
+        {account.bannerURL ? (
+          <Image
+            src={account.bannerURL}
+            alt={`${account.name_en || account.name}'s banner`}
+            fill
+            priority
+            className="object-cover rounded-lg drop-shadow-2xl"
+            sizes="100vw"
+          />
+        ) : account.ytData?.brandingSettings?.image?.bannerExternalUrl ? (
           <Image
             src={
               account.ytData.brandingSettings.image.bannerExternalUrl +
               "=w1707-fcrop64=1"
             }
-            alt={`${account.name_en}'s banner`}
+            alt={`${account.name_en || account.name}'s banner`}
             fill
             priority
             className="object-cover rounded-lg drop-shadow-2xl"
@@ -245,12 +254,12 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
           <Avatar className="w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg">
             <AvatarImage
               src={
-                account.ytData?.snippet?.thumbnails?.high?.url ||
-                account.imageUrl
+                account.imageUrl ||
+                account.ytData?.snippet?.thumbnails?.high?.url
               }
             />
             <AvatarFallback className="w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg">
-              {getInitials(account.name_en)}
+              {getInitials(account.name_en || account.name)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -261,7 +270,7 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
           <div className="flex flex-col space-y-4 md:space-y-6 md:flex-row justify-between lg:items-start">
             <div className="items-center">
               <h1 className="text-xl sm:text-2xl font-bold ml-4">
-                {account.name_en}
+                {account.name_en || account.name}
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground ml-4 mb-2">
                 {account.handle}

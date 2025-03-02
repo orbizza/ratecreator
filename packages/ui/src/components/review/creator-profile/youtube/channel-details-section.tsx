@@ -144,7 +144,16 @@ export const ChannelDetailsSection = ({
   }
 
   // Split keywords string into array and clean up each keyword
-  const keywords = account.keywords_en
+  const keywords_en = account.keywords_en
+    ?.match(/\\?"([^"]+)\\?"|[^\s]+/g) // Match quoted phrases or single words
+    ?.map((keyword) =>
+      keyword
+        .replace(/\\?"|\\?"/g, "") // Remove any quotes or escaped quotes
+        .trim(),
+    )
+    .filter((keyword) => keyword.length > 0);
+
+  const keywords = account.keywords
     ?.match(/\\?"([^"]+)\\?"|[^\s]+/g) // Match quoted phrases or single words
     ?.map((keyword) =>
       keyword
@@ -197,7 +206,31 @@ export const ChannelDetailsSection = ({
         </AccordionItem>
       </Accordion>
 
-      {keywords && keywords.length > 0 && (
+      {keywords_en && keywords_en.length > 0 && (
+        <>
+          <Separator />
+          <Accordion type="single" collapsible defaultValue="channel-keywords">
+            <AccordionItem value="channel-keywords" className="border-0">
+              <AccordionTrigger className="text-2xl font-bold hover:no-underline">
+                <div className="flex flex-row gap-x-2 items-center text-primary">
+                  <Hash size={28} />
+                  <span className="">Channel Keywords</span>
+                  <Info size={14} className="text-muted-foreground" />
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-wrap gap-2">
+                  {keywords_en.map((keyword, index) => (
+                    <KeywordBadge key={index} keyword={keyword} />
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </>
+      )}
+
+      {!keywords_en && keywords && keywords.length > 0 && (
         <>
           <Separator />
           <Accordion type="single" collapsible defaultValue="channel-keywords">

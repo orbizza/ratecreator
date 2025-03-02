@@ -93,7 +93,10 @@ export const TwitterDetailsSection = ({
     {
       icon: Users,
       label: "Followers",
-      value: account.followerCount || 0,
+      value:
+        account.xData?.public_metrics?.followers_count ||
+        account.followerCount ||
+        0,
     },
     {
       icon: ScrollText,

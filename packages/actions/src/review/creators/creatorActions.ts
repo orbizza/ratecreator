@@ -117,6 +117,8 @@ async function handleYoutubeAccount(
     await redis.set(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
       JSON.stringify(responseData),
+      "EX",
+      3600, // 1 hour TTL
     );
 
     return responseData;
@@ -188,6 +190,8 @@ async function handleTwitterAccount(
     await redis.set(
       `${CACHE_TWITTER_CREATOR}${accountId}`,
       JSON.stringify(responseData),
+      "EX",
+      3600, // 1 hour TTL
     );
 
     return responseData;
@@ -259,6 +263,8 @@ async function handleTiktokAccount(
     await redis.set(
       `${CACHE_TIKTOK_CREATOR}${accountId}`,
       JSON.stringify(responseData),
+      "EX",
+      3600, // 1 hour TTL
     );
 
     return responseData;
@@ -330,6 +336,8 @@ async function handleRedditAccount(
     await redis.set(
       `${CACHE_REDDIT_CREATOR}${accountId}`,
       JSON.stringify(responseData),
+      "EX",
+      3600, // 1 hour TTL
     );
 
     return responseData;
