@@ -1,7 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
 import { CategoryListPage } from "@ratecreator/ui/review";
-import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Categories",
