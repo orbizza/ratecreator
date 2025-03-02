@@ -1,3 +1,3 @@
 export default function NewsletterPage() {
-  return <div className=''>Newsletter</div>;
+  return <div className="">Newsletter</div>;
 }

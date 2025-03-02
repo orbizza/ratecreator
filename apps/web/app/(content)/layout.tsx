@@ -6,7 +6,7 @@ export default function ContentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className='min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto mt-12'>
+    <div className="min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto mt-12">
       <ContentNavbar />
       {children}
     </div>
