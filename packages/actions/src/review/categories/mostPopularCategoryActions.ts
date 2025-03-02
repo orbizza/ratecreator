@@ -1,7 +1,5 @@
 "use server";
 
-import axios from "axios";
-
 import {
   PopularCategory,
   PopularCategoryWithAccounts,
@@ -11,7 +9,6 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import getRedisClient from "@ratecreator/db/redis-do";
 import getMongoClient from "@ratecreator/db/mongo-client";
 import { ObjectId } from "mongodb";
-import { formatValue } from "@ratecreator/db/utils";
 const CACHE_POPULAR_CATEGORIES = "category-popular";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
@@ -21,10 +18,6 @@ const prisma = getPrismaClient();
 
 export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   try {
-    // const response = await axios.get(
-    //   `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=popular-categories`
-    // );
-    // return response.data;
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
     if (cachedCategories) {
       // console.log("Returning cached popular categories");
@@ -180,5 +173,110 @@ export async function getMostPopularCategoryWithData(): Promise<
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     throw new Error("Failed to fetch categories");
+  }
+}
+
+export async function getSingleCategoryWithAccounts(
+  categoryId: string,
+): Promise<PopularCategoryWithAccounts | null> {
+  const client = await getMongoClient();
+
+  try {
+    // Try to get cached category data first
+    const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${categoryId}`;
+    const cachedCategoryAccounts = await redis.get(categoryCacheKey);
+
+    if (cachedCategoryAccounts) {
+      return JSON.parse(cachedCategoryAccounts);
+    }
+
+    // If not in cache, fetch the category data
+    const database = client.db("ratecreator");
+    const categoryMappingCollection = database.collection("CategoryMapping");
+    const accountCollection = database.collection<Account>("Account");
+
+    // First get the category details
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    });
+
+    if (!category) {
+      return null;
+    }
+
+    const categoryObjectId = new ObjectId(categoryId);
+    const categoryMappings = await categoryMappingCollection
+      .find({ categoryId: categoryObjectId })
+      .toArray();
+
+    if (categoryMappings.length === 0) {
+      const emptyCategory: PopularCategoryWithAccounts = {
+        category: {
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+        } as any, // Type assertion to satisfy the PopularCategory interface
+        accounts: [],
+      };
+
+      // Cache with 1-hour expiry
+      await redis.set(
+        categoryCacheKey,
+        JSON.stringify(emptyCategory),
+        "EX",
+        3600, // 1 hour TTL
+      );
+
+      return emptyCategory;
+    }
+
+    const accountObjectIds = categoryMappings.map(
+      (mapping) => new ObjectId(mapping.accountId),
+    );
+
+    const accounts = await accountCollection
+      .find({
+        _id: { $in: accountObjectIds },
+      })
+      .sort({ followerCount: -1 })
+      .limit(20)
+      .toArray();
+
+    const categoryWithAccounts: PopularCategoryWithAccounts = {
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+      } as any, // Type assertion to satisfy the PopularCategory interface
+      accounts: accounts.map((account) => ({
+        id: account._id.toString(),
+        name: account.name || "",
+        handle: account.handle || "",
+        platform: account.platform,
+        accountId: account.accountId,
+        followerCount: account.followerCount || 0,
+        rating: parseFloat((account.rating || 0).toFixed(2)),
+        reviewCount: account.reviewCount || 0,
+        imageUrl: account.imageUrl || "",
+      })),
+    };
+
+    // Cache with 1-hour expiry
+    await redis.set(
+      categoryCacheKey,
+      JSON.stringify(categoryWithAccounts),
+      "EX",
+      3600, // 1 hour TTL
+    );
+
+    return categoryWithAccounts;
+  } catch (error) {
+    console.error(`Failed to fetch category ${categoryId}:`, error);
+    throw new Error(`Failed to fetch category ${categoryId}`);
   }
 }

@@ -230,10 +230,19 @@ const TwitterChannelHeader = ({
     >
       {/* Banner Section */}
       <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg ">
-        {account.xData?.profile_banner_url ? (
+        {account.bannerURL ? (
+          <Image
+            src={account.bannerURL}
+            alt={`${account.name_en || account.name}'s banner`}
+            fill
+            priority
+            className="object-cover rounded-lg drop-shadow-2xl"
+            sizes="100vw"
+          />
+        ) : account.xData?.profile_banner_url ? (
           <Image
             src={account.xData.profile_banner_url}
-            alt={`${account.name_en}'s banner`}
+            alt={`${account.name_en || account.name}'s banner`}
             fill
             priority
             className="object-cover rounded-lg drop-shadow-2xl"
@@ -249,7 +258,7 @@ const TwitterChannelHeader = ({
               src={removeNormalSuffix(account.imageUrl) || account.imageUrl}
             />
             <AvatarFallback className="w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg">
-              {getInitials(account.name_en)}
+              {getInitials(account.name_en || account.name)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -260,7 +269,7 @@ const TwitterChannelHeader = ({
           <div className="flex flex-col space-y-4 md:space-y-6 md:flex-row justify-between lg:items-start">
             <div className="items-center">
               <h1 className="text-xl sm:text-2xl font-bold ml-4 flex items-center gap-2">
-                {account.name_en}
+                {account.name_en || account.name}
                 {account.xData?.verified && (
                   <Verified
                     className={cn(
