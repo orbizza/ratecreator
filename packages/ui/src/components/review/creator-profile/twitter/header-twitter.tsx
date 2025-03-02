@@ -37,7 +37,7 @@ import { PlatformIcon } from "../../creator-rating/platform-icons";
 export const defaultBg = cn(
   "bg-gradient-to-r",
   "from-[#ffffff] via-[#f3e8de] to-[#efd4d4]",
-  "dark:from-[#646161] dark:via-[#333231] dark:to-[#0a0b0b]"
+  "dark:from-[#646161] dark:via-[#333231] dark:to-[#0a0b0b]",
 );
 
 const ratingOptions = [
@@ -72,7 +72,7 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
   const getRatingColor = (rating: number) => {
     return (
       ratingOptions.find(
-        (option) => rating >= option.range[0] && rating <= option.range[1]
+        (option) => rating >= option.range[0] && rating <= option.range[1],
       )?.color || "text-muted-foreground"
     );
   };
@@ -80,22 +80,22 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
   // Handle ratings less than 0.5
   if (count < 0.5) {
     return (
-      <div className='flex items-center space-x-[1px]'>
-        <div className='relative w-4 h-4'>
+      <div className="flex items-center space-x-[1px]">
+        <div className="relative w-4 h-4">
           <StarHalf
             size={16}
-            className='fill-current text-muted-foreground absolute left-0'
+            className="fill-current text-muted-foreground absolute left-0"
           />
           <StarHalf
             size={16}
-            className='fill-current text-muted-foreground absolute left-0 transform scale-x-[-1]'
+            className="fill-current text-muted-foreground absolute left-0 transform scale-x-[-1]"
           />
         </div>
         {Array.from({ length: 4 }).map((_, index) => (
           <Star
             key={`empty-${index}`}
             size={16}
-            className='fill-current text-muted-foreground'
+            className="fill-current text-muted-foreground"
           />
         ))}
       </div>
@@ -109,7 +109,7 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
   const starColor = getRatingColor(count);
 
   return (
-    <div className='flex items-center space-x-[1px]'>
+    <div className="flex items-center space-x-[1px]">
       {/* Full stars */}
       {Array.from({ length: fullStars }).map((_, index) => (
         <Star
@@ -121,7 +121,7 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
 
       {/* Half star */}
       {hasHalfStar && (
-        <div className='relative w-4 h-4'>
+        <div className="relative w-4 h-4">
           <StarHalf
             size={16}
             className={`fill-current ${starColor} absolute left-0`}
@@ -138,7 +138,7 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
         <Star
           key={`empty-${index}`}
           size={16}
-          className='fill-current text-muted-foreground'
+          className="fill-current text-muted-foreground"
         />
       ))}
     </div>
@@ -176,7 +176,7 @@ const ChannelNavigation = ({
   };
 
   return (
-    <nav className='flex justify-center lg:justify-start gap-1 md:gap-3 lg:gap-4 py-2'>
+    <nav className="flex justify-center lg:justify-start gap-1 md:gap-3 lg:gap-4 py-2">
       {tabs.map((tab) => (
         <button
           key={tab.name}
@@ -188,7 +188,7 @@ const ChannelNavigation = ({
             "px-4 py-2 text-sm transition-colors hover:text-primary",
             activeTab === tab.name
               ? "border-b-2 border-primary text-primary"
-              : "text-muted-foreground"
+              : "text-muted-foreground",
           )}
         >
           {tab.name}
@@ -224,20 +224,20 @@ const TwitterChannelHeader = ({
 
   return (
     <div
-      id='channel-header'
-      className='relative max-w-screen-2xl mx-auto'
+      id="channel-header"
+      className="relative max-w-screen-2xl mx-auto"
       ref={headerRef}
     >
       {/* Banner Section */}
-      <div className='relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg '>
+      <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg ">
         {account.bannerURL ? (
           <Image
             src={account.bannerURL}
             alt={`${account.name_en || account.name}'s banner`}
             fill
             priority
-            className='object-cover rounded-lg drop-shadow-2xl'
-            sizes='100vw'
+            className="object-cover rounded-lg drop-shadow-2xl"
+            sizes="100vw"
           />
         ) : account.xData?.profile_banner_url ? (
           <Image
@@ -245,30 +245,30 @@ const TwitterChannelHeader = ({
             alt={`${account.name_en || account.name}'s banner`}
             fill
             priority
-            className='object-cover rounded-lg drop-shadow-2xl'
-            sizes='100vw'
+            className="object-cover rounded-lg drop-shadow-2xl"
+            sizes="100vw"
           />
         ) : (
           <div className={cn("w-full h-full rounded-lg", defaultBg)} />
         )}
 
-        <div className='absolute -bottom-32 left-6'>
-          <Avatar className='w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg'>
+        <div className="absolute -bottom-32 left-6">
+          <Avatar className="w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg">
             <AvatarImage
               src={removeNormalSuffix(account.imageUrl) || account.imageUrl}
             />
-            <AvatarFallback className='w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg'>
+            <AvatarFallback className="w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg">
               {getInitials(account.name_en || account.name)}
             </AvatarFallback>
           </Avatar>
         </div>
       </div>
 
-      <Card className='w-full border-none rounded-none bg-background'>
-        <CardHeader className='pt-4 pl-48 space-y-6'>
-          <div className='flex flex-col space-y-4 md:space-y-6 md:flex-row justify-between lg:items-start'>
-            <div className='items-center'>
-              <h1 className='text-xl sm:text-2xl font-bold ml-4 flex items-center gap-2'>
+      <Card className="w-full border-none rounded-none bg-background">
+        <CardHeader className="pt-4 pl-48 space-y-6">
+          <div className="flex flex-col space-y-4 md:space-y-6 md:flex-row justify-between lg:items-start">
+            <div className="items-center">
+              <h1 className="text-xl sm:text-2xl font-bold ml-4 flex items-center gap-2">
                 {account.name_en || account.name}
                 {account.xData?.verified && (
                   <Verified
@@ -279,74 +279,74 @@ const TwitterChannelHeader = ({
                       account.xData?.verified_type === "government" &&
                         "fill-[#829AAB] text-secondary-foreground",
                       account.xData?.verified_type == "blue" &&
-                        "fill-[#1E9BF0] text-secondary-foreground"
+                        "fill-[#1E9BF0] text-secondary-foreground",
                     )}
                     strokeWidth={2}
                   />
                 )}
               </h1>
-              <p className='text-sm sm:text-base text-muted-foreground ml-4 mb-2'>
+              <p className="text-sm sm:text-base text-muted-foreground ml-4 mb-2">
                 @{account.handle}
               </p>
 
-              <div className='flex flex-col sm:flex-row items-start sm:items-center sm:gap-2 ml-4'>
-                <div className='flex items-center gap-x-1 mb-1 sm:mb-0'>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:gap-2 ml-4">
+                <div className="flex items-center gap-x-1 mb-1 sm:mb-0">
                   <RatingStars count={account.rating || 0} />
-                  <span className='text-md text-primary'>
+                  <span className="text-md text-primary">
                     ({formatFloat(account.rating || 0)})
                   </span>
                   <Separator
-                    orientation='vertical'
-                    className='hidden sm:block h-5 mr-2 bg-secondary-foreground'
+                    orientation="vertical"
+                    className="hidden sm:block h-5 mr-2 bg-secondary-foreground"
                   />
                 </div>
-                <div className='flex items-center text-md text-green-500'>
+                <div className="flex items-center text-md text-green-500">
                   {account.reviewCount > 1
                     ? `${formatValue(account.reviewCount)} reviews`
                     : `${account.reviewCount} review`}
                 </div>
               </div>
 
-              <div className='flex flex-col-reverse sm:flex-row items-start sm:items-center sm:gap-2 '>
-                <div className='flex items-center gap-x-1 mb-1 sm:mb-0 '>
-                  <Link href='#'>
+              <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center sm:gap-2 ">
+                <div className="flex items-center gap-x-1 mb-1 sm:mb-0 ">
+                  <Link href="#">
                     <Button
-                      variant='link'
-                      className='flex items-center gap-2 text-primary'
+                      variant="link"
+                      className="flex items-center gap-2 text-primary"
                     >
-                      <Heart className='w-4 h-4' />
+                      <Heart className="w-4 h-4" />
                       Save to My Lists
                     </Button>
                   </Link>
                   <Separator
-                    orientation='vertical'
-                    className='hidden sm:block h-5 mr-4 bg-secondary-foreground'
+                    orientation="vertical"
+                    className="hidden sm:block h-5 mr-4 bg-secondary-foreground"
                   />
                 </div>
-                <div className='flex items-center gap-2 ml-3 sm:ml-0 mt-1'>
+                <div className="flex items-center gap-2 ml-3 sm:ml-0 mt-1">
                   {/* ToDo: Add verified badge when we have a way to check if the channel is claimed */}
                   {/* <Verified className='w-5 h-5 fill-green-500 dark:fill-green-700 text-secondary-foreground' />
                   <span className='text-sm text-secondary-foreground'>
                     Claimed
                   </span> */}
-                  <BadgeAlert className='w-5 h-5 fill-orange-500  text-secondary-foreground' />
-                  <span className='text-sm text-secondary-foreground'>
+                  <BadgeAlert className="w-5 h-5 fill-orange-500  text-secondary-foreground" />
+                  <span className="text-sm text-secondary-foreground">
                     Unclaimed
                   </span>
                 </div>
               </div>
             </div>
-            <div className='hidden md:flex flex-col lg:flex-row items-center space-x-4 space-y-5 lg:space-y-0'>
+            <div className="hidden md:flex flex-col lg:flex-row items-center space-x-4 space-y-5 lg:space-y-0">
               <Link
                 href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
               >
-                <button className='block text-left py-2 px-5 md:ml-3 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
+                <button className="block text-left py-2 px-5 md:ml-3 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                   Write a Review
                 </button>
               </Link>
-              <Link href={`https://x.com/${account.handle}`} target='_blank'>
-                <Button variant='secondary' className='gap-2'>
-                  <PlatformIcon platform='twitter' />
+              <Link href={`https://x.com/${account.handle}`} target="_blank">
+                <Button variant="secondary" className="gap-2">
+                  <PlatformIcon platform="twitter" />
                   View Profile
                 </Button>
               </Link>
@@ -355,7 +355,7 @@ const TwitterChannelHeader = ({
 
           <div
             ref={navigationRef}
-            className='hidden lg:block h-10 border-t border-border'
+            className="hidden lg:block h-10 border-t border-border"
           >
             <ChannelNavigation
               activeTab={activeTab}
@@ -364,17 +364,17 @@ const TwitterChannelHeader = ({
           </div>
         </CardHeader>
 
-        <div className='grid grid-cols-2 md:hidden w-full items-center justify-center gap-2 mb-2'>
+        <div className="grid grid-cols-2 md:hidden w-full items-center justify-center gap-2 mb-2">
           <Link
             href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
           >
-            <button className='block w-full text-center py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
+            <button className="block w-full text-center py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
               Write a Review
             </button>
           </Link>
-          <Link href={`https://x.com/${account.handle}`} target='_blank'>
-            <Button variant='secondary' size='default' className='gap-2 w-full'>
-              <PlatformIcon platform='twitter' />
+          <Link href={`https://x.com/${account.handle}`} target="_blank">
+            <Button variant="secondary" size="default" className="gap-2 w-full">
+              <PlatformIcon platform="twitter" />
               View Profile
             </Button>
           </Link>
@@ -382,7 +382,7 @@ const TwitterChannelHeader = ({
 
         <div
           ref={navigationRef}
-          className='block lg:hidden border-t border-border'
+          className="block lg:hidden border-t border-border"
         >
           <ChannelNavigation activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
@@ -393,39 +393,39 @@ const TwitterChannelHeader = ({
             "transition-all duration-200",
             isSticky
               ? "fixed top-[58px] lg:top-16 left-0 right-0 z-40"
-              : "hidden"
+              : "hidden",
           )}
         >
-          <div className='w-full bg-background/60 backdrop-blur-lg'>
-            <div className='max-w-screen-xl mx-auto border-b border-border'>
-              <div className='flex items-center justify-between md:px-4'>
-                <div className='flex flex-col md:flex-row items-center lg:gap-4'>
-                  <div className='hidden lg:flex lg:flex-row items-center gap-2 lg:gap-x-6'>
-                    <Avatar className='w-12 h-12 rounded-lg border border-border'>
+          <div className="w-full bg-background/60 backdrop-blur-lg">
+            <div className="max-w-screen-xl mx-auto border-b border-border">
+              <div className="flex items-center justify-between md:px-4">
+                <div className="flex flex-col md:flex-row items-center lg:gap-4">
+                  <div className="hidden lg:flex lg:flex-row items-center gap-2 lg:gap-x-6">
+                    <Avatar className="w-12 h-12 rounded-lg border border-border">
                       <AvatarImage
                         src={
                           account.ytData?.snippet?.thumbnails?.high?.url ||
                           account.imageUrl
                         }
                       />
-                      <AvatarFallback className='bg-primary/10 text-primary rounded-lg w-12 h-12'>
+                      <AvatarFallback className="bg-primary/10 text-primary rounded-lg w-12 h-12">
                         {getInitials(account.name_en)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className='flex flex-col'>
-                      <span className='font-medium'>
+                    <div className="flex flex-col">
+                      <span className="font-medium">
                         {truncateText(account.name_en, 20)}
                       </span>
-                      <span className='text-sm text-muted-foreground'>
+                      <span className="text-sm text-muted-foreground">
                         @{truncateText(account.handle, 20)}
                       </span>
                     </div>
-                    <div className='flex flex-col items-center'>
-                      <div className='flex items-center'>
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center">
                         <RatingStars count={account.rating || 0} />
                       </div>
-                      <div className='flex flex-row items-center'>
-                        <span className='text-sm'>
+                      <div className="flex flex-row items-center">
+                        <span className="text-sm">
                           {account.reviewCount > 1
                             ? `${formatValue(account.reviewCount)} reviews`
                             : `${account.reviewCount} review`}
@@ -434,31 +434,31 @@ const TwitterChannelHeader = ({
                     </div>
                   </div>
                 </div>
-                <div className='w-full md:w-auto flex justify-center items-center gap-2'>
+                <div className="w-full md:w-auto flex justify-center items-center gap-2">
                   <ChannelNavigation
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                   />
                 </div>
 
-                <div className='hidden md:flex md:flex-row items-center md:gap-2'>
+                <div className="hidden md:flex md:flex-row items-center md:gap-2">
                   <Link
                     href={`/review/create?stars=0&accountId=${account.accountId}&platform=twitter`}
                   >
-                    <button className='hidden md:block text-left py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'>
+                    <button className="hidden md:block text-left py-2 px-2 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground">
                       Write a Review
                     </button>
                   </Link>
                   <Link
                     href={`https://x.com/${account.handle}`}
-                    target='_blank'
+                    target="_blank"
                   >
                     <Button
-                      variant='secondary'
-                      size='default'
-                      className='hidden lg:flex gap-2'
+                      variant="secondary"
+                      size="default"
+                      className="hidden lg:flex gap-2"
                     >
-                      <PlatformIcon platform='twitter' />
+                      <PlatformIcon platform="twitter" />
                       View Profile
                     </Button>
                   </Link>

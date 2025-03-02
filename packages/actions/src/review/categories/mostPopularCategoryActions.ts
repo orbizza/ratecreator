@@ -37,7 +37,7 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
 
     await redis.set(
       CACHE_POPULAR_CATEGORIES,
-      JSON.stringify(popularCategories)
+      JSON.stringify(popularCategories),
     );
     console.log("Popular Categories cached in Redis");
 
@@ -104,7 +104,7 @@ export async function getMostPopularCategoryWithData(): Promise<
             }
 
             const accountObjectIds = categoryMappings.map(
-              (mapping) => new ObjectId(mapping.accountId)
+              (mapping) => new ObjectId(mapping.accountId),
             );
 
             const accounts = await accountCollection
@@ -137,11 +137,11 @@ export async function getMostPopularCategoryWithData(): Promise<
             // Cache individual category data with TTL
             await redis.set(
               categoryCacheKey,
-              JSON.stringify(categoryWithAccounts)
+              JSON.stringify(categoryWithAccounts),
             );
 
             return categoryWithAccounts;
-          })()
+          })(),
         );
       } catch (error) {
         console.error(`Error processing category ${category.id}:`, error);
@@ -164,7 +164,7 @@ export async function getMostPopularCategoryWithData(): Promise<
     // Cache the full response with TTL
     await redis.set(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
-      JSON.stringify(accountsByCategory)
+      JSON.stringify(accountsByCategory),
       // "EX",
       // 3600, // 1 hour TTL
     );
@@ -177,7 +177,7 @@ export async function getMostPopularCategoryWithData(): Promise<
 }
 
 export async function getSingleCategoryWithAccounts(
-  categoryId: string
+  categoryId: string,
 ): Promise<PopularCategoryWithAccounts | null> {
   const client = await getMongoClient();
 
@@ -229,14 +229,14 @@ export async function getSingleCategoryWithAccounts(
         categoryCacheKey,
         JSON.stringify(emptyCategory),
         "EX",
-        3600 // 1 hour TTL
+        3600, // 1 hour TTL
       );
 
       return emptyCategory;
     }
 
     const accountObjectIds = categoryMappings.map(
-      (mapping) => new ObjectId(mapping.accountId)
+      (mapping) => new ObjectId(mapping.accountId),
     );
 
     const accounts = await accountCollection
@@ -271,7 +271,7 @@ export async function getSingleCategoryWithAccounts(
       categoryCacheKey,
       JSON.stringify(categoryWithAccounts),
       "EX",
-      3600 // 1 hour TTL
+      3600, // 1 hour TTL
     );
 
     return categoryWithAccounts;
