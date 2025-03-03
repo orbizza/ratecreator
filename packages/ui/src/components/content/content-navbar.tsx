@@ -14,22 +14,23 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  {
-    name: "Blog",
-    link: "/blog",
-  },
+  // TODO: Enable each section when they are ready
+  // {
+  //   name: "Blog",
+  //   link: "/blog",
+  // },
   {
     name: "Category Glossary",
     link: "/category-glossary",
   },
-  {
-    name: "Creator Economy Glossary",
-    link: "/glossary",
-  },
-  {
-    name: "Newsletter",
-    link: "/newsletter",
-  },
+  // {
+  //   name: "Creator Economy Glossary",
+  //   link: "/glossary",
+  // },
+  // {
+  //   name: "Newsletter",
+  //   link: "/newsletter",
+  // },
 ];
 
 export const ContentNavbar = () => {

@@ -466,6 +466,15 @@ export const CommandBar: React.FC<{ children: React.ReactNode }> = ({
       icon: <Book size={20} />,
     },
     {
+      id: "category-glossary",
+      name: "Category Glossary",
+      shortcut: ["c", "g"],
+      keywords: "category-glossary",
+      section: "General",
+      perform: () => router.push("/category-glossary"),
+      icon: <Book size={20} />,
+    },
+    {
       id: "categories",
       name: "Categories",
       shortcut: ["g", "c"],

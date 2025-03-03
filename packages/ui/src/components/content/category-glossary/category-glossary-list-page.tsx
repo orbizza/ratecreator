@@ -176,7 +176,7 @@ export const CategoryGlossaryListPage = () => {
   if (error) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Categories Glossary</h1>
+        <h1 className="text-3xl font-bold mb-6">Category Glossary</h1>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
           {error}
         </div>
@@ -209,7 +209,7 @@ export const CategoryGlossaryListPage = () => {
 
       {/* Main content */}
       <div className="flex-1 md:pr-8 pb-16 md:pb-0">
-        <h1 className="text-3xl font-bold mb-2">Categories Glossary</h1>
+        <h1 className="text-3xl font-bold mb-2">Category Glossary</h1>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
           Explore a vast collection of categories covering diverse topics.{" "}
           <span className="text-primary">Discover and review creators</span> and
