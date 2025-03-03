@@ -20,6 +20,13 @@ export interface Category {
   accounts?: CategoryMapping[];
 }
 
+export interface GlossaryCategory {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription?: string | null;
+}
+
 export interface SearchResult extends Category {
   parentCategory?: string;
 }

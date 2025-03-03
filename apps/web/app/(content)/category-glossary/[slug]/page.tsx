@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getPrismaClient } from "@ratecreator/db/client";
+import { CategoryGlossaryPost } from "@ratecreator/ui/content";
 
 export async function generateMetadata({
   params: { slug },
@@ -27,7 +28,7 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${category.name}`;
+  const title = `Glossary - ${category.name}`;
   const description =
     category.shortDescription ||
     `Discover and review ${category.name.toLowerCase()} content creators. Find ratings, reviews, and insights from the community.`;
@@ -58,5 +59,5 @@ export async function generateMetadata({
 }
 
 export default function CategoryGlossaryDetailPage() {
-  return <div>Category Glossary Detail</div>;
+  return <CategoryGlossaryPost />;
 }
