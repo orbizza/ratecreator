@@ -41,12 +41,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // const categoryGlossaryRoutes = categories.map((category) => ({
-  //   url: `${baseUrl}/category-glossary/${category.slug}`,
-  //   lastModified: category.updatedAt,
-  //   changeFrequency: "weekly" as const,
-  //   priority: 0.7,
-  // }));
+  const categoryGlossaryRoutes = categories.map((category) => ({
+    url: `${baseUrl}/category-glossary/${category.slug}`,
+    lastModified: category.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
 
-  return [...routes, ...categoryRoutes];
+  return [...routes, ...categoryRoutes, ...categoryGlossaryRoutes];
 }
