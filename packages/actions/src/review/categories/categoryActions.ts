@@ -49,7 +49,7 @@ export async function getCategoryData(): Promise<Category[]> {
       CACHE_ALL_CATEGORIES,
       JSON.stringify(allCategories),
       "EX",
-      CACHE_EXPIRY
+      CACHE_EXPIRY,
     );
     console.log("All Categories cached in Redis for 24 hours");
 
@@ -57,7 +57,7 @@ export async function getCategoryData(): Promise<Category[]> {
       CACHE_ROOT_CATEGORIES,
       JSON.stringify(rootCategories),
       "EX",
-      CACHE_EXPIRY
+      CACHE_EXPIRY,
     );
     console.log("Root Categories cached in Redis for 24 hours");
 
@@ -114,7 +114,7 @@ export async function getAllCategoriesAlphabetically(): Promise<{
       CACHE_ALPHABETICAL_CATEGORIES,
       JSON.stringify(categoriesByLetter),
       "EX",
-      CACHE_EXPIRY
+      CACHE_EXPIRY,
     );
     console.log("Alphabetical Categories cached in Redis for 24 hours");
 
@@ -131,7 +131,7 @@ interface SingleGlossaryCategory {
 }
 
 export async function getSingleGlossaryCategory(
-  slug: string
+  slug: string,
 ): Promise<SingleGlossaryCategory> {
   const redis = getRedisClient();
   const prisma = getPrismaClient();
@@ -169,7 +169,7 @@ export async function getSingleGlossaryCategory(
       CACHE_SINGLE_GLOSSARY_CATEGORY,
       JSON.stringify({ category, accounts }),
       "EX",
-      CACHE_EXPIRY
+      CACHE_EXPIRY,
     );
     console.log("Alphabetical Categories cached in Redis for 24 hours");
 
