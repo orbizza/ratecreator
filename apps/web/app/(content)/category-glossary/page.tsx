@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { CategoryGlossaryListPage } from "@ratecreator/ui/content";
+
 export const metadata: Metadata = {
   title: "Categories Glossary",
   description: "Glossary of categories and their definitions.",
@@ -25,5 +27,5 @@ export const metadata: Metadata = {
 };
 
 export default function CategoryGlossaryPage() {
-  return <div>Category Glossary</div>;
+  return <CategoryGlossaryListPage />;
 }
