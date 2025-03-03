@@ -188,15 +188,27 @@ export function MobileSideNav() {
                   </div>
                 </Button>
               </SheetClose>
-              <SheetClose asChild>
+              {/* <SheetClose asChild>
                 <Button
                   variant={"ghost"}
                   onClick={() => handleNavigation("/wip")}
+                  className='flex justify-between'
+                >
+                  <div className='flex items-center'>
+                    <Library className='mr-4 size-4' />
+                    <span>Blog</span>
+                  </div>
+                </Button>
+              </SheetClose> */}
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/category-glossary")}
                   className="flex justify-between"
                 >
                   <div className="flex items-center">
                     <Library className="mr-4 size-4" />
-                    <span>Blog</span>
+                    <span>Glossary</span>
                   </div>
                 </Button>
               </SheetClose>
@@ -330,15 +342,27 @@ export function MobileSideNav() {
                   </div>
                 </Button>
               </SheetClose>
-              <SheetClose asChild>
+              {/* <SheetClose asChild>
                 <Button
                   variant={"ghost"}
                   onClick={() => handleNavigation("/wip")}
+                  className='flex justify-between'
+                >
+                  <div className='flex items-center'>
+                    <Library className='mr-4 size-4' />
+                    <span>Blog</span>
+                  </div>
+                </Button>
+              </SheetClose> */}
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/category-glossary")}
                   className="flex justify-between"
                 >
                   <div className="flex items-center">
                     <Library className="mr-4 size-4" />
-                    <span>Blog</span>
+                    <span>Glossary</span>
                   </div>
                 </Button>
               </SheetClose>

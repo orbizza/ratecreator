@@ -73,8 +73,14 @@ export function MainMenu() {
           >
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
+          {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
+          </Button> */}
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/category-glossary")}
+          >
+            Glossary
           </Button>
 
           <DropdownMenu>
@@ -191,8 +197,14 @@ export function MainMenu() {
           >
             Categories
           </Button>
-          <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
+          {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
+          </Button> */}
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/category-glossary")}
+          >
+            Glossary
           </Button>
           <Button
             variant={"outline"}

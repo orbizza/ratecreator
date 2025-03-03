@@ -17,7 +17,7 @@ export const CategoryGlossarySkeleton = () => {
       </div>
 
       <div className="flex-1 md:pr-8 pb-16 md:pb-0">
-        <h1 className="text-3xl font-bold mb-2">Categories Glossary</h1>
+        <h1 className="text-3xl font-bold mb-2">Category Glossary</h1>
 
         {/* Description skeleton */}
         <Skeleton className="h-16 w-full max-w-2xl mb-8" />
