@@ -60,6 +60,7 @@
     "cmdk": "^1.0.4",
     "cobe": "^0.6.3",
     "framer-motion": "^11.18.2",
+    "fuzzy-search": "^3.2.1",
     "kbar": "^0.1.0-beta.45",
     "lucide-react": "^0.428.0",
     "mini-svg-data-uri": "^1.4.4",

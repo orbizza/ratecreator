@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-import { Category } from "@ratecreator/types/review";
+import { Category, GlossaryCategory } from "@ratecreator/types/review";
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 const CACHE_ROOT_CATEGORIES = "category-root";
@@ -49,7 +49,7 @@ export async function getCategoryData(): Promise<Category[]> {
       CACHE_ALL_CATEGORIES,
       JSON.stringify(allCategories),
       "EX",
-      CACHE_EXPIRY,
+      CACHE_EXPIRY
     );
     console.log("All Categories cached in Redis for 24 hours");
 
@@ -57,7 +57,7 @@ export async function getCategoryData(): Promise<Category[]> {
       CACHE_ROOT_CATEGORIES,
       JSON.stringify(rootCategories),
       "EX",
-      CACHE_EXPIRY,
+      CACHE_EXPIRY
     );
     console.log("Root Categories cached in Redis for 24 hours");
 
@@ -69,7 +69,7 @@ export async function getCategoryData(): Promise<Category[]> {
 }
 
 export async function getAllCategoriesAlphabetically(): Promise<{
-  [key: string]: Category[];
+  [key: string]: GlossaryCategory[];
 }> {
   const redis = getRedisClient();
   const prisma = getPrismaClient();
@@ -90,10 +90,16 @@ export async function getAllCategoriesAlphabetically(): Promise<{
       where: {
         deletedAt: null,
       },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        shortDescription: true,
+      },
     });
 
     // Group categories by first letter
-    const categoriesByLetter: { [key: string]: Category[] } = {};
+    const categoriesByLetter: { [key: string]: GlossaryCategory[] } = {};
 
     allCategories.forEach((category) => {
       const firstLetter = category.name.charAt(0).toUpperCase();
@@ -108,7 +114,7 @@ export async function getAllCategoriesAlphabetically(): Promise<{
       CACHE_ALPHABETICAL_CATEGORIES,
       JSON.stringify(categoriesByLetter),
       "EX",
-      CACHE_EXPIRY,
+      CACHE_EXPIRY
     );
     console.log("Alphabetical Categories cached in Redis for 24 hours");
 
@@ -116,5 +122,60 @@ export async function getAllCategoriesAlphabetically(): Promise<{
   } catch (error) {
     console.error("Failed to fetch alphabetical categories:", error);
     throw new Error("Failed to fetch alphabetical categories");
+  }
+}
+
+interface SingleGlossaryCategory {
+  category: Category;
+  accounts: number;
+}
+
+export async function getSingleGlossaryCategory(
+  slug: string
+): Promise<SingleGlossaryCategory> {
+  const redis = getRedisClient();
+  const prisma = getPrismaClient();
+  const CACHE_SINGLE_GLOSSARY_CATEGORY = `category-single-glossary-${slug}`;
+  const CACHE_EXPIRY = 60 * 60 * 24; // 24 hours in seconds
+
+  try {
+    // Check cache first
+    const cachedCategories = await redis.get(CACHE_SINGLE_GLOSSARY_CATEGORY);
+    if (cachedCategories) {
+      console.log("Returning cached single glossary category");
+      return JSON.parse(cachedCategories);
+    }
+
+    // Fetch all categories from database
+    const category = await prisma.category.findUnique({
+      where: {
+        slug: slug,
+      },
+    });
+
+    if (!category) {
+      console.log("No category found for slug:", slug);
+      return null as unknown as SingleGlossaryCategory;
+    }
+
+    const accounts = await prisma.categoryMapping.count({
+      where: {
+        categoryId: category.id,
+      },
+    });
+
+    // Cache the result with 24-hour expiration
+    await redis.set(
+      CACHE_SINGLE_GLOSSARY_CATEGORY,
+      JSON.stringify({ category, accounts }),
+      "EX",
+      CACHE_EXPIRY
+    );
+    console.log("Alphabetical Categories cached in Redis for 24 hours");
+
+    return { category, accounts };
+  } catch (error) {
+    console.error("Failed to fetch single glossary category:", error);
+    throw new Error("Failed to fetch single glossary category");
   }
 }
