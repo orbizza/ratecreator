@@ -61,15 +61,15 @@ export async function generateMetadata({
     switch (platform) {
       case "reddit":
         return `A Reddit community with ${formatValue(
-          account.followerCount || 0
+          account.followerCount || 0,
         )} members. View their ratings and reviews on Rate Creator.`;
       case "youtube":
         return `A ${getLabelText(platform)} creator with ${formatValue(
-          account.followerCount || 0
+          account.followerCount || 0,
         )} subscribers. View their ratings and reviews on Rate Creator.`;
       default:
         return `A ${getLabelText(platform)} creator with ${formatValue(
-          account.followerCount || 0
+          account.followerCount || 0,
         )} followers. View their ratings and reviews on Rate Creator.`;
     }
   };
@@ -87,7 +87,7 @@ export async function generateMetadata({
         {
           url: new URL(
             account.imageUrl || "/ratecreator.png",
-            metadataBase
+            metadataBase,
           ).toString(),
           width: 1200,
           height: 630,
@@ -103,7 +103,7 @@ export async function generateMetadata({
       images: [
         new URL(
           account.imageUrl || "/ratecreator.png",
-          metadataBase
+          metadataBase,
         ).toString(),
       ],
       creator: "@ratecreator",
@@ -123,7 +123,7 @@ export default function ReviewProfile({
   params: { accountId: string; platform: string };
 }) {
   return (
-    <main className='min-h-[calc(100vh-20vh)]'>
+    <main className="min-h-[calc(100vh-20vh)]">
       <CreatorProfile accountId={accountId} platform={platform} />
     </main>
   );

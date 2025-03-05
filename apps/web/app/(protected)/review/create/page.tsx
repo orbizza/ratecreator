@@ -67,7 +67,7 @@ export async function generateMetadata({
         {
           url: new URL(
             creatorImageUrl || "/ratecreator.png",
-            "https://ratecreator.com"
+            "https://ratecreator.com",
           ).toString(),
           width: 1200,
           height: 630,
@@ -82,7 +82,7 @@ export async function generateMetadata({
       images: [
         new URL(
           creatorImageUrl || "/ratecreator.png",
-          "https://ratecreator.com"
+          "https://ratecreator.com",
         ).toString(),
       ],
     },
@@ -91,7 +91,7 @@ export async function generateMetadata({
 
 export default function CreateReviewPage() {
   return (
-    <main className='min-h-[calc(100vh-20vh)]'>
+    <main className="min-h-[calc(100vh-20vh)]">
       <CreateReviewContent />
     </main>
   );
