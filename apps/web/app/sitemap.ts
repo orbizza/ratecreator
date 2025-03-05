@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/privacy",
     "/cookie-policy",
     "/category-glossary",
+    "/search",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -37,16 +38,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categories/${category.slug}`,
     lastModified: category.updatedAt,
-    changeFrequency: "weekly" as const,
+    changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 
   const categoryGlossaryRoutes = categories.map((category) => ({
     url: `${baseUrl}/category-glossary/${category.slug}`,
     lastModified: category.updatedAt,
-    changeFrequency: "weekly" as const,
+    changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 
-  return [...routes, ...categoryRoutes, ...categoryGlossaryRoutes];
+  // For profile routes, we'll only include a subset of the most important ones
+  // This prevents timeout issues with 3M records
+  const topProfiles = await prisma.account.findMany({
+    where: {
+      isSuspended: false,
+    },
+    orderBy: [{ followerCount: "desc" }],
+    select: {
+      platform: true,
+      accountId: true,
+      updatedAt: true,
+    },
+    take: 5000, // Limit to top 5000 profiles by review count and follower count
+  });
+
+  const profileRoutes = topProfiles.map((profile) => ({
+    url: `${baseUrl}/profile/${profile.platform.toLowerCase()}/${profile.accountId}`,
+    lastModified: profile.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...routes,
+    ...categoryRoutes,
+    ...categoryGlossaryRoutes,
+    ...profileRoutes,
+  ];
 }

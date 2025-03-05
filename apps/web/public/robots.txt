@@ -1,12 +1,37 @@
-# *
+# Allow all user-agents but disallow specific paths
 User-agent: *
 Allow: /
 Disallow: /api/*
 Disallow: /admin/*
 Disallow: /private/*
 
+# Allow AI Crawlers Explicitly
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: CCbot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
 # Host
 Host: https://ratecreator.com
 
 # Sitemaps
-Sitemap: https://ratecreator.com/sitemap.xml 
+Sitemap: https://ratecreator.com/sitemap.xml
