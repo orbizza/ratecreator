@@ -1,0 +1,4 @@
+{
+  "buildCommand": "yarn build && yarn generate-sitemaps",
+  "outputDirectory": "apps/web/.next"
+}

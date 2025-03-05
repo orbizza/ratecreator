@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/privacy",
     "/cookie-policy",
     "/category-glossary",
+    "/search",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -37,14 +38,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categories/${category.slug}`,
     lastModified: category.updatedAt,
-    changeFrequency: "weekly" as const,
+    changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 
   const categoryGlossaryRoutes = categories.map((category) => ({
     url: `${baseUrl}/category-glossary/${category.slug}`,
     lastModified: category.updatedAt,
-    changeFrequency: "weekly" as const,
+    changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 
