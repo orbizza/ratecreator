@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "vercel-build": "cd ../../packages/ui && yarn build && cd ../../apps/web && prisma generate --schema=../../packages/db/prisma/schema.prisma && next build",
+    "vercel-build": "cd ../../packages/ui && yarn build && cd ../../apps/web && prisma generate --schema=../../packages/db/prisma/schema.prisma && next build && next-sitemap",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
@@ -20,6 +20,7 @@
     "@ratecreator/ui": "*",
     "@sentry/nextjs": "^9",
     "next": "^14.2.21",
+    "next-sitemap": "^4.2.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

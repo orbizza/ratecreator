@@ -15,7 +15,7 @@ export const metadataBase = new URL("https://ratecreator.com");
 
 export const metadata: Metadata = {
   title: {
-    default: "Rate Creator - Search and Review Creators and Communities",
+    default: "Rate Creator - Discover and Review Creators and Communities",
     template: "%s - Rate Creator",
   },
   description:
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "Rate Creator - Search and Review Content Creators",
+    title: "Rate Creator - Discover and Review Creators and Communities",
     description:
       "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
     url: "/",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rate Creator - Search and Review Content Creators",
+    title: "Rate Creator - Discover and Review Creators and Communities",
     description:
       "Discover and review content creators across different platforms. Get insights, ratings, and detailed reviews from the community.",
     creator: "@ratecreator",
@@ -107,7 +107,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
             <Providers>
