@@ -1,10 +1,13 @@
 import React from "react";
 import { Metadata } from "next";
+
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorProfile } from "@ratecreator/ui/review";
 import { Platform } from "@ratecreator/types/review";
 import { formatFloat, formatValue } from "@ratecreator/db/utils";
-// Generate dynamic metadata for creator profiles
+
+import { metadataBase } from "../../../../layout";
+
 export async function generateMetadata({
   params: { accountId, platform },
 }: {
@@ -39,21 +42,52 @@ export async function generateMetadata({
       description: "The creator profile you're looking for could not be found.",
     };
   }
+  const getLabelText = (platform: string) => {
+    switch (platform) {
+      case "youtube":
+        return "YouTube";
+      case "twitter":
+        return "X";
+      case "tiktok":
+        return "TikTok";
+      case "reddit":
+        return "Reddit";
+      default:
+        return platform;
+    }
+  };
+
+  const getDescriptionText = (platform: string) => {
+    switch (platform) {
+      case "reddit":
+        return `A Reddit community with ${formatValue(
+          account.followerCount || 0,
+        )} members. View their ratings and reviews on Rate Creator.`;
+      case "youtube":
+        return `A ${getLabelText(platform)} creator with ${formatValue(
+          account.followerCount || 0,
+        )} subscribers. View their ratings and reviews on Rate Creator.`;
+      default:
+        return `A ${getLabelText(platform)} creator with ${formatValue(
+          account.followerCount || 0,
+        )} followers. View their ratings and reviews on Rate Creator.`;
+    }
+  };
 
   const name = account.name_en || account.name || account.handle || "Creator";
-  const description = `${name} is a creator on ${platform}. View their ratings and reviews on Rate Creator.`;
+  const description = getDescriptionText(platform);
 
   return {
-    title: `${name} on ${platform}`,
+    title: `${name} on ${getLabelText(platform)}`,
     description,
     openGraph: {
-      title: `${name} on ${platform}`,
+      title: `${name} on ${getLabelText(platform)}`,
       description,
       images: [
         {
           url: new URL(
             account.imageUrl || "/ratecreator.png",
-            "https://ratecreator.com",
+            metadataBase,
           ).toString(),
           width: 1200,
           height: 630,
@@ -64,12 +98,12 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${name} on ${platform}`,
+      title: `${name} on ${getLabelText(platform)}`,
       description,
       images: [
         new URL(
           account.imageUrl || "/ratecreator.png",
-          "https://ratecreator.com",
+          metadataBase,
         ).toString(),
       ],
       creator: "@ratecreator",

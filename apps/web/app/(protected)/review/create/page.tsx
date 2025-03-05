@@ -9,36 +9,51 @@ export async function generateMetadata({
   searchParams: { accountId?: string; platform?: string };
 }): Promise<Metadata> {
   const prisma = getPrismaClient();
-  let creatorName = "Creator";
-  let creatorImageUrl = "";
-  const platform = searchParams.platform;
-  const accountId = searchParams.accountId;
 
-  if (platform && accountId) {
-    try {
-      const creator = await prisma.account.findFirst({
-        where: {
-          platform: platform.toUpperCase() as Platform,
-          accountId: accountId,
-        },
-        select: {
-          name_en: true,
-          name: true,
-          imageUrl: true,
-        },
-      });
-
-      if (creator) {
-        creatorName = creator.name_en || creator.name || "Creator";
-        creatorImageUrl = creator?.imageUrl || "";
-      }
-    } catch (error) {
-      console.error("Error fetching creator:", error);
-      // Fallback to default creator name
-    }
+  if (!searchParams.accountId || !searchParams.platform) {
+    return {
+      title: "Create Review",
+      description: "Share your experience and rate a creator.",
+    };
   }
 
-  const title = `${creatorName}'s Review`;
+  const creator = await prisma.account.findFirst({
+    where: {
+      platform: searchParams.platform.toUpperCase() as Platform,
+      accountId: searchParams.accountId,
+    },
+    select: {
+      name_en: true,
+      name: true,
+      imageUrl: true,
+    },
+  });
+
+  if (!creator) {
+    return {
+      title: "Creator's review page not found",
+      description: "The creator profile you're looking for could not be found.",
+    };
+  }
+
+  const getLabelText = (platform: string) => {
+    switch (platform) {
+      case "youtube":
+        return "YouTube";
+      case "twitter":
+        return "X";
+      case "tiktok":
+        return "TikTok";
+      case "reddit":
+        return "Reddit";
+      default:
+        return platform;
+    }
+  };
+  const creatorName = creator.name_en || creator.name;
+  const creatorImageUrl = creator.imageUrl;
+
+  const title = `${creatorName}'s Review for ${getLabelText(searchParams.platform)}`;
   const description = `Share your experience and rate ${creatorName}. Your feedback helps the community make informed decisions.`;
 
   return {

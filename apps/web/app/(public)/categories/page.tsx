@@ -3,13 +3,11 @@ import { Metadata } from "next";
 import { CategoryListPage } from "@ratecreator/ui/review";
 
 export const metadata: Metadata = {
-  title: "Categories",
-  description:
-    "Explore and discover content creators across different categories.",
+  title: "Search Categories",
+  description: "Find the best content creators across different categories.",
   openGraph: {
-    title: "Categories",
-    description:
-      "Explore and discover content creators across different categories.",
+    title: "Search Categories",
+    description: "Find the best content creators across different categories.",
     type: "website",
     images: [
       {
@@ -22,9 +20,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Categories",
-    description:
-      "Explore and discover content creators across different categories.",
+    title: "Search Categories",
+    description: "Find the best content creators across different categories.",
     images: ["/ratecreator.png"], // Uses metadataBase
   },
 };

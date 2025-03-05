@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/categories/${category.slug}`,
     lastModified: category.updatedAt,
     changeFrequency: "daily" as const,
-    priority: 0.7,
+    priority: 0.6,
   }));
 
   const categoryGlossaryRoutes = categories.map((category) => ({
@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/profile/${profile.platform.toLowerCase()}/${profile.accountId}`,
     lastModified: profile.updatedAt,
     changeFrequency: "weekly" as const,
-    priority: 0.6,
+    priority: 0.8,
   }));
 
   return [
