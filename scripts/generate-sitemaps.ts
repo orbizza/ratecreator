@@ -39,7 +39,7 @@ ${Array.from({ length: totalChunks })
     (_, i) => `  <sitemap>
     <loc>${baseUrl}/sitemap-profiles-${i}.xml</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
-  </sitemap>`
+  </sitemap>`,
   )
   .join("\n")}
 </sitemapindex>`;
@@ -74,14 +74,14 @@ ${profiles
     <lastmod>${profile.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-  </url>`
+  </url>`,
   )
   .join("\n")}
 </urlset>`;
 
     fs.writeFileSync(
       path.join(outputDir, `sitemap-profiles-${chunk}.xml`),
-      sitemap
+      sitemap,
     );
   }
 
