@@ -49,5 +49,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...routes, ...categoryRoutes, ...categoryGlossaryRoutes];
+  // For profile routes, we'll only include a subset of the most important ones
+  // This prevents timeout issues with 3M records
+  const topProfiles = await prisma.account.findMany({
+    where: {
+      isSuspended: false,
+    },
+    orderBy: [{ followerCount: "desc" }],
+    select: {
+      platform: true,
+      accountId: true,
+      updatedAt: true,
+    },
+    take: 5000, // Limit to top 5000 profiles by review count and follower count
+  });
+
+  const profileRoutes = topProfiles.map((profile) => ({
+    url: `${baseUrl}/profile/${profile.platform.toLowerCase()}/${profile.accountId}`,
+    lastModified: profile.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...routes,
+    ...categoryRoutes,
+    ...categoryGlossaryRoutes,
+    ...profileRoutes,
+  ];
 }
