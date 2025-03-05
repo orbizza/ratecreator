@@ -1,4 +1,4 @@
 {
-  "buildCommand": "yarn vercel-build && yarn generate-sitemaps",
+  "buildCommand": "yarn vercel-build",
   "outputDirectory": "apps/web/.next"
 }
