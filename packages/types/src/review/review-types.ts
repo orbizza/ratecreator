@@ -5,12 +5,23 @@ export interface ReviewFormData {
   stars: number;
   platform: Platform;
   accountId: string;
-  content?: any; // Json type in Prisma
+  content?: string;
   title: string;
   contentUrl?: string;
   authorId: string;
   status?: ReviewStatus;
   verificationStatus?: VerificationStatus;
+}
+
+export interface RedditMetadata {
+  postUrl: string;
+  title?: string;
+  author?: string;
+  subreddit?: string;
+}
+
+export interface ReviewEditHistory {
+  redditMetadata?: RedditMetadata;
 }
 
 export interface CommentFormData {
@@ -39,7 +50,8 @@ export interface ReviewType extends ReviewFormData {
   createdAt: Date;
   updatedAt: Date;
   isEdited: boolean;
-  editHistory?: any; // Json type in Prisma
+  editHistory?: any; // For future edit history implementation
+  redditMetadata?: RedditMetadata;
   reportCount: number;
   lastActivityAt: Date;
   viewCount: number;

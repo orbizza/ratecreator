@@ -50,22 +50,24 @@ export async function createReview(formData: unknown) {
     // Create the review in the database
     const review = await prisma.review.create({
       data: {
-        ...validatedData,
+        title: validatedData.title,
         authorId: user.id,
         platform: account.platform as Platform,
         accountId: account.id,
-        content: {
-          ...validatedData.content,
-          redditMetadata:
-            validatedData.platform === "REDDIT" && validatedData.contentUrl
-              ? {
-                  postUrl: validatedData.contentUrl,
-                  title: validatedData.content?.redditMetadata?.title,
-                  author: validatedData.content?.redditMetadata?.author,
-                  subreddit: validatedData.content?.redditMetadata?.subreddit,
-                }
-              : undefined,
-        },
+        stars: validatedData.stars,
+        status: validatedData.status,
+        verificationStatus: validatedData.verificationStatus,
+        content: validatedData.content,
+        contentUrl: validatedData.contentUrl,
+        redditMetadata:
+          validatedData.platform === "REDDIT" && validatedData.redditMetadata
+            ? {
+                postUrl: validatedData.contentUrl,
+                title: validatedData.redditMetadata.title,
+                author: validatedData.redditMetadata.author,
+                subreddit: validatedData.redditMetadata.subreddit,
+              }
+            : undefined,
       },
     });
 

@@ -72,8 +72,8 @@ const PlatformContent: React.FC<{
   contentUrl: string;
   review: ReviewType;
 }> = ({ platform, contentUrl, review }) => {
-  // Get Reddit metadata from review content if available
-  const redditMetadata = review.content?.redditMetadata;
+  // Get Reddit metadata from redditMetadata field
+  const redditMetadata = review.redditMetadata;
 
   if (!contentUrl) return null;
 
@@ -194,40 +194,24 @@ export const ReviewCardSelf: React.FC<ReviewCardSelfProps> = ({ review }) => {
         {review.title}
       </h1>
 
-      {typeof review.content === "object" ? (
-        <div className="prose dark:prose-invert prose-2xl max-w-none">
-          {JSON.stringify(review.content) === "{}" ? (
-            <span className="text-lg sm:text-xl text-muted-foreground">
-              You said nothing
-            </span>
-          ) : (
-            <>
-              <div className="flex flex-col gap-4">
-                <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
-                  What you had to say
-                </div>
-                <div className="prose dark:prose-invert prose-2xl max-w-none">
-                  <ReactQuill
-                    value={review.content}
-                    readOnly={true}
-                    theme="bubble"
-                    modules={{ toolbar: false }}
-                    className="[&_.ql-editor]:!text-lg sm:[&_.ql-editor]:!text-xl [&_.ql-editor]:!p-0 [&_.ql-editor_p]:!text-lg sm:[&_.ql-editor_p]:!text-xl [&_.ql-editor_img]:!max-w-full [&_.ql-editor_img]:!h-auto"
-                  />
-                </div>
+      <div className="prose dark:prose-invert prose-2xl max-w-none">
+        {!review.content ? (
+          <span className="text-lg sm:text-xl text-muted-foreground">
+            You said nothing
+          </span>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4">
+              <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
+                What you had to say
               </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="prose dark:prose-invert prose-2xl max-w-none">
-            <span className="text-lg sm:text-xl text-muted-foreground">
-              You said nothing
-            </span>
-          </div>
-        </>
-      )}
+              <div className="text-lg sm:text-xl whitespace-pre-wrap">
+                {review.content}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       {review.contentUrl && (
         <PlatformContent

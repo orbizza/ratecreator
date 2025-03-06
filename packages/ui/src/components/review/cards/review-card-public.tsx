@@ -79,8 +79,8 @@ const PlatformContent: React.FC<{
   contentUrl: string;
   review: ReviewType;
 }> = ({ platform, contentUrl, review }) => {
-  // Get Reddit metadata from review content if available
-  const redditMetadata = review.content?.redditMetadata;
+  // Get Reddit metadata from redditMetadata field
+  const redditMetadata = review.redditMetadata;
 
   if (!contentUrl) return null;
 
@@ -235,34 +235,24 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         {review.title}
       </h1>
 
-      {typeof review.content === "object" ? (
-        <div className="prose dark:prose-invert prose-2xl max-w-none">
-          {JSON.stringify(review.content) === "{}" ? (
-            <span className="text-lg sm:text-xl text-muted-foreground">
-              No content provided
-            </span>
-          ) : (
-            <>
-              <div className="flex flex-col gap-4">
-                <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
-                  Review
-                </div>
-                <ReactQuill
-                  value={review.content}
-                  readOnly={true}
-                  theme="bubble"
-                />
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="prose dark:prose-invert prose-2xl max-w-none">
+      <div className="prose dark:prose-invert prose-2xl max-w-none">
+        {!review.content ? (
           <span className="text-lg sm:text-xl text-muted-foreground">
             No content provided
           </span>
-        </div>
-      )}
+        ) : (
+          <>
+            <div className="flex flex-col gap-4">
+              <div className="text-2xl sm:text-3xl text-primary/70 font-semibold">
+                Review
+              </div>
+              <div className="text-lg sm:text-xl whitespace-pre-wrap">
+                {review.content}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       {review.contentUrl && (
         <PlatformContent
