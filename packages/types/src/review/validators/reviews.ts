@@ -17,6 +17,13 @@ const VerificationStatus = z.enum([
   "IN_PROGRESS",
 ]);
 
+const RedditMetadataValidator = z.object({
+  postUrl: z.string().url(),
+  title: z.string().optional(),
+  author: z.string().optional(),
+  subreddit: z.string().optional(),
+});
+
 export const ReviewValidator = z.object({
   title: z
     .string()
@@ -30,7 +37,11 @@ export const ReviewValidator = z.object({
   platform: z.string().toUpperCase(),
   stars: z.number({ message: "Star rating is required" }).min(1).max(5),
   authorId: z.string(),
-  content: z.any(),
+  content: z
+    .string()
+    .min(50, { message: "Content must be at least 50 characters long" })
+    .max(10000, { message: "Content must be less than 10000 characters long" }),
+  redditMetadata: RedditMetadataValidator.optional(),
   contentUrl: z.string().url().optional(),
   status: ReviewStatus.default("PUBLISHED"),
   verificationStatus: VerificationStatus.default("IN_PROGRESS"),

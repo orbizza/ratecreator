@@ -36,7 +36,6 @@ import {
   extractTikTokVideoId,
   getRedditPostId,
 } from "@ratecreator/db/utils";
-import { Editor } from "./editor";
 import { PlatformIcon } from "./platform-icons";
 import { CreatorHeaderSkeleton } from "../skeletons/creator-review-header-skeleton";
 import { useRouter } from "next/navigation";
@@ -182,17 +181,16 @@ export const CreatorRating = ({
       // Validate form data
       const validatedData = ReviewValidator.parse({
         ...formData,
-        content: {
-          ...formData.content,
-          redditMetadata:
-            platform === "reddit" && redditPostData
-              ? {
-                  title: redditPostData.title,
-                  author: redditPostData.author,
-                  subreddit: redditPostData.subreddit,
-                }
-              : undefined,
-        },
+        content: formData.content,
+        redditMetadata:
+          platform === "reddit" && redditPostData
+            ? {
+                postUrl: formData.contentUrl || "",
+                title: redditPostData.title,
+                author: redditPostData.author,
+                subreddit: redditPostData.subreddit,
+              }
+            : undefined,
       });
 
       if (platform === "youtube" && validatedData.contentUrl) {
@@ -495,12 +493,13 @@ export const CreatorRating = ({
               <label className="block text-xl font-medium mb-2">
                 What you had to say
               </label>
-              <Editor
-                value={formData.content}
-                onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, content: value }))
+              <Textarea
+                value={formData.content || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, content: e.target.value }))
                 }
                 placeholder="Write your review here..."
+                className="min-h-[200px] resize-none"
               />
             </div>
 

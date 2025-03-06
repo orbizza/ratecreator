@@ -160,8 +160,9 @@ model Review {
   id                 String               @id @default(auto()) @map("_id") @db.ObjectId
   title              String
   stars              Int
-  content            Json?
+  content            String?
   contentUrl         String?
+  redditMetadata     Json?               // { postUrl: string, title?: string, author?: string, subreddit?: string }
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   author             User                 @relation(fields: [authorId], references: [id])
@@ -173,7 +174,7 @@ model Review {
   votes              Vote[]
   verificationStatus VerificationStatus   @default(IN_PROGRESS)
   isEdited           Boolean              @default(false)
-  editHistory        Json?                // Store edit history
+  editHistory        Json?                // For future edit history implementation
   status             ReviewStatus         @default(PUBLISHED)
   reportCount        Int                  @default(0)
   lastActivityAt     DateTime             @default(now())  // For sorting/trending

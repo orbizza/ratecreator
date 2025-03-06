@@ -35,12 +35,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   });
 
-  const categoryRoutes = categories.map((category) => ({
-    url: `${baseUrl}/categories/${category.slug}`,
-    lastModified: category.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.6,
-  }));
+  // const categoryRoutes = categories.map((category) => ({
+  //   url: `${baseUrl}/categories/${category.slug}`,
+  //   lastModified: category.updatedAt,
+  //   changeFrequency: "daily" as const,
+  //   priority: 0.6,
+  // }));
 
   const categoryGlossaryRoutes = categories.map((category) => ({
     url: `${baseUrl}/category-glossary/${category.slug}`,
@@ -71,10 +71,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [
-    ...routes,
-    ...categoryRoutes,
-    ...categoryGlossaryRoutes,
-    ...profileRoutes,
-  ];
+  return [...routes, ...categoryGlossaryRoutes, ...profileRoutes];
 }
