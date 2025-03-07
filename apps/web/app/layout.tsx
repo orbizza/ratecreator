@@ -7,7 +7,6 @@ import "./globals.css";
 import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
 import { Toaster } from "@ratecreator/ui";
-import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -107,7 +106,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
             <Providers>
