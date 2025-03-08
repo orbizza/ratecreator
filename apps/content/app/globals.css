@@ -6,8 +6,6 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
@@ -31,6 +29,14 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --sidebar-background: 220 13% 95%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 14% 90%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 85%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -59,6 +65,14 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+  --sidebar-background: 240 10% 12%;
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-primary: 224.3 76.3% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 10% 20%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 10% 16%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
 body {
