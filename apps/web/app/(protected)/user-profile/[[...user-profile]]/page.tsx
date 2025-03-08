@@ -11,29 +11,29 @@ const UserProfilePage = () => {
   const clerkTheme = theme === "dark";
 
   return (
-    <div className='w-full mt-14  mb-2'>
-      <div className='flex items-center justify-center'>
+    <div className="w-full mt-14  mb-2">
+      <div className="flex items-center justify-center">
         {clerkTheme && (
           <UserProfile
-            path='/user-profile'
-            routing='path'
+            path="/user-profile"
+            routing="path"
             appearance={{
               baseTheme: dark,
             }}
           >
             <UserProfile.Link
-              label='Homepage'
+              label="Homepage"
               labelIcon={<RateCreatorLogo />}
-              url='/'
+              url="/"
             />
           </UserProfile>
         )}
         {!clerkTheme && (
-          <UserProfile path='/user-profile' routing='path'>
+          <UserProfile path="/user-profile" routing="path">
             <UserProfile.Link
-              label='Homepage'
+              label="Homepage"
               labelIcon={<RateCreatorLogo />}
-              url='/'
+              url="/"
             />
           </UserProfile>
         )}
