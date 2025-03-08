@@ -47,4 +47,7 @@ export * from "./components/ui/hover-card";
 export * from "./components/ui/icon-toggle";
 export * from "./components/ui/Spotlight";
 export * from "./components/ui/hero-highlight";
+export * from "./components/ui/sidebar";
+export * from "./hooks/use-mobile";
+export * from "./components/ui/collapsible";
 export { IconCloud, LinearGradient, RadialGradient };
