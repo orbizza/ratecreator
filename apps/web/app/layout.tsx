@@ -7,7 +7,6 @@ import "./globals.css";
 import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
 import { Toaster } from "@ratecreator/ui";
-import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
