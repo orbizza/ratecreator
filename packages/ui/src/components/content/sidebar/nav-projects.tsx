@@ -37,7 +37,7 @@ export function NavProjects({
   const { isMobile } = useSidebar();
 
   return (
-    <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Common Modules</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
