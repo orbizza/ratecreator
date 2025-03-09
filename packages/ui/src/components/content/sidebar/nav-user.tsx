@@ -60,7 +60,7 @@ export function NavUser() {
                   alt={user.user?.fullName || "SD"}
                 />
                 <AvatarFallback className="rounded-lg bg-zinc-50 dark:bg-[hsl(var(--sidebar-accent))]">
-                  CN
+                  SD
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -88,7 +88,7 @@ export function NavUser() {
                     alt={user.user?.fullName || "SD"}
                   />
                   <AvatarFallback className="rounded-lg bg-zinc-50 dark:bg-[hsl(var(--sidebar-accent))]">
-                    CN
+                    SD
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
