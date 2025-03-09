@@ -315,8 +315,9 @@ model ContactForm {
   @@index([createdAt])
 }
 
+
 // -----------------------
-// Enums
+// Enums for Rate Creator
 // -----------------------
 
 enum Platform {
@@ -365,4 +366,106 @@ enum CommentStatus {
   DELETED
   PENDING
   FLAGGED
+}
+
+
+// -----------------------
+// Content Writer
+// -----------------------
+
+
+model Post {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  contentPlatform      ContentPlatform
+  title         String
+  content       String
+  featureImage  String?
+  postUrl       String   @unique
+  publishDate   DateTime?
+  tags          TagOnPost[]
+  excerpt       String?
+  authorId      String   @db.ObjectId
+  author        Author   @relation(fields: [authorId], references: [id])
+  featured      Boolean  @default(false)
+  metadataTitle        String?
+  metadataDescription  String?
+  metadataImageUrl     String?
+  metadataKeywords     String?
+  metadataAuthorName   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  status        PostStatus @default(DRAFT)
+  contentType   ContentType @default(BLOG)
+  isDeleted     Boolean @default(false)
+
+  @@index([featured])
+  @@index([publishDate])
+  @@index([status])
+  @@index([title])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([isDeleted])
+  @@index([contentType])
+  @@index([contentPlatform])
+}
+
+enum ContentType {
+  BLOG
+  GLOSSARY
+  NEWSLETTER
+}
+
+enum ContentPlatform {
+  RATECREATOR
+  CREATOROPS
+  UNITY
+  DOCUMENTATION
+  LEGAL
+}
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+  DELETED
+  UNPUBLISHED
+}
+
+
+model Tag {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  slug  String @unique
+  description String?
+  imageUrl String?
+  posts TagOnPost[]
+}
+
+model TagOnPost {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id])
+  postId String @db.ObjectId
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String @db.ObjectId
+
+  @@index([postId])
+  @@index([tagId])
+}
+
+model Author {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId String @unique
+  name    String
+  email   String @unique
+  imageUrl String?
+  posts   Post[]
+  role    Role
+
+  @@index([name])
+  @@index([role])
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  WRITER
 }
