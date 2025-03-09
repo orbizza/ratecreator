@@ -1,10 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Boxes, Cog, Scale, Star } from "lucide-react";
+import {
+  BookOpen,
+  Boxes,
+  ChartColumn,
+  Cog,
+  Scale,
+  Star,
+  Tag,
+} from "lucide-react";
 
 import { NavMain } from "./nav-main";
-// import { NavProjects } from "./nav-projects";
+import { NavProjects } from "./nav-projects";
 // import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import {
@@ -134,23 +142,18 @@ const data = {
   //     icon: Send,
   //   },
   // ],
-  // projects: [
-  //   {
-  //     name: "Design Engineering",
-  //     url: "#",
-  //     icon: Frame,
-  //   },
-  //   {
-  //     name: "Sales & Marketing",
-  //     url: "#",
-  //     icon: PieChart,
-  //   },
-  //   {
-  //     name: "Travel",
-  //     url: "#",
-  //     icon: Map,
-  //   },
-  // ],
+  projects: [
+    {
+      name: "Tags",
+      url: "/tags",
+      icon: Tag,
+    },
+    {
+      name: "Analytics",
+      url: "/todo/analytics",
+      icon: ChartColumn,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -161,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <RateCreatorLogo />
                 </div>
@@ -175,7 +178,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
+        <NavProjects projects={data.projects} />
         {/* <NavSecondary items={data.navSecondary} className='mt-auto' /> */}
       </SidebarContent>
       <SidebarFooter>
