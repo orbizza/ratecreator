@@ -50,4 +50,6 @@ export * from "./components/ui/hero-highlight";
 export * from "./components/ui/sidebar";
 export * from "./hooks/use-mobile";
 export * from "./components/ui/collapsible";
+export * from "./components/ui/table";
+export * from "./components/ui/spinner";
 export { IconCloud, LinearGradient, RadialGradient };
