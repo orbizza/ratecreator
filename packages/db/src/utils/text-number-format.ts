@@ -114,7 +114,7 @@ export const capitalizeFirstLetter = (item: string) => {
     .map((word, index) =>
       index === 0
         ? word.charAt(0).toUpperCase() + word.slice(1)
-        : word.toLowerCase()
+        : word.toLowerCase(),
     )
     .join(" ");
 };
