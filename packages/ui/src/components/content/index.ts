@@ -4,3 +4,6 @@ export * from "./category-glossary/categor-glossary-post";
 export * from "./category-glossary/category-glossary-skeleton";
 export * from "./category-glossary/category-glossary-post-skeleton";
 export * from "./sidebar/app-sidebar";
+export * from "./tag-management/tag-component";
+export * from "./single-image-dropzone";
+export * from "./tag-management/edit-component";

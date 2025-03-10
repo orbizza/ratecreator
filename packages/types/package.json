@@ -11,6 +11,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./review": "./src/review/index.ts"
+    "./review": "./src/review/index.ts",
+    "./content": "./src/content/index.ts"
   }
 }
