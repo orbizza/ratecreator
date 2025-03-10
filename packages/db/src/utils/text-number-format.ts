@@ -103,3 +103,18 @@ export const truncateText = (text: string, maxLength: number): string => {
 export const formatFloat = (number: number): string => {
   return number.toFixed(2);
 };
+
+export const reverseAndHyphenate = (item: string) => {
+  return item.toLowerCase().split(" ").join("-");
+};
+
+export const capitalizeFirstLetter = (item: string) => {
+  return item
+    .split("-")
+    .map((word, index) =>
+      index === 0
+        ? word.charAt(0).toUpperCase() + word.slice(1)
+        : word.toLowerCase(),
+    )
+    .join(" ");
+};
