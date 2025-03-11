@@ -18,8 +18,8 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
+        attribute='class'
+        defaultTheme='system'
         enableSystem
         disableTransitionOnChange
       >
@@ -28,7 +28,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
             <TooltipProvider>
               <TermlyCMP
                 autoBlock={true}
-                masterConsentsOrigin="https://ratecreator.com"
+                masterConsentsOrigin='https://ratecreator.com'
                 websiteUUID={WEBSITE_UUID}
               />
               {children}

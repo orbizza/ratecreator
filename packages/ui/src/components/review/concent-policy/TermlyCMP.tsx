@@ -3,6 +3,14 @@
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+declare global {
+  interface Window {
+    Termly?: {
+      initialize: (options?: { siteId?: string }) => void;
+    };
+  }
+}
+
 const SCRIPT_SRC_BASE = "https://app.termly.io";
 
 export const TermlyCMP = ({
@@ -28,11 +36,21 @@ export const TermlyCMP = ({
 
   const isScriptAdded = useRef(false);
   const isPolicyScriptAdded = useRef(false);
+  const isScriptLoaded = useRef(false);
+  const isPolicyScriptLoaded = useRef(false);
 
   useEffect(() => {
     if (isScriptAdded.current) return;
+
     const script = document.createElement("script");
     script.src = scriptSrc;
+    script.async = true;
+    script.onload = () => {
+      isScriptLoaded.current = true;
+      if (window.Termly && typeof window.Termly.initialize === "function") {
+        window.Termly.initialize();
+      }
+    };
     document.head.appendChild(script);
     isScriptAdded.current = true;
 
@@ -41,6 +59,9 @@ export const TermlyCMP = ({
       const policyScript = document.createElement("script");
       policyScript.src = `${SCRIPT_SRC_BASE}/embed-policy.min.js`;
       policyScript.async = true;
+      policyScript.onload = () => {
+        isPolicyScriptLoaded.current = true;
+      };
       document.head.appendChild(policyScript);
       isPolicyScriptAdded.current = true;
     }
@@ -49,7 +70,12 @@ export const TermlyCMP = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   useEffect(() => {
-    (window as any).Termly?.initialize();
+    // Only try to initialize if both scripts are loaded
+    if (isScriptLoaded.current && isPolicyScriptLoaded.current) {
+      if (window.Termly && typeof window.Termly.initialize === "function") {
+        window.Termly.initialize();
+      }
+    }
   }, [pathname, searchParams]);
 
   return null;
