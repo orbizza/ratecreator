@@ -12,19 +12,19 @@ export default function Page() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect_url");
   return (
-    <div className="w-full mt-14 min-h-[600px] flex items-center justify-center mb-2">
-      <div className="flex items-center justify-center">
+    <div className='w-full mt-14 min-h-[600px] flex items-center justify-center mb-2'>
+      <div className='flex items-center justify-center'>
         {clerkTheme && (
           <SignIn
             appearance={{
               baseTheme: dark,
             }}
-            path="/sign-in"
+            path='/sign-in'
             redirectUrl={redirectUrl || "/"}
           />
         )}
         {!clerkTheme && (
-          <SignIn path="/sign-in" redirectUrl={redirectUrl || "/"} />
+          <SignIn path='/sign-in' redirectUrl={redirectUrl || "/"} />
         )}
       </div>
     </div>
