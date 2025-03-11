@@ -460,7 +460,7 @@ model Author {
   email   String @unique
   imageUrl String?
   posts   Post[]
-  role    Role
+  role    Role @default(WRITER)
 
   @@index([name])
   @@index([role])

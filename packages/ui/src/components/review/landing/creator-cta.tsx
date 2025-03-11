@@ -169,9 +169,9 @@ export function CreatorCTA() {
                   <ChevronRight className="ml-1 size-4 transition-all duration-300 ease-out group-hover:translate-x-1" />
                 </Button>
               </div>
-              <div className="absolute inset-0 -z-10 rounded-full  bg-white opacity-40 blur-xl dark:bg-background" />
+              <div className="absolute inset-0 -z-10 rounded-full bg-background opacity-40 blur-xl" />
             </div>
-            <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-b from-transparent to-white to-70% dark:to-background" />
+            <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-b from-transparent to-background to-70% blur-xl" />
           </div>
         </div>
       </div>
