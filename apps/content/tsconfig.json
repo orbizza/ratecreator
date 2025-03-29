@@ -23,6 +23,12 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/components/content/admin-posts/posts-navbar.tsx"
+  ],
   "exclude": ["node_modules"]
 }
