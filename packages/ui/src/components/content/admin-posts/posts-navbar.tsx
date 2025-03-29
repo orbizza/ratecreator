@@ -69,14 +69,14 @@ export const PostsNavbar = () => {
   return (
     <>
       {/* mobile screen */}
-      <div className='flex md:hidden flex-col gap-4 justify-end mr-4'>
-        <div className='flex justify-end'>
-          <Link href='/new-post' className='mr-4'>
-            <Button variant='outline'>New post</Button>
+      <div className="flex md:hidden flex-col gap-4 justify-end mr-4">
+        <div className="flex justify-end">
+          <Link href="/new-post" className="mr-4">
+            <Button variant="outline">New post</Button>
           </Link>
         </div>
-        <div className='flex flex-row gap-2 justify-between mr-4 '>
-          <div className=''>
+        <div className="flex flex-row gap-2 justify-between mr-4 ">
+          <div className="">
             {/* <SelectComponent
           items={postFilter}
           placeholder='all-posts'
@@ -84,15 +84,15 @@ export const PostsNavbar = () => {
           selectedItem={postOption}
         /> */}
           </div>
-          <div className='mr-1 text-sm md:text-sm'>
+          <div className="mr-1 text-sm md:text-sm">
             {capitalizeFirstLetter(contentType)}
           </div>
-          <div className='mr-1 text-sm md:text-sm'>
+          <div className="mr-1 text-sm md:text-sm">
             {/* {capitalizeFirstLetter(postStatus)} */}
             Status
           </div>
-          <div className='mr-1 text-sm md:text-sm '>All authors</div>
-          <div className='mr-1 text-sm md:text-sm '>Tags</div>
+          <div className="mr-1 text-sm md:text-sm ">All authors</div>
+          <div className="mr-1 text-sm md:text-sm ">Tags</div>
           {/* <div className='mr-1'>
           <SelectComponent
           items={tags}
@@ -101,13 +101,13 @@ export const PostsNavbar = () => {
           selectedItem={tagOption}
         />
         </div> */}
-          <div className='mr-1 text-sm md:text-sm'>Newest first</div>
+          <div className="mr-1 text-sm md:text-sm">Newest first</div>
         </div>
       </div>
 
       {/* md screen */}
-      <div className='hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center'>
-        <div className=''>
+      <div className="hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center">
+        <div className="">
           {/* <SelectComponent
           items={postFilter}
           placeholder='all-posts'
@@ -115,15 +115,15 @@ export const PostsNavbar = () => {
           selectedItem={postOption}
         /> */}
         </div>
-        <div className='mr-1 text-sm md:text-sm'>
+        <div className="mr-1 text-sm md:text-sm">
           {capitalizeFirstLetter(contentType)}
         </div>
-        <div className='mr-1 text-sm md:text-sm'>
+        <div className="mr-1 text-sm md:text-sm">
           {/* {capitalizeFirstLetter(postStatus)} */}
           Status
         </div>
-        <div className='mr-1 text-sm md:text-sm '>All authors</div>
-        <div className='mr-1 text-sm md:text-sm '>Tags</div>
+        <div className="mr-1 text-sm md:text-sm ">All authors</div>
+        <div className="mr-1 text-sm md:text-sm ">Tags</div>
         {/* <div className='mr-1'>
           <SelectComponent
           items={tags}
@@ -132,10 +132,10 @@ export const PostsNavbar = () => {
           selectedItem={tagOption}
         />
         </div> */}
-        <div className='mr-1 text-sm md:text-sm'>Newest first</div>
+        <div className="mr-1 text-sm md:text-sm">Newest first</div>
 
-        <Link href='/new-post' className='mr-4'>
-          <Button variant='outline'>New post</Button>
+        <Link href="/new-post" className="mr-4">
+          <Button variant="outline">New post</Button>
         </Link>
       </div>
     </>
@@ -168,17 +168,17 @@ const SelectComponent = ({
             : "text-neutral-200"
         }`}
       >
-        <SelectTrigger className='ml-2 bg-transparent border-transparent ring-0 outline-none focus:ring-0 focus:outline-none  text-sm md:text-sm'>
+        <SelectTrigger className="ml-2 bg-transparent border-transparent ring-0 outline-none focus:ring-0 focus:outline-none  text-sm md:text-sm">
           {capitalizeFirstLetter(selectedItem) ||
             capitalizeFirstLetter(placeholder)}
         </SelectTrigger>{" "}
       </div>
-      <SelectContent className='pl-0 bg-neutral-800 border-transparent ring-0 outline-none focus:ring-0 focus:outline-none'>
-        <SelectGroup className='pl-0 bg-neutral-800 '>
+      <SelectContent className="pl-0 bg-neutral-800 border-transparent ring-0 outline-none focus:ring-0 focus:outline-none">
+        <SelectGroup className="pl-0 bg-neutral-800 ">
           {items.map((item) => (
             <SelectItem
               key={item}
-              className='text-neutral-200 border-transparent hover:bg-neutral-950 hover:text-neutral-200 text-sm md:text-sm font-light !justify-start focus:ring-0 focus:outline-none focus:bg-neutral-950 focus:text-neutral-200 pr-5 '
+              className="text-neutral-200 border-transparent hover:bg-neutral-950 hover:text-neutral-200 text-sm md:text-sm font-light !justify-start focus:ring-0 focus:outline-none focus:bg-neutral-950 focus:text-neutral-200 pr-5 "
               value={item}
               onClick={() => handleSelect(item)}
             >

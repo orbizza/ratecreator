@@ -64,7 +64,7 @@ const insertDivider = (editor: typeof schema.BlockNoteEditor) => ({
 });
 
 const getCustomSlashMenuItems = (
-  editor: typeof schema.BlockNoteEditor
+  editor: typeof schema.BlockNoteEditor,
 ): DefaultReactSuggestionItem[] => [
   ...getDefaultReactSlashMenuItems(editor),
   insertYoutube(editor),
@@ -122,7 +122,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
         data-theming-css-demo
       >
         <SuggestionMenuController
-          triggerCharacter='/'
+          triggerCharacter="/"
           getItems={async (query) =>
             filterSuggestionItems(getCustomSlashMenuItems(editor), query)
           }

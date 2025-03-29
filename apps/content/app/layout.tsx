@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang='en'>
+      <html lang="en">
         <body className={`${inter.className} antialiased`}>
           <Provider>{children}</Provider>
         </body>
