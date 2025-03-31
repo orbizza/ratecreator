@@ -1,5 +1,5 @@
 import { fetchTagDetails } from "@ratecreator/actions/content";
-import { EditComponent } from "@ratecreator/ui/content";
+import { EditTagComponent } from "@ratecreator/ui/content";
 import { notFound } from "next/navigation";
 
 export default async function TagPage({
@@ -16,7 +16,7 @@ export default async function TagPage({
   }
 
   return (
-    <EditComponent
+    <EditTagComponent
       id={tag?.id || ""}
       slug={tag?.slug || ""}
       description={tag?.description || ""}

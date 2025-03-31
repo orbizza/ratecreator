@@ -105,7 +105,9 @@ export const formatFloat = (number: number): string => {
 };
 
 export const reverseAndHyphenate = (item: string) => {
-  return item.toLowerCase().split(" ").join("-");
+  const url = item.toLowerCase().split(" ").join("-");
+  const trimmedItem = url.trim();
+  return trimmedItem;
 };
 
 export const capitalizeFirstLetter = (item: string) => {
@@ -113,8 +115,20 @@ export const capitalizeFirstLetter = (item: string) => {
     .split("-")
     .map((word, index) =>
       index === 0
-        ? word.charAt(0).toUpperCase() + word.slice(1)
+        ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
         : word.toLowerCase(),
     )
     .join(" ");
+};
+
+export const capitalizeEachWord = (item: string) => {
+  return item
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
+export const splitAndCapitalize = (item: string) => {
+  const [firstWord] = item.split("-");
+  return firstWord.toUpperCase();
 };

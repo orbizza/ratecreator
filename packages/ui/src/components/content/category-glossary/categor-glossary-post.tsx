@@ -105,6 +105,23 @@ export const CategoryGlossaryPost = () => {
         {/* <Layers2 size={20} /> */}
         <h1 className="text-2xl font-semibold">{category.name}</h1>
       </div>
+      <div className="flex flex-row gap-x-2 items-center text-primary mt-4">
+        <UserSearch size={28} />
+        <h2 className="text-2xl font-semibold">Creators in this category</h2>
+        <Info size={12} className="text-muted-foreground" />
+      </div>
+      <div className="flex flex-col items-start gap-2 mt-2">
+        <span className="text-lg ">
+          Total creators &amp; communities:{" "}
+          <span className="text-primary font-semibold">{accounts}</span>
+        </span>
+        <Link
+          href={`/categories/${category.slug}`}
+          className="text-lg text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline"
+        >
+          <span className="">Click here to view all</span>
+        </Link>
+      </div>
       <Accordion type="single" collapsible defaultValue="channel-description">
         <AccordionItem value="channel-description" className="border-0">
           <AccordionTrigger className="text-2xl font-bold hover:no-underline">
@@ -125,23 +142,6 @@ export const CategoryGlossaryPost = () => {
               <p className="whitespace-pre-wrap  mt-2">
                 {category.longDescription || "No description available"}
               </p>
-            </div>
-            <div className="flex flex-row gap-x-2 items-center text-primary mt-4">
-              <UserSearch size={20} />
-              <h2 className="text-lg font-semibold">Category Accounts</h2>
-              <Info size={12} className="text-muted-foreground" />
-            </div>
-            <div className="flex flex-col items-start gap-2 mt-2">
-              <span className="text-sm ">
-                Total creators &amp; communities in this category:{" "}
-                <span className="text-primary font-semibold">{accounts}</span>
-              </span>
-              <Link
-                href={`/categories/${category.slug}`}
-                className="text-sm text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline"
-              >
-                <span className="">View all creator &amp; communities</span>
-              </Link>
             </div>
           </AccordionContent>
         </AccordionItem>

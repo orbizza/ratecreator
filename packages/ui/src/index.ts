@@ -52,4 +52,8 @@ export * from "./hooks/use-mobile";
 export * from "./components/ui/collapsible";
 export * from "./components/ui/table";
 export * from "./components/ui/spinner";
+export * from "./components/ui/alert-dialog";
+export * from "./components/ui/calendar";
+export * from "./components/ui/popover";
+export * from "./components/ui/switch";
 export { IconCloud, LinearGradient, RadialGradient };
