@@ -371,7 +371,6 @@ enum VoteType {
   DOWN
 }
 
-// New enum for LLM verification statuses.
 enum VerificationStatus {
   VERIFIED
   NOT_VERIFIED
@@ -405,32 +404,30 @@ enum CommentStatus {
 
 
 model Post {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  id                   String  @id @default(auto()) @map("_id") @db.ObjectId
   contentPlatform      ContentPlatform @default(RATECREATOR)
-  title         String
-  content       String
-  featureImage  String?
-  postUrl       String   @unique
-  publishDate   DateTime?
-  tags          TagOnPost[]
-  excerpt       String?
-  authorId      String   @db.ObjectId
-  author        Author   @relation(fields: [authorId], references: [id])
-  featured      Boolean  @default(false)
+  contentType          ContentType @default(BLOG)
+  title                String
+  content              String
+  featureImage         String?
+  postUrl              String   @unique
+  publishDate          DateTime?
+  tags                 TagOnPost[]
+  excerpt              String?
+  authorId             String   @db.ObjectId
+  author               Author   @relation(fields: [authorId], references: [id])
   metadataTitle        String?
   metadataDescription  String?
   metadataImageUrl     String?
   metadataKeywords     String?
   metadataAuthorName   String?
   canonicalUrl         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  status        PostStatus @default(DRAFT)
-  contentType   ContentType @default(BLOG)
-  isDeleted     Boolean @default(false)
-  isFeatured    Boolean @default(false)
-  
-  @@index([featured])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  status               PostStatus @default(DRAFT)
+  isDeleted            Boolean @default(false)
+  isFeatured           Boolean @default(false)
+
   @@index([publishDate])
   @@index([status])
   @@index([title])
@@ -440,12 +437,7 @@ model Post {
   @@index([contentType])
   @@index([contentPlatform])
   @@index([isFeatured])
-}
-
-enum ContentType {
-  BLOG
-  GLOSSARY
-  NEWSLETTER
+  @@index([authorId])
 }
 
 enum ContentPlatform {
@@ -455,6 +447,13 @@ enum ContentPlatform {
   DOCUMENTATION
   LEGAL
 }
+
+enum ContentType {
+  BLOG
+  GLOSSARY
+  NEWSLETTER
+}
+
 enum PostStatus {
   DRAFT
   PUBLISHED

@@ -13,7 +13,7 @@ const prisma = getPrismaClient();
 
 export async function fetchAllPostsCount(
   postOption: string,
-  tagOption: string,
+  tagOption: string
 ) {
   // modify for based on postOption and tagOption
   if (postOption === "all-posts") {
@@ -22,7 +22,7 @@ export async function fetchAllPostsCount(
   } else if (postOption === "featured-posts") {
     const posts = await prisma.post.count({
       where: {
-        featured: true,
+        isFeatured: true,
       },
     });
     return posts;
@@ -61,7 +61,7 @@ export async function fetchPublishedPostsCount(postOption: string) {
   } else if (postOption === "featured-posts") {
     const posts = await prisma.post.count({
       where: {
-        featured: true,
+        isFeatured: true,
         status: "PUBLISHED",
       },
     });
@@ -89,7 +89,7 @@ export async function fetchPublishedPostsCount(postOption: string) {
 export async function fetchAllPosts(
   postOption: string,
   tagOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -111,7 +111,7 @@ export async function fetchAllPosts(
   } else if (postOption === "featured-posts") {
     const posts = await prisma.post.findMany({
       where: {
-        featured: true,
+        isFeatured: true,
       },
       skip: offset,
       take: pageSize,
@@ -185,7 +185,7 @@ export async function fetchPublishedPosts(postOption: string) {
   if (postOption === "featured-posts") {
     const posts = await prisma.post.findMany({
       where: {
-        featured: true,
+        isFeatured: true,
         status: "PUBLISHED",
         contentType: ContentType.BLOG,
       },
@@ -235,7 +235,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -243,7 +243,7 @@ export async function fetchPublishedPostsPaginated(
   if (postOption === "featured-posts") {
     const posts = await prisma.post.findMany({
       where: {
-        featured: true,
+        isFeatured: true,
         status: "PUBLISHED",
       },
       skip: offset,

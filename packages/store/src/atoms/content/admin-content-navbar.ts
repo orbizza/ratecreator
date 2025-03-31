@@ -7,7 +7,7 @@ import {
 
 export const contentTypeAtom = atom<ContentType>({
   key: "contentType",
-  default: ContentType.ALL,
+  default: ContentType.BLOG,
 });
 
 export const contentPlatformAtom = atom<ContentPlatform>({
@@ -17,5 +17,5 @@ export const contentPlatformAtom = atom<ContentPlatform>({
 
 export const postStatusAtom = atom<PostStatus>({
   key: "postStatus",
-  default: PostStatus.ALL,
+  default: PostStatus.DRAFT,
 });

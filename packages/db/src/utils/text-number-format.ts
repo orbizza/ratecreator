@@ -116,8 +116,15 @@ export const capitalizeFirstLetter = (item: string) => {
     .map((word, index) =>
       index === 0
         ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        : word.toLowerCase(),
+        : word.toLowerCase()
     )
+    .join(" ");
+};
+
+export const capitalizeEachWord = (item: string) => {
+  return item
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 };
 
