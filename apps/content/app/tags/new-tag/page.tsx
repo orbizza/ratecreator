@@ -17,7 +17,7 @@ import {
 import { createTagAction } from "@ratecreator/actions/content";
 
 import { useRouter } from "next/navigation";
-import { SingleImageDropzone } from "@ratecreator/ui/content";
+import { SingleImageDropzone } from "@ratecreator/ui/common";
 import { reverseAndHyphenate } from "@ratecreator/db/utils";
 import axios from "axios";
 import { makeFilePublic } from "@ratecreator/actions";
@@ -115,7 +115,7 @@ const NewTag = () => {
               <BreadcrumbItem>
                 <BreadcrumbLink
                   href="/tags"
-                  className="text-neutral-200 hover:text-neutral-100"
+                  className="text-neutral-800 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-neutral-100"
                 >
                   Tags
                 </BreadcrumbLink>
@@ -141,14 +141,19 @@ const NewTag = () => {
                 : "Save"}
           </Button>
         </div>
-        <h1 className="text-3xl font-semibold">New tag</h1>
+        <h1 className="text-3xl font-semibold text-neutral-800 dark:text-neutral-200">
+          New tag
+        </h1>
       </div>
 
-      <div className="bg-neutral-900 rounded-lg p-4 lg:p-6 ">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg p-4 lg:p-6 border border-neutral-200 dark:border-neutral-800">
         <div className="flex flex-col lg:flex-row!important lg:overflow-hidden gap-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="SlugName" className="text-sm text-neutral-200">
+              <Label
+                htmlFor="SlugName"
+                className="text-sm text-neutral-800 dark:text-neutral-200"
+              >
                 Slug
               </Label>
               <input
@@ -156,7 +161,7 @@ const NewTag = () => {
                 type="text"
                 value={inputSlug}
                 onChange={handleSlugNameChange}
-                className={`w-full h-10 rounded-md text-neutral-300 bg-neutral-800 px-3 py-2 text-sm border-2 ${
+                className={`w-full h-10 rounded-md text-neutral-800 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 px-3 py-2 text-sm border-2 ${
                   slugError ? "border-red-500" : "border-transparent"
                 } focus:border-green-500 focus:outline-none`}
               />
@@ -171,7 +176,7 @@ const NewTag = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="TagDescription"
-                className="text-sm text-neutral-200"
+                className="text-sm text-neutral-800 dark:text-neutral-200"
               >
                 Description
               </Label>
@@ -179,7 +184,7 @@ const NewTag = () => {
                 id="TagDescription"
                 value={tagDescription}
                 onChange={handleTagDescriptionChange}
-                className={`w-full min-h-[100px] rounded-md text-neutral-300 bg-neutral-800 px-3 py-2 text-sm border-2 ${
+                className={`w-full min-h-[100px] rounded-md text-neutral-800 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 px-3 py-2 text-sm border-2 ${
                   descriptionError ? "border-red-500" : "border-transparent"
                 } focus:border-green-500 focus:outline-none`}
               />
@@ -205,7 +210,7 @@ const NewTag = () => {
           <div className="">
             <Label
               htmlFor="TagImage"
-              className="text-sm text-neutral-200 mb-2 block"
+              className="text-sm text-neutral-800 dark:text-neutral-200 mb-2 block"
             >
               Tag image
             </Label>

@@ -73,7 +73,7 @@ model Account {
   videoFetch           Boolean?          
 
   reviews              Review[]
-  subscriptions        Subscription[]
+  saveToMyList        SaveToMyList[]
   videos              YouTubeVideo[]
 
   @@unique([platform, accountId])
@@ -119,6 +119,7 @@ model CategoryMapping {
 model User {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   clerkId        String         @unique
+  resendId       String?         
   email          String         @unique
   firstName      String?        @default("")
   lastName       String?        @default("")
@@ -134,7 +135,8 @@ model User {
   comments       Comment[]
   votes          Vote[]
   commentVotes   CommentVote[]
-  subscriptions  Subscription[]
+  saveToMyList   SaveToMyList[]
+  newsletterAudience NewsletterAudience[]
 
   @@index([firstName])
   @@index([lastName])
@@ -143,7 +145,35 @@ model User {
   @@index([role])
 }
 
-model Subscription {
+model Newsletter{
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  audienceId  String   
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  audience    NewsletterAudience[]
+
+  @@index([audienceId])
+}
+
+model NewsletterAudience {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscribed    Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @db.ObjectId
+  newsletter    Newsletter @relation(fields: [newsletterId], references: [id])
+  newsletterId  String   @db.ObjectId
+
+  @@index([userId])
+  @@index([newsletterId])
+  @@index([subscribed])
+
+  @@unique([userId, newsletterId])
+}
+
+model SaveToMyList {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   user       User     @relation(fields: [userId], references: [id])
   userId     String   @db.ObjectId
@@ -341,7 +371,6 @@ enum VoteType {
   DOWN
 }
 
-// New enum for LLM verification statuses.
 enum VerificationStatus {
   VERIFIED
   NOT_VERIFIED
@@ -375,31 +404,30 @@ enum CommentStatus {
 
 
 model Post {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  contentPlatform      ContentPlatform
-  title         String
-  content       String
-  featureImage  String?
-  postUrl       String   @unique
-  publishDate   DateTime?
-  tags          TagOnPost[]
-  excerpt       String?
-  authorId      String   @db.ObjectId
-  author        Author   @relation(fields: [authorId], references: [id])
-  featured      Boolean  @default(false)
+  id                   String  @id @default(auto()) @map("_id") @db.ObjectId
+  contentPlatform      ContentPlatform @default(RATECREATOR)
+  contentType          ContentType @default(BLOG)
+  title                String
+  content              String
+  featureImage         String?
+  postUrl              String   @unique
+  publishDate          DateTime?
+  tags                 TagOnPost[]
+  excerpt              String?
+  authorId             String   @db.ObjectId
+  author               Author   @relation(fields: [authorId], references: [id])
   metadataTitle        String?
   metadataDescription  String?
   metadataImageUrl     String?
   metadataKeywords     String?
   metadataAuthorName   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  status        PostStatus @default(DRAFT)
-  contentType   ContentType @default(BLOG)
-  isDeleted     Boolean @default(false)
-  isFeatured    Boolean @default(false)
-  
-  @@index([featured])
+  canonicalUrl         String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  status               PostStatus @default(DRAFT)
+  isDeleted            Boolean @default(false)
+  isFeatured           Boolean @default(false)
+
   @@index([publishDate])
   @@index([status])
   @@index([title])
@@ -409,12 +437,7 @@ model Post {
   @@index([contentType])
   @@index([contentPlatform])
   @@index([isFeatured])
-}
-
-enum ContentType {
-  BLOG
-  GLOSSARY
-  NEWSLETTER
+  @@index([authorId])
 }
 
 enum ContentPlatform {
@@ -424,13 +447,18 @@ enum ContentPlatform {
   DOCUMENTATION
   LEGAL
 }
+
+enum ContentType {
+  BLOG
+  GLOSSARY
+  NEWSLETTER
+}
+
 enum PostStatus {
   DRAFT
   PUBLISHED
   SCHEDULED
-  ARCHIVED
   DELETED
-  UNPUBLISHED
 }
 
 

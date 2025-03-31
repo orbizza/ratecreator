@@ -8,13 +8,13 @@ export interface PostType {
   publishDate: Date | null;
   tags: TagOnPost[];
   excerpt: string;
-  featured: boolean;
   author: Author;
   metadataTitle: string;
   metadataDescription: string;
   metadataImageUrl: string;
   metadataKeywords: string;
   metadataAuthorName: string;
+  canonicalUrl: string;
   contentType: ContentType;
   status: PostStatus;
   isDeleted: boolean;
@@ -22,6 +22,40 @@ export interface PostType {
   updatedAt: Date;
   isFeatured: boolean;
 }
+
+export interface UpdatePostType {
+  contentPlatform: ContentPlatform;
+  title: string;
+  content: string;
+  featureImage: string | null;
+  postUrl: string;
+  publishDate: Date | null;
+  tags: TagOnPost[];
+  excerpt: string;
+  author: Author;
+  metadataTitle: string;
+  metadataDescription: string;
+  metadataImageUrl: string;
+  metadataKeywords: string;
+  metadataAuthorName: string;
+  canonicalUrl: string;
+  contentType: ContentType;
+  status: PostStatus;
+  updatedAt: Date;
+  isFeatured: boolean;
+}
+
+// export interface PostListType {
+//   id: string; //ObjectId
+//   title: string;
+//   featureImage: string | null;
+//   postUrl: string;
+//   publishDate: Date | null;
+//   excerpt: string;
+//   isFeatured: boolean;
+//   tags: TagOnPost[];
+//   author: Author;
+// }
 
 export enum ContentType {
   BLOG = "BLOG",
@@ -41,9 +75,7 @@ export enum PostStatus {
   DRAFT = "DRAFT",
   PUBLISHED = "PUBLISHED",
   SCHEDULED = "SCHEDULED",
-  ARCHIVED = "ARCHIVED",
   DELETED = "DELETED",
-  UNPUBLISHED = "UNPUBLISHED",
 }
 
 export interface TagOnPost {

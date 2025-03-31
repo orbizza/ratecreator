@@ -25,6 +25,15 @@ export const CategoryGlossaryPostSkeleton = () => {
         <Layers2 size={28} />
         <Skeleton className="h-9 w-64" />
       </div>
+      <div className="flex flex-row gap-x-2 items-center text-primary mt-4">
+        <UserSearch size={28} />
+        <h2 className="text-lg font-semibold">Creators in this category</h2>
+        <Info size={12} className="text-muted-foreground" />
+      </div>
+      <div className="flex flex-col items-start gap-2 mt-2">
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-4 w-40" />
+      </div>
 
       {/* Category Details accordion skeleton */}
       <Accordion type="single" collapsible defaultValue="channel-description">
@@ -51,15 +60,6 @@ export const CategoryGlossaryPostSkeleton = () => {
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />
               </div>
-            </div>
-            <div className="flex flex-row gap-x-2 items-center text-primary mt-4">
-              <UserSearch size={20} />
-              <h2 className="text-lg font-semibold">Category Accounts</h2>
-              <Info size={12} className="text-muted-foreground" />
-            </div>
-            <div className="flex flex-col items-start gap-2 mt-2">
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-4 w-40" />
             </div>
           </AccordionContent>
         </AccordionItem>

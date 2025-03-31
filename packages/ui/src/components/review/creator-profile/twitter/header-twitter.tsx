@@ -255,7 +255,10 @@ const TwitterChannelHeader = ({
         <div className="absolute -bottom-32 left-6">
           <Avatar className="w-36 h-36 rounded-lg border-2 border-border drop-shadow-lg">
             <AvatarImage
-              src={removeNormalSuffix(account.imageUrl) || account.imageUrl}
+              src={
+                removeNormalSuffix(account.xData?.profile_banner_url || "") ||
+                account.imageUrl
+              }
             />
             <AvatarFallback className="w-36 h-36 text-primary text-5xl rounded-lg border-2 border-border drop-shadow-lg">
               {getInitials(account.name_en || account.name)}
