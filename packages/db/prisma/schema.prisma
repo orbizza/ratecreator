@@ -420,12 +420,10 @@ model Post {
   metadataDescription  String?
   metadataImageUrl     String?
   metadataKeywords     String?
-  metadataAuthorName   String?
   canonicalUrl         String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   status               PostStatus @default(DRAFT)
-  isDeleted            Boolean @default(false)
   isFeatured           Boolean @default(false)
 
   @@index([publishDate])
@@ -433,7 +431,6 @@ model Post {
   @@index([title])
   @@index([createdAt])
   @@index([updatedAt])
-  @@index([isDeleted])
   @@index([contentType])
   @@index([contentPlatform])
   @@index([isFeatured])
@@ -484,7 +481,8 @@ model TagOnPost {
 model Author {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   clerkId String @unique
-  name    String
+  name    String?
+  username String @unique
   email   String @unique
   imageUrl String?
   posts   Post[]

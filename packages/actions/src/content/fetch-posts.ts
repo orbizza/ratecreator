@@ -1,61 +1,51 @@
 "use server";
 
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
-import { PostStatus as PrismaPostStatus } from "@prisma/client";
 
 import { getPrismaClient } from "@ratecreator/db/client";
 import {
-  PostType,
-  PostStatus,
   ContentType,
   FetchedPostType,
+  PostStatus,
+  ContentPlatform,
 } from "@ratecreator/types/content";
-import { splitAndCapitalize } from "@ratecreator/db/utils";
 
 const prisma = getPrismaClient();
 
 export async function fetchAllPostsCount(
-  postOption: string,
-  tagOption: string,
+  tagOption?: string,
+  contentType?: string,
+  platformType: string = "ratecreator",
+  postStatus?: string
 ) {
-  // modify for based on postOption and tagOption
-  if (postOption === "all-posts") {
-    const posts = await prisma.post.count();
-    return posts;
-  } else if (postOption === "featured-posts") {
-    const posts = await prisma.post.count({
-      where: {
-        isFeatured: true,
-      },
-    });
-    return posts;
-  } else if (postOption === "newsletters") {
-    const posts = await prisma.post.count({
-      where: {
-        contentType: ContentType.NEWSLETTER,
-      },
-    });
-    return posts;
-  } else if (postOption === "articles") {
-    const posts = await prisma.post.count({
-      where: {
-        status: "PUBLISHED",
-        contentType: ContentType.BLOG,
-      },
-    });
-    return posts;
-  } else {
-    const posts = await prisma.post.count({
-      where: {
-        status: {
-          equals: splitAndCapitalize(postOption) as PrismaPostStatus,
+  // Base where clause with platform type
+  const baseWhere: Prisma.PostWhereInput = {
+    contentPlatform: platformType.toUpperCase() as ContentPlatform,
+  };
+
+  // Add content type filter if specified and not "all"
+  if (contentType && contentType.toLowerCase() !== "all") {
+    baseWhere.contentType = contentType.toUpperCase() as ContentType;
+  }
+
+  if (postStatus && postStatus.toLowerCase() !== "all") {
+    baseWhere.status = postStatus.toUpperCase() as PostStatus;
+  }
+
+  // Add tag filter if specified
+  if (tagOption && tagOption.toLowerCase() !== "all") {
+    baseWhere.tags = {
+      some: {
+        tag: {
+          slug: tagOption.toLowerCase(),
         },
       },
-    });
-    return posts;
+    };
   }
+
+  return await prisma.post.count({
+    where: baseWhere,
+  });
 }
 
 export async function fetchPublishedPostsCount(postOption: string) {
@@ -92,98 +82,54 @@ export async function fetchPublishedPostsCount(postOption: string) {
 }
 
 export async function fetchAllPosts(
-  postOption: string,
   tagOption: string,
   pageNumber: number,
+  contentType?: string,
+  platformType: string = "ratecreator",
+  postStatus?: string
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
 
-  if (postOption === "all-posts") {
-    const posts = await prisma.post.findMany({
-      skip: offset,
-      take: pageSize,
-      include: {
-        tags: true,
-        author: true,
-      },
-      orderBy: {
-        publishDate: "desc",
-      },
-    });
+  // Base where clause with platform type
+  const baseWhere: Prisma.PostWhereInput = {
+    contentPlatform: platformType.toUpperCase() as ContentPlatform,
+  };
 
-    return posts as FetchedPostType[];
-  } else if (postOption === "featured-posts") {
-    const posts = await prisma.post.findMany({
-      where: {
-        isFeatured: true,
-      },
-      skip: offset,
-      take: pageSize,
-      include: {
-        tags: true,
-        author: true,
-      },
-      orderBy: {
-        publishDate: "desc",
-      },
-    });
+  // Add content type filter if specified and not "all"
+  if (contentType && contentType.toLowerCase() !== "all") {
+    baseWhere.contentType = contentType.toUpperCase() as ContentType;
+  }
 
-    return posts as FetchedPostType[];
-  } else if (postOption === "newsletters") {
-    const posts = await prisma.post.findMany({
-      where: {
-        contentType: ContentType.NEWSLETTER,
-      },
-      skip: offset,
-      take: pageSize,
-      include: {
-        tags: true,
-        author: true,
-      },
-      orderBy: {
-        publishDate: "desc",
-      },
-    });
+  if (postStatus && postStatus.toLowerCase() !== "all") {
+    baseWhere.status = postStatus.toUpperCase() as PostStatus;
+  }
 
-    return posts as FetchedPostType[];
-  } else if (postOption === "articles") {
-    const posts = await prisma.post.findMany({
-      where: {
-        status: "PUBLISHED",
-        contentType: ContentType.BLOG,
-      },
-      skip: offset,
-      take: pageSize,
-      include: {
-        tags: true,
-        author: true,
-      },
-      orderBy: {
-        publishDate: "desc",
-      },
-    });
-    return posts as FetchedPostType[];
-  } else {
-    const posts = await prisma.post.findMany({
-      where: {
-        status: {
-          equals: splitAndCapitalize(postOption) as PrismaPostStatus,
+  // Add tag filter if specified
+  if (tagOption && tagOption.toLowerCase() !== "all") {
+    baseWhere.tags = {
+      some: {
+        tag: {
+          slug: tagOption.toLowerCase(),
         },
       },
-      skip: offset,
-      take: pageSize,
-      include: {
-        tags: true,
-        author: true,
-      },
-      orderBy: {
-        publishDate: "desc",
-      },
-    });
-
-    return posts as FetchedPostType[];
+    };
   }
+
+  const posts = await prisma.post.findMany({
+    where: baseWhere,
+    skip: offset,
+    take: pageSize,
+    include: {
+      tags: true,
+      author: true,
+    },
+    orderBy: {
+      publishDate: "desc",
+    },
+  });
+
+  return posts as FetchedPostType[];
 }
 
 export async function fetchPublishedPosts(postOption: string) {
@@ -240,7 +186,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -315,6 +261,20 @@ export async function fetchPostById(id: string) {
   }
 
   return post as FetchedPostType;
+}
+
+export async function fetchPostTitleById(id: string) {
+  const post = await prisma.post.findUnique({
+    where: { id },
+    select: {
+      title: true,
+    },
+  });
+  if (!post) {
+    return null;
+  }
+
+  return post.title;
 }
 
 export async function fetchPostByPostUrl(postUrl: string) {

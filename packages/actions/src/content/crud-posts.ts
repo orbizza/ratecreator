@@ -8,6 +8,7 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import {
   ContentPlatform,
   ContentType,
+  FetchedPostType,
   PostStatus,
   PostType,
   UpdatePostType,
@@ -50,7 +51,6 @@ async function createPost(data: PostType) {
         metadataDescription: data.metadataDescription,
         metadataImageUrl: data.metadataImageUrl,
         metadataKeywords: data.metadataKeywords,
-        metadataAuthorName: data.metadataAuthorName,
         canonicalUrl: data.canonicalUrl,
         contentType: data.contentType as ContentType,
         contentPlatform: data.contentPlatform as ContentPlatform,
@@ -104,7 +104,6 @@ async function updatePost(data: PostType, postId: string) {
     metadataDescription: data.metadataDescription,
     metadataImageUrl: data.metadataImageUrl,
     metadataKeywords: data.metadataKeywords,
-    metadataAuthorName: data.metadataAuthorName,
     canonicalUrl: data.canonicalUrl,
     contentType: data.contentType as ContentType,
     contentPlatform: data.contentPlatform as ContentPlatform,
@@ -147,7 +146,6 @@ async function updatePost(data: PostType, postId: string) {
         metadataDescription: post.metadataDescription,
         metadataImageUrl: post.metadataImageUrl,
         metadataKeywords: post.metadataKeywords,
-        metadataAuthorName: post.metadataAuthorName,
         canonicalUrl: post.canonicalUrl,
         contentType: post.contentType as ContentType,
         contentPlatform: post.contentPlatform as ContentPlatform,
@@ -183,4 +181,65 @@ async function updatePost(data: PostType, postId: string) {
   }
 }
 
-export { createPost, updatePost };
+async function deletePost(postId: string) {
+  await authenticateUser();
+  try {
+    await prisma.post.update({
+      where: { id: postId },
+      data: {
+        status: PostStatus.DELETED,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return { error: "Error deleting post" };
+  }
+}
+
+async function restorePost(postId: string) {
+  await authenticateUser();
+  try {
+    await prisma.post.update({
+      where: { id: postId },
+      data: {
+        status: PostStatus.DRAFT,
+      },
+    });
+  } catch (error) {
+    console.error("Error restoring post:", error);
+    return { error: "Error restoring post" };
+  }
+}
+
+async function publishPost(
+  postData: FetchedPostType,
+  finalTime: Date,
+  scheduleType: string,
+  postId: string
+) {
+  // let data = {};
+  // if (postData.status === PostStatus.SCHEDULED) {
+  //   data = {
+  //     status: PostStatus.PUBLISHED,
+  //     publishDate: postData.publishDate,
+  //   };
+  // } else {
+  //   data = { status: PostStatus.PUBLISHED };
+  // }
+
+  await authenticateUser();
+  try {
+    await prisma.post.update({
+      where: { id: postId },
+      data: {
+        status: PostStatus.PUBLISHED,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error publishing post:", error);
+    return { error: "Error publishing post" };
+  }
+}
+
+export { createPost, updatePost, deletePost, restorePost, publishPost };

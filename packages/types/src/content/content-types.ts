@@ -13,11 +13,9 @@ export interface PostType {
   metadataDescription: string;
   metadataImageUrl: string;
   metadataKeywords: string;
-  metadataAuthorName: string;
   canonicalUrl: string;
   contentType: ContentType;
   status: PostStatus;
-  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
   isFeatured: boolean;
@@ -37,7 +35,6 @@ export interface UpdatePostType {
   metadataDescription: string;
   metadataImageUrl: string;
   metadataKeywords: string;
-  metadataAuthorName: string;
   canonicalUrl: string;
   contentType: ContentType;
   status: PostStatus;
@@ -58,11 +55,9 @@ export interface FetchedPostType {
   metadataDescription: string;
   metadataImageUrl: string;
   metadataKeywords: string;
-  metadataAuthorName: string;
   canonicalUrl: string;
   contentType: ContentType;
   status: PostStatus;
-  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
   isFeatured: boolean;
@@ -119,6 +114,7 @@ export interface Author {
   id: string;
   clerkId: string;
   name: string;
+  username: string;
   email: string;
   imageUrl: string;
   role: string;

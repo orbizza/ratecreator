@@ -4,7 +4,7 @@ import { fetchTagsFromTagOnPost } from "@ratecreator/actions/content";
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 import { UploadComponent } from "@ratecreator/ui/common";
 import {
@@ -14,6 +14,7 @@ import {
   selectedTagsState,
   postDataState,
   postIdState,
+  metadataToggleState,
 } from "@ratecreator/store/content";
 import { Tags } from "@ratecreator/types/content";
 import { usePathname } from "next/navigation";
@@ -36,7 +37,7 @@ export const EditContentPost = ({
   const [inputTimeIst, setInputTimeIst] = useRecoilState(selectedTimeIst);
 
   // Local States
-  const [isOpen, setIsOpen] = useState(true);
+  const isMetadataToggle = useRecoilValue(metadataToggleState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFeatureFileUploadOpen, setIsFeatureFileUploadOpen] = useState(false);
   const [abortController, setAbortController] =
@@ -68,7 +69,7 @@ export const EditContentPost = ({
             imageUrl: tag.tag.imageUrl ?? "",
             slug: tag.tag.slug,
             posts: tag.tag.posts,
-          })),
+          }))
         );
       } catch (error) {
         console.error("Error fetching tags:", error);
@@ -111,7 +112,6 @@ export const EditContentPost = ({
         contentPlatform: initialPost.contentPlatform,
         contentType: initialPost.contentType,
         status: initialPost.status,
-        isDeleted: initialPost.isDeleted,
         createdAt: initialPost.createdAt,
         updatedAt: initialPost.updatedAt,
         canonicalUrl: initialPost.canonicalUrl || "",
@@ -119,7 +119,6 @@ export const EditContentPost = ({
         metadataDescription: initialPost.metadataDescription || "",
         metadataImageUrl: initialPost.metadataImageUrl || "",
         metadataKeywords: initialPost.metadataKeywords || "",
-        metadataAuthorName: initialPost.metadataAuthorName || "",
       });
 
       setSelectedTags(post.tags);
@@ -144,15 +143,11 @@ export const EditContentPost = ({
       dynamic(() => import("../../common/blocknote-editor/editor"), {
         ssr: false,
       }),
-    [],
+    []
   );
 
   const handleEditorContentChange = (content: string) => {
     setPost((prev) => ({ ...prev, content }));
-  };
-
-  const toggleSidebar = () => {
-    setIsOpen((prev) => !prev);
   };
 
   const toggleFeatureImageUpload = () => {
@@ -208,19 +203,19 @@ export const EditContentPost = ({
   };
 
   return (
-    <div className="flex relative min-h-screen">
-      <div className="flex-1 transition-all duration-200">
-        <div className="mx-auto rounded-md lg:max-w-screen-2xl">
-          <div className="ml-10 max-w-screen-md lg:max-w-screen-lg">
+    <div className='flex relative min-h-screen'>
+      <div className='flex-1 transition-all duration-200'>
+        <div className='mx-auto rounded-md lg:max-w-screen-2xl'>
+          <div className='ml-10 max-w-screen-md lg:max-w-screen-lg'>
             <UploadComponent
               imageUrl={post.featureImage}
               isSubmitting={isSubmitting}
               onChange={handleFeatureImageChange}
               isFileUploadOpen={isFeatureFileUploadOpen}
               toggleFileUpload={toggleFeatureImageUpload}
-              text="Add feature image"
-              className="text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10"
-              buttonVariant="link"
+              text='Add feature image'
+              className='text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10'
+              buttonVariant='link'
               onCancel={handleCancelUpload}
             />
           </div>
@@ -228,11 +223,11 @@ export const EditContentPost = ({
             <input
               value={post.title}
               onChange={handleMainInputChange}
-              placeholder="Post title"
-              className="w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700"
+              placeholder='Post title'
+              className='w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700'
             />
           </div>
-          <div className="mt-8">
+          <div className='mt-8'>
             <Editor
               onChange={handleEditorContentChange}
               initialContent={post.content}
@@ -242,7 +237,7 @@ export const EditContentPost = ({
         </div>
       </div>
 
-      {isOpen && <MetadataSidebar />}
+      {isMetadataToggle && <MetadataSidebar />}
     </div>
   );
 };
