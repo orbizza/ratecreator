@@ -96,7 +96,7 @@ async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
   } catch (error) {
     console.error(
       "Failed to fetch tags with post count. Error details:",
-      error
+      error,
     );
     if (error instanceof Error) {
       console.error("Error name:", error.name);

@@ -18,7 +18,7 @@ const prisma = getPrismaClient();
 
 export async function fetchAllPostsCount(
   postOption: string,
-  tagOption: string
+  tagOption: string,
 ) {
   // modify for based on postOption and tagOption
   if (postOption === "all-posts") {
@@ -94,7 +94,7 @@ export async function fetchPublishedPostsCount(postOption: string) {
 export async function fetchAllPosts(
   postOption: string,
   tagOption: string,
-  pageNumber: number
+  pageNumber: number,
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -240,7 +240,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number
+  pageNumber: number,
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
