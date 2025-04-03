@@ -118,6 +118,7 @@ export function MetadataSidebar() {
           "/api/upload",
           {
             fileType: file.type,
+            folderName: "content/metadata-images",
           },
           {
             signal: controller.signal,
@@ -160,7 +161,7 @@ export function MetadataSidebar() {
   const closeMetaImageUpload = () => {
     setIsMetaImageUploadOpen(false);
     setIsSubmitting(false);
-    setPost((prev) => ({ ...prev, imageUrl: "" }));
+    setPost((prev) => ({ ...prev, metadataImageUrl: "" }));
   };
 
   // Helper function to close all uploaders
@@ -176,7 +177,7 @@ export function MetadataSidebar() {
       return;
     }
     const url = await handleFileUpload(file);
-    setPost((prev) => ({ ...prev, imageUrl: url }));
+    setPost((prev) => ({ ...prev, metadataImageUrl: url }));
   };
 
   useEffect(() => {
@@ -506,6 +507,7 @@ export const TagsComponent: React.FC<TagsProps> = ({
   const [tags, setTags] = useRecoilState(tagsState);
   const [currentSelectedTags, setCurrentSelectedTags] =
     useState<Tags[]>(oldSelectedTags);
+  const [post, setPost] = useRecoilState(postState);
 
   useEffect(() => {
     const fetchTags = async () => {

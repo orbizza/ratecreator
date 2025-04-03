@@ -80,6 +80,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
     try {
       const { data } = await axios.post("/api/upload", {
         fileType: file.type,
+        folderName: "content/editor-images",
       });
 
       const { uploadURL, s3URL, fileName } = data;

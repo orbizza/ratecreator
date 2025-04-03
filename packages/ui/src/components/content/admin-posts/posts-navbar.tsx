@@ -7,6 +7,8 @@ import {
   contentTypeAtom,
   contentPlatformAtom,
   postStatusAtom,
+  listOfTagsState,
+  postListTagsState,
 } from "@ratecreator/store/content";
 import {
   ContentType,
@@ -17,20 +19,30 @@ import { Button } from "@ratecreator/ui";
 import { capitalizeFirstLetter } from "@ratecreator/db/utils";
 import Link from "next/link";
 import { SelectComponent } from "@ratecreator/ui/common";
+import { fetchAllTagsWithPostCount } from "@ratecreator/actions/content";
+
 export const PostsNavbar = () => {
-  const allPosts = [
-    "all-posts",
-    "draft",
-    "featured",
-    "published",
-    "scheduled",
-    "deleted",
-  ];
   const pathname = usePathname();
+
   const [contentType, setContentType] = useRecoilState(contentTypeAtom);
   const [contentPlatformType, setContentPlatformType] =
     useRecoilState(contentPlatformAtom);
   const [postStatus, setPostStatus] = useRecoilState(postStatusAtom);
+  const [tags, setTags] = useRecoilState(listOfTagsState);
+  const [postListTags, setPostListTags] = useRecoilState(postListTagsState);
+
+  const contentTypes = [
+    { value: ContentType.BLOG.toLowerCase(), label: "Blog" },
+    { value: ContentType.GLOSSARY.toLowerCase(), label: "Glossary" },
+    { value: ContentType.NEWSLETTER.toLowerCase(), label: "Newsletter" },
+  ];
+
+  const statusOptions = [
+    { value: PostStatus.DRAFT.toLowerCase(), label: "Draft" },
+    { value: PostStatus.PUBLISHED.toLowerCase(), label: "Published" },
+    { value: PostStatus.SCHEDULED.toLowerCase(), label: "Scheduled" },
+    { value: PostStatus.DELETED.toLowerCase(), label: "Deleted" },
+  ];
 
   useEffect(() => {
     const pathSegments = pathname.split("/").filter(Boolean);
@@ -52,10 +64,25 @@ export const PostsNavbar = () => {
     }
   }, [pathname, setContentType, setContentPlatformType]);
 
-  const currentPostType = pathname.split("/").pop();
+  useEffect(() => {
+    const fetchTags = async () => {
+      const fetchedTags = await fetchAllTagsWithPostCount();
+      setTags(fetchedTags);
+    };
 
-  const isCurrentPostType = (type: string) => {
-    return currentPostType === type;
+    fetchTags();
+  }, []);
+
+  const handleSelectContentType = (value: string) => {
+    setContentType(value ? (value.toUpperCase() as ContentType) : null);
+  };
+
+  const handleSelectStatus = (value: string) => {
+    setPostStatus(value ? (value.toUpperCase() as PostStatus) : null);
+  };
+
+  const handleSelectTagOption = (item: string) => {
+    setPostListTags(item);
   };
 
   return (
@@ -67,63 +94,75 @@ export const PostsNavbar = () => {
             <Button variant="outline">New post</Button>
           </Link>
         </div>
-        <div className="flex flex-row gap-2 justify-between mr-4 ">
+        <div className="flex flex-row gap-2 gap-x-4 justify-between mx-auto mr-4 items-center">
           <div className="">
-            {/* <SelectComponent
-          items={postFilter}
-          placeholder='all-posts'
-          onSelect={onSelectPostOption}
-          selectedItem={postOption}
-        /> */}
+            <SelectComponent
+              items={contentTypes}
+              placeholder="all-posts"
+              onSelect={handleSelectContentType}
+              selectedItem={contentType?.toLowerCase() || ""}
+              showAll={true}
+            />
           </div>
-          <div className="mr-1 text-sm md:text-sm">
-            {capitalizeFirstLetter(contentType)}
-          </div>
-          <div className="mr-1 text-sm md:text-sm">
-            {/* {capitalizeFirstLetter(postStatus)} */}
-            Status
+          <div className="">
+            <SelectComponent
+              items={statusOptions}
+              placeholder="all-status"
+              onSelect={handleSelectStatus}
+              selectedItem={postStatus?.toLowerCase() || ""}
+              showAll={true}
+            />
           </div>
           <div className="mr-1 text-sm md:text-sm ">All authors</div>
-          <div className="mr-1 text-sm md:text-sm ">Tags</div>
-          {/* <div className='mr-1'>
-          <SelectComponent
-          items={tags}
-          placeholder='all-tags'
-          onSelect={onSelectTagOption}
-          selectedItem={tagOption}
-        />
-        </div> */}
+          <div className="mr-1 text-sm md:text-sm ">
+            <SelectComponent
+              items={tags.map((tag) => ({
+                value: tag.slug,
+                label: capitalizeFirstLetter(tag.slug),
+              }))}
+              placeholder="all-tags"
+              onSelect={handleSelectTagOption}
+              selectedItem={postListTags}
+              showAll={true}
+            />
+          </div>
           <div className="mr-1 text-sm md:text-sm">Newest first</div>
         </div>
       </div>
 
       {/* md screen */}
-      <div className="hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center">
+      <div className="hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center md:max-w-7xl mx-auto w-full ">
         <div className="">
-          {/* <SelectComponent
-          items={postFilter}
-          placeholder='all-posts'
-          onSelect={onSelectPostOption}
-          selectedItem={postOption}
-        /> */}
+          <SelectComponent
+            items={contentTypes}
+            placeholder="all-posts"
+            onSelect={handleSelectContentType}
+            selectedItem={contentType?.toLowerCase() || ""}
+            showAll={true}
+          />
         </div>
-        <div className="mr-1 text-sm md:text-sm">
-          {capitalizeFirstLetter(contentType)}
-        </div>
-        <div className="mr-1 text-sm md:text-sm">
-          {/* {capitalizeFirstLetter(postStatus)} */}
-          Status
+        <div className="">
+          <SelectComponent
+            items={statusOptions}
+            placeholder="all-status"
+            onSelect={handleSelectStatus}
+            selectedItem={postStatus?.toLowerCase() || ""}
+            showAll={true}
+          />
         </div>
         <div className="mr-1 text-sm md:text-sm ">All authors</div>
-        <div className="mr-1 text-sm md:text-sm ">Tags</div>
-        {/* <div className='mr-1'>
+        <div className="mr-1 text-sm md:text-sm ">
           <SelectComponent
-          items={tags}
-          placeholder='all-tags'
-          onSelect={onSelectTagOption}
-          selectedItem={tagOption}
-        />
-        </div> */}
+            items={tags.map((tag) => ({
+              value: tag.slug,
+              label: capitalizeFirstLetter(tag.slug),
+            }))}
+            placeholder="all-tags"
+            onSelect={handleSelectTagOption}
+            selectedItem={postListTags}
+            showAll={true}
+          />
+        </div>
         <div className="mr-1 text-sm md:text-sm">Newest first</div>
 
         <Link href="/new-post" className="mr-4">

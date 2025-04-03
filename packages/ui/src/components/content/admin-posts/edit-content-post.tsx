@@ -1,72 +1,141 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { fetchTagsFromTagOnPost } from "@ratecreator/actions/content";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
-import { useResetRecoilState, useRecoilState, useRecoilValue } from "recoil";
-import { useMemo } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 import { UploadComponent } from "@ratecreator/ui/common";
 import {
   selectDate,
   postState,
   selectedTimeIst,
-  postIdState,
-  postDataState,
-  tagsState,
   selectedTagsState,
+  postDataState,
+  postIdState,
   metadataToggleState,
 } from "@ratecreator/store/content";
-import { makeFilePublic } from "@ratecreator/actions";
+import { Tags } from "@ratecreator/types/content";
+import { usePathname } from "next/navigation";
 import { MetadataSidebar } from "./metadata-sidebar";
-import { useRouter } from "next/navigation";
+import { FetchedPostType } from "@ratecreator/types/content";
+import { makeFilePublic } from "@ratecreator/actions";
 
-const NewPostComponent = () => {
-  const router = useRouter();
+export const EditContentPost = ({
+  initialPost,
+}: {
+  initialPost: FetchedPostType;
+}) => {
+  const pathname = usePathname();
+
+  // Recoil States
+  const [postFull, setPostFull] = useRecoilState(postDataState);
+  const [post, setPost] = useRecoilState(postState);
+  const [postId, setPostId] = useRecoilState(postIdState);
+  const [inputDate, setInputDate] = useRecoilState(selectDate);
+  const [inputTimeIst, setInputTimeIst] = useRecoilState(selectedTimeIst);
+
+  // Local States
   const isMetadataToggle = useRecoilValue(metadataToggleState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFeatureFileUploadOpen, setIsFeatureFileUploadOpen] = useState(false);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
+  const [tags, setTags] = useState<Tags[]>([]);
+  const [selectedTags, setSelectedTags] = useRecoilState(selectedTagsState);
 
-  const [post, setPost] = useRecoilState(postState);
-
-  const resetPost = useResetRecoilState(postState);
-  const resetSelectedTimeIst = useResetRecoilState(selectedTimeIst);
-  const resetSelectDate = useResetRecoilState(selectDate);
-  const resetPostFull = useResetRecoilState(postDataState);
-  const resetPostId = useResetRecoilState(postIdState);
-  const resetTags = useResetRecoilState(tagsState);
-  const resetSelectedTags = useResetRecoilState(selectedTagsState);
-  const resetPostData = useResetRecoilState(postDataState);
-
-  // reset state of all fields and uploaders of this page
   const resetState = () => {
     setIsSubmitting(false);
     setIsFeatureFileUploadOpen(false);
     setAbortController(null);
-
-    resetPostFull();
-    resetPost();
-    resetSelectedTimeIst();
-    resetSelectDate();
-    resetPostId();
-    resetTags();
-    resetSelectedTags();
-    resetPostData();
   };
+
   useEffect(() => {
-    router.refresh();
     resetState();
+  }, []);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tagOptions = await fetchTagsFromTagOnPost({
+          postId: initialPost.id,
+        });
+        // console.log("Fetched tags:", tagOptions);
+        setTags(
+          tagOptions.map((tag) => ({
+            id: tag.tag.id,
+            description: tag.tag.description ?? "",
+            imageUrl: tag.tag.imageUrl ?? "",
+            slug: tag.tag.slug,
+            posts: tag.tag.posts,
+          })),
+        );
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    fetchTags();
+  }, [setTags]);
+
+  useEffect(() => {
+    if (pathname.includes("/editor/")) {
+      setPostFull(initialPost);
+
+      const initializeDateAndTime = (publishDate: Date) => {
+        // Extract the date portion
+        setInputDate(publishDate);
+
+        // Extract the time portion in HH:mm format
+
+        const istTime = new Date(publishDate.getTime() + 5.5 * 60 * 60 * 1000);
+        const hours = istTime.getUTCHours().toString().padStart(2, "0");
+        const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
+        const formattedTime = `${hours}:${minutes}`;
+        setInputTimeIst(formattedTime);
+        // console.log("formattedTime", formattedTime);
+      };
+
+      initializeDateAndTime(initialPost.publishDate || new Date());
+
+      setPost({
+        title: initialPost.title,
+        content: initialPost.content,
+        featureImage: initialPost.featureImage || "",
+        postUrl: initialPost.postUrl,
+        publishDate: initialPost.publishDate,
+        excerpt: initialPost.excerpt,
+        featured: initialPost.isFeatured,
+        tags: tags,
+        authors: initialPost.author?.id || "",
+        contentPlatform: initialPost.contentPlatform,
+        contentType: initialPost.contentType,
+        status: initialPost.status,
+        createdAt: initialPost.createdAt,
+        updatedAt: initialPost.updatedAt,
+        canonicalUrl: initialPost.canonicalUrl || "",
+        metadataTitle: initialPost.metadataTitle || "",
+        metadataDescription: initialPost.metadataDescription || "",
+        metadataImageUrl: initialPost.metadataImageUrl || "",
+        metadataKeywords: initialPost.metadataKeywords || "",
+      });
+
+      setSelectedTags(post.tags);
+
+      setPostId(initialPost.id);
+    }
   }, [
-    resetPost,
-    resetPostFull,
-    resetPostId,
-    resetSelectedTimeIst,
-    resetSelectDate,
-    resetTags,
-    resetSelectedTags,
-    resetPostData,
+    initialPost,
+    setPostFull,
+    setPost,
+    tags,
+    setPostId,
+    setTags,
+    pathname,
+    setSelectedTags,
+    setInputDate,
+    setInputTimeIst,
   ]);
 
   const Editor = useMemo(
@@ -165,11 +234,10 @@ const NewPostComponent = () => {
               editable={true}
             />
           </div>
-          {isMetadataToggle && <MetadataSidebar />}
         </div>
       </div>
+
+      {isMetadataToggle && <MetadataSidebar />}
     </div>
   );
 };
-
-export { NewPostComponent };

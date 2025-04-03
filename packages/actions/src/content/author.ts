@@ -5,6 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 
 import { SignedIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { getInitials } from "@ratecreator/db/utils";
 
 const prisma = getPrismaClient();
 
@@ -35,8 +36,9 @@ export async function createAuthor() {
         data: {
           clerkId: user.id,
           name:
-            user.username ||
+            user.fullName ||
             `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          username: user.username || "",
           email: user.emailAddresses[0]?.emailAddress || "",
           imageUrl: user.imageUrl || "",
           role: "WRITER",
@@ -44,18 +46,22 @@ export async function createAuthor() {
       });
       return {
         id: newAuthor.id,
+        clerkId: newAuthor.clerkId,
         name: newAuthor.name,
+        username: newAuthor.username,
         email: newAuthor.email,
-        imageUrl: newAuthor.imageUrl,
+        imageUrl: newAuthor.imageUrl || "",
         role: newAuthor.role,
       };
     }
     // Return existing author
     return {
       id: existingAuthor.id,
+      clerkId: existingAuthor.clerkId,
       name: existingAuthor.name,
+      username: existingAuthor.username,
       email: existingAuthor.email,
-      imageUrl: existingAuthor.imageUrl,
+      imageUrl: existingAuthor.imageUrl || "",
       role: existingAuthor.role,
     };
   } catch (error) {

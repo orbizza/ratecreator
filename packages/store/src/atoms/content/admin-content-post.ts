@@ -3,7 +3,7 @@ import {
   ContentPlatform,
   ContentType,
   PostStatus,
-  PostType,
+  FetchedPostType,
   Tags,
 } from "@ratecreator/types/content";
 
@@ -22,7 +22,6 @@ export const postState = atom({
     contentPlatform: ContentPlatform.RATECREATOR,
     contentType: ContentType.BLOG,
     status: PostStatus.DRAFT,
-    isDeleted: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     canonicalUrl: "",
@@ -30,7 +29,6 @@ export const postState = atom({
     metadataDescription: "",
     metadataImageUrl: "",
     metadataKeywords: "",
-    metadataAuthorName: "",
   },
 });
 
@@ -49,7 +47,7 @@ export const postIdState = atom<string | null>({
   default: null,
 });
 
-export const postDataState = atom<PostType | null>({
+export const postDataState = atom<FetchedPostType | null>({
   key: "postDataState",
   default: null,
 });
@@ -67,6 +65,16 @@ export const tagsState = atom<Tags[]>({
 export const selectedTagsState = atom<Tags[]>({
   key: "selectedTagsState",
   default: [],
+});
+
+export const listOfTagsState = atom<Tags[]>({
+  key: "listOfTagsState",
+  default: [],
+});
+
+export const postListTagsState = atom<string>({
+  key: "postListTagsState",
+  default: "",
 });
 
 export const pageNumberState = atom<number>({

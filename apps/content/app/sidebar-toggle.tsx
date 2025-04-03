@@ -14,6 +14,7 @@ import {
 import { SidebarTrigger } from "@ratecreator/ui";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+import { fetchPostTitleById } from "@ratecreator/actions/content";
 
 export function SidebarToggle() {
   const { isSignedIn } = useAuth();
@@ -28,6 +29,25 @@ export function SidebarToggle() {
           <span className=" font-bold">{user?.user?.firstName}</span>
         </h1>
       );
+
+    if (pathname.startsWith("/editor/")) {
+      const postId = pathname.split("/").pop() || "";
+      return (
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="/editor">Editor</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbPage>
+                <PostTitle postId={postId} />
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      );
+    }
 
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length === 0) return null;
@@ -74,4 +94,18 @@ export function SidebarToggle() {
   ) : (
     <></>
   );
+}
+
+function PostTitle({ postId }: { postId: string }) {
+  const [title, setTitle] = React.useState<string>("Loading...");
+
+  React.useEffect(() => {
+    const fetchTitle = async () => {
+      const postTitle = await fetchPostTitleById(postId);
+      setTitle(postTitle || "Untitled Post");
+    };
+    fetchTitle();
+  }, [postId]);
+
+  return <>{title}</>;
 }
