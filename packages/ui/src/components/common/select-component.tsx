@@ -61,7 +61,7 @@ export const SelectComponent = ({
     ? String(selectedItem).toLowerCase()
     : ALL_VALUE;
   const currentOption = finalOptions.find(
-    (item) => item.value === currentValue
+    (item) => item.value === currentValue,
   );
 
   return (
@@ -73,16 +73,16 @@ export const SelectComponent = ({
             : ""
         }`}
       >
-        <SelectTrigger className='ml-2 bg-transparent border-transparent ring-0 outline-none focus:ring-0 focus:outline-none  text-sm md:text-sm'>
+        <SelectTrigger className="ml-2 bg-transparent border-transparent ring-0 outline-none focus:ring-0 focus:outline-none  text-sm md:text-sm">
           {currentOption?.label || capitalizeEachWord(placeholder)}
         </SelectTrigger>{" "}
       </div>
-      <SelectContent className='pl-0 bg-neutral-800 border-transparent ring-0 outline-none focus:ring-0 focus:outline-none'>
-        <SelectGroup className='pl-0 bg-neutral-800 '>
+      <SelectContent className="pl-0 bg-neutral-800 border-transparent ring-0 outline-none focus:ring-0 focus:outline-none">
+        <SelectGroup className="pl-0 bg-neutral-800 ">
           {finalOptions.map((item) => (
             <SelectItem
               key={item.value}
-              className='text-neutral-200 border-transparent hover:bg-neutral-950 hover:text-neutral-200 text-sm md:text-sm font-light !justify-start focus:ring-0 focus:outline-none focus:bg-neutral-950 focus:text-neutral-200 pr-5 '
+              className="text-neutral-200 border-transparent hover:bg-neutral-950 hover:text-neutral-200 text-sm md:text-sm font-light !justify-start focus:ring-0 focus:outline-none focus:bg-neutral-950 focus:text-neutral-200 pr-5 "
               value={item.value}
             >
               {item.label}

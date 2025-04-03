@@ -74,7 +74,7 @@ const NewPostComponent = () => {
       dynamic(() => import("../../common/blocknote-editor/editor"), {
         ssr: false,
       }),
-    []
+    [],
   );
 
   const handleEditorContentChange = (content: string) => {
@@ -134,19 +134,19 @@ const NewPostComponent = () => {
   };
 
   return (
-    <div className='flex relative min-h-screen'>
-      <div className='flex-1 transition-all duration-200'>
-        <div className='mx-auto rounded-md lg:max-w-screen-2xl'>
-          <div className='ml-10 max-w-screen-md lg:max-w-screen-lg'>
+    <div className="flex relative min-h-screen">
+      <div className="flex-1 transition-all duration-200">
+        <div className="mx-auto rounded-md lg:max-w-screen-2xl">
+          <div className="ml-10 max-w-screen-md lg:max-w-screen-lg">
             <UploadComponent
               imageUrl={post.featureImage}
               isSubmitting={isSubmitting}
               onChange={handleFeatureImageChange}
               isFileUploadOpen={isFeatureFileUploadOpen}
               toggleFileUpload={toggleFeatureImageUpload}
-              text='Add feature image'
-              className='text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10'
-              buttonVariant='link'
+              text="Add feature image"
+              className="text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10"
+              buttonVariant="link"
               onCancel={handleCancelUpload}
             />
           </div>
@@ -154,11 +154,11 @@ const NewPostComponent = () => {
             <input
               value={post.title}
               onChange={handleMainInputChange}
-              placeholder='Post title'
-              className='w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700'
+              placeholder="Post title"
+              className="w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700"
             />
           </div>
-          <div className='mt-8'>
+          <div className="mt-8">
             <Editor
               onChange={handleEditorContentChange}
               initialContent={post.content}

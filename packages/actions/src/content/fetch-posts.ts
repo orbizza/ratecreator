@@ -16,7 +16,7 @@ export async function fetchAllPostsCount(
   tagOption?: string,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string
+  postStatus?: string,
 ) {
   // Base where clause with platform type
   const baseWhere: Prisma.PostWhereInput = {
@@ -86,7 +86,7 @@ export async function fetchAllPosts(
   pageNumber: number,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string
+  postStatus?: string,
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -186,7 +186,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number
+  pageNumber: number,
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;

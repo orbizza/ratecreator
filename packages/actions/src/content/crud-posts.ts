@@ -215,7 +215,7 @@ async function publishPost(
   postData: FetchedPostType,
   finalTime: Date,
   scheduleType: string,
-  postId: string
+  postId: string,
 ) {
   // let data = {};
   // if (postData.status === PostStatus.SCHEDULED) {

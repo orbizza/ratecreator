@@ -6,7 +6,7 @@ export default function RateCreatorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className='mx-auto w-full max-w-7xl'>
+    <div className="mx-auto w-full max-w-7xl">
       <PostsNavbar />
 
       {children}

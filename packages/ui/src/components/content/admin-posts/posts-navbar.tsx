@@ -88,85 +88,85 @@ export const PostsNavbar = () => {
   return (
     <>
       {/* mobile screen */}
-      <div className='flex md:hidden flex-col gap-4 justify-end mr-4'>
-        <div className='flex justify-end'>
-          <Link href='/new-post' className='mr-4'>
-            <Button variant='outline'>New post</Button>
+      <div className="flex md:hidden flex-col gap-4 justify-end mr-4">
+        <div className="flex justify-end">
+          <Link href="/new-post" className="mr-4">
+            <Button variant="outline">New post</Button>
           </Link>
         </div>
-        <div className='flex flex-row gap-2 gap-x-4 justify-between mx-auto mr-4 items-center'>
-          <div className=''>
+        <div className="flex flex-row gap-2 gap-x-4 justify-between mx-auto mr-4 items-center">
+          <div className="">
             <SelectComponent
               items={contentTypes}
-              placeholder='all-posts'
+              placeholder="all-posts"
               onSelect={handleSelectContentType}
               selectedItem={contentType?.toLowerCase() || ""}
               showAll={true}
             />
           </div>
-          <div className=''>
+          <div className="">
             <SelectComponent
               items={statusOptions}
-              placeholder='all-status'
+              placeholder="all-status"
               onSelect={handleSelectStatus}
               selectedItem={postStatus?.toLowerCase() || ""}
               showAll={true}
             />
           </div>
-          <div className='mr-1 text-sm md:text-sm '>All authors</div>
-          <div className='mr-1 text-sm md:text-sm '>
+          <div className="mr-1 text-sm md:text-sm ">All authors</div>
+          <div className="mr-1 text-sm md:text-sm ">
             <SelectComponent
               items={tags.map((tag) => ({
                 value: tag.slug,
                 label: capitalizeFirstLetter(tag.slug),
               }))}
-              placeholder='all-tags'
+              placeholder="all-tags"
               onSelect={handleSelectTagOption}
               selectedItem={postListTags}
               showAll={true}
             />
           </div>
-          <div className='mr-1 text-sm md:text-sm'>Newest first</div>
+          <div className="mr-1 text-sm md:text-sm">Newest first</div>
         </div>
       </div>
 
       {/* md screen */}
-      <div className='hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center md:max-w-7xl mx-auto w-full '>
-        <div className=''>
+      <div className="hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center md:max-w-7xl mx-auto w-full ">
+        <div className="">
           <SelectComponent
             items={contentTypes}
-            placeholder='all-posts'
+            placeholder="all-posts"
             onSelect={handleSelectContentType}
             selectedItem={contentType?.toLowerCase() || ""}
             showAll={true}
           />
         </div>
-        <div className=''>
+        <div className="">
           <SelectComponent
             items={statusOptions}
-            placeholder='all-status'
+            placeholder="all-status"
             onSelect={handleSelectStatus}
             selectedItem={postStatus?.toLowerCase() || ""}
             showAll={true}
           />
         </div>
-        <div className='mr-1 text-sm md:text-sm '>All authors</div>
-        <div className='mr-1 text-sm md:text-sm '>
+        <div className="mr-1 text-sm md:text-sm ">All authors</div>
+        <div className="mr-1 text-sm md:text-sm ">
           <SelectComponent
             items={tags.map((tag) => ({
               value: tag.slug,
               label: capitalizeFirstLetter(tag.slug),
             }))}
-            placeholder='all-tags'
+            placeholder="all-tags"
             onSelect={handleSelectTagOption}
             selectedItem={postListTags}
             showAll={true}
           />
         </div>
-        <div className='mr-1 text-sm md:text-sm'>Newest first</div>
+        <div className="mr-1 text-sm md:text-sm">Newest first</div>
 
-        <Link href='/new-post' className='mr-4'>
-          <Button variant='outline'>New post</Button>
+        <Link href="/new-post" className="mr-4">
+          <Button variant="outline">New post</Button>
         </Link>
       </div>
     </>
