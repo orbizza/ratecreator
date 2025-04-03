@@ -6,7 +6,7 @@ export interface PostType {
   featureImage: string | null;
   postUrl: string;
   publishDate: Date | null;
-  tags: TagOnPost[];
+  tags: Tags[];
   excerpt: string;
   author: Author;
   metadataTitle: string;
@@ -30,6 +30,27 @@ export interface UpdatePostType {
   featureImage: string | null;
   postUrl: string;
   publishDate: Date | null;
+  tags: Tags[];
+  excerpt: string;
+  author: Author;
+  metadataTitle: string;
+  metadataDescription: string;
+  metadataImageUrl: string;
+  metadataKeywords: string;
+  metadataAuthorName: string;
+  canonicalUrl: string;
+  contentType: ContentType;
+  status: PostStatus;
+  isFeatured: boolean;
+}
+export interface FetchedPostType {
+  id: string; //ObjectId
+  contentPlatform: ContentPlatform;
+  title: string;
+  content: string;
+  featureImage: string | null;
+  postUrl: string;
+  publishDate: Date | null;
   tags: TagOnPost[];
   excerpt: string;
   author: Author;
@@ -41,6 +62,8 @@ export interface UpdatePostType {
   canonicalUrl: string;
   contentType: ContentType;
   status: PostStatus;
+  isDeleted: boolean;
+  createdAt: Date;
   updatedAt: Date;
   isFeatured: boolean;
 }

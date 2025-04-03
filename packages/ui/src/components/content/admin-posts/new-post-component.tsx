@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
-import { useResetRecoilState, useRecoilState } from "recoil";
+import { useResetRecoilState, useRecoilState, useRecoilValue } from "recoil";
 import { useMemo } from "react";
 
 import { UploadComponent } from "@ratecreator/ui/common";
@@ -19,10 +19,11 @@ import {
 } from "@ratecreator/store/content";
 import { makeFilePublic } from "@ratecreator/actions";
 import { MetadataSidebar } from "./metadata-sidebar";
+import { useRouter } from "next/navigation";
 
 const NewPostComponent = () => {
-  const [isMetadataToggle, setIsMetadataToggle] =
-    useRecoilState(metadataToggleState);
+  const router = useRouter();
+  const isMetadataToggle = useRecoilValue(metadataToggleState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFeatureFileUploadOpen, setIsFeatureFileUploadOpen] = useState(false);
   const [abortController, setAbortController] =
@@ -53,6 +54,7 @@ const NewPostComponent = () => {
     resetSelectedTags();
   };
   useEffect(() => {
+    router.refresh();
     resetState();
   }, [
     resetPost,
@@ -69,15 +71,11 @@ const NewPostComponent = () => {
       dynamic(() => import("../../common/blocknote-editor/editor"), {
         ssr: false,
       }),
-    [],
+    []
   );
 
   const handleEditorContentChange = (content: string) => {
     setPost((prev) => ({ ...prev, content }));
-  };
-
-  const toggleSidebar = () => {
-    setIsMetadataToggle((prev) => !prev);
   };
 
   const toggleFeatureImageUpload = () => {
@@ -94,6 +92,7 @@ const NewPostComponent = () => {
       try {
         const { data } = await axios.post("/api/upload", {
           fileType: file.type,
+          folderName: "content/feature-images",
         });
         const { uploadURL, s3URL, fileName } = data;
         await axios.put(uploadURL, file, {
@@ -132,19 +131,19 @@ const NewPostComponent = () => {
   };
 
   return (
-    <div className="flex relative min-h-screen">
-      <div className="flex-1 transition-all duration-200">
-        <div className="lg:mx-[180px] rounded-md lg:max-w-screen-2xl">
-          <div className="ml-10 max-w-screen-md lg:max-w-screen-lg">
+    <div className='flex relative min-h-screen'>
+      <div className='flex-1 transition-all duration-200'>
+        <div className='mx-auto rounded-md lg:max-w-screen-2xl'>
+          <div className='ml-10 max-w-screen-md lg:max-w-screen-lg'>
             <UploadComponent
               imageUrl={post.featureImage}
               isSubmitting={isSubmitting}
               onChange={handleFeatureImageChange}
               isFileUploadOpen={isFeatureFileUploadOpen}
               toggleFileUpload={toggleFeatureImageUpload}
-              text="Add feature image"
-              className="text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10"
-              buttonVariant="link"
+              text='Add feature image'
+              className='text-neutral-400 font-light !no-underline hover:text-neutral-200 mt-10'
+              buttonVariant='link'
               onCancel={handleCancelUpload}
             />
           </div>
@@ -152,11 +151,11 @@ const NewPostComponent = () => {
             <input
               value={post.title}
               onChange={handleMainInputChange}
-              placeholder="Post title"
-              className="w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700"
+              placeholder='Post title'
+              className='w-full ml-12 mt-4 bg-transparent text-5xl font-semibold outline-none ring-0 placeholder:text-neutral-700'
             />
           </div>
-          <div className="mt-8">
+          <div className='mt-8'>
             <Editor
               onChange={handleEditorContentChange}
               initialContent={post.content}

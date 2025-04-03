@@ -3,7 +3,7 @@ import {
   ContentPlatform,
   ContentType,
   PostStatus,
-  PostType,
+  FetchedPostType,
   Tags,
 } from "@ratecreator/types/content";
 
@@ -49,7 +49,7 @@ export const postIdState = atom<string | null>({
   default: null,
 });
 
-export const postDataState = atom<PostType | null>({
+export const postDataState = atom<FetchedPostType | null>({
   key: "postDataState",
   default: null,
 });

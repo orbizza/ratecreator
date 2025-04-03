@@ -61,14 +61,14 @@ export const PostsNavbar = () => {
   return (
     <>
       {/* mobile screen */}
-      <div className="flex md:hidden flex-col gap-4 justify-end mr-4">
-        <div className="flex justify-end">
-          <Link href="/new-post" className="mr-4">
-            <Button variant="outline">New post</Button>
+      <div className='flex md:hidden flex-col gap-4 justify-end mr-4'>
+        <div className='flex justify-end'>
+          <Link href='/new-post' className='mr-4'>
+            <Button variant='outline'>New post</Button>
           </Link>
         </div>
-        <div className="flex flex-row gap-2 justify-between mr-4 ">
-          <div className="">
+        <div className='flex flex-row gap-2 justify-between mr-4 '>
+          <div className=''>
             {/* <SelectComponent
           items={postFilter}
           placeholder='all-posts'
@@ -76,15 +76,15 @@ export const PostsNavbar = () => {
           selectedItem={postOption}
         /> */}
           </div>
-          <div className="mr-1 text-sm md:text-sm">
+          <div className='mr-1 text-sm md:text-sm'>
             {capitalizeFirstLetter(contentType)}
           </div>
-          <div className="mr-1 text-sm md:text-sm">
+          <div className='mr-1 text-sm md:text-sm'>
             {/* {capitalizeFirstLetter(postStatus)} */}
             Status
           </div>
-          <div className="mr-1 text-sm md:text-sm ">All authors</div>
-          <div className="mr-1 text-sm md:text-sm ">Tags</div>
+          <div className='mr-1 text-sm md:text-sm '>All authors</div>
+          <div className='mr-1 text-sm md:text-sm '>Tags</div>
           {/* <div className='mr-1'>
           <SelectComponent
           items={tags}
@@ -93,13 +93,13 @@ export const PostsNavbar = () => {
           selectedItem={tagOption}
         />
         </div> */}
-          <div className="mr-1 text-sm md:text-sm">Newest first</div>
+          <div className='mr-1 text-sm md:text-sm'>Newest first</div>
         </div>
       </div>
 
       {/* md screen */}
-      <div className="hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center">
-        <div className="">
+      <div className='hidden md:flex flex-col md:flex-row gap-2 md:gap-8 justify-end mr-4 items-center'>
+        <div className=''>
           {/* <SelectComponent
           items={postFilter}
           placeholder='all-posts'
@@ -107,15 +107,15 @@ export const PostsNavbar = () => {
           selectedItem={postOption}
         /> */}
         </div>
-        <div className="mr-1 text-sm md:text-sm">
+        <div className='mr-1 text-sm md:text-sm'>
           {capitalizeFirstLetter(contentType)}
         </div>
-        <div className="mr-1 text-sm md:text-sm">
+        <div className='mr-1 text-sm md:text-sm'>
           {/* {capitalizeFirstLetter(postStatus)} */}
           Status
         </div>
-        <div className="mr-1 text-sm md:text-sm ">All authors</div>
-        <div className="mr-1 text-sm md:text-sm ">Tags</div>
+        <div className='mr-1 text-sm md:text-sm '>All authors</div>
+        <div className='mr-1 text-sm md:text-sm '>Tags</div>
         {/* <div className='mr-1'>
           <SelectComponent
           items={tags}
@@ -124,10 +124,10 @@ export const PostsNavbar = () => {
           selectedItem={tagOption}
         />
         </div> */}
-        <div className="mr-1 text-sm md:text-sm">Newest first</div>
+        <div className='mr-1 text-sm md:text-sm'>Newest first</div>
 
-        <Link href="/new-post" className="mr-4">
-          <Button variant="outline">New post</Button>
+        <Link href='/new-post' className='mr-4'>
+          <Button variant='outline'>New post</Button>
         </Link>
       </div>
     </>

@@ -64,7 +64,7 @@ const insertDivider = (editor: typeof schema.BlockNoteEditor) => ({
 });
 
 const getCustomSlashMenuItems = (
-  editor: typeof schema.BlockNoteEditor,
+  editor: typeof schema.BlockNoteEditor
 ): DefaultReactSuggestionItem[] => [
   ...getDefaultReactSlashMenuItems(editor),
   insertYoutube(editor),
@@ -80,6 +80,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
     try {
       const { data } = await axios.post("/api/upload", {
         fileType: file.type,
+        folderName: "content/editor-images",
       });
 
       const { uploadURL, s3URL, fileName } = data;
@@ -122,7 +123,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
         data-theming-css-demo
       >
         <SuggestionMenuController
-          triggerCharacter="/"
+          triggerCharacter='/'
           getItems={async (query) =>
             filterSuggestionItems(getCustomSlashMenuItems(editor), query)
           }

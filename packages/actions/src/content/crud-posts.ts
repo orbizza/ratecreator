@@ -109,7 +109,6 @@ async function updatePost(data: PostType, postId: string) {
     contentType: data.contentType as ContentType,
     contentPlatform: data.contentPlatform as ContentPlatform,
     status: data.status as PostStatus,
-    updatedAt: data.updatedAt,
   };
 
   try {
@@ -153,7 +152,6 @@ async function updatePost(data: PostType, postId: string) {
         contentType: post.contentType as ContentType,
         contentPlatform: post.contentPlatform as ContentPlatform,
         status: post.status as PostStatus,
-        updatedAt: post.updatedAt,
       },
     });
 

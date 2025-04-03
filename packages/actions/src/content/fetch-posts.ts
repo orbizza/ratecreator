@@ -6,14 +6,19 @@ import { Prisma } from "@prisma/client";
 import { PostStatus as PrismaPostStatus } from "@prisma/client";
 
 import { getPrismaClient } from "@ratecreator/db/client";
-import { PostType, PostStatus, ContentType } from "@ratecreator/types/content";
+import {
+  PostType,
+  PostStatus,
+  ContentType,
+  FetchedPostType,
+} from "@ratecreator/types/content";
 import { splitAndCapitalize } from "@ratecreator/db/utils";
 
 const prisma = getPrismaClient();
 
 export async function fetchAllPostsCount(
   postOption: string,
-  tagOption: string,
+  tagOption: string
 ) {
   // modify for based on postOption and tagOption
   if (postOption === "all-posts") {
@@ -89,7 +94,7 @@ export async function fetchPublishedPostsCount(postOption: string) {
 export async function fetchAllPosts(
   postOption: string,
   tagOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -107,7 +112,7 @@ export async function fetchAllPosts(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "featured-posts") {
     const posts = await prisma.post.findMany({
       where: {
@@ -124,7 +129,7 @@ export async function fetchAllPosts(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "newsletters") {
     const posts = await prisma.post.findMany({
       where: {
@@ -141,7 +146,7 @@ export async function fetchAllPosts(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "articles") {
     const posts = await prisma.post.findMany({
       where: {
@@ -158,7 +163,7 @@ export async function fetchAllPosts(
         publishDate: "desc",
       },
     });
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else {
     const posts = await prisma.post.findMany({
       where: {
@@ -177,7 +182,7 @@ export async function fetchAllPosts(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   }
 }
 
@@ -198,7 +203,7 @@ export async function fetchPublishedPosts(postOption: string) {
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "newsletters") {
     const posts = await prisma.post.findMany({
       where: {
@@ -214,7 +219,7 @@ export async function fetchPublishedPosts(postOption: string) {
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "articles") {
     const posts = await prisma.post.findMany({
       where: {
@@ -229,13 +234,13 @@ export async function fetchPublishedPosts(postOption: string) {
         publishDate: "desc",
       },
     });
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   }
   return [];
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -257,7 +262,7 @@ export async function fetchPublishedPostsPaginated(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "newsletters") {
     const posts = await prisma.post.findMany({
       where: {
@@ -275,7 +280,7 @@ export async function fetchPublishedPostsPaginated(
       },
     });
 
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   } else if (postOption === "articles") {
     const posts = await prisma.post.findMany({
       where: {
@@ -292,7 +297,7 @@ export async function fetchPublishedPostsPaginated(
         publishDate: "desc",
       },
     });
-    return posts as PostType[];
+    return posts as FetchedPostType[];
   }
   return [];
 }
@@ -305,8 +310,11 @@ export async function fetchPostById(id: string) {
       author: true,
     },
   });
+  if (!post) {
+    return null;
+  }
 
-  return post;
+  return post as FetchedPostType;
 }
 
 export async function fetchPostByPostUrl(postUrl: string) {
