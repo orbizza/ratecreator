@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   ChevronLeft,
@@ -29,6 +30,7 @@ import {
   ContentType,
   ContentPlatform,
   PostStatus,
+  PostType,
 } from "@ratecreator/types/content";
 import {
   Button,
@@ -40,10 +42,17 @@ import {
   TooltipTrigger,
 } from "@ratecreator/ui";
 import { SelectComponent } from "@ratecreator/ui/common";
-import { createAuthor } from "@ratecreator/actions/content";
-import { capitalizeFirstLetter } from "@ratecreator/db/utils";
+import {
+  createAuthor,
+  updatePost,
+  createPost,
+} from "@ratecreator/actions/content";
+import { capitalizeFirstLetter, getInitials } from "@ratecreator/db/utils";
+import PublishDialog from "./publish-dialog-component";
 
 export const PostsEditNavbar = () => {
+  const router = useRouter();
+
   const postFull = useRecoilValue(postDataState);
   const [post, setPost] = useRecoilState(postState);
   const [postType, setPostType] = useRecoilState(postTypeState);
@@ -75,14 +84,6 @@ export const PostsEditNavbar = () => {
     setPost({ ...post, contentType: item.toUpperCase() as ContentType });
   };
 
-  const handleSelectPlatformType = (item: string) => {
-    setPostPlatform(item.toUpperCase() as ContentPlatform);
-    setPost({
-      ...post,
-      contentPlatform: item.toUpperCase() as ContentPlatform,
-    });
-  };
-
   useEffect(() => {
     if (postFull) {
       setPostType(postFull.contentType);
@@ -102,6 +103,49 @@ export const PostsEditNavbar = () => {
     setErrorDuplicateUrl(null);
     setIsSaving(true);
     const user = await createAuthor();
+    if (!user || "error" in user) {
+      console.error("Failed to create author");
+      setIsSaving(false);
+      return;
+    }
+
+    const data: PostType = {
+      ...post,
+      author: {
+        ...user,
+        name: user.name ?? user.username ?? getInitials(user.email),
+        username: user.username,
+      },
+      tags: post.tags,
+      id: postId || "",
+      isFeatured: post.featured,
+    };
+    if (postId) {
+      const result = await updatePost(data, postId);
+      setIsSaving(false);
+      if (result && "error" in result) {
+        setErrorDuplicateUrl(result.error ?? "Duplicate URL");
+      } else {
+        setIsSavingSuccess(true);
+        setTimeout(() => {
+          setIsSavingSuccess(false);
+        }, 3000);
+        // router.push(`/editor/${postId}`);
+      }
+    } else {
+      const result = await createPost(data);
+      setIsSaving(false);
+      if (result && "error" in result) {
+        setErrorDuplicateUrl(result.error ?? "Duplicate URL");
+      } else if (result && "post" in result && result.post) {
+        setPostId(result.post.id);
+        setIsSavingSuccess(true);
+        setTimeout(() => {
+          setIsSavingSuccess(false);
+        }, 3000);
+        router.push(`/editor/${result.post.id}`);
+      }
+    }
   };
 
   const handlePublish = async () => {
@@ -144,8 +188,9 @@ export const PostsEditNavbar = () => {
               <SelectComponent
                 items={contentTypes}
                 placeholder="blog"
-                selectedItem={postType}
+                selectedItem={postType || contentTypes[0]}
                 onSelect={handleSelectContentType}
+                showAll={false}
               />
             ) : postFull.status === PostStatus.PUBLISHED ? (
               <Label className="flex flex-row items-center text-md  text-green-600 dark:text-green-500  p-2">
@@ -155,8 +200,9 @@ export const PostsEditNavbar = () => {
               <SelectComponent
                 items={contentTypes}
                 placeholder="blog"
-                selectedItem={postType}
+                selectedItem={postType || contentTypes[0]}
                 onSelect={handleSelectContentType}
+                showAll={false}
               />
             )}
 
@@ -171,11 +217,16 @@ export const PostsEditNavbar = () => {
               onClick={handlePublish}
               variant="link"
               size="sm"
-              className="flex flex-row items-center text-sm text-green-500 rounded-sm hover:bg-neutral-700 active:bg-gray-200 p-2"
+              className="flex flex-row items-center text-sm text-green-500 rounded-md hover:bg-neutral-700 active:bg-gray-200 p-2"
               disabled={isDisabled}
             >
               Publish
             </Button>
+
+            <PublishDialog
+              value={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+            />
 
             <TooltipProvider>
               <Tooltip>

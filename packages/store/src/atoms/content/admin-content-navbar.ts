@@ -5,9 +5,9 @@ import {
   PostStatus,
 } from "@ratecreator/types/content";
 
-export const contentTypeAtom = atom<ContentType>({
+export const contentTypeAtom = atom<ContentType | null>({
   key: "contentType",
-  default: ContentType.BLOG,
+  default: null,
 });
 
 export const contentPlatformAtom = atom<ContentPlatform>({
@@ -15,7 +15,7 @@ export const contentPlatformAtom = atom<ContentPlatform>({
   default: ContentPlatform.RATECREATOR,
 });
 
-export const postStatusAtom = atom<PostStatus>({
+export const postStatusAtom = atom<PostStatus | null>({
   key: "postStatus",
-  default: PostStatus.DRAFT,
+  default: null,
 });

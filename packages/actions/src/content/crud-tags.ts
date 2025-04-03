@@ -69,7 +69,7 @@ async function fetchTagsFromTagOnPost({ postId }: { postId: string }) {
 
 async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
   try {
-    console.log("Attempting to fetch tags...");
+    // console.log("Attempting to fetch tags...");
     const tags = await prisma.tag.findMany({
       include: {
         posts: true,
@@ -79,7 +79,7 @@ async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
       },
     });
 
-    console.log("Tags fetched:", tags ? tags.length : 0);
+    // console.log("Tags fetched:", tags ? tags.length : 0);
 
     if (!tags) {
       console.log("No tags found, returning empty array");

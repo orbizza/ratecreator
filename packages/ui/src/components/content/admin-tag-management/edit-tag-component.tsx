@@ -72,7 +72,7 @@ export const EditTagComponent = ({
         // Request presigned URL from the API route
         const { data } = await axios.post("/api/upload", {
           fileType: file.type,
-          folderName: "tags",
+          folderName: "content/tags",
         });
 
         const { uploadURL, s3URL, fileName } = data;
