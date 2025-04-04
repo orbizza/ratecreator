@@ -35,6 +35,7 @@ export const PostsNavbar = () => {
     { value: ContentType.BLOG.toLowerCase(), label: "Blog" },
     { value: ContentType.GLOSSARY.toLowerCase(), label: "Glossary" },
     { value: ContentType.NEWSLETTER.toLowerCase(), label: "Newsletter" },
+    { value: ContentType.LEGAL.toLowerCase(), label: "Legal" },
   ];
 
   const statusOptions = [

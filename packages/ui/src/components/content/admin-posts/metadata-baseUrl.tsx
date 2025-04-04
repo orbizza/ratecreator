@@ -8,7 +8,11 @@ const generateBaseUrl = (
 
   switch (platform) {
     case ContentPlatform.RATECREATOR:
-      baseUrl = "www.ratecreator.com";
+      if (contentType === ContentType.LEGAL) {
+        baseUrl = "www.legal.ratecreator.com";
+      } else {
+        baseUrl = "www.ratecreator.com";
+      }
       break;
     case ContentPlatform.CREATOROPS:
       baseUrl = "www.creator.ratecreator.com";
@@ -18,9 +22,6 @@ const generateBaseUrl = (
       break;
     case ContentPlatform.DOCUMENTATION:
       baseUrl = "www.docs.ratecreator.com";
-      break;
-    case ContentPlatform.LEGAL:
-      baseUrl = "www.legal.ratecreator.com";
       break;
     default:
       baseUrl = "www.ratecreator.com";

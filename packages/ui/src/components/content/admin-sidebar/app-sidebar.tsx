@@ -7,13 +7,15 @@ import {
   ChartColumn,
   Cog,
   Scale,
+  Send,
+  Settings,
   Star,
   Tag,
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
-// import { NavSecondary } from "./nav-secondary";
+import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import {
   Sidebar,
@@ -46,6 +48,10 @@ const data = {
         {
           title: "Newsletter",
           url: "/ratecreator/newsletter",
+        },
+        {
+          title: "Legal",
+          url: "/ratecreator/legal",
         },
       ],
     },
@@ -110,38 +116,38 @@ const data = {
         },
       ],
     },
-    {
-      title: "Legal",
-      url: "/todo/legal",
-      icon: Scale,
-      items: [
-        {
-          title: "Terms of Service",
-          url: "/todo/legal-terms-of-service",
-        },
-        {
-          title: "Privacy Policy",
-          url: "/todo/legal-privacy-policy",
-        },
-        {
-          title: "Cookie Policy",
-          url: "/todo/legal-cookie-policy",
-        },
-      ],
-    },
+    // {
+    //   title: "Legal",
+    //   url: "/todo/legal",
+    //   icon: Scale,
+    //   items: [
+    //     {
+    //       title: "Terms of Service",
+    //       url: "/todo/legal-terms-of-service",
+    //     },
+    //     {
+    //       title: "Privacy Policy",
+    //       url: "/todo/legal-privacy-policy",
+    //     },
+    //     {
+    //       title: "Cookie Policy",
+    //       url: "/todo/legal-cookie-policy",
+    //     },
+    //   ],
+    // },
   ],
-  // navSecondary: [
-  //   {
-  //     title: "Support",
-  //     url: "#",
-  //     icon: LifeBuoy,
-  //   },
-  //   {
-  //     title: "Feedback",
-  //     url: "#",
-  //     icon: Send,
-  //   },
-  // ],
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings,
+    },
+    // {
+    //   title: "Feedback",
+    //   url: "#",
+    //   icon: Send,
+    // },
+  ],
   projects: [
     {
       name: "Tags",
@@ -179,7 +185,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
-        {/* <NavSecondary items={data.navSecondary} className='mt-auto' /> */}
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
