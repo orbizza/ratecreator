@@ -11,3 +11,4 @@ export * from "./admin-posts/posts-edit-navbar";
 export * from "./admin-posts/new-post-component";
 export * from "./admin-posts/edit-content-post";
 export * from "./admin-posts/posts-list-component";
+export * from "./admin-posts/posts-list-content-wise";

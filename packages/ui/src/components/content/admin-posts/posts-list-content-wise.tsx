@@ -11,7 +11,6 @@ import {
   contentTypeAtom,
   contentPlatformAtom,
   postListTagsState,
-  listOfTagsState,
   postStatusAtom,
 } from "@ratecreator/store/content";
 import {
@@ -25,7 +24,7 @@ import { FetchedPostType } from "@ratecreator/types/content";
 import { PaginationBar } from "../../review/cards/pagination-bar";
 import { ContentType, ContentPlatform } from "@ratecreator/types/content";
 
-const PostsListComponent = () => {
+const PostsListContentWise = () => {
   const [posts, setPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -45,15 +44,8 @@ const PostsListComponent = () => {
     resetPageNumber();
     resetPostListTags();
     resetPostStatus();
-    resetContentType();
     resetPlatformType();
-  }, [
-    resetPageNumber,
-    resetPostListTags,
-    resetPostStatus,
-    resetContentType,
-    resetPlatformType,
-  ]);
+  }, [resetPageNumber, resetPostListTags, resetPostStatus, resetPlatformType]);
 
   const [postsCount, setPostsCount] = useState(0);
 
@@ -128,4 +120,4 @@ const PostsListComponent = () => {
   );
 };
 
-export { PostsListComponent };
+export { PostsListContentWise };

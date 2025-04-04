@@ -16,7 +16,7 @@ export async function fetchAllPostsCount(
   tagOption?: string,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
   // Base where clause with platform type
   const baseWhere: Prisma.PostWhereInput = {
@@ -48,45 +48,12 @@ export async function fetchAllPostsCount(
   });
 }
 
-export async function fetchPublishedPostsCount(postOption: string) {
-  // modify for based on postOption and tagOption
-  if (postOption === "all-posts") {
-    const posts = await prisma.post.count();
-    return posts;
-  } else if (postOption === "featured-posts") {
-    const posts = await prisma.post.count({
-      where: {
-        isFeatured: true,
-        status: "PUBLISHED",
-      },
-    });
-    return posts;
-  } else if (postOption === "newsletters") {
-    const posts = await prisma.post.count({
-      where: {
-        contentType: ContentType.NEWSLETTER,
-        status: "PUBLISHED",
-      },
-    });
-    return posts;
-  } else if (postOption === "articles") {
-    const posts = await prisma.post.count({
-      where: {
-        status: "PUBLISHED",
-        contentType: ContentType.BLOG,
-      },
-    });
-    return posts;
-  }
-  return 0;
-}
-
 export async function fetchAllPosts(
   tagOption: string,
   pageNumber: number,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -130,6 +97,39 @@ export async function fetchAllPosts(
   });
 
   return posts as FetchedPostType[];
+}
+
+export async function fetchPublishedPostsCount(postOption: string) {
+  // modify for based on postOption and tagOption
+  if (postOption === "all-posts") {
+    const posts = await prisma.post.count();
+    return posts;
+  } else if (postOption === "featured-posts") {
+    const posts = await prisma.post.count({
+      where: {
+        isFeatured: true,
+        status: "PUBLISHED",
+      },
+    });
+    return posts;
+  } else if (postOption === "newsletters") {
+    const posts = await prisma.post.count({
+      where: {
+        contentType: ContentType.NEWSLETTER,
+        status: "PUBLISHED",
+      },
+    });
+    return posts;
+  } else if (postOption === "articles") {
+    const posts = await prisma.post.count({
+      where: {
+        status: "PUBLISHED",
+        contentType: ContentType.BLOG,
+      },
+    });
+    return posts;
+  }
+  return 0;
 }
 
 export async function fetchPublishedPosts(postOption: string) {
@@ -186,7 +186,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;

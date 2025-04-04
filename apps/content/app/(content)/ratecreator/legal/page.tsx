@@ -1,5 +1,5 @@
 import { PostsListContentWise } from "@ratecreator/ui/content";
 
-export default function RateCreatorNewsletterList() {
+export default function RateCreatorLegalList() {
   return <PostsListContentWise />;
 }

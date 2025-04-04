@@ -79,6 +79,7 @@ export enum ContentType {
   BLOG = "BLOG",
   GLOSSARY = "GLOSSARY",
   NEWSLETTER = "NEWSLETTER",
+  LEGAL = "LEGAL",
 }
 
 export enum ContentPlatform {
@@ -86,7 +87,6 @@ export enum ContentPlatform {
   CREATOROPS = "CREATOROPS",
   UNITY = "UNITY",
   DOCUMENTATION = "DOCUMENTATION",
-  LEGAL = "LEGAL",
 }
 
 export enum PostStatus {
