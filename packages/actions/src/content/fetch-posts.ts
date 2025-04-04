@@ -48,39 +48,6 @@ export async function fetchAllPostsCount(
   });
 }
 
-export async function fetchPublishedPostsCount(postOption: string) {
-  // modify for based on postOption and tagOption
-  if (postOption === "all-posts") {
-    const posts = await prisma.post.count();
-    return posts;
-  } else if (postOption === "featured-posts") {
-    const posts = await prisma.post.count({
-      where: {
-        isFeatured: true,
-        status: "PUBLISHED",
-      },
-    });
-    return posts;
-  } else if (postOption === "newsletters") {
-    const posts = await prisma.post.count({
-      where: {
-        contentType: ContentType.NEWSLETTER,
-        status: "PUBLISHED",
-      },
-    });
-    return posts;
-  } else if (postOption === "articles") {
-    const posts = await prisma.post.count({
-      where: {
-        status: "PUBLISHED",
-        contentType: ContentType.BLOG,
-      },
-    });
-    return posts;
-  }
-  return 0;
-}
-
 export async function fetchAllPosts(
   tagOption: string,
   pageNumber: number,
@@ -130,6 +97,39 @@ export async function fetchAllPosts(
   });
 
   return posts as FetchedPostType[];
+}
+
+export async function fetchPublishedPostsCount(postOption: string) {
+  // modify for based on postOption and tagOption
+  if (postOption === "all-posts") {
+    const posts = await prisma.post.count();
+    return posts;
+  } else if (postOption === "featured-posts") {
+    const posts = await prisma.post.count({
+      where: {
+        isFeatured: true,
+        status: "PUBLISHED",
+      },
+    });
+    return posts;
+  } else if (postOption === "newsletters") {
+    const posts = await prisma.post.count({
+      where: {
+        contentType: ContentType.NEWSLETTER,
+        status: "PUBLISHED",
+      },
+    });
+    return posts;
+  } else if (postOption === "articles") {
+    const posts = await prisma.post.count({
+      where: {
+        status: "PUBLISHED",
+        contentType: ContentType.BLOG,
+      },
+    });
+    return posts;
+  }
+  return 0;
 }
 
 export async function fetchPublishedPosts(postOption: string) {

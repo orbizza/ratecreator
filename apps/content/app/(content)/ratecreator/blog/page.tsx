@@ -1,3 +1,5 @@
+import { PostsListContentWise } from "@ratecreator/ui/content";
+
 export default function RateCreatorBlogList() {
-  return <div>Rate Creator Blog List</div>;
+  return <PostsListContentWise />;
 }

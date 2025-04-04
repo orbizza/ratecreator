@@ -25,6 +25,7 @@ import {
   metadataToggleState,
   postTypeState,
   postPlatformState,
+  contentTypeAtom,
 } from "@ratecreator/store/content";
 import {
   ContentType,
@@ -54,6 +55,7 @@ export const PostsEditNavbar = () => {
   const router = useRouter();
 
   const postFull = useRecoilValue(postDataState);
+  const contentType = useRecoilValue(contentTypeAtom);
   const [post, setPost] = useRecoilState(postState);
   const [postType, setPostType] = useRecoilState(postTypeState);
   const [postPlatform, setPostPlatform] = useRecoilState(postPlatformState);
@@ -75,9 +77,7 @@ export const PostsEditNavbar = () => {
     setIsMetadataToggle((prev) => !prev);
   };
 
-  const contentTypes = ["blog", "glossary", "newsletter"];
-
-  const platformTypes = ["ratecreator", "creatorops", "unity"];
+  const contentTypes = ["blog", "glossary", "newsletter", "legal"];
 
   const handleSelectContentType = (item: string) => {
     setPostType(item.toUpperCase() as ContentType);
@@ -188,7 +188,7 @@ export const PostsEditNavbar = () => {
               <SelectComponent
                 items={contentTypes}
                 placeholder="blog"
-                selectedItem={postType || contentTypes[0]}
+                selectedItem={contentType || postType}
                 onSelect={handleSelectContentType}
                 showAll={false}
               />
@@ -200,7 +200,7 @@ export const PostsEditNavbar = () => {
               <SelectComponent
                 items={contentTypes}
                 placeholder="blog"
-                selectedItem={postType || contentTypes[0]}
+                selectedItem={contentType || postType}
                 onSelect={handleSelectContentType}
                 showAll={false}
               />
