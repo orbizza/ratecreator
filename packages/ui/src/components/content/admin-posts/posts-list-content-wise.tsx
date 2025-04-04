@@ -56,7 +56,7 @@ const PostsListContentWise = () => {
         currentPage,
         contentType?.toString().toLowerCase(),
         platformType.toString().toLowerCase(),
-        postStatus?.toString().toLowerCase()
+        postStatus?.toString().toLowerCase(),
       );
 
       setPosts(fetchedPosts as FetchedPostType[]);
@@ -74,7 +74,7 @@ const PostsListContentWise = () => {
         tagValue,
         contentType?.toString().toLowerCase(),
         platformType.toString().toLowerCase(),
-        postStatus?.toString().toLowerCase()
+        postStatus?.toString().toLowerCase(),
       );
       setPostsCount(fetchedPostsCount);
     } catch (error) {
@@ -92,11 +92,11 @@ const PostsListContentWise = () => {
   };
 
   return (
-    <div className='m-8 w-full max-w-7xl mx-auto'>
-      <Separator className='bg-neutral-500 h-[1px] mb-4' />
+    <div className="m-8 w-full max-w-7xl mx-auto">
+      <Separator className="bg-neutral-500 h-[1px] mb-4" />
       {loading ? (
-        <div className='flex flex-row items-center justify-center h-screen-1/2'>
-          <Loader2 className='size-10 animate-spin' />
+        <div className="flex flex-row items-center justify-center h-screen-1/2">
+          <Loader2 className="size-10 animate-spin" />
         </div>
       ) : (
         <PostsTableRender posts={posts} />
@@ -112,8 +112,8 @@ const PostsListContentWise = () => {
           itemsPerPage={10}
         />
       ) : (
-        <div className='flex flex-row mt-10 items-start justify-center h-screen-1/2'>
-          <p className='text-3xl text-red-700'>No posts found</p>
+        <div className="flex flex-row mt-10 items-start justify-center h-screen-1/2">
+          <p className="text-3xl text-red-700">No posts found</p>
         </div>
       )}
     </div>

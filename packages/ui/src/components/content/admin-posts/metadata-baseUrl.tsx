@@ -2,7 +2,7 @@ import { ContentPlatform, ContentType } from "@ratecreator/types/content";
 
 const generateBaseUrl = (
   platform: ContentPlatform,
-  contentType: ContentType
+  contentType: ContentType,
 ): string => {
   let baseUrl: string;
 
