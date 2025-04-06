@@ -203,7 +203,6 @@ async function restorePost(postId: string) {
       where: { id: postId },
       data: {
         status: PostStatus.DRAFT,
-        publishDate: new Date(),
       },
     });
   } catch (error) {
@@ -216,13 +215,12 @@ async function publishPost(
   postData: FetchedPostType,
   scheduleType: string,
   postId: string,
-  markdown: string,
+  markdown: string
 ) {
   let data = {};
   if (scheduleType === "later") {
     data = {
       status: PostStatus.SCHEDULED,
-      publishDate: postData.publishDate,
     };
   } else {
     data = { status: PostStatus.PUBLISHED, publishDate: new Date() };
