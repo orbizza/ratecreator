@@ -1,8 +1,7 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
-
 import { getPrismaClient } from "@ratecreator/db/client";
+
 import {
   ContentType,
   FetchedPostType,
@@ -16,35 +15,30 @@ export async function fetchAllPostsCount(
   tagOption?: string,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
-  // Base where clause with platform type
-  const baseWhere: Prisma.PostWhereInput = {
-    contentPlatform: platformType.toUpperCase() as ContentPlatform,
-  };
-
-  // Add content type filter if specified and not "all"
-  if (contentType && contentType.toLowerCase() !== "all") {
-    baseWhere.contentType = contentType.toUpperCase() as ContentType;
-  }
-
-  if (postStatus && postStatus.toLowerCase() !== "all") {
-    baseWhere.status = postStatus.toUpperCase() as PostStatus;
-  }
-
-  // Add tag filter if specified
-  if (tagOption && tagOption.toLowerCase() !== "all") {
-    baseWhere.tags = {
-      some: {
-        tag: {
-          slug: tagOption.toLowerCase(),
-        },
-      },
-    };
-  }
-
   return await prisma.post.count({
-    where: baseWhere,
+    where: {
+      contentPlatform: platformType.toUpperCase() as ContentPlatform,
+      ...(contentType &&
+        contentType.toLowerCase() !== "all" && {
+          contentType: contentType.toUpperCase() as ContentType,
+        }),
+      ...(postStatus &&
+        postStatus.toLowerCase() !== "all" && {
+          status: postStatus.toUpperCase() as PostStatus,
+        }),
+      ...(tagOption &&
+        tagOption.toLowerCase() !== "all" && {
+          tags: {
+            some: {
+              tag: {
+                slug: tagOption.toLowerCase(),
+              },
+            },
+          },
+        }),
+    },
   });
 }
 
@@ -53,38 +47,33 @@ export async function fetchAllPosts(
   pageNumber: number,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
 
-  // Base where clause with platform type
-  const baseWhere: Prisma.PostWhereInput = {
-    contentPlatform: platformType.toUpperCase() as ContentPlatform,
-  };
-
-  // Add content type filter if specified and not "all"
-  if (contentType && contentType.toLowerCase() !== "all") {
-    baseWhere.contentType = contentType.toUpperCase() as ContentType;
-  }
-
-  if (postStatus && postStatus.toLowerCase() !== "all") {
-    baseWhere.status = postStatus.toUpperCase() as PostStatus;
-  }
-
-  // Add tag filter if specified
-  if (tagOption && tagOption.toLowerCase() !== "all") {
-    baseWhere.tags = {
-      some: {
-        tag: {
-          slug: tagOption.toLowerCase(),
-        },
-      },
-    };
-  }
-
-  const posts = await prisma.post.findMany({
-    where: baseWhere,
+  return (await prisma.post.findMany({
+    where: {
+      contentPlatform: platformType.toUpperCase() as ContentPlatform,
+      ...(contentType &&
+        contentType.toLowerCase() !== "all" && {
+          contentType: contentType.toUpperCase() as ContentType,
+        }),
+      ...(postStatus &&
+        postStatus.toLowerCase() !== "all" && {
+          status: postStatus.toUpperCase() as PostStatus,
+        }),
+      ...(tagOption &&
+        tagOption.toLowerCase() !== "all" && {
+          tags: {
+            some: {
+              tag: {
+                slug: tagOption.toLowerCase(),
+              },
+            },
+          },
+        }),
+    },
     skip: offset,
     take: pageSize,
     include: {
@@ -94,9 +83,7 @@ export async function fetchAllPosts(
     orderBy: {
       publishDate: "desc",
     },
-  });
-
-  return posts as FetchedPostType[];
+  })) as FetchedPostType[];
 }
 
 export async function fetchPublishedPostsCount(postOption: string) {
@@ -186,7 +173,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;

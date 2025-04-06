@@ -61,6 +61,7 @@ export interface FetchedPostType {
   createdAt: Date;
   updatedAt: Date;
   isFeatured: boolean;
+  broadcastIds: string[];
 }
 
 // export interface PostListType {

@@ -203,6 +203,7 @@ async function restorePost(postId: string) {
       where: { id: postId },
       data: {
         status: PostStatus.DRAFT,
+        publishDate: new Date(),
       },
     });
   } catch (error) {
@@ -213,28 +214,33 @@ async function restorePost(postId: string) {
 
 async function publishPost(
   postData: FetchedPostType,
-  finalTime: Date,
   scheduleType: string,
   postId: string,
+  markdown: string
 ) {
-  // let data = {};
-  // if (postData.status === PostStatus.SCHEDULED) {
-  //   data = {
-  //     status: PostStatus.PUBLISHED,
-  //     publishDate: postData.publishDate,
-  //   };
-  // } else {
-  //   data = { status: PostStatus.PUBLISHED };
-  // }
+  let data = {};
+  if (scheduleType === "later") {
+    data = {
+      status: PostStatus.SCHEDULED,
+      publishDate: postData.publishDate,
+    };
+  } else {
+    data = { status: PostStatus.PUBLISHED, publishDate: new Date() };
+  }
 
   await authenticateUser();
   try {
     await prisma.post.update({
       where: { id: postId },
-      data: {
-        status: PostStatus.PUBLISHED,
-      },
+      data,
     });
+
+    // TODO: Send broadcast newsletter
+
+    if (postData.contentType === ContentType.NEWSLETTER) {
+      // await sendBroadcastNewsletter({ post, sendData: data, markdown });
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Error publishing post:", error);
@@ -242,4 +248,55 @@ async function publishPost(
   }
 }
 
-export { createPost, updatePost, deletePost, restorePost, publishPost };
+async function unpublishPost(postId: string) {
+  await authenticateUser();
+  try {
+    await prisma.post.update({
+      where: { id: postId },
+      data: {
+        status: PostStatus.DRAFT,
+        publishDate: new Date(),
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error unpublishing post:", error);
+    return { error: "Error unpublishing post" };
+  }
+}
+
+async function unschedulePost(postData: FetchedPostType, postId: string) {
+  await authenticateUser();
+
+  try {
+    // TODO: Send broadcast newsletter
+
+    if (postData.contentType === ContentType.NEWSLETTER) {
+      // await deleteBroadcastNewsletter({ postData.broadcastIds });
+    }
+
+    await prisma.post.update({
+      where: { id: postId },
+      data: {
+        status: PostStatus.DRAFT,
+        broadcastIds: [],
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error unscheduling post:", error);
+    return { error: "Error unscheduling post" };
+  }
+}
+
+export {
+  createPost,
+  updatePost,
+  deletePost,
+  restorePost,
+  publishPost,
+  unpublishPost,
+  unschedulePost,
+};

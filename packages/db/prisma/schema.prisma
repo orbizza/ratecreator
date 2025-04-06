@@ -425,6 +425,8 @@ model Post {
   updatedAt            DateTime @updatedAt
   status               PostStatus @default(DRAFT)
   isFeatured           Boolean @default(false)
+  broadcastIds         String[] @default([])
+
 
   @@index([publishDate])
   @@index([status])

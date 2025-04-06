@@ -6,3 +6,4 @@ export * from "./blocknote-editor/divider";
 export * from "./blocknote-editor/youtube-blocknote";
 export * from "./date-picker";
 export * from "./select-component";
+export * from "./blocknote-editor/blocknote-to-markdown";
