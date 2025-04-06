@@ -16,7 +16,6 @@ import {
 import {
   fetchAllPosts,
   fetchAllPostsCount,
-  fetchAllTagsWithPostCount,
 } from "@ratecreator/actions/content";
 
 import PostsTableRender from "./posts-table-render";

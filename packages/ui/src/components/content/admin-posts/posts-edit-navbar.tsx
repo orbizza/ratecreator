@@ -47,6 +47,8 @@ import {
   createAuthor,
   updatePost,
   createPost,
+  unpublishPost,
+  unschedulePost,
 } from "@ratecreator/actions/content";
 import { capitalizeFirstLetter, getInitials } from "@ratecreator/db/utils";
 import PublishDialog from "./publish-dialog-component";
@@ -69,7 +71,10 @@ export const PostsEditNavbar = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingSuccess, setIsSavingSuccess] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const isDisabled = post.title === "" || post.postUrl === "";
+  const isDisabled =
+    post.title === "" ||
+    post.postUrl === "" ||
+    postFull?.status === PostStatus.DELETED;
 
   const [isMetadataToggle, setIsMetadataToggle] =
     useRecoilState(metadataToggleState);
@@ -149,9 +154,26 @@ export const PostsEditNavbar = () => {
   };
 
   const handlePublish = async () => {
-    if (isDisabled) return;
-    await handleSave();
-    setIsDialogOpen(true);
+    if (isDisabled || !postId) return;
+
+    if (postFull?.status === PostStatus.PUBLISHED) {
+      const result = await unpublishPost(postId);
+      if (result.success) {
+        // Stay on same page and update post status
+        setPost({ ...post, status: PostStatus.DRAFT });
+        router.refresh();
+      }
+    } else if (postFull?.status === PostStatus.SCHEDULED) {
+      const result = await unschedulePost(postFull, postId);
+      if (result.success) {
+        // Stay on same page and update post status
+        setPost({ ...post, status: PostStatus.DRAFT });
+        router.refresh();
+      }
+    } else {
+      await handleSave();
+      setIsDialogOpen(true);
+    }
   };
 
   return (
@@ -175,7 +197,11 @@ export const PostsEditNavbar = () => {
             className="h-4 bg-neutral-700 dark:bg-neutral-300"
           />
           <Label className="flex flex-row items-center text-sm font-light text-neutral-600 dark:text-neutral-400  p-2">
-            {postId ? "Drafts" : "New Post"}
+            {postId
+              ? postFull?.status
+                ? capitalizeFirstLetter(postFull.status.toLowerCase())
+                : "Draft"
+              : "New Post"}
           </Label>
         </div>
 
@@ -217,10 +243,20 @@ export const PostsEditNavbar = () => {
               onClick={handlePublish}
               variant="link"
               size="sm"
-              className="flex flex-row items-center text-sm text-green-500 rounded-md hover:bg-neutral-700 active:bg-gray-200 p-2"
+              className={`flex flex-row items-center text-sm rounded-md hover:bg-neutral-700 active:bg-gray-200 p-2 ${
+                postFull?.status === PostStatus.PUBLISHED
+                  ? "text-red-500"
+                  : postFull?.status === PostStatus.SCHEDULED
+                    ? "text-blue-500"
+                    : "text-green-500"
+              }`}
               disabled={isDisabled}
             >
-              Publish
+              {postFull?.status === PostStatus.PUBLISHED
+                ? "Unpublish"
+                : postFull?.status === PostStatus.SCHEDULED
+                  ? "Unschedule"
+                  : "Publish"}
             </Button>
 
             <PublishDialog
