@@ -5,7 +5,7 @@ import { Link as LinkIcon, Trash2, Star } from "lucide-react";
 
 import Link from "next/link";
 import axios from "axios";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useTheme } from "next-themes";
 
 import {
@@ -45,11 +45,16 @@ import {
   ContentType,
 } from "@ratecreator/types/content";
 
-import { fetchAllTagsWithPostCount } from "@ratecreator/actions/content";
+import {
+  deletePost,
+  fetchAllTagsWithPostCount,
+  restorePost,
+} from "@ratecreator/actions/content";
 
 import { reverseAndHyphenate } from "@ratecreator/db/utils";
 
 import generateBaseUrl from "./metadata-baseUrl";
+import { useRouter } from "next/navigation";
 
 export function MetadataSidebar() {
   const [post, setPost] = useRecoilState(postState);
@@ -57,6 +62,9 @@ export function MetadataSidebar() {
   const [errorDuplicateUrl, setErrorDuplicateUrl] = useRecoilState(
     errorDuplicateUrlState,
   );
+  const postFull = useRecoilValue(postDataState);
+  const router = useRouter();
+
   const [baseUrl, setBaseUrl] = useState("");
   const [inputDate, setInputDate] = useRecoilState(selectDate);
   const [inputTimeIst, setInputTimeIst] = useRecoilState(selectedTimeIst);
@@ -229,6 +237,23 @@ export function MetadataSidebar() {
       ...prevPost,
       tags: tags, // Directly set the new tags instead of appending
     }));
+  };
+
+  const handleDeletePost = async () => {
+    if (!postFull?.id) return;
+
+    try {
+      if (postFull.status === PostStatus.DELETED) {
+        await restorePost(postFull.id);
+        setPost({ ...post, status: PostStatus.DRAFT });
+      } else {
+        await deletePost(postFull.id);
+        setPost({ ...post, status: PostStatus.DELETED });
+      }
+      router.refresh();
+    } catch (error) {
+      console.error("Error handling post status:", error);
+    }
   };
 
   return (
@@ -475,8 +500,19 @@ export function MetadataSidebar() {
         </div>
 
         <div>
-          <Button variant="destructive-outline" className="w-full mt-4">
-            <Trash2 className="mr-2 size-4" /> Delete Post
+          <Button
+            onClick={handleDeletePost}
+            variant={
+              postFull?.status !== PostStatus.DELETED
+                ? "destructive-outline"
+                : "destructive-outline-green"
+            }
+            className="w-full mt-4"
+          >
+            <Trash2 className="mr-2 size-4" />{" "}
+            {postFull?.status === PostStatus.DELETED
+              ? "Unarchive post"
+              : "Delete post"}
           </Button>
         </div>
       </div>

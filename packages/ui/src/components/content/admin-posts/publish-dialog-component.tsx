@@ -14,8 +14,9 @@ import {
   AccordionTrigger,
   Badge,
   Button,
-  // useNewsletterMarkdown,
 } from "@ratecreator/ui";
+
+import { useNewsletterMarkdown } from "@ratecreator/ui/common";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 
@@ -25,6 +26,8 @@ import {
   selectedTimeIst,
   postIdState,
   savePostErrorState,
+  contentTypeAtom,
+  postTypeState,
 } from "@ratecreator/store/content";
 
 import { publishPost } from "@ratecreator/actions/content";
@@ -33,6 +36,7 @@ import {
   dateTimeValidation,
   FetchedPostType,
   PostType,
+  ContentType,
 } from "@ratecreator/types/content";
 
 interface PublishDialogProps {
@@ -45,9 +49,7 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
 
   const [isFirstDialogOpen, setFirstDialogOpen] = useState(value);
   const [isSecondDialogOpen, setSecondDialogOpen] = useState(false);
-  const [finalTime, setFinalTime] = useState<Date | null>(null);
   const [scheduleType, setScheduleType] = useState("now");
-  const [publishType, setPublishType] = useState("blog");
   const [openAccordionItem, setOpenAccordionItem] = useState<
     string | undefined
   >(undefined);
@@ -58,9 +60,11 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
 
   const postId = useRecoilValue(postIdState);
   const post = useRecoilValue(postDataState);
+  const contentType = useRecoilValue(postTypeState);
+  const publishType = contentType || post?.contentType || ContentType.BLOG;
 
-  // const { markdown: newsletterMarkdown, NewsletterMarkdown } =
-  //   useNewsletterMarkdown(post?.content || "");
+  const { markdown: newsletterMarkdown, NewsletterMarkdown } =
+    useNewsletterMarkdown(post?.content || "");
 
   const handleScheduleTypeChange = (type: string) => {
     setScheduleType(type);
@@ -85,7 +89,8 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
       return;
     }
     try {
-      // const markdown = publishType === "newsletter" ? newsletterMarkdown : "";
+      const markdown =
+        publishType === ContentType.NEWSLETTER ? newsletterMarkdown : "";
 
       const timeValidation = await dateTimeValidation(inputDate, inputTimeIst);
 
@@ -93,28 +98,20 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
         setError(timeValidation.error);
       } else {
         setError(null);
-        const combinedDate = timeValidation.combinedDate as Date;
-        setFinalTime(combinedDate);
-      }
-
-      if (!finalTime) {
-        console.error("Publish time is required");
-        return;
       }
 
       const result = await publishPost(
         post as FetchedPostType,
-        finalTime,
         scheduleType,
         postId,
-        // markdown
+        markdown,
       );
 
       if (result.success) {
         console.log("Post published successfully");
         setSecondDialogOpen(false);
         setFirstDialogOpen(false);
-        router.push("/posts");
+        router.push(`/${post?.contentPlatform.toLowerCase()}`);
       } else {
         console.error("Error publishing post:", result.error);
         setError(result.error || "Failed to publish post");
@@ -135,12 +132,12 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
 
   const getScheduleText = (
     scheduleType: string,
-    publishType: string,
+    publishType: ContentType,
     inputDate: Date,
     inputTimeIst: string,
   ) => {
     if (scheduleType === "now") {
-      return publishType === "newsletter"
+      return publishType === ContentType.NEWSLETTER
         ? "Publish & send, right now"
         : "Publish, right now";
     }
@@ -151,7 +148,9 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
   return (
     <>
       {/* Hidden component to generate markdown */}
-      {/* {publishType === "newsletter" && post?.content && <NewsletterMarkdown />} */}
+      {publishType === ContentType.NEWSLETTER && post?.content && (
+        <NewsletterMarkdown />
+      )}
 
       {/* FIRST DIALOG */}
       <Dialog
@@ -218,48 +217,12 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
                     className="border-b-[1px] border-gray-700"
                   >
                     <AccordionTrigger className="text-gray-200 text-lg">
-                      {publishType === "newsletter"
-                        ? "Publish and email"
-                        : "Publish only"}
+                      {publishType === ContentType.NEWSLETTER
+                        ? `Publish as ${publishType.toLowerCase()} and send mails`
+                        : `Publish as ${publishType.toLowerCase()}`}
                     </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex gap-2 mb-4">
-                        <Badge
-                          className={`cursor-pointer text-base py-2 px-4 rounded-md ${
-                            publishType === "blog"
-                              ? "bg-green-500"
-                              : "bg-gray-700"
-                          }`}
-                          onClick={() => setPublishType("blog")}
-                        >
-                          Blog
-                        </Badge>
-                        <Badge
-                          className={`cursor-pointer text-base py-2 px-4 rounded-md ${
-                            publishType === "newsletter"
-                              ? "bg-green-500"
-                              : "bg-gray-700"
-                          }`}
-                          onClick={() => setPublishType("newsletter")}
-                        >
-                          Newsletter
-                        </Badge>
-                      </div>
-                    </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem
-                    value="subscribers"
-                    className="border-b-[1px] border-gray-700"
-                  >
-                    <AccordionTrigger className="text-gray-200 text-lg">
-                      All 405 subscribers
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="text-gray-400">
-                        Functionality to be added later
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+
                   <AccordionItem value="schedule" className="border-none">
                     <AccordionTrigger className="text-gray-200 text-lg">
                       {scheduleType === "now"
@@ -292,36 +255,10 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
                             Schedule for later
                           </Badge>
                         </div>
-
-                        {/* {scheduleType === "later" && (
-                          <div className='flex flex-col items-center sm:flex-row gap-4'>
-                            <div className='bg-gray-900 p-2 rounded'>
-                              <DatePicker
-                                date={inputDate}
-                                setDate={setInputDate}
-                              />
-                            </div>
-
-                            <div className='flex flex-row items-center bg-neutral-700 group-hover:bg-neutral-900 border-none rounded-md'>
-                              <input
-                                type='time'
-                                value={inputTimeIst}
-                                onChange={(e) =>
-                                  setInputTimeIst(e.target.value)
-                                }
-                                className=' p-2  h-10 rounded-md text-neutral-300 ring-0 focus:ring-0 focus:outline-none bg-neutral-700 group-hover:bg-neutral-900 px-3 py-2 text-sm file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
-                              />
-                              <span className='text-neutral-400 items-center mr-4 text-[10px]'>
-                                IST
-                              </span>
-                            </div>
-                          </div>
-                        )} */}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-
                 <Button
                   className="bg-white text-black hover:bg-gray-200 py-6 text-lg mt-8"
                   onClick={handleContinue}
@@ -386,9 +323,9 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
               <div className="space-y-6">
                 <p className="text-gray-300 text-base sm:text-lg">
                   Your post will be published on your{" "}
-                  {publishType === "newsletter"
-                    ? "newsletter section, and delivered to all 405 subscribers."
-                    : "blog section."}
+                  {publishType === ContentType.NEWSLETTER
+                    ? "newsletter section, and delivered to all subscribers."
+                    : `${publishType.toLowerCase()} section.`}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -398,7 +335,7 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
                   >
                     {getScheduleText(
                       scheduleType,
-                      publishType,
+                      publishType as ContentType,
                       inputDate,
                       inputTimeIst,
                     )}
