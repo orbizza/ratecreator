@@ -9,7 +9,7 @@ import {
   fetchPostByslug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "@ratecreator/ui/common";
+import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 
 import { useState, useEffect } from "react";
 import PostSkeleton from "../content-skeletons/skeleton-blog-post";

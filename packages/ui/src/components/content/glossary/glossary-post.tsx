@@ -9,7 +9,7 @@ import {
   fetchPostByslug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "@ratecreator/ui/common";
+import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { Button, Label, Separator, toast } from "@ratecreator/ui";
