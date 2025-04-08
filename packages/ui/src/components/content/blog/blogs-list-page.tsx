@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useEffect } from "react";
-import { pageNumberState } from "@ratecreator/store/content";
+import { contentPageNumberState } from "@ratecreator/store/content";
 import {
   fetchPublishedPosts,
   fetchPublishedPostsCount,
@@ -19,8 +19,8 @@ export const BlogsListPage = () => {
   const [featuredPosts, setFeaturedPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
-  const resetPageNumber = useResetRecoilState(pageNumberState);
+  const [currentPage, setCurrentPage] = useRecoilState(contentPageNumberState);
+  const resetPageNumber = useResetRecoilState(contentPageNumberState);
   const [postsCount, setPostsCount] = useState(0);
 
   const fetchPostsCount = async () => {
@@ -79,9 +79,9 @@ export const BlogsListPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto items-center justify-between pb-20">
+    <div className='max-w-6xl mx-auto items-center justify-between pb-20'>
       {loading ? (
-        <div className="flex flex-row mt-10 items-center justify-center ">
+        <div className='flex flex-row mt-10 items-center justify-center '>
           {/* <Loader2 className="size-16 animate-spin" /> */}
           <ArticlesListingSkeleton />
         </div>
@@ -97,8 +97,8 @@ export const BlogsListPage = () => {
           /> */}
         </>
       ) : (
-        <div className="flex flex-row mt-10 items-start justify-center h-screen-1/2">
-          <p className="text-3xl text-red-700">No blogs found</p>
+        <div className='flex flex-row mt-10 items-start justify-center h-screen-1/2'>
+          <p className='text-3xl text-red-700'>No blogs found</p>
         </div>
       )}
     </div>

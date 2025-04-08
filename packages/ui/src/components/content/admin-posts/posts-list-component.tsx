@@ -7,7 +7,7 @@ import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
 
 import { Separator } from "@ratecreator/ui";
 import {
-  pageNumberState,
+  contentPageNumberState,
   contentTypeAtom,
   contentPlatformAtom,
   postListTagsState,
@@ -29,13 +29,13 @@ const PostsListComponent = () => {
   const [posts, setPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
+  const [currentPage, setCurrentPage] = useRecoilState(contentPageNumberState);
   const tagValue = useRecoilValue(postListTagsState);
   const postStatus = useRecoilValue(postStatusAtom);
   const contentType = useRecoilValue(contentTypeAtom);
   const platformType = useRecoilValue(contentPlatformAtom);
 
-  const resetPageNumber = useResetRecoilState(pageNumberState);
+  const resetPageNumber = useResetRecoilState(contentPageNumberState);
   const resetPostListTags = useResetRecoilState(postListTagsState);
   const resetPostStatus = useResetRecoilState(postStatusAtom);
   const resetContentType = useResetRecoilState(contentTypeAtom);
@@ -64,7 +64,7 @@ const PostsListComponent = () => {
         currentPage,
         contentType?.toString().toLowerCase(),
         platformType.toString().toLowerCase(),
-        postStatus?.toString().toLowerCase(),
+        postStatus?.toString().toLowerCase()
       );
 
       setPosts(fetchedPosts as FetchedPostType[]);
@@ -82,7 +82,7 @@ const PostsListComponent = () => {
         tagValue,
         contentType?.toString().toLowerCase(),
         platformType.toString().toLowerCase(),
-        postStatus?.toString().toLowerCase(),
+        postStatus?.toString().toLowerCase()
       );
       setPostsCount(fetchedPostsCount);
     } catch (error) {
@@ -100,11 +100,11 @@ const PostsListComponent = () => {
   };
 
   return (
-    <div className="m-8 w-full max-w-7xl mx-auto">
-      <Separator className="bg-neutral-500 h-[1px] mb-4" />
+    <div className='m-8 w-full max-w-7xl mx-auto'>
+      <Separator className='bg-neutral-500 h-[1px] mb-4' />
       {loading ? (
-        <div className="flex flex-row items-center justify-center h-screen-1/2">
-          <Loader2 className="size-10 animate-spin" />
+        <div className='flex flex-row items-center justify-center h-screen-1/2'>
+          <Loader2 className='size-10 animate-spin' />
         </div>
       ) : (
         <PostsTableRender posts={posts} />
@@ -120,8 +120,8 @@ const PostsListComponent = () => {
           itemsPerPage={10}
         />
       ) : (
-        <div className="flex flex-row mt-10 items-start justify-center h-screen-1/2">
-          <p className="text-3xl text-red-700">No posts found</p>
+        <div className='flex flex-row mt-10 items-start justify-center h-screen-1/2'>
+          <p className='text-3xl text-red-700'>No posts found</p>
         </div>
       )}
     </div>
