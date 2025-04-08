@@ -215,7 +215,7 @@ async function publishPost(
   postData: FetchedPostType,
   scheduleType: string,
   postId: string,
-  markdown: string
+  markdown: string,
 ) {
   let data = {};
   if (scheduleType === "later") {
