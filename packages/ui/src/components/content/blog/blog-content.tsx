@@ -172,7 +172,7 @@ export function BlogContent({ params }: { params: { postUrl: string } }) {
                 `${window.location.origin}/blog/${post?.postUrl}`,
               );
               toast({
-                description: "Share link copied to your clipboard.",
+                description: "Blog link copied to your clipboard.",
               });
             }}
           >
