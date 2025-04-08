@@ -62,7 +62,7 @@ export async function createReview(formData: unknown) {
         redditMetadata:
           validatedData.platform === "REDDIT" && validatedData.redditMetadata
             ? {
-                postUrl: validatedData.contentUrl,
+                slug: validatedData.contentUrl,
                 title: validatedData.redditMetadata.title,
                 author: validatedData.redditMetadata.author,
                 subreddit: validatedData.redditMetadata.subreddit,
@@ -104,14 +104,14 @@ export async function createReview(formData: unknown) {
           retryCount++;
           console.error(
             `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
-            error,
+            error
           );
           if (retryCount === maxRetries) {
             throw error;
           }
           // Wait before retrying
           await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * retryCount),
+            setTimeout(resolve, 1000 * retryCount)
           );
         }
       }
@@ -123,7 +123,7 @@ export async function createReview(formData: unknown) {
 
     // Revalidate the creator's page
     revalidatePath(
-      `/profile/${validatedData.platform}/${validatedData.accountId}`,
+      `/profile/${validatedData.platform}/${validatedData.accountId}`
     );
 
     return { success: true, data: review };

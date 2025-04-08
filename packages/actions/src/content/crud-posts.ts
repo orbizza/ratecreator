@@ -27,7 +27,7 @@ async function createPost(data: PostType) {
   await authenticateUser();
   try {
     const existingPost = await prisma.post.findUnique({
-      where: { postUrl: data.postUrl },
+      where: { slug: data.slug },
     });
 
     if (existingPost) {
@@ -39,7 +39,7 @@ async function createPost(data: PostType) {
       data: {
         title: data.title,
         content: data.content,
-        postUrl: data.postUrl,
+        slug: data.slug,
         publishDate: data.publishDate || undefined,
         excerpt: data.excerpt,
         isFeatured: data.isFeatured,
@@ -91,7 +91,7 @@ async function updatePost(data: PostType, postId: string) {
   const post: UpdatePostType = {
     title: data.title,
     content: data.content,
-    postUrl: data.postUrl,
+    slug: data.slug,
     publishDate: data.publishDate
       ? new Date(data.publishDate.toString())
       : null,
@@ -113,7 +113,7 @@ async function updatePost(data: PostType, postId: string) {
   try {
     const existingPost = await prisma.post.findUnique({
       where: {
-        postUrl: post.postUrl,
+        slug: post.slug,
         NOT: {
           id: postId,
         },
@@ -134,7 +134,7 @@ async function updatePost(data: PostType, postId: string) {
       data: {
         title: post.title,
         content: post.content,
-        postUrl: post.postUrl,
+        slug: post.slug,
         publishDate: post.publishDate || undefined,
         excerpt: post.excerpt,
         isFeatured: post.isFeatured,
@@ -215,7 +215,7 @@ async function publishPost(
   postData: FetchedPostType,
   scheduleType: string,
   postId: string,
-  markdown: string,
+  markdown: string
 ) {
   let data = {};
   if (scheduleType === "later") {

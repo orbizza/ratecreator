@@ -192,7 +192,7 @@ model Review {
   stars              Int
   content            String?
   contentUrl         String?
-  redditMetadata     Json?               // { postUrl: string, title?: string, author?: string, subreddit?: string }
+  redditMetadata     Json?               // { slug: string, title?: string, author?: string, subreddit?: string }
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   author             User                 @relation(fields: [authorId], references: [id])
@@ -410,7 +410,7 @@ model Post {
   title                String
   content              String
   featureImage         String?
-  postUrl              String   @unique
+  slug                 String   @unique
   publishDate          DateTime?
   tags                 TagOnPost[]
   excerpt              String?
