@@ -14,3 +14,7 @@ export * from "./admin-posts/posts-list-component";
 export * from "./admin-posts/posts-list-content-wise";
 export * from "./blog/blogs-list-page";
 export * from "./blog/blog-content";
+export * from "./glossary/glossary-list-page";
+export * from "./glossary/glossary-post";
+export * from "./content-skeletons/glossary-skeleton";
+export * from "./content-skeletons/glossary-post-skeleton";

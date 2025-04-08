@@ -7,6 +7,7 @@ import { useState } from "react";
 import { cn } from "@ratecreator/ui/utils";
 
 import { FetchedPostType } from "@ratecreator/types/content";
+import { truncateText } from "@ratecreator/db/utils";
 
 export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
   return (
@@ -135,8 +136,11 @@ export const BlogCard = ({ blog }: { blog: FetchedPostType }) => {
             {blog.author.name}
           </p>
         </div>
-        <p className="text-lg font-bold mb-4 text-neutral-800 dark:text-neutral-100">
+        <p className="hidden sm:block text-lg font-bold mb-4 text-neutral-800 dark:text-neutral-100">
           {blog.title}
+        </p>
+        <p className="block sm:hidden text-lg font-bold mb-4 text-neutral-800 dark:text-neutral-100">
+          {truncateText(blog.title, 30)}
         </p>
         {/* <p className='text-left text-sm mt-2 text-neutral-600 dark:text-neutral-400'>
           {truncate(blog.excerpt, 100)}
