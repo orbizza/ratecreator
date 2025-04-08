@@ -132,16 +132,16 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
             : "text-foreground"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           {action.icon && (
-            <span className="text-muted-foreground">{action.icon}</span>
+            <span className='text-muted-foreground'>{action.icon}</span>
           )}
           <div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               {ancestors.map((ancestor) => (
                 <span
                   key={ancestor.id}
-                  className="text-sm text-muted-foreground"
+                  className='text-sm text-muted-foreground'
                 >
                   {ancestor.name}
                 </span>
@@ -149,18 +149,18 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
               <span>{action.name}</span>
             </div>
             {action.subtitle && (
-              <span className="text-sm text-muted-foreground">
+              <span className='text-sm text-muted-foreground'>
                 {action.subtitle}
               </span>
             )}
           </div>
         </div>
         {action.shortcut?.length ? (
-          <div className="flex items-center uppercase gap-1">
+          <div className='flex items-center uppercase gap-1'>
             {action.shortcut.map((sc) => (
               <kbd
                 key={sc}
-                className="px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground"
+                className='px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground'
               >
                 {sc}
               </kbd>
@@ -169,13 +169,13 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
         ) : null}
       </div>
     );
-  },
+  }
 );
 
 ResultItem.displayName = "ResultItem";
 
 const GroupName = ({ name }: GroupNameProps): JSX.Element => (
-  <div className="px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase">
+  <div className='px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase'>
     {name}
   </div>
 );
@@ -234,29 +234,29 @@ const SearchComponent = ({
         categories: hit.categories,
         rating: hit.rating,
         reviews: hit.reviewCount,
-      })),
+      }))
     );
   }, [hits]);
 
   return (
-    <div className="mt-4 min-h-[300px]">
+    <div className='mt-4 min-h-[300px]'>
       {status === "loading" ? (
-        <div className="space-y-4">
-          <div className="px-4 py-2 text-sm text-muted-foreground">
+        <div className='space-y-4'>
+          <div className='px-4 py-2 text-sm text-muted-foreground'>
             Loading results... In the meantime, you can:
           </div>
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <div
               onClick={() => {
                 query.toggle();
                 router.push("/write-review");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <PenLine size={20} className="text-muted-foreground" />
+              <PenLine size={20} className='text-muted-foreground' />
               <div>
                 <div>Write a Review</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Share your experience about a creator
                 </div>
               </div>
@@ -266,12 +266,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/categories");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <Book size={20} className="text-muted-foreground" />
+              <Book size={20} className='text-muted-foreground' />
               <div>
                 <div>Browse Categories</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Explore creators by category
                 </div>
               </div>
@@ -281,12 +281,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/my-lists");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <List size={20} className="text-muted-foreground" />
+              <List size={20} className='text-muted-foreground' />
               <div>
                 <div>Create Lists</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Organize creators into custom lists
                 </div>
               </div>
@@ -296,12 +296,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/blogs");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <Newspaper size={20} className="text-muted-foreground" />
+              <Newspaper size={20} className='text-muted-foreground' />
               <div>
                 <div>Read Blog</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Latest updates and creator insights
                 </div>
               </div>
@@ -309,7 +309,7 @@ const SearchComponent = ({
           </div>
         </div>
       ) : filteredResults.length > 0 ? (
-        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+        <div className='space-y-2 max-h-[50vh] overflow-y-auto'>
           {filteredResults.map((result) => (
             <div key={result.accountId}>
               <CreatorCard
@@ -321,7 +321,7 @@ const SearchComponent = ({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+        <div className='flex items-center justify-center h-[300px] text-muted-foreground'>
           No results found.
         </div>
       )}
@@ -363,26 +363,26 @@ const CommandBarContent = ({
 
   return (
     <>
-      <InstantSearch searchClient={searchClient} indexName="accounts">
+      <InstantSearch searchClient={searchClient} indexName='accounts'>
         <KBarPortal>
-          <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
-            <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
-              <div className="p-4 flex-grow overflow-hidden">
-                <div className="relative flex items-center">
+          <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
+            <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
+              <div className='p-4 flex-grow overflow-hidden'>
+                <div className='relative flex items-center'>
                   <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
                     size={20}
                   />
                   <CustomKBarSearch
-                    defaultPlaceholder="Type name, description or category... "
-                    className="w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultPlaceholder='Type name, description or category... '
+                    className='w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
                     onChange={handleSearchChange}
                     value={searchTerm}
                     onKeyDown={handleKeyDown}
                   />
 
                   {searchTerm && (
-                    <div className="flex ml-2">
+                    <div className='flex ml-2'>
                       <Button onClick={handleSearchRedirect}>Search</Button>
                     </div>
                   )}
@@ -608,10 +608,10 @@ export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
       ref={query.inputRefSetter}
       className={className}
       autoFocus={visualState === VisualState.showing}
-      role="combobox"
+      role='combobox'
       aria-expanded={visualState === VisualState.showing}
-      aria-controls="kbar-listbox"
-      aria-autocomplete="list"
+      aria-controls='kbar-listbox'
+      aria-autocomplete='list'
       value={value || searchQuery}
       placeholder={defaultPlaceholder}
       onChange={onChange}
