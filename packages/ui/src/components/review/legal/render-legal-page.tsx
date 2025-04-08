@@ -4,14 +4,10 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { BlockNoteRenderer } from "@ratecreator/ui/common";
 import { FetchedPostType } from "@ratecreator/types/content";
-import { fetchPostByPostUrl } from "@ratecreator/actions/content";
+import { fetchPostByslug } from "@ratecreator/actions/content";
 import LegalPostSkeleton from "./skeleton-legal-post";
 
-export const RenderLegalPage = ({
-  params,
-}: {
-  params: { postUrl: string };
-}) => {
+export const RenderLegalPage = ({ params }: { params: { slug: string } }) => {
   const [post, setPost] = useState<FetchedPostType | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +18,7 @@ export const RenderLegalPage = ({
       setIsLoading(true);
 
       // If no cache, fetch fresh data
-      const postData = await fetchPostByPostUrl(params.postUrl);
+      const postData = await fetchPostByslug(params.slug);
 
       setPost(postData as FetchedPostType);
     } catch (error) {

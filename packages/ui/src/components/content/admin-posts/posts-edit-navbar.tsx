@@ -73,7 +73,7 @@ export const PostsEditNavbar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isDisabled =
     post.title === "" ||
-    post.postUrl === "" ||
+    post.slug === "" ||
     postFull?.status === PostStatus.DELETED;
 
   const [isMetadataToggle, setIsMetadataToggle] =

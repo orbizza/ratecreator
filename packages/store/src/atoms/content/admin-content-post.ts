@@ -13,7 +13,7 @@ export const postState = atom({
     title: "",
     content: "",
     featureImage: "",
-    postUrl: "",
+    slug: "",
     publishDate: null as Date | null,
     excerpt: "",
     featured: false,

@@ -84,7 +84,7 @@ export function MetadataSidebar() {
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = reverseAndHyphenate(e.target.value);
     const canonicalUrl = baseUrl + "/" + url;
-    setPost({ ...post, postUrl: url, canonicalUrl: canonicalUrl });
+    setPost({ ...post, slug: url, canonicalUrl: canonicalUrl });
   };
 
   const handleExcerptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -265,7 +265,7 @@ export function MetadataSidebar() {
       <div className="space-y-4 mt-8">
         <div className="space-y-2">
           <Label
-            htmlFor="PostUrl"
+            htmlFor="slug"
             className="text-[13px] text-neutral-900 dark:text-white"
           >
             Post URL
@@ -273,21 +273,21 @@ export function MetadataSidebar() {
           <div className="flex items-center bg-neutral-50 dark:bg-neutral-800 border-2 border-transparent focus-within:border-green-500 rounded-md">
             <LinkIcon className="dark:text-neutral-400 text-neutral-700 ml-2 size-4" />
             <input
-              id="PostUrl"
+              id="slug"
               type="text"
               placeholder="Post URL"
-              value={post.postUrl}
+              value={post.slug}
               onChange={handleUrlChange}
               className="flex h-8 w-full rounded-md text-neutral-900 dark:text-neutral-200 ring-0 focus:ring-0 focus:outline-none bg-neutral-50 dark:bg-neutral-800 px-3 py-2 text-sm file:text-sm file:font-medium placeholder:text-neutral-500 dark:placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
-          {!post.postUrl && (
+          {!post.slug && (
             <span className="text-[12px] text-neutral-500">{baseUrl}/</span>
           )}
-          {!errorDuplicateUrl && post.postUrl && (
+          {!errorDuplicateUrl && post.slug && (
             <span className="text-[12px] text-neutral-500">
-              {baseUrl}/{post.postUrl}/
+              {baseUrl}/{post.slug}/
             </span>
           )}
           {errorDuplicateUrl && (

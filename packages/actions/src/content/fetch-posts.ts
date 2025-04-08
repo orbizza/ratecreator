@@ -283,7 +283,7 @@ export async function fetchAllGlossaryPosts() {
     },
     select: {
       title: true,
-      postUrl: true,
+      slug: true,
     },
   });
   return posts;
@@ -318,9 +318,9 @@ export async function fetchPostTitleById(id: string) {
   return post.title;
 }
 
-export async function fetchPostByPostUrl(postUrl: string) {
+export async function fetchPostByslug(slug: string) {
   const post = await prisma.post.findUnique({
-    where: { postUrl },
+    where: { slug },
     include: {
       tags: true,
       author: true,
