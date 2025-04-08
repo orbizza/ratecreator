@@ -107,11 +107,19 @@ export async function fetchPublishedPostsCount(postOption: string) {
       },
     });
     return posts;
-  } else if (postOption === "articles") {
+  } else if (postOption === "blogs") {
     const posts = await prisma.post.count({
       where: {
         status: "PUBLISHED",
         contentType: ContentType.BLOG,
+      },
+    });
+    return posts;
+  } else if (postOption === "glossary") {
+    const posts = await prisma.post.count({
+      where: {
+        status: "PUBLISHED",
+        contentType: ContentType.GLOSSARY,
       },
     });
     return posts;
@@ -153,11 +161,26 @@ export async function fetchPublishedPosts(postOption: string) {
     });
 
     return posts as FetchedPostType[];
-  } else if (postOption === "articles") {
+  } else if (postOption === "blogs") {
     const posts = await prisma.post.findMany({
       where: {
         status: "PUBLISHED",
         contentType: ContentType.BLOG,
+      },
+      include: {
+        tags: true,
+        author: true,
+      },
+      orderBy: {
+        publishDate: "desc",
+      },
+    });
+    return posts as FetchedPostType[];
+  } else if (postOption === "glossary") {
+    const posts = await prisma.post.findMany({
+      where: {
+        status: "PUBLISHED",
+        contentType: ContentType.GLOSSARY,
       },
       include: {
         tags: true,
@@ -214,7 +237,7 @@ export async function fetchPublishedPostsPaginated(
     });
 
     return posts as FetchedPostType[];
-  } else if (postOption === "articles") {
+  } else if (postOption === "blogs") {
     const posts = await prisma.post.findMany({
       where: {
         status: "PUBLISHED",
@@ -231,8 +254,39 @@ export async function fetchPublishedPostsPaginated(
       },
     });
     return posts as FetchedPostType[];
+  } else if (postOption === "glossary") {
+    const posts = await prisma.post.findMany({
+      where: {
+        status: "PUBLISHED",
+        contentType: ContentType.GLOSSARY,
+      },
+      skip: offset,
+      take: pageSize,
+      include: {
+        tags: true,
+        author: true,
+      },
+      orderBy: {
+        publishDate: "desc",
+      },
+    });
+    return posts as FetchedPostType[];
   }
   return [];
+}
+
+export async function fetchAllGlossaryPosts() {
+  const posts = await prisma.post.findMany({
+    where: {
+      contentType: ContentType.GLOSSARY,
+      status: "PUBLISHED",
+    },
+    select: {
+      title: true,
+      postUrl: true,
+    },
+  });
+  return posts;
 }
 
 export async function fetchPostById(id: string) {
