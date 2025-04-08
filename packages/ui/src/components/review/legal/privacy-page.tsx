@@ -8,7 +8,7 @@ import { fetchPostByslug } from "@ratecreator/actions/content";
 import LegalPostSkeleton from "./skeleton-legal-post";
 import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 
-export const RenderLegalPage = ({ params }: { params: { slug: string } }) => {
+export const PrivacyPage = () => {
   const [post, setPost] = useState<FetchedPostType | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +19,7 @@ export const RenderLegalPage = ({ params }: { params: { slug: string } }) => {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
-      const postData = await fetchPostByslug(params.slug);
+      const postData = await fetchPostByslug("privacy");
 
       setPost(postData as FetchedPostType);
     } catch (error) {
