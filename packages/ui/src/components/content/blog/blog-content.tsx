@@ -6,7 +6,7 @@ import { ChevronLeft, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 
 import {
-  fetchPostByPostUrl,
+  fetchPostByslug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
 import { BlockNoteRenderer } from "@ratecreator/ui/common";
@@ -24,7 +24,7 @@ import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { capitalizeFirstLetter } from "@ratecreator/db/utils";
 
-export function BlogContent({ params }: { params: { postUrl: string } }) {
+export function BlogContent({ params }: { params: { slug: string } }) {
   const [post, setPost] = useState<FetchedPostType | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +37,7 @@ export function BlogContent({ params }: { params: { postUrl: string } }) {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
-      const postData = await fetchPostByPostUrl(params.postUrl);
+      const postData = await fetchPostByslug(params.slug);
       if (postData && postData.id) {
         const tagList = await fetchTagsFromTagOnPost({
           postId: postData.id,
@@ -169,7 +169,7 @@ export function BlogContent({ params }: { params: { postUrl: string } }) {
             className="rounded-lg text-neutral-600 dark:text-neutral-400"
             onClick={() => {
               navigator.clipboard.writeText(
-                `${window.location.origin}/blog/${post?.postUrl}`,
+                `${window.location.origin}/blog/${post?.slug}`,
               );
               toast({
                 description: "Blog link copied to your clipboard.",

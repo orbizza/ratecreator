@@ -3,16 +3,16 @@ import { Metadata } from "next";
 import { getPrismaClient } from "@ratecreator/db/client";
 
 export async function generateMetadata({
-  params: { postUrl },
+  params: { slug },
 }: {
-  params: { postUrl: string };
+  params: { slug: string };
 }): Promise<Metadata> {
   const prisma = getPrismaClient();
 
   // Fetch post data
   const post = await prisma.post.findFirst({
     where: {
-      postUrl: postUrl,
+      slug: slug,
     },
     select: {
       title: true,
@@ -63,10 +63,16 @@ export async function generateMetadata({
   };
 }
 
-export default function GlossaryPostPage({
-  params,
+export default async function GlossaryPostPage({
+  params: { slug },
 }: {
-  params: { postUrl: string };
+  params: { slug: string };
 }) {
-  return <GlossaryPost params={params} />;
+  return (
+    <GlossaryPost
+      params={{
+        slug: slug,
+      }}
+    />
+  );
 }

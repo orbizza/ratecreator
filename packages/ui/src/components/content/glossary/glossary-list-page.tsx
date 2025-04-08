@@ -50,7 +50,7 @@ export const GlossaryListPage = () => {
     if (Object.keys(termsByLetter).length > 0) {
       const flattenedTerms = Object.values(termsByLetter).flat();
       setSearcher(
-        new FuzzySearch(flattenedTerms, ["title", "postUrl", "excerpt"], {
+        new FuzzySearch(flattenedTerms, ["title", "slug", "excerpt"], {
           caseSensitive: false,
         }),
       );
@@ -196,7 +196,7 @@ export const GlossaryListPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {results.map((term) => (
               <Link
-                href={`/glossary/${term.postUrl}`}
+                href={`/glossary/${term.slug}`}
                 key={term.id}
                 className="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary dark:hover:border-primary hover:shadow-md transition-all"
               >
@@ -276,7 +276,7 @@ export const GlossaryListPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {displayedTerms.map((term) => (
                     <Link
-                      href={`/glossary/${term.postUrl}`}
+                      href={`/glossary/${term.slug}`}
                       key={term.id}
                       className="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary dark:hover:border-primary hover:shadow-md transition-all"
                     >
