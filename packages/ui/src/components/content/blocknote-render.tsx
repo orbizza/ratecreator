@@ -1,11 +1,13 @@
+"use client";
+
 import React from "react";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import "@blocknote/mantine/style.css";
 
-import { Youtube } from "./youtube-blocknote";
-import { Divider } from "./divider";
+import { Youtube } from "../common/blocknote-editor/youtube-blocknote";
+import { Divider } from "../common/blocknote-editor/divider";
 import { useTheme } from "next-themes";
 interface BlockNoteRendererProps {
   content: any;
@@ -48,9 +50,9 @@ const BlockNoteRenderer: React.FC<BlockNoteRendererProps> = ({
 
   return (
     <div className={`relative w-full ${className}`}>
-      <div className="prose prose-lg max-w-none ml-0 p-0">
+      <div className='prose prose-lg max-w-none ml-0 p-0'>
         <div
-          className="
+          className='
             prose-headings:font-semibold 
             prose-h1:text-4xl prose-h1:mb-6 
             prose-h2:text-3xl prose-h2:mb-4 
@@ -77,13 +79,13 @@ const BlockNoteRenderer: React.FC<BlockNoteRendererProps> = ({
             prose-video:rounded-md prose-video:shadow-md
             prose-video:p-2
             prose-text:text-neutral-100
-          "
+          '
         >
           <BlockNoteView
             editor={editor}
             editable={false}
             theme={resolvedTheme === "dark" ? "dark" : "light"}
-            className="min-h-[200px] w-full [&_*]:ml-0 [&_*]:pl-0"
+            className='min-h-[200px] w-full [&_*]:ml-0 [&_*]:pl-0'
           />
         </div>
       </div>
