@@ -6,8 +6,8 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import "@blocknote/mantine/style.css";
 
-import { Youtube } from "../common/blocknote-editor/youtube-blocknote";
-import { Divider } from "../common/blocknote-editor/divider";
+import { Youtube } from "./youtube-blocknote";
+import { Divider } from "./divider";
 import { useTheme } from "next-themes";
 interface BlockNoteRendererProps {
   content: any;

@@ -9,7 +9,6 @@ import {
   fetchPostByslug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "../blocknote-render";
 
 import { useState, useEffect } from "react";
 import PostSkeleton from "../content-skeletons/skeleton-blog-post";
@@ -23,6 +22,7 @@ import {
 import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { capitalizeFirstLetter } from "@ratecreator/db/utils";
+import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 
 export function BlogContent({ params }: { params: { slug: string } }) {
   const [post, setPost] = useState<FetchedPostType | null>(null);

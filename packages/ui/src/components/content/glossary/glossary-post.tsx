@@ -14,7 +14,7 @@ import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { Button, Label, Separator, toast } from "@ratecreator/ui";
 import { GlossaryPostSkeleton } from "../content-skeletons/glossary-post-skeleton";
-import { BlockNoteRenderer } from "../blocknote-render";
+import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 
 export function GlossaryPost({ params }: { params: { slug: string } }) {
   const [post, setPost] = useState<FetchedPostType | null>(null);

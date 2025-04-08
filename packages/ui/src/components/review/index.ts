@@ -18,4 +18,6 @@ export * from "./common/form-success";
 export * from "./common/form-error";
 export * from "./contact/contact-page";
 export * from "./cards/pagination-bar";
-export * from "./legal/render-legal-page";
+export * from "./legal/privacy-page";
+export * from "./legal/terms-page";
+export * from "./legal/cookie-policy-page";

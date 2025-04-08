@@ -1,5 +1,5 @@
-import { RenderLegalPage } from "@ratecreator/ui/review";
+import { TermsPage } from "@ratecreator/ui/review";
 
 export default function TermsOfService() {
-  return <RenderLegalPage params={{ slug: "terms" }} />;
+  return <TermsPage />;
 }
