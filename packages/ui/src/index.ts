@@ -56,4 +56,5 @@ export * from "./components/ui/alert-dialog";
 export * from "./components/ui/calendar";
 export * from "./components/ui/popover";
 export * from "./components/ui/switch";
+export * from "./components/ui/scroll-progress";
 export { IconCloud, LinearGradient, RadialGradient };

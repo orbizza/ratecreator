@@ -1,3 +1,5 @@
+import { BlogsListPage } from "@ratecreator/ui/content";
+
 export default function BlogPage() {
-  return <div className="">Blog</div>;
+  return <BlogsListPage />;
 }

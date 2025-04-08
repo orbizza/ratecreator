@@ -106,9 +106,23 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
+            <style>{`
+        ::selection {
+         background: oklch(90.5% 0.182 98.111);
+         color: #000;
+         -webkit-text-fill-color: #000;
+         -webkit-background-clip: text;
+       }
+       :is(.dark) ::selection {
+         background: oklch(86.5% 0.127 207.078);
+         color: #000;
+         -webkit-text-fill-color: #000;
+         -webkit-background-clip: text;
+       }
+     `}</style>
             <Providers>
               <Appbar />
               {children}
