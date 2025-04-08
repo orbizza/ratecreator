@@ -14,7 +14,7 @@ export interface ReviewFormData {
 }
 
 export interface RedditMetadata {
-  postUrl: string;
+  slug: string;
   title?: string;
   author?: string;
   subreddit?: string;

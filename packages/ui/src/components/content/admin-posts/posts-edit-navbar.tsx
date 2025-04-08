@@ -63,7 +63,7 @@ export const PostsEditNavbar = () => {
   const [postPlatform, setPostPlatform] = useRecoilState(postPlatformState);
   const [postId, setPostId] = useRecoilState(postIdState);
   const [errorDuplicateUrl, setErrorDuplicateUrl] = useRecoilState(
-    errorDuplicateUrlState,
+    errorDuplicateUrlState
   );
 
   const savePostError = useRecoilValue(savePostErrorState);
@@ -73,7 +73,7 @@ export const PostsEditNavbar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isDisabled =
     post.title === "" ||
-    post.postUrl === "" ||
+    post.slug === "" ||
     postFull?.status === PostStatus.DELETED;
 
   const [isMetadataToggle, setIsMetadataToggle] =
@@ -180,23 +180,23 @@ export const PostsEditNavbar = () => {
     <div
       className={`sticky top-0 z-50  transition-all duration-200 ${isMetadataToggle ? "mr-[400px]" : ""}`}
     >
-      <nav className="w-full flex flex-row justify-between px-5 py-4">
-        <div className="flex flex-row gap-2 items-center">
+      <nav className='w-full flex flex-row justify-between px-5 py-4'>
+        <div className='flex flex-row gap-2 items-center'>
           <Link
             href={`/${postPlatform?.toLowerCase() || "ratecreator"}`}
             passHref
-            className="flex flex-row items-center text-sm rounded-md hover:bg-neutral-300  dark:hover:bg-neutral-700 active:bg-gray-200 p-2"
+            className='flex flex-row items-center text-sm rounded-md hover:bg-neutral-300  dark:hover:bg-neutral-700 active:bg-gray-200 p-2'
           >
-            <ChevronLeft className="size-4 mr-3" />
+            <ChevronLeft className='size-4 mr-3' />
             {!postFull
               ? capitalizeFirstLetter(postPlatform)
               : capitalizeFirstLetter(postFull.contentPlatform)}
           </Link>
           <Separator
-            orientation="vertical"
-            className="h-4 bg-neutral-700 dark:bg-neutral-300"
+            orientation='vertical'
+            className='h-4 bg-neutral-700 dark:bg-neutral-300'
           />
-          <Label className="flex flex-row items-center text-sm font-light text-neutral-600 dark:text-neutral-400  p-2">
+          <Label className='flex flex-row items-center text-sm font-light text-neutral-600 dark:text-neutral-400  p-2'>
             {postId
               ? postFull?.status
                 ? capitalizeFirstLetter(postFull.status.toLowerCase())
@@ -206,26 +206,26 @@ export const PostsEditNavbar = () => {
         </div>
 
         {/* Right-aligned section */}
-        <div className="flex flex-row items-center gap-2 mr-2">
-          <div className="flex flex-row gap-4 items-center">
+        <div className='flex flex-row items-center gap-2 mr-2'>
+          <div className='flex flex-row gap-4 items-center'>
             {/* select content type */}
 
             {!postFull ? (
               <SelectComponent
                 items={contentTypes}
-                placeholder="blog"
+                placeholder='blog'
                 selectedItem={contentType || postType}
                 onSelect={handleSelectContentType}
                 showAll={false}
               />
             ) : postFull.status === PostStatus.PUBLISHED ? (
-              <Label className="flex flex-row items-center text-md  text-green-600 dark:text-green-500  p-2">
+              <Label className='flex flex-row items-center text-md  text-green-600 dark:text-green-500  p-2'>
                 {capitalizeFirstLetter(postFull.contentType)}
               </Label>
             ) : (
               <SelectComponent
                 items={contentTypes}
-                placeholder="blog"
+                placeholder='blog'
                 selectedItem={contentType || postType}
                 onSelect={handleSelectContentType}
                 showAll={false}
@@ -233,16 +233,16 @@ export const PostsEditNavbar = () => {
             )}
 
             <Link
-              href="/preview"
+              href='/preview'
               passHref
-              className="flex flex-row items-center text-sm rounded-md hover:bg-neutral-300  dark:hover:bg-neutral-700 active:bg-gray-200 p-2"
+              className='flex flex-row items-center text-sm rounded-md hover:bg-neutral-300  dark:hover:bg-neutral-700 active:bg-gray-200 p-2'
             >
               Preview
             </Link>
             <Button
               onClick={handlePublish}
-              variant="link"
-              size="sm"
+              variant='link'
+              size='sm'
               className={`flex flex-row items-center text-sm rounded-md hover:bg-neutral-700 active:bg-gray-200 p-2 ${
                 postFull?.status === PostStatus.PUBLISHED
                   ? "text-red-500"
@@ -266,35 +266,35 @@ export const PostsEditNavbar = () => {
 
             <TooltipProvider>
               <Tooltip>
-                <div className="inline-block">
+                <div className='inline-block'>
                   {" "}
                   {/* Wrapper div to prevent button nesting */}
                   <TooltipTrigger asChild>
                     <Button
-                      variant="ghost"
-                      aria-label="Save post"
+                      variant='ghost'
+                      aria-label='Save post'
                       onClick={handleSave}
-                      className="flex z-50 items-center"
+                      className='flex z-50 items-center'
                       disabled={isDisabled}
                     >
                       {isSaving && !isSavingSuccess ? (
                         <>
-                          <Loader2 className="size-4 mr-1 animate-spin" />
+                          <Loader2 className='size-4 mr-1 animate-spin' />
                           Saving...
                         </>
                       ) : savePostError ? (
-                        <span className="flex flex-row items-center text-red-500">
-                          <AlertTriangle className="size-4 mr-1" />
+                        <span className='flex flex-row items-center text-red-500'>
+                          <AlertTriangle className='size-4 mr-1' />
                           Error
                         </span>
                       ) : !isSaving && !isSavingSuccess && !savePostError ? (
                         <>
-                          <Save className="size-4 mr-1" />
+                          <Save className='size-4 mr-1' />
                           Save
                         </>
                       ) : (
-                        <span className="flex flex-row items-center text-green-500">
-                          <Check className="size-4 mr-1" />
+                        <span className='flex flex-row items-center text-green-500'>
+                          <Check className='size-4 mr-1' />
                           Saved
                         </span>
                       )}
@@ -309,14 +309,14 @@ export const PostsEditNavbar = () => {
             </TooltipProvider>
           </div>
           <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Toggle sidebar"
+            variant='ghost'
+            size='icon'
+            aria-label='Toggle sidebar'
             onClick={toggleMetadata}
-            className="flex z-50 items-center"
+            className='flex z-50 items-center'
           >
-            {!isMetadataToggle && <PanelRightOpen className="size-5" />}
-            {isMetadataToggle && <PanelRightClose className="size-5" />}
+            {!isMetadataToggle && <PanelRightOpen className='size-5' />}
+            {isMetadataToggle && <PanelRightClose className='size-5' />}
           </Button>
         </div>
       </nav>
