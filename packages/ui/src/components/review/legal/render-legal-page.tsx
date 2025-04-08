@@ -35,36 +35,36 @@ export const RenderLegalPage = ({ params }: { params: { slug: string } }) => {
 
   if (isLoading || !post) {
     return (
-      <div className='flex flex-row mt-10 items-center justify-center min-h-screen'>
+      <div className="flex flex-row mt-10 items-center justify-center min-h-screen">
         <LegalPostSkeleton />
       </div>
     );
   }
   return (
-    <div className='max-w-6xl mx-auto mt-20'>
-      <div className='flex gap-2 justify-center mb-10'>
-        <span className='text-sm text-neutral-600'>
+    <div className="max-w-6xl mx-auto mt-20">
+      <div className="flex gap-2 justify-center mb-10">
+        <span className="text-sm text-neutral-600">
           Last updated:{" "}
           {post?.updatedAt
             ? format(new Date(post.updatedAt), "MMMM dd, yyyy")
             : ""}
         </span>
       </div>
-      <div className='w-full px-2 sm:px-8 max-w-4xl mx-auto'>
-        <div className='flex flex-col gap-2'>
-          <div className='text-2xl sm:text-3xl md:text-5xl font-semibold mb-4'>
+      <div className="w-full px-2 sm:px-8 max-w-4xl mx-auto">
+        <div className="flex flex-col gap-2">
+          <div className="text-2xl sm:text-3xl md:text-5xl font-semibold mb-4">
             {post?.title}
           </div>
         </div>
-        <div className='flex flex-col-reverse sm:flex-row sm:items-center gap-y-2 sm:gap-y-0 '>
-          <p className='pl-0 sm:pl-1 text-sm text-neutral-600 dark:text-neutral-400'>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-y-2 sm:gap-y-0 ">
+          <p className="pl-0 sm:pl-1 text-sm text-neutral-600 dark:text-neutral-400">
             {post?.publishDate
               ? format(new Date(post?.publishDate), "MMMM dd, yyyy")
               : ""}
           </p>
         </div>
 
-        <div className='mt-10 '>
+        <div className="mt-10 ">
           <BlockNoteRenderer content={post?.content} />
         </div>
       </div>
