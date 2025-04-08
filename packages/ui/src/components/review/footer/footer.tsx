@@ -96,9 +96,9 @@ export const Footer = () => {
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/wip">Trust in reviews</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Help Center</Link>
-                </li>
+                {/* <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Help Center</Link>
+                </li> */}
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/sign-in">Log in</Link>
                 </li>
@@ -110,36 +110,36 @@ export const Footer = () => {
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-normal mb-5">Creators</h3>
-              <ul className="text-sm space-y-4">
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="https://creator.ratecreator.com" target="_blank">
+            {/* <div>
+              <h3 className='font-normal mb-5'>Creators</h3>
+              <ul className='text-sm space-y-4'>
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='https://creator.ratecreator.com' target='_blank'>
                     For Creators
                   </Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="https://creator.ratecreator.com" target="_blank">
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='https://creator.ratecreator.com' target='_blank'>
                     Features
                   </Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="https://creator.ratecreator.com" target="_blank">
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='https://creator.ratecreator.com' target='_blank'>
                     Pricing
                   </Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="https://creator.ratecreator.com" target="_blank">
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='https://creator.ratecreator.com' target='_blank'>
                     Creator login
                   </Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="https://creator.ratecreator.com" target="_blank">
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='https://creator.ratecreator.com' target='_blank'>
                     Blog for creators
                   </Link>
                 </li>
               </ul>
-            </div>
+            </div> */}
             <div>
               <h3 className="font-normal mb-5">Company</h3>
               <ul className="text-sm space-y-4">
@@ -152,22 +152,22 @@ export const Footer = () => {
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/wip">How it works</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Changelog</Link>
+                {/* <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Changelog</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Roadmap</Link>
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Roadmap</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Brand</Link>
-                </li>
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Brand</Link>
+                </li> */}
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/contact">Contact</Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-normal mb-5">Resources</h3>
+              <h3 className="font-normal mb-5">Help Center</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/wip">Blog</Link>
@@ -178,12 +178,12 @@ export const Footer = () => {
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/wip">Categories Glossary</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Newsletter</Link>
+                {/* <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Newsletter</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Report a vulnerability</Link>
-                </li>
+                <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Report a vulnerability</Link>
+                </li> */}
               </ul>
             </div>
           </div>
@@ -224,12 +224,12 @@ export const Footer = () => {
             >
               Cookie Policy
             </Link>
-            <Link
+            {/* <Link
               href="#"
-              className="termly-display-preferences text-muted-foreground hover:text-primary-foreground/80"
+              className=" text-muted-foreground hover:text-primary-foreground/80"
             >
               Consent Preferences
-            </Link>
+            </Link> */}
           </div>
         </div>
         <div className="block lg:hidden justify-center text-[11px] ml-10 mt-8">

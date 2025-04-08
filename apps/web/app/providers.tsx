@@ -8,11 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, TooltipProvider } from "@ratecreator/ui";
 import { CommandBar } from "@ratecreator/ui/review";
 import { RecoilRoot } from "recoil";
-import { TermlyCMP } from "@ratecreator/ui/review";
 
 // Create a client
 const queryClient = new QueryClient();
-const WEBSITE_UUID = "2eb8b651-459a-4d7b-8860-bd4f5f1e1c25";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -25,14 +23,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
       >
         <RecoilRoot>
           <CommandBar>
-            <TooltipProvider>
-              <TermlyCMP
-                autoBlock={true}
-                masterConsentsOrigin="https://ratecreator.com"
-                websiteUUID={WEBSITE_UUID}
-              />
-              {children}
-            </TooltipProvider>
+            <TooltipProvider>{children}</TooltipProvider>
           </CommandBar>
         </RecoilRoot>
       </ThemeProvider>
