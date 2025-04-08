@@ -16,18 +16,19 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   // TODO: Enable each section when they are ready
-  // {
-  //   name: "Blog",
-  //   link: "/blog",
-  // },
+  {
+    name: "Blog",
+    link: "/blog",
+  },
+  {
+    name: "Creator Economy Glossary",
+    link: "/glossary",
+  },
   {
     name: "Category Glossary",
     link: "/category-glossary",
   },
-  // {
-  //   name: "Creator Economy Glossary",
-  //   link: "/glossary",
-  // },
+
   // {
   //   name: "Newsletter",
   //   link: "/newsletter",
@@ -185,14 +186,14 @@ const Logo = () => {
     <div className="font-normal flex space-x-2 items-center text-sm mr-4  text-black px-2 py-1  relative ">
       <Image src="/logo.svg" alt="logo" width={30} height={30} />
       <span className="block md:hidden font-medium text-black dark:text-white">
-        {activeNavItem ? `${activeNavItem.name}` : "Resource Hub"}
+        {activeNavItem ? `${activeNavItem.name}` : "Help Center"}
       </span>
-      <span className="hidden md:block lg:hidden font-medium text-black dark:text-white">
-        Resource Hub
+      <span className="hidden md:block  font-medium text-black dark:text-white">
+        Help Center
       </span>
-      <span className="hidden  lg:block font-medium text-black dark:text-white">
-        Resource Hub{activeNavItem ? ` - ${activeNavItem.name}` : ""}
-      </span>
+      {/* <span className='hidden  lg:block font-medium text-black dark:text-white'>
+        Help Center{activeNavItem ? ` - ${activeNavItem.name}` : ""}
+      </span> */}
     </div>
   );
 };
