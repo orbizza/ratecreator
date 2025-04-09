@@ -18,7 +18,7 @@ const VerificationStatus = z.enum([
 ]);
 
 const RedditMetadataValidator = z.object({
-  postUrl: z.string().url(),
+  slug: z.string().url(),
   title: z.string().optional(),
   author: z.string().optional(),
   subreddit: z.string().optional(),

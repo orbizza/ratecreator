@@ -62,7 +62,7 @@ export async function createReview(formData: unknown) {
         redditMetadata:
           validatedData.platform === "REDDIT" && validatedData.redditMetadata
             ? {
-                postUrl: validatedData.contentUrl,
+                slug: validatedData.contentUrl,
                 title: validatedData.redditMetadata.title,
                 author: validatedData.redditMetadata.author,
                 subreddit: validatedData.redditMetadata.subreddit,

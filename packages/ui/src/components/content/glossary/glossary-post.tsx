@@ -6,18 +6,20 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import {
-  fetchPostByPostUrl,
+  fetchPostByslug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "@ratecreator/ui/common";
+
 import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { Button, Label, Separator, toast } from "@ratecreator/ui";
 import { GlossaryPostSkeleton } from "../content-skeletons/glossary-post-skeleton";
+
 import { useParams } from "next/navigation";
 export function GlossaryPost() {
   const params = useParams();
   const postUrl = params.slug as string;
+
   const [post, setPost] = useState<FetchedPostType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tags, setTags] = useState<Tags[]>([]);
@@ -25,7 +27,9 @@ export function GlossaryPost() {
   const getPost = async () => {
     try {
       setIsLoading(true);
+
       const postData = await fetchPostByPostUrl(postUrl);
+
 
       if (postData && postData.id) {
         const tagList = await fetchTagsFromTagOnPost({
@@ -91,7 +95,7 @@ export function GlossaryPost() {
             className="rounded-lg text-neutral-600 dark:text-neutral-400"
             onClick={() => {
               navigator.clipboard.writeText(
-                `${window.location.origin}/glossary/${post?.postUrl}`,
+                `${window.location.origin}/glossary/${post?.slug}`,
               );
               toast({
                 description: "Glossary link copied to your clipboard.",

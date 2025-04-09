@@ -13,7 +13,7 @@ export const postState = atom({
     title: "",
     content: "",
     featureImage: "",
-    postUrl: "",
+    slug: "",
     publishDate: null as Date | null,
     excerpt: "",
     featured: false,
@@ -76,12 +76,10 @@ export const postListTagsState = atom<string>({
   key: "postListTagsState",
   default: "",
 });
-
-export const pageNumberState = atom<number>({
-  key: "pageNumberState",
+export const contentPageNumberState = atom<number>({
+  key: "contentPageNumberState",
   default: 0,
 });
-
 export const savePostErrorState = atom<string | null>({
   key: "savePostErrorState",
   default: null,

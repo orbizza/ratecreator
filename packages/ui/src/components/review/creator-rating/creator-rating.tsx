@@ -185,7 +185,7 @@ export const CreatorRating = ({
         redditMetadata:
           platform === "reddit" && redditPostData
             ? {
-                postUrl: formData.contentUrl || "",
+                slug: formData.contentUrl || "",
                 title: redditPostData.title,
                 author: redditPostData.author,
                 subreddit: redditPostData.subreddit,

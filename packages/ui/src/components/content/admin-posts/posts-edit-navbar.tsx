@@ -27,12 +27,7 @@ import {
   postPlatformState,
   contentTypeAtom,
 } from "@ratecreator/store/content";
-import {
-  ContentType,
-  ContentPlatform,
-  PostStatus,
-  PostType,
-} from "@ratecreator/types/content";
+import { ContentType, PostStatus, PostType } from "@ratecreator/types/content";
 import {
   Button,
   Label,
@@ -73,7 +68,7 @@ export const PostsEditNavbar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isDisabled =
     post.title === "" ||
-    post.postUrl === "" ||
+    post.slug === "" ||
     postFull?.status === PostStatus.DELETED;
 
   const [isMetadataToggle, setIsMetadataToggle] =

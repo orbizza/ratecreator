@@ -1,4 +1,5 @@
 import { GlossaryPost } from "@ratecreator/ui/content";
+
 import { Metadata } from "next";
 import { getPrismaClient } from "@ratecreator/db/client";
 
@@ -65,4 +66,5 @@ export async function generateMetadata({
 
 export default function GlossaryPostPage() {
   return <GlossaryPost />;
+
 }

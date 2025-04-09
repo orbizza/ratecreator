@@ -37,7 +37,6 @@ if (typeof window !== "undefined") {
     person_profiles: "always", // or 'always' to create profiles for anonymous users as well.
     //identified_only -> for only identified
   });
-  console.log(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 }
 export function CSPostHogProvider({ children }: { children: React.ReactNode }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;

@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 
 export default async function TermsOfService() {
@@ -6,4 +7,5 @@ export default async function TermsOfService() {
       <Link href="/legal/terms">View Terms of Service</Link>
     </div>
   );
+
 }

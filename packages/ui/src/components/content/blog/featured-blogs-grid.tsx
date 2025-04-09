@@ -29,7 +29,7 @@ export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
             blogs
               .slice(0, 2)
               .map((blog, index) => (
-                <BlogCard blog={blog} key={blog.postUrl + index} />
+                <BlogCard blog={blog} key={blog.slug + index} />
               ))
           ) : (
             <div className="flex flex-row items-center justify-center text-red-500">
@@ -42,7 +42,7 @@ export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
             blogs
               .slice(2, 5)
               .map((blog, index) => (
-                <BlogCard blog={blog} key={blog.postUrl + index} />
+                <BlogCard blog={blog} key={blog.slug + index} />
               ))
           ) : (
             <></>
@@ -55,7 +55,7 @@ export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
             blogs
               .slice(0, 2)
               .map((blog, index) => (
-                <BlogCard blog={blog} key={blog.postUrl + index} />
+                <BlogCard blog={blog} key={blog.slug + index} />
               ))
           ) : (
             <div className="flex flex-row items-center justify-center text-red-500">
@@ -68,7 +68,7 @@ export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
             blogs
               .slice(2, 4)
               .map((blog, index) => (
-                <BlogCard blog={blog} key={blog.postUrl + index} />
+                <BlogCard blog={blog} key={blog.slug + index} />
               ))
           ) : (
             <></>
@@ -79,7 +79,7 @@ export function SimpleBlogWithGrid({ blogs }: { blogs: FetchedPostType[] }) {
             blogs
               .slice(4, 5)
               .map((blog, index) => (
-                <BlogCard blog={blog} key={blog.postUrl + index} />
+                <BlogCard blog={blog} key={blog.slug + index} />
               ))
           ) : (
             <></>
@@ -108,7 +108,7 @@ export const BlogCard = ({ blog }: { blog: FetchedPostType }) => {
   return (
     <Link
       className="shadow-derek rounded-3xl border dark:border-neutral-800 w-full bg-white dark:bg-neutral-900  overflow-hidden  hover:scale-[1.02] transition duration-200"
-      href={`/blog/${blog.postUrl}`}
+      href={`/blog/${blog.slug}`}
     >
       {blog.featureImage ? (
         <BlurImage

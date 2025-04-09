@@ -96,9 +96,9 @@ export const Footer = () => {
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/wip">Trust in reviews</Link>
                 </li>
-                <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Help Center</Link>
-                </li>
+                {/* <li className='text-muted-foreground hover:text-primary-foreground/80'>
+                  <Link href='/wip'>Help Center</Link>
+                </li> */}
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
                   <Link href="/sign-in">Log in</Link>
                 </li>

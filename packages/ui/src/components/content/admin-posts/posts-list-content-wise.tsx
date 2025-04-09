@@ -7,7 +7,7 @@ import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
 
 import { Separator } from "@ratecreator/ui";
 import {
-  pageNumberState,
+  contentPageNumberState,
   contentTypeAtom,
   contentPlatformAtom,
   postListTagsState,
@@ -27,13 +27,13 @@ const PostsListContentWise = () => {
   const [posts, setPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
+  const [currentPage, setCurrentPage] = useRecoilState(contentPageNumberState);
   const tagValue = useRecoilValue(postListTagsState);
   const postStatus = useRecoilValue(postStatusAtom);
   const contentType = useRecoilValue(contentTypeAtom);
   const platformType = useRecoilValue(contentPlatformAtom);
 
-  const resetPageNumber = useResetRecoilState(pageNumberState);
+  const resetPageNumber = useResetRecoilState(contentPageNumberState);
   const resetPostListTags = useResetRecoilState(postListTagsState);
   const resetPostStatus = useResetRecoilState(postStatusAtom);
   const resetContentType = useResetRecoilState(contentTypeAtom);
