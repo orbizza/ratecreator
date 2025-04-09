@@ -170,13 +170,13 @@ export const Footer = () => {
               <h3 className="font-normal mb-5">Help Center</h3>
               <ul className="text-sm space-y-4">
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Blog</Link>
+                  <Link href="/blog">Blog</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Creator Economy Glossary</Link>
+                  <Link href="/glossary">Creator Economy Glossary</Link>
                 </li>
                 <li className="text-muted-foreground hover:text-primary-foreground/80">
-                  <Link href="/wip">Categories Glossary</Link>
+                  <Link href="/category-glossary">Categories Glossary</Link>
                 </li>
                 {/* <li className='text-muted-foreground hover:text-primary-foreground/80'>
                   <Link href='/wip'>Newsletter</Link>
@@ -212,12 +212,7 @@ export const Footer = () => {
             >
               Terms
             </Link>
-            {/* <Link
-              href='/wip'
-              className='text-muted-foreground hover:text-primary-foreground/80'
-            >
-              Status
-            </Link> */}
+
             <Link
               href="/cookie-policy"
               className="text-muted-foreground hover:text-primary-foreground/80"

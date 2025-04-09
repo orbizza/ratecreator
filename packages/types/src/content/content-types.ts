@@ -4,7 +4,7 @@ export interface PostType {
   title: string;
   content: string;
   featureImage: string | null;
-  slug: string;
+  postUrl: string;
   publishDate: Date | null;
   tags: Tags[];
   excerpt: string;
@@ -26,7 +26,7 @@ export interface UpdatePostType {
   title: string;
   content: string;
   featureImage: string | null;
-  slug: string;
+  postUrl: string;
   publishDate: Date | null;
   tags: Tags[];
   excerpt: string;
@@ -46,7 +46,7 @@ export interface FetchedPostType {
   title: string;
   content: string;
   featureImage: string | null;
-  slug: string;
+  postUrl: string;
   publishDate: Date | null;
   tags: TagOnPost[];
   excerpt: string;

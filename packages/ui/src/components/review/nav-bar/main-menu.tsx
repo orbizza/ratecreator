@@ -81,7 +81,10 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button variant={"ghost"} onClick={() => handleNavigation("/blog")}>
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/category-glossary")}
+          >
             Help Center
           </Button>
 
@@ -207,7 +210,10 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button variant={"ghost"} onClick={() => handleNavigation("/blog")}>
+          <Button
+            variant={"ghost"}
+            onClick={() => handleNavigation("/category-glossary")}
+          >
             Help Center
           </Button>
           <Button

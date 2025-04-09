@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 
 import { FetchedPostType } from "@ratecreator/types/content";
-import { fetchPostByslug } from "@ratecreator/actions/content";
-import LegalPostSkeleton from "./skeleton-legal-post";
-import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
+import { fetchPostByPostUrl } from "@ratecreator/actions/content";
 
-export const CookiePolicyPage = () => {
-  const [post, setPost] = useState<FetchedPostType | null>(null);
+import { BlockNoteRenderer } from "@ratecreator/ui/common";
+import { LegalPostSkeleton } from "../content-skeletons/skeleton-legal-post";
+import { useParams } from "next/navigation";
+
+export const LegalPost = () => {
+  const params = useParams();
+  const postUrl = params.slug as string;
+  const [post, setPost] = useState<FetchedPostType>();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -19,7 +23,7 @@ export const CookiePolicyPage = () => {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
-      const postData = await fetchPostByslug("cookie-policy");
+      const postData = await fetchPostByPostUrl(postUrl);
 
       setPost(postData as FetchedPostType);
     } catch (error) {
@@ -33,7 +37,7 @@ export const CookiePolicyPage = () => {
     getPost();
   }, []);
 
-  if (isLoading || !post) {
+  if (!post || isLoading) {
     return (
       <div className="flex flex-row mt-10 items-center justify-center min-h-screen">
         <LegalPostSkeleton />
@@ -65,7 +69,7 @@ export const CookiePolicyPage = () => {
         </div>
 
         <div className="mt-10 ">
-          <BlockNoteRenderer content={post?.content} />
+          <BlockNoteRenderer content={post.content} />
         </div>
       </div>
     </div>

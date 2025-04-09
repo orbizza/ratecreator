@@ -95,7 +95,7 @@ export const BlogPostRows = ({ blogs }: { blogs: FetchedPostType[] }) => {
           results.map((blog, index) => (
             <BlogPostRow
               blog={blog}
-              key={blog.slug + index}
+              key={blog.postUrl + index}
               tags={allTags[blog.id] || []}
             />
           ))
@@ -153,8 +153,8 @@ export const BlogPostRow = ({
 
   return (
     <Link
-      href={`/blog/${blog.slug}`}
-      key={`${blog.slug}`}
+      href={`/blog/${blog.postUrl}`}
+      key={`${blog.postUrl}`}
       className="relative block"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {

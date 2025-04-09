@@ -6,12 +6,12 @@ import { ChevronLeft, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 
 import {
-  fetchPostByslug,
+  fetchPostByPostUrl,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
 
 import { useState, useEffect } from "react";
-import PostSkeleton from "../content-skeletons/skeleton-blog-post";
+import { PostSkeleton } from "../content-skeletons/skeleton-blog-post";
 import {
   Button,
   Label,
@@ -22,9 +22,13 @@ import {
 import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { capitalizeFirstLetter } from "@ratecreator/db/utils";
-import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
+import { BlockNoteRenderer } from "@ratecreator/ui/common";
+import { useParams } from "next/navigation";
 
-export function BlogContent({ params }: { params: { slug: string } }) {
+export function BlogContent() {
+  const params = useParams();
+  const postUrl = params.slug as string;
+
   const [post, setPost] = useState<FetchedPostType | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +41,9 @@ export function BlogContent({ params }: { params: { slug: string } }) {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
-      const postData = await fetchPostByslug(params.slug);
+
+      const postData = await fetchPostByPostUrl(postUrl);
+
       if (postData && postData.id) {
         const tagList = await fetchTagsFromTagOnPost({
           postId: postData.id,
@@ -169,7 +175,7 @@ export function BlogContent({ params }: { params: { slug: string } }) {
             className="rounded-lg text-neutral-600 dark:text-neutral-400"
             onClick={() => {
               navigator.clipboard.writeText(
-                `${window.location.origin}/blog/${post?.slug}`,
+                `${window.location.origin}/blog/${post?.postUrl}`,
               );
               toast({
                 description: "Blog link copied to your clipboard.",

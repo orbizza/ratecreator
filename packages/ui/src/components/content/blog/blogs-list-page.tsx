@@ -12,7 +12,7 @@ import { PaginationBar } from "@ratecreator/ui/review";
 import { BlogWithSearch } from "./all-blogs-list";
 import { SimpleBlogWithGrid } from "./featured-blogs-grid";
 import { FetchedPostType } from "@ratecreator/types/content";
-import ArticlesListingSkeleton from "../content-skeletons/skeleton-blog-listing";
+import { ArticlesListingSkeleton } from "../content-skeletons/skeleton-blog-listing";
 
 export const BlogsListPage = () => {
   const [posts, setPosts] = useState<FetchedPostType[]>([]);

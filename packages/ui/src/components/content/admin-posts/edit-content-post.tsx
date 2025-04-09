@@ -103,7 +103,7 @@ export const EditContentPost = ({
         title: initialPost.title,
         content: initialPost.content,
         featureImage: initialPost.featureImage || "",
-        slug: initialPost.slug,
+        postUrl: initialPost.postUrl,
         publishDate: initialPost.publishDate,
         excerpt: initialPost.excerpt,
         featured: initialPost.isFeatured,

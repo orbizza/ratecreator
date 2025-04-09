@@ -2,7 +2,7 @@ import React from "react";
 import { Skeleton } from "@ratecreator/ui";
 import { Card, CardContent } from "@ratecreator/ui";
 
-const PostSkeleton = () => {
+export const PostSkeleton = () => {
   return (
     <div className="w-full  max-w-3xl mx-auto space-y-6 sm:space-y-8 p-2 sm:p-4 bg-background ">
       {/* Header with back button and edit info */}
@@ -83,5 +83,3 @@ const PostSkeleton = () => {
     </div>
   );
 };
-
-export default PostSkeleton;
