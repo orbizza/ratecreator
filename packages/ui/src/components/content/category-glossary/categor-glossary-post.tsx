@@ -24,7 +24,7 @@ import {
 import { getSingleGlossaryCategory } from "@ratecreator/actions/review";
 import { Category } from "@ratecreator/types/review";
 import { CategoryGlossaryPostSkeleton } from "./category-glossary-post-skeleton";
-import { categoryGlossaryCache, truncateText } from "@ratecreator/db/utils";
+import { categoryGlossaryCache } from "@ratecreator/db/utils";
 
 export const CategoryGlossaryPost = () => {
   const params = useParams();
@@ -81,12 +81,12 @@ export const CategoryGlossaryPost = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-5xl mx-auto px-4 sm:px-6 mb-10">
+    <div className='flex flex-col gap-4 max-w-5xl mx-auto px-4 sm:px-6 mb-10'>
       {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-2">
+      <Breadcrumb className='mb-2'>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/category-glossary">
+            <BreadcrumbLink href='/category-glossary'>
               Category Glossary
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -97,49 +97,49 @@ export const CategoryGlossaryPost = () => {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="hidden sm:flex flex-row gap-x-2 items-center text-primary">
+      <div className='hidden sm:flex flex-row gap-x-2 items-center text-primary'>
         <Layers2 size={28} />
-        <h1 className="text-2xl md:text-3xl font-semibold">{category.name}</h1>
+        <h1 className='text-2xl md:text-3xl font-semibold'>{category.name}</h1>
       </div>
-      <div className="flex sm:hidden flex-row gap-x-2 items-center text-primary ">
+      <div className='flex sm:hidden flex-row gap-x-2 items-center text-primary '>
         {/* <Layers2 size={20} /> */}
-        <h1 className="text-2xl font-semibold">{category.name}</h1>
+        <h1 className='text-2xl font-semibold'>{category.name}</h1>
       </div>
-      <div className="flex flex-row gap-x-2 items-center text-primary mt-4">
+      <div className='flex flex-row gap-x-2 items-center text-primary mt-4'>
         <UserSearch size={28} />
-        <h2 className="text-2xl font-semibold">Creators in this category</h2>
-        <Info size={12} className="text-muted-foreground" />
+        <h2 className='text-2xl font-semibold'>Creators in this category</h2>
+        <Info size={12} className='text-muted-foreground' />
       </div>
-      <div className="flex flex-col items-start gap-2 mt-2">
-        <span className="text-lg ">
+      <div className='flex flex-col items-start gap-2 mt-2'>
+        <span className='text-lg '>
           Total creators &amp; communities:{" "}
-          <span className="text-primary font-semibold">{accounts}</span>
+          <span className='text-primary font-semibold'>{accounts}</span>
         </span>
         <Link
           href={`/categories/${category.slug}`}
-          className="text-lg text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline"
+          className='text-lg text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 hover:underline'
         >
-          <span className="">Click here to view all</span>
+          <span className=''>Click here to view all</span>
         </Link>
       </div>
-      <Accordion type="single" collapsible defaultValue="channel-description">
-        <AccordionItem value="channel-description" className="border-0">
-          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center text-primary">
+      <Accordion type='single' collapsible defaultValue='channel-description'>
+        <AccordionItem value='channel-description' className='border-0'>
+          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
+            <div className='flex flex-row gap-x-2 items-center text-primary'>
               <ReceiptText size={28} />
-              <span className="">Category Details</span>
+              <span className=''>Category Details</span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="prose dark:prose-invert max-w-none">
-              <h2 className="text-lg font-semibold">Short Description</h2>
-              <p className="whitespace-pre-wrap  mt-2">
+            <div className='prose dark:prose-invert max-w-none'>
+              <h2 className='text-lg font-semibold'>Short Description</h2>
+              <p className='whitespace-pre-wrap  mt-2'>
                 {category.shortDescription || "No description available"}
               </p>
             </div>
-            <div className="prose dark:prose-invert max-w-none mt-4">
-              <h2 className="text-lg font-semibold">Long Description</h2>
-              <p className="whitespace-pre-wrap  mt-2">
+            <div className='prose dark:prose-invert max-w-none mt-4'>
+              <h2 className='text-lg font-semibold'>Long Description</h2>
+              <p className='whitespace-pre-wrap  mt-2'>
                 {category.longDescription || "No description available"}
               </p>
             </div>
@@ -148,17 +148,17 @@ export const CategoryGlossaryPost = () => {
       </Accordion>
 
       <Separator />
-      <Accordion type="single" collapsible defaultValue="category-keywords">
-        <AccordionItem value="category-keywords" className="border-0">
-          <AccordionTrigger className="text-2xl font-bold hover:no-underline">
-            <div className="flex flex-row gap-x-2 items-center text-primary">
+      <Accordion type='single' collapsible defaultValue='category-keywords'>
+        <AccordionItem value='category-keywords' className='border-0'>
+          <AccordionTrigger className='text-2xl font-bold hover:no-underline'>
+            <div className='flex flex-row gap-x-2 items-center text-primary'>
               <Hash size={28} />
-              <span className="">Category Keywords</span>
-              <Info size={14} className="text-muted-foreground" />
+              <span className=''>Category Keywords</span>
+              <Info size={14} className='text-muted-foreground' />
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-wrap gap-2">
+            <div className='flex flex-wrap gap-2'>
               {category.keywords.map((keyword, index) => (
                 <KeywordBadge key={index} keyword={keyword} />
               ))}
@@ -173,10 +173,10 @@ export const CategoryGlossaryPost = () => {
 const KeywordBadge = ({ keyword }: { keyword: String }) => (
   <Link href={`/search?q=${keyword}`}>
     <Badge
-      variant="secondary"
-      className="px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors"
+      variant='secondary'
+      className='px-3 py-1.5 gap-1.5 hover:bg-secondary/80 cursor-pointer transition-colors'
     >
-      <Hash className="w-3 h-3 -mr-1" />
+      <Hash className='w-3 h-3 -mr-1' />
       {keyword.trim()}
     </Badge>
   </Link>
