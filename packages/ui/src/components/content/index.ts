@@ -18,3 +18,4 @@ export * from "./glossary/glossary-list-page";
 export * from "./glossary/glossary-post";
 export * from "./content-skeletons/glossary-skeleton";
 export * from "./content-skeletons/glossary-post-skeleton";
+export * from "./legal/legal-post";
