@@ -9,7 +9,7 @@ import {
   fetchPostBySlug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "@ratecreator/ui/common";
+
 import { FetchedPostType } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { Button, Label, Separator, toast } from "@ratecreator/ui";
@@ -19,6 +19,7 @@ import { useParams } from "next/navigation";
 export function GlossaryPost() {
   const params = useParams();
   const slug = params?.slug as string;
+
   const [post, setPost] = useState<FetchedPostType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tags, setTags] = useState<Tags[]>([]);
@@ -26,7 +27,9 @@ export function GlossaryPost() {
   const getPost = async () => {
     try {
       setIsLoading(true);
+
       const postData = await fetchPostBySlug(slug);
+
 
       if (postData && postData.id) {
         const tagList = await fetchTagsFromTagOnPost({

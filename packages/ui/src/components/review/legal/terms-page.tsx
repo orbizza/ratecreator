@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
 import { FetchedPostType } from "@ratecreator/types/content";
-import { fetchPostBySlug } from "@ratecreator/actions/content";
 
+import { fetchPostBySlug } from "@ratecreator/actions/content";
 import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 import { LegalPostSkeleton } from "./skeleton-legal-post";
+
 
 export const TermsPage = () => {
   const [post, setPost] = useState<FetchedPostType | null>(null);
@@ -20,6 +21,7 @@ export const TermsPage = () => {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
+
       const postData = await fetchPostBySlug("terms");
 
       setPost(postData as FetchedPostType);

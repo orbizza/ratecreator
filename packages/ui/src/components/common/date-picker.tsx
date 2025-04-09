@@ -4,10 +4,7 @@ import * as React from "react";
 import { format, isBefore, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { useRecoilState } from "recoil";
-
 import { cn } from "@ratecreator/ui/utils";
-import { selectDate } from "@ratecreator/store/content";
 
 import {
   Button,

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";

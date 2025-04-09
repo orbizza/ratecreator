@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useEffect } from "react";
-import { pageNumberState } from "@ratecreator/store/content";
+import { contentPageNumberState } from "@ratecreator/store/content";
 import {
   fetchPublishedPosts,
   fetchPublishedPostsCount,
@@ -19,8 +19,8 @@ export const BlogsListPage = () => {
   const [featuredPosts, setFeaturedPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
-  const resetPageNumber = useResetRecoilState(pageNumberState);
+  const [currentPage, setCurrentPage] = useRecoilState(contentPageNumberState);
+  const resetPageNumber = useResetRecoilState(contentPageNumberState);
   const [postsCount, setPostsCount] = useState(0);
 
   const fetchPostsCount = async () => {

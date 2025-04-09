@@ -27,12 +27,7 @@ import {
   postPlatformState,
   contentTypeAtom,
 } from "@ratecreator/store/content";
-import {
-  ContentType,
-  ContentPlatform,
-  PostStatus,
-  PostType,
-} from "@ratecreator/types/content";
+import { ContentType, PostStatus, PostType } from "@ratecreator/types/content";
 import {
   Button,
   Label,

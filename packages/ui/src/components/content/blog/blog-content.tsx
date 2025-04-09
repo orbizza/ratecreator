@@ -9,7 +9,6 @@ import {
   fetchPostBySlug,
   fetchTagsFromTagOnPost,
 } from "@ratecreator/actions/content";
-import { BlockNoteRenderer } from "@ratecreator/ui/common";
 
 import { useState, useEffect } from "react";
 import {
@@ -30,6 +29,7 @@ export function BlogContent() {
   const slug = params.slug as string;
   const [post, setPost] = useState<FetchedPostType>();
 
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [tags, setTags] = useState<Tags[]>([]);
@@ -40,7 +40,9 @@ export function BlogContent() {
       setIsLoading(true);
 
       // If no cache, fetch fresh data
+
       const postData = await fetchPostBySlug(slug);
+
       if (postData && postData.id) {
         const tagList = await fetchTagsFromTagOnPost({
           postId: postData.id,

@@ -26,7 +26,6 @@ import {
   selectedTimeIst,
   postIdState,
   savePostErrorState,
-  contentTypeAtom,
   postTypeState,
 } from "@ratecreator/store/content";
 
@@ -35,7 +34,6 @@ import { useRouter } from "next/navigation";
 import {
   dateTimeValidation,
   FetchedPostType,
-  PostType,
   ContentType,
 } from "@ratecreator/types/content";
 
