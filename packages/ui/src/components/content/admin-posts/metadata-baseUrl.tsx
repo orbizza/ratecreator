@@ -2,14 +2,14 @@ import { ContentPlatform, ContentType } from "@ratecreator/types/content";
 
 const generateBaseUrl = (
   platform: ContentPlatform,
-  contentType: ContentType,
+  contentType: ContentType
 ): string => {
   let baseUrl: string;
 
   switch (platform) {
     case ContentPlatform.RATECREATOR:
       if (contentType === ContentType.LEGAL) {
-        baseUrl = "www.legal.ratecreator.com";
+        baseUrl = "www.ratecreator.com";
       } else {
         baseUrl = "www.ratecreator.com";
       }

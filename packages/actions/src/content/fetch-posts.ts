@@ -15,7 +15,7 @@ export async function fetchAllPostsCount(
   tagOption?: string,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
   return await prisma.post.count({
     where: {
@@ -47,7 +47,7 @@ export async function fetchAllPosts(
   pageNumber: number,
   contentType?: string,
   platformType: string = "ratecreator",
-  postStatus?: string,
+  postStatus?: string
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -196,7 +196,7 @@ export async function fetchPublishedPosts(postOption: string) {
 }
 export async function fetchPublishedPostsPaginated(
   postOption: string,
-  pageNumber: number,
+  pageNumber: number
 ) {
   const pageSize = 10;
   const offset = pageNumber * pageSize;
@@ -283,7 +283,7 @@ export async function fetchAllGlossaryPosts() {
     },
     select: {
       title: true,
-      slug: true,
+      postUrl: true,
     },
   });
   return posts;
@@ -318,9 +318,9 @@ export async function fetchPostTitleById(id: string) {
   return post.title;
 }
 
-export async function fetchPostByslug(slug: string) {
+export async function fetchPostByPostUrl(postUrl: string) {
   const post = await prisma.post.findUnique({
-    where: { slug },
+    where: { postUrl },
     include: {
       tags: true,
       author: true,
