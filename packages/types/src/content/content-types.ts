@@ -64,18 +64,6 @@ export interface FetchedPostType {
   broadcastIds: string[];
 }
 
-// export interface PostListType {
-//   id: string; //ObjectId
-//   title: string;
-//   featureImage: string | null;
-//   slug: string;
-//   publishDate: Date | null;
-//   excerpt: string;
-//   isFeatured: boolean;
-//   tags: TagOnPost[];
-//   author: Author;
-// }
-
 export enum ContentType {
   BLOG = "BLOG",
   GLOSSARY = "GLOSSARY",

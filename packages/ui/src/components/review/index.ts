@@ -17,7 +17,6 @@ export * from "./contact/contact-map";
 export * from "./common/form-success";
 export * from "./common/form-error";
 export * from "./contact/contact-page";
-export * from "./concent-policy/TermlyCMP";
 export * from "./cards/pagination-bar";
 export * from "./legal/cookie-policy-page";
 export * from "./legal/privacy-page";

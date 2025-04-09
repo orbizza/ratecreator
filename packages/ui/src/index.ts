@@ -1,6 +1,4 @@
 import IconCloud from "./components/ui/icon-cloud";
-import LinearGradient from "./components/ui/linear-gradient";
-import RadialGradient from "./components/ui/radial-gradient";
 
 export * from "./components/ui/accordion";
 export * from "./components/ui/button";
@@ -57,4 +55,4 @@ export * from "./components/ui/calendar";
 export * from "./components/ui/popover";
 export * from "./components/ui/switch";
 export * from "./components/ui/scroll-progress";
-export { IconCloud, LinearGradient, RadialGradient };
+export { IconCloud };
