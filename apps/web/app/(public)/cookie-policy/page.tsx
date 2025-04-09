@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 
 export default async function CookiePolicy() {
@@ -7,5 +6,4 @@ export default async function CookiePolicy() {
       <Link href="/legal/cookie-policy">View Cookie Policy</Link>
     </div>
   );
-
 }

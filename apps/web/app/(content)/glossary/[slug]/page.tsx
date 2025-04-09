@@ -66,5 +66,4 @@ export async function generateMetadata({
 
 export default function GlossaryPostPage() {
   return <GlossaryPost />;
-
 }

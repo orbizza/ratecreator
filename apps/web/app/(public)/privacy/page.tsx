@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 
 export default async function PrivacyPolicy() {
@@ -7,5 +6,4 @@ export default async function PrivacyPolicy() {
       <Link href="/legal/privacy">View Privacy Policy</Link>
     </div>
   );
-
 }
