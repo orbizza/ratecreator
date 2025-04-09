@@ -318,9 +318,7 @@ export async function fetchPostTitleById(id: string) {
   return post.title;
 }
 
-
 export async function fetchPostBySlug(slug: string) {
-
   const post = await prisma.post.findUnique({
     where: { slug },
     include: {

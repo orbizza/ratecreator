@@ -23,7 +23,6 @@ export const PrivacyPage = () => {
 
       const postData = await fetchPostBySlug("privacy");
 
-
       setPost(postData as FetchedPostType);
     } catch (error) {
       console.error("Error fetching blog post:", error);

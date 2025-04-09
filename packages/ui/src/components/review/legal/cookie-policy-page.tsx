@@ -8,7 +8,6 @@ import { fetchPostBySlug } from "@ratecreator/actions/content";
 import { BlockNoteRenderer } from "../../common/blocknote-editor/blocknote-render";
 import { LegalPostSkeleton } from "./skeleton-legal-post";
 
-
 export const CookiePolicyPage = () => {
   const [post, setPost] = useState<FetchedPostType | null>(null);
 
