@@ -410,7 +410,7 @@ model Post {
   title                String
   content              String
   featureImage         String?
-  slug                 String   @unique
+  postUrl              String   @unique
   publishDate          DateTime?
   tags                 TagOnPost[]
   excerpt              String?

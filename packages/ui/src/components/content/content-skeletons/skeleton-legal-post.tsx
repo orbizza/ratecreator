@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@ratecreator/ui";
 
-const LegalPostSkeleton = () => {
+export const LegalPostSkeleton = () => {
   return (
     <div className="w-full  max-w-3xl mx-auto space-y-6 sm:space-y-8 p-2 sm:p-4 bg-background ">
       {/* Header with back button and edit info */}
@@ -48,5 +48,3 @@ const LegalPostSkeleton = () => {
     </div>
   );
 };
-
-export default LegalPostSkeleton;

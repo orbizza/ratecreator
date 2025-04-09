@@ -205,7 +205,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => handleNavigation("/blog")}
+                  onClick={() => handleNavigation("/category-glossary")}
                   className="flex justify-between"
                 >
                   <div className="flex items-center">
@@ -361,7 +361,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
-                  onClick={() => handleNavigation("/blog")}
+                  onClick={() => handleNavigation("/category-glossary")}
                   className="flex justify-between"
                 >
                   <div className="flex items-center">

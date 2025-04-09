@@ -27,7 +27,7 @@ async function createPost(data: PostType) {
   await authenticateUser();
   try {
     const existingPost = await prisma.post.findUnique({
-      where: { slug: data.slug },
+      where: { postUrl: data.postUrl },
     });
 
     if (existingPost) {
@@ -39,7 +39,7 @@ async function createPost(data: PostType) {
       data: {
         title: data.title,
         content: data.content,
-        slug: data.slug,
+        postUrl: data.postUrl,
         publishDate: data.publishDate || undefined,
         excerpt: data.excerpt,
         isFeatured: data.isFeatured,
@@ -91,7 +91,7 @@ async function updatePost(data: PostType, postId: string) {
   const post: UpdatePostType = {
     title: data.title,
     content: data.content,
-    slug: data.slug,
+    postUrl: data.postUrl,
     publishDate: data.publishDate
       ? new Date(data.publishDate.toString())
       : null,
@@ -113,7 +113,7 @@ async function updatePost(data: PostType, postId: string) {
   try {
     const existingPost = await prisma.post.findUnique({
       where: {
-        slug: post.slug,
+        postUrl: post.postUrl,
         NOT: {
           id: postId,
         },
@@ -134,7 +134,7 @@ async function updatePost(data: PostType, postId: string) {
       data: {
         title: post.title,
         content: post.content,
-        slug: post.slug,
+        postUrl: post.postUrl,
         publishDate: post.publishDate || undefined,
         excerpt: post.excerpt,
         isFeatured: post.isFeatured,

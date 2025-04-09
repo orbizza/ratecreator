@@ -8,7 +8,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/(public)/policy/page.jsx"
+    "app/(public)/policy/page.jsx",
+    "../../packages/ui/src/components/content/legal/privacy-page.tsx"
   ],
   "exclude": ["node_modules"]
 }

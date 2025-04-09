@@ -1,7 +1,7 @@
 import React from "react";
 import { Skeleton, Card, CardContent } from "@ratecreator/ui";
 
-const ArticlesListingSkeleton = () => {
+export const ArticlesListingSkeleton = () => {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8 sm:space-y-12 p-2 sm:p-4 bg-background">
       {/* Featured Articles Section */}
@@ -78,5 +78,3 @@ const ArticlesListingSkeleton = () => {
     </div>
   );
 };
-
-export default ArticlesListingSkeleton;
