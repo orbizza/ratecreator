@@ -1,0 +1,7 @@
+{
+  "auths": {
+    "registry.example.com": {
+      "auth": "YOUR_BASE64_ENCODED_AUTH_HERE"
+    }
+  }
+}

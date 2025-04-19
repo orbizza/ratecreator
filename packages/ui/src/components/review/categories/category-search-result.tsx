@@ -393,7 +393,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex justify-end items-center gap-x-2">
+            {/* <div className="flex justify-end items-center gap-x-2">
               <Toggle
                 aria-label="Toggle Sort Order"
                 pressed={!isDescending}
@@ -430,7 +430,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 </SelectContent>
               </Select>
               <Info size={14} />
-            </div>
+            </div> */}
           </div>
           {creatorLoading && <CreatorLoadingCard />}
           {!creatorLoading && (
