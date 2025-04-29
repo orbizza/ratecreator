@@ -55,10 +55,37 @@ import { CommandBarReset } from "./commandbar-reset";
 import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@ratecreator/ui";
 
+/**
+ * Command Bar Component
+ *
+ * A powerful command palette interface that provides quick access to various actions and search functionality.
+ * Features include:
+ * - Global search with Algolia integration
+ * - Keyboard shortcuts for common actions
+ * - Platform-specific filtering (YouTube, X, TikTok, Reddit)
+ * - Real-time search results
+ * - Responsive design with mobile support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Child components to render
+ * @returns {JSX.Element} A command bar interface with search and action capabilities
+ */
+
 // Type Definitions
+/**
+ * Supported platform types for search results
+ */
 type Platform = "YOUTUBE" | "X" | "TIKTOK" | "REDDIT";
+
+/**
+ * Available tab types for filtering results
+ */
 type TabType = "All" | "YouTube" | "X" | "TikTok" | "Reddit";
 
+/**
+ * Structure of a search result item
+ */
 interface SearchResult {
   accountId: string;
   platform: Platform;
@@ -72,29 +99,47 @@ interface SearchResult {
   reviews: number;
 }
 
+/**
+ * Props for the ResultItem component
+ */
 interface ResultItemProps {
   action: ActionImpl;
   active: boolean;
   currentRootActionId: ActionId | null;
 }
 
+/**
+ * Props for the SearchComponent
+ */
 interface SearchComponentProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
 }
 
+/**
+ * Props for the CommandBarContent component
+ */
 interface CommandBarContentProps {
   children: ReactNode;
 }
 
+/**
+ * Props for the main CommandBar component
+ */
 interface CommandBarProps {
   children: ReactNode;
 }
 
+/**
+ * Props for the GroupName component
+ */
 interface GroupNameProps {
   name: string;
 }
 
+/**
+ * Structure of a KBar action
+ */
 interface KBarAction {
   id: string;
   name: string;
@@ -107,6 +152,11 @@ interface KBarAction {
 }
 
 // Helper function to type guard the search hits
+/**
+ * Type guard to validate search hit objects
+ * @param {any} hit - The object to validate
+ * @returns {boolean} True if the object is a valid search hit
+ */
 function isSearchHit(hit: any): hit is SearchResult {
   return (
     typeof hit === "object" &&
@@ -119,6 +169,13 @@ function isSearchHit(hit: any): hit is SearchResult {
 }
 
 // Results rendering components
+/**
+ * ResultItem Component
+ *
+ * Renders a single result item in the command bar results list
+ * @param {ResultItemProps} props - Component props
+ * @returns {JSX.Element} A styled result item with icon, text, and keyboard shortcuts
+ */
 const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
   ({ action, active, currentRootActionId }, ref) => {
     const ancestors = [...(action.ancestors || [])].reverse();
@@ -132,16 +189,16 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
             : "text-foreground"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           {action.icon && (
-            <span className="text-muted-foreground">{action.icon}</span>
+            <span className='text-muted-foreground'>{action.icon}</span>
           )}
           <div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               {ancestors.map((ancestor) => (
                 <span
                   key={ancestor.id}
-                  className="text-sm text-muted-foreground"
+                  className='text-sm text-muted-foreground'
                 >
                   {ancestor.name}
                 </span>
@@ -149,18 +206,18 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
               <span>{action.name}</span>
             </div>
             {action.subtitle && (
-              <span className="text-sm text-muted-foreground">
+              <span className='text-sm text-muted-foreground'>
                 {action.subtitle}
               </span>
             )}
           </div>
         </div>
         {action.shortcut?.length ? (
-          <div className="flex items-center uppercase gap-1">
+          <div className='flex items-center uppercase gap-1'>
             {action.shortcut.map((sc) => (
               <kbd
                 key={sc}
-                className="px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground"
+                className='px-2 py-1 text-xs bg-neutral-300 dark:bg-neutral-600 rounded-sm text-muted-foreground'
               >
                 {sc}
               </kbd>
@@ -169,17 +226,30 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
         ) : null}
       </div>
     );
-  },
+  }
 );
 
 ResultItem.displayName = "ResultItem";
 
+/**
+ * GroupName Component
+ *
+ * Renders a section header in the command bar results
+ * @param {GroupNameProps} props - Component props
+ * @returns {JSX.Element} A styled section header
+ */
 const GroupName = ({ name }: GroupNameProps): JSX.Element => (
-  <div className="px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase">
+  <div className='px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase'>
     {name}
   </div>
 );
 
+/**
+ * RenderResults Component
+ *
+ * Renders the list of search results and action items in the command bar
+ * @returns {JSX.Element} A list of results with proper grouping and styling
+ */
 const RenderResults = (): JSX.Element => {
   const { results, rootActionId } = useMatches();
 
@@ -201,6 +271,19 @@ const RenderResults = (): JSX.Element => {
   );
 };
 
+/**
+ * SearchComponent
+ *
+ * Handles the search functionality and results display
+ * Features:
+ * - Real-time search with Algolia
+ * - Results sorting by follower count
+ * - Loading states
+ * - Error handling
+ *
+ * @param {SearchComponentProps} props - Component props
+ * @returns {JSX.Element} A search interface with results display
+ */
 const SearchComponent = ({
   searchTerm,
   onSearchChange,
@@ -234,29 +317,29 @@ const SearchComponent = ({
         categories: hit.categories,
         rating: hit.rating,
         reviews: hit.reviewCount,
-      })),
+      }))
     );
   }, [hits]);
 
   return (
-    <div className="mt-4 min-h-[300px]">
+    <div className='mt-4 min-h-[300px]'>
       {status === "loading" ? (
-        <div className="space-y-4">
-          <div className="px-4 py-2 text-sm text-muted-foreground">
+        <div className='space-y-4'>
+          <div className='px-4 py-2 text-sm text-muted-foreground'>
             Loading results... In the meantime, you can:
           </div>
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <div
               onClick={() => {
                 query.toggle();
                 router.push("/write-review");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <PenLine size={20} className="text-muted-foreground" />
+              <PenLine size={20} className='text-muted-foreground' />
               <div>
                 <div>Write a Review</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Share your experience about a creator
                 </div>
               </div>
@@ -266,12 +349,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/categories");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <Book size={20} className="text-muted-foreground" />
+              <Book size={20} className='text-muted-foreground' />
               <div>
                 <div>Browse Categories</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Explore creators by category
                 </div>
               </div>
@@ -281,12 +364,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/my-lists");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <List size={20} className="text-muted-foreground" />
+              <List size={20} className='text-muted-foreground' />
               <div>
                 <div>Create Lists</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Organize creators into custom lists
                 </div>
               </div>
@@ -296,12 +379,12 @@ const SearchComponent = ({
                 query.toggle();
                 router.push("/blogs");
               }}
-              className="px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+              className='px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md'
             >
-              <Newspaper size={20} className="text-muted-foreground" />
+              <Newspaper size={20} className='text-muted-foreground' />
               <div>
                 <div>Read Blog</div>
-                <div className="text-sm text-muted-foreground">
+                <div className='text-sm text-muted-foreground'>
                   Latest updates and creator insights
                 </div>
               </div>
@@ -309,7 +392,7 @@ const SearchComponent = ({
           </div>
         </div>
       ) : filteredResults.length > 0 ? (
-        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+        <div className='space-y-2 max-h-[50vh] overflow-y-auto'>
           {filteredResults.map((result) => (
             <div key={result.accountId}>
               <CreatorCard
@@ -321,7 +404,7 @@ const SearchComponent = ({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+        <div className='flex items-center justify-center h-[300px] text-muted-foreground'>
           No results found.
         </div>
       )}
@@ -329,6 +412,13 @@ const SearchComponent = ({
   );
 };
 
+/**
+ * CommandBarContent Component
+ *
+ * Wrapper component that provides the command bar interface structure
+ * @param {CommandBarContentProps} props - Component props
+ * @returns {JSX.Element} The command bar interface structure
+ */
 const CommandBarContent = ({
   children,
 }: CommandBarContentProps): JSX.Element => {
@@ -363,26 +453,26 @@ const CommandBarContent = ({
 
   return (
     <>
-      <InstantSearch searchClient={searchClient} indexName="accounts">
+      <InstantSearch searchClient={searchClient} indexName='accounts'>
         <KBarPortal>
-          <KBarPositioner className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]">
-            <KBarAnimator className="w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col">
-              <div className="p-4 flex-grow overflow-hidden">
-                <div className="relative flex items-center">
+          <KBarPositioner className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[14vh]'>
+            <KBarAnimator className='w-full max-w-2xl bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden flex flex-col'>
+              <div className='p-4 flex-grow overflow-hidden'>
+                <div className='relative flex items-center'>
                   <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'
                     size={20}
                   />
                   <CustomKBarSearch
-                    defaultPlaceholder="Type name, description or category... "
-                    className="w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultPlaceholder='Type name, description or category... '
+                    className='w-full pl-10 pr-4 py-2 my-1 bg-muted text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
                     onChange={handleSearchChange}
                     value={searchTerm}
                     onKeyDown={handleKeyDown}
                   />
 
                   {searchTerm && (
-                    <div className="flex ml-2">
+                    <div className='flex ml-2'>
                       <Button onClick={handleSearchRedirect}>Search</Button>
                     </div>
                   )}
@@ -591,6 +681,13 @@ interface CustomSearchProps {
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * CustomKBarSearch Component
+ *
+ * A customizable search input component for the command bar
+ * @param {CustomSearchProps} props - Component props
+ * @returns {JSX.Element} A styled search input with custom functionality
+ */
 export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
   defaultPlaceholder = "Type your search here...",
   className = "",
@@ -608,10 +705,10 @@ export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
       ref={query.inputRefSetter}
       className={className}
       autoFocus={visualState === VisualState.showing}
-      role="combobox"
+      role='combobox'
       aria-expanded={visualState === VisualState.showing}
-      aria-controls="kbar-listbox"
-      aria-autocomplete="list"
+      aria-controls='kbar-listbox'
+      aria-autocomplete='list'
       value={value || searchQuery}
       placeholder={defaultPlaceholder}
       onChange={onChange}

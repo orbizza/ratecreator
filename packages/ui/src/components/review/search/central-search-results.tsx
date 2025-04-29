@@ -53,10 +53,35 @@ import {
   FilterSkeleton,
 } from "../skeletons/skeleton-category-search-results";
 
-export const CentralSearchResults: React.FC<{
+/**
+ * Props for the CentralSearchResults component
+ */
+interface CentralSearchResultsProps {
+  /** Optional search query string */
   searchQuery?: string;
+  /** Optional initial platform filter */
   platform?: string;
-}> = ({ searchQuery, platform: initialPlatform }) => {
+}
+
+/**
+ * CentralSearchResults Component
+ *
+ * A comprehensive search results component that displays creator search results with filtering and sorting capabilities.
+ * Features include:
+ * - Real-time search results display
+ * - Multiple filter options (platform, followers, rating, etc.)
+ * - Sorting and pagination
+ * - Loading states and error handling
+ * - Responsive design with mobile and desktop layouts
+ *
+ * @component
+ * @param {CentralSearchResultsProps} props - Component props
+ * @returns {JSX.Element} A search results page with filtering and sorting
+ */
+export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
+  searchQuery,
+  platform: initialPlatform,
+}) => {
   const [creators, setCreators] = useState<SearchAccount[]>([]);
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
   const [filterSidebarLoading, setFilterSidebarLoading] =
@@ -83,7 +108,7 @@ export const CentralSearchResults: React.FC<{
   const debouncedPlatform = useDebounce(platform, 1000);
   const [sortBy, setSortBy] = useRecoilState(sortByFilterState);
   const [isDescending, setIsDescending] = useRecoilState(
-    isDescendingFilterState,
+    isDescendingFilterState
   );
 
   // Add reset functions for all states
@@ -158,11 +183,19 @@ export const CentralSearchResults: React.FC<{
     }
   }, [initialPlatform, setPlatformFilter]);
 
+  /**
+   * Toggle sort order between ascending and descending
+   * Resets pagination to first page when sort order changes
+   */
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
     setCurrentPage(0);
   };
 
+  /**
+   * Fetch creators based on current filters and pagination
+   * Implements error handling and loading states
+   */
   const fetchCreators = useCallback(async () => {
     try {
       setCreatorLoading(true);
@@ -236,6 +269,10 @@ export const CentralSearchResults: React.FC<{
     fetchCreators();
   }, [fetchCreators]);
 
+  /**
+   * Handle page change in pagination
+   * @param {number} page - The new page number
+   */
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -249,67 +286,67 @@ export const CentralSearchResults: React.FC<{
   }, []);
 
   return (
-    <div className="container mx-auto p-4 mt-16">
-      <div className="flex flex-col">
-        <div className="flex flex-col justify-center items-center w-full mx-auto m-8 gap-4">
-          <div className="flex flex-wrap justify-center items-baseline text-3xl sm:text-4xl lg:text-5xl font-bold">
+    <div className='container mx-auto p-4 mt-16'>
+      <div className='flex flex-col'>
+        <div className='flex flex-col justify-center items-center w-full mx-auto m-8 gap-4'>
+          <div className='flex flex-wrap justify-center items-baseline text-3xl sm:text-4xl lg:text-5xl font-bold'>
             {searchQuery && searchQuery !== " " ? (
               <>
-                <span className="mr-2">Results for</span>
-                <span className="text-primary">"{searchQuery}"</span>
+                <span className='mr-2'>Results for</span>
+                <span className='text-primary'>"{searchQuery}"</span>
               </>
             ) : (
               <>
-                <span className="mr-2">Find a </span>
-                <span className="text-primary">Creator</span>
+                <span className='mr-2'>Find a </span>
+                <span className='text-primary'>Creator</span>
               </>
             )}
           </div>
-          <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
+          <div className='flex flex-row items-center gap-x-2 text-muted-foreground'>
             <>
-              <span className="text-[13px] md:text-sm lg:text-xl">
+              <span className='text-[13px] md:text-sm lg:text-xl'>
                 Apply filters and sort to narrow down your search
               </span>
               <Info size={14} />
             </>
           </div>
         </div>
-        <Separator className="my-[2rem] xl:my-[4rem]" />
+        <Separator className='my-[2rem] xl:my-[4rem]' />
       </div>
-      <div className="flex flex-row">
-        <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
+      <div className='flex flex-row'>
+        <div className='hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4'>
           {!filterSidebarLoading && <FilterSidebar />}
           {filterSidebarLoading && (
-            <div className="flex flex-col">
+            <div className='flex flex-col'>
               <FilterSkeleton />
             </div>
           )}
           {/* ToDo: Add category based filter */}
 
-          {error && <div className="text-red-500">{error}</div>}
+          {error && <div className='text-red-500'>{error}</div>}
         </div>
-        <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
-          <div className="flex xl:hidden gap-y-2 flex-row items-center justify-between">
+        <div className='flex flex-col w-full xl:w-3/4 gap-4 mb-4'>
+          <div className='flex xl:hidden gap-y-2 flex-row items-center justify-between'>
             {filterSidebarLoading && (
               <Button
-                variant="default"
-                size="sm"
+                variant='default'
+                size='sm'
                 disabled
-                className="flex items-center gap-2"
+                className='flex items-center gap-2'
               >
                 <SlidersHorizontal size={16} />
-                <span className="hidden md:inline-block">Filters</span>
+                <span className='hidden md:inline-block'>Filters</span>
               </Button>
             )}
             {!filterSidebarLoading && <FilterSidebar />}
           </div>
-          <div className="flex flex-row items-center justify-between">
+          <div className='flex flex-row items-center justify-between'>
             <div>
               {creatorLoading && (
-                <span className="text-muted-foreground text-sm"># of ###</span>
+                <span className='text-muted-foreground text-sm'># of ###</span>
               )}
               {!creatorLoading && (
-                <div className="flex flex-row items-center gap-x-2 text-muted-foreground text-sm">
+                <div className='flex flex-row items-center gap-x-2 text-muted-foreground text-sm'>
                   {" "}
                   {viewCount} of {count} <Info size={14} />
                 </div>

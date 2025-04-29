@@ -7,6 +7,9 @@ import { twMerge } from "tailwind-merge";
 
 import { Spinner } from "@ratecreator/ui";
 
+/**
+ * CSS variants for different states of the dropzone
+ */
 const variants = {
   base: "relative rounded-md flex justify-center items-center flex-col cursor-pointer min-h-[150px] min-w-[200px] border border-dashed border-gray-400 dark:border-gray-300 transition-colors duration-200 ease-in-out",
   image:
@@ -18,16 +21,29 @@ const variants = {
   reject: "border border-red-700 bg-red-700 bg-opacity-10",
 };
 
+/**
+ * Props for the SingleImageDropzone component
+ */
 type InputProps = {
+  /** Width of the dropzone */
   width?: number;
+  /** Height of the dropzone */
   height?: number;
+  /** Additional CSS classes */
   className?: string;
+  /** Current value (File or URL string) */
   value?: File | string;
+  /** Function to handle file changes */
   onChange?: (file?: File) => void | Promise<void>;
+  /** Whether the dropzone is disabled */
   disabled?: boolean;
+  /** Additional dropzone options */
   dropzoneOptions?: Omit<DropzoneOptions, "disabled">;
 };
 
+/**
+ * Error messages for different validation scenarios
+ */
 const ERROR_MESSAGES = {
   fileTooLarge(maxSize: number) {
     return `The file is too large. Max size is ${formatFileSize(maxSize)}.`;
@@ -43,11 +59,22 @@ const ERROR_MESSAGES = {
   },
 };
 
+/**
+ * SingleImageDropzone Component
+ *
+ * A reusable component for handling single image uploads with drag-and-drop functionality.
+ * Supports image preview, validation, and error handling.
+ *
+ * @component
+ * @param {InputProps} props - Component props
+ * @returns {JSX.Element} A single image dropzone component
+ */
 const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
   (
     { dropzoneOptions, width, height, value, className, disabled, onChange },
-    ref,
+    ref
   ) => {
+    // Create image URL from File or string value
     const imageUrl = React.useMemo(() => {
       if (typeof value === "string") {
         // in case a url is passed in, use it to display the image
@@ -59,7 +86,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
       return null;
     }, [value]);
 
-    // dropzone configuration
+    // Configure dropzone with options
     const {
       getRootProps,
       getInputProps,
@@ -81,7 +108,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
       ...dropzoneOptions,
     });
 
-    // styling
+    // Compute dropzone className based on state
     const dropZoneClassName = React.useMemo(
       () =>
         twMerge(
@@ -91,7 +118,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
           imageUrl && variants.image,
           (isDragReject ?? fileRejections[0]) && variants.reject,
           isDragAccept && variants.accept,
-          className,
+          className
         ).trim(),
       [
         isFocused,
@@ -101,10 +128,10 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
         isDragReject,
         disabled,
         className,
-      ],
+      ]
     );
 
-    // error validation messages
+    // Generate error message based on rejection type
     const errorMessage = React.useMemo(() => {
       if (fileRejections[0]) {
         const { errors } = fileRejections[0];
@@ -122,12 +149,15 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
     }, [fileRejections, dropzoneOptions]);
 
     return (
-      <div className="relative">
+      <div className='relative'>
+        {/* Loading spinner when disabled */}
         {disabled && (
-          <div className="flex items-center justify-center absolute inset-y-0 h-full w-full bg-background/80 z-50">
-            <Spinner size="lg" />
+          <div className='flex items-center justify-center absolute inset-y-0 h-full w-full bg-background/80 z-50'>
+            <Spinner size='lg' />
           </div>
         )}
+
+        {/* Main dropzone container */}
         <div
           {...getRootProps({
             className: dropZoneClassName,
@@ -137,38 +167,38 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
             },
           })}
         >
-          {/* Main File Input */}
+          {/* Hidden file input */}
           <input ref={ref} {...getInputProps()} />
 
           {imageUrl ? (
-            // Image Preview
+            // Image preview
             <img
-              className="h-full w-full rounded-md object-cover"
+              className='h-full w-full rounded-md object-cover'
               src={imageUrl}
               alt={acceptedFiles[0]?.name}
             />
           ) : (
-            // Upload Icon
-            <div className="flex flex-col items-center justify-center text-xs text-gray-400">
-              <UploadCloudIcon className="mb-2 h-7 w-7" />
-              <div className="text-gray-400">
+            // Upload placeholder
+            <div className='flex flex-col items-center justify-center text-xs text-gray-400'>
+              <UploadCloudIcon className='mb-2 h-7 w-7' />
+              <div className='text-gray-400'>
                 Click or drag file to this area to upload
               </div>
             </div>
           )}
 
-          {/* Remove Image Icon */}
+          {/* Remove image button */}
           {imageUrl && !disabled && (
             <div
-              className="group absolute right-0 top-0 -translate-y-1/4 translate-x-1/4 transform"
+              className='group absolute right-0 top-0 -translate-y-1/4 translate-x-1/4 transform'
               onClick={(e) => {
                 e.stopPropagation();
                 void onChange?.(undefined);
               }}
             >
-              <div className="flex h-5 w-5 items-center justify-center rounded-md border border-solid border-gray-500 bg-white transition-all duration-300 hover:h-6 hover:w-6 dark:border-gray-400 dark:bg-black">
+              <div className='flex h-5 w-5 items-center justify-center rounded-md border border-solid border-gray-500 bg-white transition-all duration-300 hover:h-6 hover:w-6 dark:border-gray-400 dark:bg-black'>
                 <X
-                  className="text-gray-500 dark:text-gray-400"
+                  className='text-gray-500 dark:text-gray-400'
                   width={16}
                   height={16}
                 />
@@ -177,14 +207,23 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
 
-        {/* Error Text */}
-        <div className="mt-1 text-xs text-red-500">{errorMessage}</div>
+        {/* Error message display */}
+        <div className='mt-1 text-xs text-red-500'>{errorMessage}</div>
       </div>
     );
-  },
+  }
 );
 SingleImageDropzone.displayName = "SingleImageDropzone";
 
+/**
+ * Button Component
+ *
+ * A reusable button component with consistent styling.
+ *
+ * @component
+ * @param {React.ButtonHTMLAttributes<HTMLButtonElement>} props - Button props
+ * @returns {JSX.Element} A button component
+ */
 const Button = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -198,7 +237,7 @@ const Button = React.forwardRef<
         "border border-gray-400 text-gray-400 shadow hover:bg-gray-100 hover:text-gray-500 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700",
         // size
         "h-6 rounded-md px-2 text-xs",
-        className,
+        className
       )}
       ref={ref}
       {...props}
@@ -207,6 +246,12 @@ const Button = React.forwardRef<
 });
 Button.displayName = "Button";
 
+/**
+ * Formats file size in bytes to human-readable format
+ *
+ * @param {number} bytes - Size in bytes
+ * @returns {string} Formatted file size
+ */
 function formatFileSize(bytes?: number) {
   if (!bytes) {
     return "0 Bytes";

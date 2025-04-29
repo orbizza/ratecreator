@@ -1,3 +1,18 @@
+/**
+ * LandingPage Component
+ *
+ * This component serves as the main landing page layout, featuring:
+ * - Hero section with search functionality
+ * - Popular categories section
+ * - Statistics display
+ * - Why Rate Creator section
+ * - Creator call-to-action section
+ * - Animated footer text
+ *
+ * The component uses Intersection Observer to handle scroll-based animations
+ * and visibility of certain sections.
+ */
+
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -9,9 +24,11 @@ import { CataloguedStats } from "./catalogued-stats";
 import { PopularCategories } from "./popular-categories";
 
 export const LandingPage = () => {
+  // State to track visibility of creator CTA section
   const [isCreatorCtaVisible, setIsCreatorCtaVisible] = useState(false);
   const creatorCtaRef = useRef(null);
 
+  // Set up Intersection Observer to handle scroll-based animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -20,7 +37,7 @@ export const LandingPage = () => {
           observer.disconnect(); // Stop observing once visible
         }
       },
-      { threshold: 0.1 }, // Trigger when 10% of the element is visible
+      { threshold: 0.1 } // Trigger when 10% of the element is visible
     );
 
     if (creatorCtaRef.current) {
@@ -35,31 +52,29 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <main className="min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto">
+    <main className='min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto'>
       {/* Hero Section with Create Creator CTA */}
       <HeroSection />
 
-      <Separator className="my-4" />
+      <Separator className='my-4' />
 
-      {/* ToDo: Most Popular Categories with Write a review CTA */}
+      {/* Popular Categories section with Write a review CTA */}
       <PopularCategories />
 
-      {/* Catalogued Stats */}
+      {/* Statistics section showing catalogued data */}
       <CataloguedStats />
 
-      {/* ToDo: Reviews card */}
+      <Separator className='my-0 sm:my-4' />
 
-      <Separator className="my-0 sm:my-4" />
-      {/* Why use RC */}
+      {/* Why Rate Creator section explaining the platform's benefits */}
       <WhyRateCreator />
 
-      {/* Border */}
-      <div className="mb-0 sm:mb-10">
-        {/* <hr className='my-4 border-t border-gray-300 dark:border-gray-700' /> */}
+      {/* Decorative sphere mask element */}
+      <div className='mb-0 sm:mb-10'>
         <SphereMask />
       </div>
 
-      {/* Creator CTA */}
+      {/* Creator CTA section with scroll-based visibility */}
       <div
         ref={creatorCtaRef}
         className={`total-accounts w-full mt-0 sm:mt-10 p-8 transition-opacity duration-1000  ${
@@ -69,11 +84,11 @@ export const LandingPage = () => {
         {isCreatorCtaVisible && <CreatorCTA />}
       </div>
 
-      {/* Pre Footer */}
-      <div className="ml-1 sm:ml-0 h-[10rem] -my-[2rem] flex items-center justify-center">
+      {/* Pre-footer section with animated text */}
+      <div className='ml-1 sm:ml-0 h-[10rem] -my-[2rem] flex items-center justify-center'>
         <SparklesText
-          text="RATE CREATORS"
-          className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-rose-200"
+          text='RATE CREATORS'
+          className='text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-rose-200'
           colors={{ first: "#ff3131", second: "#fecdd3" }}
         />
       </div>

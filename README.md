@@ -15,6 +15,7 @@ components:
 - `web/` - Main web application (Next.js)
 - `content/` - Content management system (Next.js)
 - `admin/` - Admin dashboard (Next.js)
+- `consumer/` - Consumer-facing application (Next.js)
 - `api/` - Backend services (Express.js/Hono.js)
 - `webhooks/` - Webhook handlers for various services
 
@@ -179,3 +180,58 @@ configuration in the `vercel.json` file.
 ### Store
 
 ### UI
+
+The UI package contains shared components used across the platform, including:
+
+#### BlockNote Editor
+
+A rich text editor component built on top of BlockNote, providing a modern and
+feature-rich editing experience. The editor supports:
+
+- Text formatting (bold, italic, etc.)
+- Headings
+- Lists (ordered and unordered)
+- Code blocks
+- Blockquotes
+- YouTube video embeds
+- Dividers
+- Theme-aware styling (dark/light mode)
+
+##### Usage in Apps
+
+The BlockNote editor is used in various applications:
+
+1. **Content Management System (`/apps/content`)**
+
+   - Blog post creation and editing
+   - Newsletter content management
+   - Rich text content creation
+
+2. **Review Site (`/apps/web`)**
+
+   **_Used in Rendering_**
+
+- Blogs
+- Newsletters
+- Glossaries
+
+##### Key Features
+
+- **Rich Text Editing**: Full support for text formatting and styling
+- **Media Integration**: Easy embedding of YouTube videos and other media
+- **Theme Support**: Automatic dark/light mode adaptation
+- **Custom Blocks**: Extensible block system for custom content types
+- **Markdown Export**: Built-in support for converting content to Markdown
+  format
+
+##### Implementation
+
+The editor is implemented in the
+`packages/ui/src/components/common/blocknote-editor` directory with the
+following components:
+
+- `editor.tsx`: Main editor component
+- `blocknote-render.tsx`: Content rendering component
+- `blocknote-to-markdown.tsx`: Markdown conversion utilities
+- `youtube-blocknote.tsx`: YouTube video block implementation
+- `divider.tsx`: Divider block implementation

@@ -1,3 +1,15 @@
+/**
+ * WriteReviewCTA Component
+ *
+ * This component displays a call-to-action section for writing reviews, featuring:
+ * - Animated creator cards with hover effects
+ * - Creator statistics and ratings
+ * - Responsive layout with staggered animations
+ *
+ * The component uses Framer Motion for animations and includes interactive
+ * elements to showcase popular creators and encourage user engagement.
+ */
+
 "use client";
 
 import React from "react";
@@ -5,8 +17,14 @@ import { cubicBezier, motion } from "framer-motion";
 import { UsersRound } from "lucide-react";
 import { formatValue } from "@ratecreator/db/utils";
 import { useRouter } from "next/navigation";
+
 export function WriteReviewCTA() {
   const router = useRouter();
+
+  /**
+   * Animation variants for the first creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant1 = {
     initial: {
       y: 0,
@@ -31,6 +49,11 @@ export function WriteReviewCTA() {
       },
     },
   };
+
+  /**
+   * Animation variants for the second creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant2 = {
     initial: {
       y: 0,
@@ -56,6 +79,10 @@ export function WriteReviewCTA() {
     },
   };
 
+  /**
+   * Animation variants for the third creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant3 = {
     initial: {
       y: 0,
@@ -83,6 +110,10 @@ export function WriteReviewCTA() {
     },
   };
 
+  /**
+   * Container animation variants
+   * Controls the staggered animation of child elements
+   */
   const containerVariants = {
     initial: {},
     whileHover: {
@@ -93,48 +124,50 @@ export function WriteReviewCTA() {
   };
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row justify-between items-center p-4 md:p-2 lg:p-0">
-      <div className="hidden sm:block relative h-full w-full lg:w-1/2  transform-gpu rounded-lg border bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] dark:bg-black dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] md:max-h-[500px]">
+    <div className='flex flex-col-reverse lg:flex-row justify-between items-center p-4 md:p-2 lg:p-0'>
+      {/* Main container with creator cards */}
+      <div className='hidden sm:block relative h-full w-full lg:w-1/2  transform-gpu rounded-lg border bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] dark:bg-black dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] md:max-h-[500px]'>
         <motion.div
           variants={containerVariants}
-          initial="initial"
-          whileHover="whileHover"
-          className="flex h-full w-full cursor-pointer flex-col items-start justify-between"
+          initial='initial'
+          whileHover='whileHover'
+          className='flex h-full w-full cursor-pointer flex-col items-start justify-between'
         >
-          <div className="flex h-[350px] w-full items-center justify-center rounded-t-xl bg-transparent ">
-            <div className="relative flex cursor-pointer flex-col items-center justify-center gap-y-2 p-14">
+          <div className='flex h-[350px] w-full items-center justify-center rounded-t-xl bg-transparent '>
+            <div className='relative flex cursor-pointer flex-col items-center justify-center gap-y-2 p-14'>
+              {/* First creator card - MrBeast */}
               <motion.div
                 variants={variant1}
-                className="dark:bg-neutral-980 -top-10 z-[3] flex h-full w-full items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"
+                className='dark:bg-neutral-980 -top-10 z-[3] flex h-full w-full items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900'
               >
-                <div className="h-10 w-10 rounded-full bg-pink-300">
+                <div className='h-10 w-10 rounded-full bg-pink-300'>
                   <img
-                    className="h-full w-full rounded-full object-cover"
-                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCX6OQ3DkcsbYNE6H8uQQuVA_1740264523.jpg"
-                    alt="MrBeast"
+                    className='h-full w-full rounded-full object-cover'
+                    src='https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCX6OQ3DkcsbYNE6H8uQQuVA_1740264523.jpg'
+                    alt='MrBeast'
                   />
                 </div>
-                <div className="flex flex-col gap-y-4 min-w-72 md:min-w-96">
-                  <div className="flex flex-row justify-between">
-                    <div className="h-3 text-lg font-medium dark:text-white">
+                <div className='flex flex-col gap-y-4 min-w-72 md:min-w-96'>
+                  <div className='flex flex-row justify-between'>
+                    <div className='h-3 text-lg font-medium dark:text-white'>
                       MrBeast
                     </div>
-                    <div className="h-2 mt-1 text-xs font-medium dark:text-white/40">
+                    <div className='h-2 mt-1 text-xs font-medium dark:text-white/40'>
                       @mrbeast
                     </div>
                   </div>
 
-                  <div className="flex flex-row justify-between">
-                    <div className="flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2">
-                      <UsersRound size={24} className="text-primary" />
-                      <span className="text-secondary-foreground dark:text-primary-foreground">
+                  <div className='flex flex-row justify-between'>
+                    <div className='flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2'>
+                      <UsersRound size={24} className='text-primary' />
+                      <span className='text-secondary-foreground dark:text-primary-foreground'>
                         {" "}
                         {formatValue(361000000)}
                       </span>
                     </div>
-                    <div className="flex flex-row items-center justify-end mt-2 gap-2">
-                      <div className="flex flex-row mr-1 text-primary">
-                        <div className="flex">
+                    <div className='flex flex-row items-center justify-end mt-2 gap-2'>
+                      <div className='flex flex-row mr-1 text-primary'>
+                        <div className='flex'>
                           {[...Array(5)].map((_, i) => (
                             <span
                               key={i}
@@ -144,7 +177,7 @@ export function WriteReviewCTA() {
                             </span>
                           ))}
                         </div>
-                        <span className="ml-1 text-sm text-gray-600 items-center">
+                        <span className='ml-1 text-sm text-gray-600 items-center'>
                           ({3.7})
                         </span>
                       </div>
@@ -152,38 +185,40 @@ export function WriteReviewCTA() {
                   </div>
                 </div>
               </motion.div>
+
+              {/* Second creator card - Cocomelon */}
               <motion.div
                 variants={variant2}
-                className="absolute bottom-14 z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"
+                className='absolute bottom-14 z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900'
               >
-                <div className="h-10 w-10 rounded-full bg-pink-300">
+                <div className='h-10 w-10 rounded-full bg-pink-300'>
                   <img
-                    className="h-full w-full rounded-full object-cover"
-                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCbCmjCuTUZos6Inko4u57UQ_1740264516.jpg"
-                    alt="Cocomelon - Nursery Rhymes"
+                    className='h-full w-full rounded-full object-cover'
+                    src='https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCbCmjCuTUZos6Inko4u57UQ_1740264516.jpg'
+                    alt='Cocomelon - Nursery Rhymes'
                   />
                 </div>
-                <div className="flex flex-col gap-y-4 min-w-72 md:min-w-96">
-                  <div className="flex flex-row justify-between">
-                    <div className="h-3 text-lg font-medium dark:text-white">
+                <div className='flex flex-col gap-y-4 min-w-72 md:min-w-96'>
+                  <div className='flex flex-row justify-between'>
+                    <div className='h-3 text-lg font-medium dark:text-white'>
                       Cocomelon - Nursery Rhymes
                     </div>
-                    <div className="h-2 mt-1 text-xs font-medium dark:text-white/40">
+                    <div className='h-2 mt-1 text-xs font-medium dark:text-white/40'>
                       @cocomelon
                     </div>
                   </div>
 
-                  <div className="flex flex-row justify-between">
-                    <div className="flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2">
-                      <UsersRound size={24} className="text-primary" />
-                      <span className="text-secondary-foreground dark:text-primary-foreground">
+                  <div className='flex flex-row justify-between'>
+                    <div className='flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2'>
+                      <UsersRound size={24} className='text-primary' />
+                      <span className='text-secondary-foreground dark:text-primary-foreground'>
                         {" "}
                         {formatValue(189000000)}
                       </span>
                     </div>
-                    <div className="flex flex-row items-end mt-2 gap-2">
-                      <div className="flex flex-row mr-1 text-primary">
-                        <div className="flex">
+                    <div className='flex flex-row items-end mt-2 gap-2'>
+                      <div className='flex flex-row mr-1 text-primary'>
+                        <div className='flex'>
                           {[...Array(5)].map((_, i) => (
                             <span
                               key={i}
@@ -193,7 +228,7 @@ export function WriteReviewCTA() {
                             </span>
                           ))}
                         </div>
-                        <span className="ml-1 text-sm text-gray-600 items-center">
+                        <span className='ml-1 text-sm text-gray-600 items-center'>
                           ({0})
                         </span>
                       </div>
@@ -201,36 +236,38 @@ export function WriteReviewCTA() {
                   </div>
                 </div>
               </motion.div>
+
+              {/* Third creator card - T-Series */}
               <motion.div
                 variants={variant3}
-                className="absolute top-24 bottom-14  z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"
+                className='absolute top-24 bottom-14  z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900'
               >
-                <div className="h-10 w-10 rounded-full bg-pink-300">
+                <div className='h-10 w-10 rounded-full bg-pink-300'>
                   <img
-                    className="h-full w-full rounded-full object-cover"
-                    src="https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCq-Fj5jknLsUf-MWSy4_brA_1740264532.jpg"
-                    alt="tseries"
+                    className='h-full w-full rounded-full object-cover'
+                    src='https://ratecreator.nyc3.cdn.digitaloceanspaces.com/youtube-profile-image/UCq-Fj5jknLsUf-MWSy4_brA_1740264532.jpg'
+                    alt='tseries'
                   />
                 </div>
-                <div className="flex flex-col gap-y-4 min-w-72 md:min-w-96">
-                  <div className="flex flex-row justify-between">
-                    <div className="h-3 text-lg font-medium dark:text-white">
+                <div className='flex flex-col gap-y-4 min-w-72 md:min-w-96'>
+                  <div className='flex flex-row justify-between'>
+                    <div className='h-3 text-lg font-medium dark:text-white'>
                       T-Series
                     </div>
-                    <div className="h-2 mt-1 text-xs font-medium dark:text-white/40">
+                    <div className='h-2 mt-1 text-xs font-medium dark:text-white/40'>
                       @tseries
                     </div>
                   </div>
-                  <div className="flex flex-row justify-between">
-                    <div className="flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2">
-                      <UsersRound size={24} className="text-primary" />
-                      <span className="text-secondary-foreground dark:text-primary-foreground">
+                  <div className='flex flex-row justify-between'>
+                    <div className='flex flex-row items-center mt-2 text-muted-foreground text-sm gap-2'>
+                      <UsersRound size={24} className='text-primary' />
+                      <span className='text-secondary-foreground dark:text-primary-foreground'>
                         {formatValue(286000000)}
                       </span>
                     </div>
-                    <div className="flex flex-row items-end mt-2 gap-2">
-                      <div className="flex flex-row mr-1 text-primary">
-                        <div className="flex">
+                    <div className='flex flex-row items-end mt-2 gap-2'>
+                      <div className='flex flex-row mr-1 text-primary'>
+                        <div className='flex'>
                           {[...Array(5)].map((_, i) => (
                             <span
                               key={i}
@@ -240,7 +277,7 @@ export function WriteReviewCTA() {
                             </span>
                           ))}
                         </div>
-                        <span className="ml-1 text-sm text-gray-600 items-center">
+                        <span className='ml-1 text-sm text-gray-600 items-center'>
                           ({4.2})
                         </span>
                       </div>
@@ -252,20 +289,20 @@ export function WriteReviewCTA() {
           </div>
         </motion.div>
       </div>
-      <div className="flex w-full lg:w-1/2  flex-col items-center justify-center  sm:p-12 ">
-        <div className="flex flex-col items-center lg:items-start space-y-8">
-          <div className="flex flex-col gap-y-4 items-center lg:items-start">
-            <h2 className="text-3xl sm:text-5xl font-bold text-rose-700">
+      <div className='flex w-full lg:w-1/2  flex-col items-center justify-center  sm:p-12 '>
+        <div className='flex flex-col items-center lg:items-start space-y-8'>
+          <div className='flex flex-col gap-y-4 items-center lg:items-start'>
+            <h2 className='text-3xl sm:text-5xl font-bold text-rose-700'>
               Following a Creator?
             </h2>
-            <h3 className="text-2xl sm:text-4xl font-bold">Write a review.</h3>
+            <h3 className='text-2xl sm:text-4xl font-bold'>Write a review.</h3>
           </div>
 
-          <p className="text-[12px] sm:text-sm text-neutral-600 dark:text-neutral-400">
+          <p className='text-[12px] sm:text-sm text-neutral-600 dark:text-neutral-400'>
             Help billions of daily users find the content that matters.
           </p>
           <button
-            className="block text-left py-2 px-4 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground"
+            className='block text-left py-2 px-4 rounded border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground'
             onClick={() => router.push("/search")}
           >
             Write a Review

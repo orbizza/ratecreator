@@ -32,6 +32,10 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 
+/**
+ * Mapping of category names to their corresponding Lucide icons
+ * Each category is associated with a specific icon that represents its theme
+ */
 const categoryIcons: Record<string, LucideIcon> = {
   "Artificial Intelligence and Machine Learning": Cpu,
   "Arts and Entertainment": Clapperboard,
@@ -62,7 +66,21 @@ const categoryIcons: Record<string, LucideIcon> = {
   "Virtual and Augmented Reality": Glasses,
 };
 
+/**
+ * Get the appropriate icon component for a given category name
+ *
+ * @param {string} categoryName - The name of the category
+ * @returns {React.ReactElement} A React element containing the category icon
+ *
+ * @example
+ * // Returns a CPU icon for AI/ML category
+ * getIconForCategory("Artificial Intelligence and Machine Learning")
+ *
+ * @example
+ * // Returns a briefcase icon for unknown categories
+ * getIconForCategory("Unknown Category")
+ */
 export function getIconForCategory(categoryName: string): React.ReactElement {
-  const IconComponent = categoryIcons[categoryName] || Briefcase; // Default to ShoppingCart if no match
-  return <IconComponent className="w-6 h-6" />;
+  const IconComponent = categoryIcons[categoryName] || Briefcase; // Default to Briefcase if no match
+  return <IconComponent className='w-6 h-6' />;
 }
