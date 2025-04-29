@@ -1,10 +1,25 @@
+/**
+ * @fileoverview Category glossary cache implementation for Rate Creator platform
+ * @module utils/category-glossary-cache
+ * @description Provides caching functionality for category and glossary data using IndexedDB.
+ * Implements cache management, data retrieval, and automatic cache invalidation.
+ */
+
 import { Category, GlossaryCategory } from "@ratecreator/types/review";
 
+/**
+ * Interface for cached categories data
+ * @interface
+ */
 interface CachedCategoriesData {
   data: { [key: string]: GlossaryCategory[] };
   timestamp: number;
 }
 
+/**
+ * Interface for cached category data
+ * @interface
+ */
 interface CachedCategoryData {
   data: {
     category: Category;
@@ -13,16 +28,42 @@ interface CachedCategoryData {
   timestamp: number;
 }
 
+/**
+ * Database name for the cache
+ * @constant
+ */
 const DB_NAME = "CategoryGlossaryCache";
-const STORE_NAME = "categories";
-// 7 days in milliseconds
-const CACHE_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
-const MAX_CACHE_SIZE = 20 * 1024 * 1024; // 20MB limit
 
+/**
+ * Store name for the cache
+ * @constant
+ */
+const STORE_NAME = "categories";
+
+/**
+ * Cache expiration time in milliseconds (7 days)
+ * @constant
+ */
+const CACHE_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Maximum cache size in bytes (20MB)
+ * @constant
+ */
+const MAX_CACHE_SIZE = 20 * 1024 * 1024;
+
+/**
+ * Class for managing category and glossary data caching
+ * @class
+ */
 export class CategoryGlossaryCache {
   private db: IDBDatabase | null = null;
   private currentSize: number = 0;
 
+  /**
+   * Initializes the IndexedDB database
+   * @returns {Promise<void>} Promise that resolves when initialization is complete
+   */
   async init() {
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, 1);
@@ -40,6 +81,10 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Retrieves cached categories data
+   * @returns {Promise<{[key: string]: GlossaryCategory[]} | null>} Cached categories or null if expired/not found
+   */
   async getCachedCategories(): Promise<{
     [key: string]: GlossaryCategory[];
   } | null> {
@@ -65,8 +110,13 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Retrieves cached category data with account count
+   * @param {string} slug - Category slug
+   * @returns {Promise<{category: Category; accounts: number} | null>} Cached category data or null if expired/not found
+   */
   async getCachedCategoryWithAccounts(
-    slug: string,
+    slug: string
   ): Promise<{ category: Category; accounts: number } | null> {
     if (!this.db) await this.init();
 
@@ -90,6 +140,11 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Calculates the current size of the cache
+   * @returns {Promise<number>} Current cache size in bytes
+   * @private
+   */
   private async calculateSize(): Promise<number> {
     if (!this.db) await this.init();
 
@@ -109,6 +164,11 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Cleans up expired cache entries
+   * @returns {Promise<void>} Promise that resolves when cleanup is complete
+   * @private
+   */
   private async cleanup() {
     if (!this.db) await this.init();
 
@@ -131,7 +191,7 @@ export class CategoryGlossaryCache {
                 const deleteRequest = store.delete(cursor.key);
                 deleteRequest.onerror = () => reject(deleteRequest.error);
                 deleteRequest.onsuccess = () => resolve();
-              }),
+              })
             );
           }
           cursor.continue();
@@ -144,6 +204,11 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Caches categories data
+   * @param {{[key: string]: GlossaryCategory[]}} data - Categories data to cache
+   * @returns {Promise<void>} Promise that resolves when caching is complete
+   */
   async setCachedCategories(data: { [key: string]: GlossaryCategory[] }) {
     if (!this.db) await this.init();
 
@@ -168,9 +233,15 @@ export class CategoryGlossaryCache {
     });
   }
 
+  /**
+   * Caches category data with account count
+   * @param {string} slug - Category slug
+   * @param {{category: Category; accounts: number}} data - Category data to cache
+   * @returns {Promise<void>} Promise that resolves when caching is complete
+   */
   async setCachedCategoryWithAccounts(
     slug: string,
-    data: { category: Category; accounts: number },
+    data: { category: Category; accounts: number }
   ) {
     if (!this.db) await this.init();
 
@@ -196,4 +267,7 @@ export class CategoryGlossaryCache {
   }
 }
 
+/**
+ * Singleton instance of the category glossary cache
+ */
 export const categoryGlossaryCache = new CategoryGlossaryCache();

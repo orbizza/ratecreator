@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Blog post CRUD operations for Rate Creator platform
+ * @module actions/content/crud-posts
+ * @description Provides server actions for managing blog posts, including
+ * creation, reading, updating, and deletion of posts.
+ */
+
 "use server";
 
 import { SignedIn } from "@clerk/nextjs";
@@ -14,8 +21,17 @@ import {
   UpdatePostType,
 } from "@ratecreator/types/content";
 
+/**
+ * Prisma client instance for database operations
+ * @private
+ */
 const prisma = getPrismaClient();
 
+/**
+ * Authenticates the current user and redirects to sign-in if not authenticated
+ * @private
+ * @throws {Error} If user is not authenticated
+ */
 async function authenticateUser() {
   const sign = await SignedIn;
   if (!sign) {
@@ -23,6 +39,11 @@ async function authenticateUser() {
   }
 }
 
+/**
+ * Creates a new blog post
+ * @param {PostType} data - Post data including title, content, and metadata
+ * @returns {Promise<{post?: any; success?: boolean; error?: string}>} Result of the operation
+ */
 async function createPost(data: PostType) {
   await authenticateUser();
   try {
@@ -86,6 +107,12 @@ async function createPost(data: PostType) {
   }
 }
 
+/**
+ * Updates an existing blog post
+ * @param {PostType} data - Updated post data
+ * @param {string} postId - ID of the post to update
+ * @returns {Promise<{post?: any; success?: boolean; error?: string}>} Result of the operation
+ */
 async function updatePost(data: PostType, postId: string) {
   await authenticateUser();
   const post: UpdatePostType = {
@@ -181,6 +208,11 @@ async function updatePost(data: PostType, postId: string) {
   }
 }
 
+/**
+ * Deletes a blog post by marking it as deleted
+ * @param {string} postId - ID of the post to delete
+ * @returns {Promise<{error?: string}>} Result of the operation
+ */
 async function deletePost(postId: string) {
   await authenticateUser();
   try {
@@ -196,6 +228,11 @@ async function deletePost(postId: string) {
   }
 }
 
+/**
+ * Restores a deleted blog post to draft status
+ * @param {string} postId - ID of the post to restore
+ * @returns {Promise<{error?: string}>} Result of the operation
+ */
 async function restorePost(postId: string) {
   await authenticateUser();
   try {
@@ -211,11 +248,19 @@ async function restorePost(postId: string) {
   }
 }
 
+/**
+ * Publishes a blog post immediately or schedules it for later
+ * @param {FetchedPostType} postData - Post data
+ * @param {string} scheduleType - Type of scheduling ("later" or immediate)
+ * @param {string} postId - ID of the post to publish
+ * @param {string} markdown - Markdown content of the post
+ * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
+ */
 async function publishPost(
   postData: FetchedPostType,
   scheduleType: string,
   postId: string,
-  markdown: string,
+  markdown: string
 ) {
   let data = {};
   if (scheduleType === "later") {
@@ -246,6 +291,11 @@ async function publishPost(
   }
 }
 
+/**
+ * Unpublishes a blog post and reverts it to draft status
+ * @param {string} postId - ID of the post to unpublish
+ * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
+ */
 async function unpublishPost(postId: string) {
   await authenticateUser();
   try {
@@ -264,6 +314,12 @@ async function unpublishPost(postId: string) {
   }
 }
 
+/**
+ * Unschedules a scheduled blog post
+ * @param {FetchedPostType} postData - Post data
+ * @param {string} postId - ID of the post to unschedule
+ * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
+ */
 async function unschedulePost(postData: FetchedPostType, postId: string) {
   await authenticateUser();
 

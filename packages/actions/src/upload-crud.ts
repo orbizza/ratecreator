@@ -21,7 +21,7 @@ export async function makeFilePublic(fileName: string) {
         Bucket: process.env.DO_SPACES_BUCKET as string,
         Key: fileName,
         ACL: "public-read",
-      }),
+      })
     );
     return { success: true };
   } catch (error) {
@@ -55,7 +55,7 @@ export async function deleteFileFromBucket(fileUrl: string) {
       new DeleteObjectCommand({
         Bucket: bucketName,
         Key: fileKey,
-      }),
+      })
     );
 
     console.log(`File deleted successfully: ${fileUrl}`);

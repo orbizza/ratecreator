@@ -1,12 +1,37 @@
+/**
+ * @fileoverview MongoDB client implementation for Rate Creator platform
+ * @module clients/mongo-client
+ * @description Provides a singleton client for interacting with MongoDB database,
+ * handling database operations, connection management, and error handling.
+ */
+
 import { MongoClient } from "mongodb";
 
+/**
+ * Global declaration for MongoDB client promise
+ * @private
+ */
 declare global {
   var _mongoClientPromise: Promise<MongoClient>;
 }
 
+/**
+ * MongoDB client instance
+ * @private
+ */
 let client: MongoClient;
+
+/**
+ * Promise resolving to MongoDB client instance
+ * @private
+ */
 let clientPromise: Promise<MongoClient>;
 
+/**
+ * Gets the MongoDB connection URI from environment variables
+ * @returns {string} The MongoDB connection URI
+ * @throws {Error} If DATABASE_URL_ONLINE is not set
+ */
 function getMongoURI(): string {
   const uri = process.env.DATABASE_URL_ONLINE || "";
   if (!uri) {
@@ -17,6 +42,11 @@ function getMongoURI(): string {
   return uri;
 }
 
+/**
+ * Creates a new MongoDB client instance
+ * @returns {Promise<MongoClient>} Promise resolving to MongoDB client
+ * @throws {Error} If connection fails
+ */
 function createMongoClient(): Promise<MongoClient> {
   // console.log("Creating new MongoDB client");
   const uri = getMongoURI();
@@ -36,6 +66,7 @@ function createMongoClient(): Promise<MongoClient> {
     });
 }
 
+// Initialize client based on environment
 if (process.env.NODE_ENV === "development") {
   if (!global._mongoClientPromise) {
     // console.log("Initializing global MongoDB client for development");
@@ -51,6 +82,10 @@ if (process.env.NODE_ENV === "development") {
 
 export default clientPromise;
 
+/**
+ * Checks the MongoDB connection status
+ * @returns {Promise<boolean>} Promise resolving to true if connection is successful
+ */
 export async function checkMongoConnection() {
   try {
     const client = await clientPromise;
