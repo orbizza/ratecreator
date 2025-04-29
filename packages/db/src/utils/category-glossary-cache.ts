@@ -116,7 +116,7 @@ export class CategoryGlossaryCache {
    * @returns {Promise<{category: Category; accounts: number} | null>} Cached category data or null if expired/not found
    */
   async getCachedCategoryWithAccounts(
-    slug: string
+    slug: string,
   ): Promise<{ category: Category; accounts: number } | null> {
     if (!this.db) await this.init();
 
@@ -191,7 +191,7 @@ export class CategoryGlossaryCache {
                 const deleteRequest = store.delete(cursor.key);
                 deleteRequest.onerror = () => reject(deleteRequest.error);
                 deleteRequest.onsuccess = () => resolve();
-              })
+              }),
             );
           }
           cursor.continue();
@@ -241,7 +241,7 @@ export class CategoryGlossaryCache {
    */
   async setCachedCategoryWithAccounts(
     slug: string,
-    data: { category: Category; accounts: number }
+    data: { category: Category; accounts: number },
   ) {
     if (!this.db) await this.init();
 

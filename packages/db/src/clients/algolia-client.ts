@@ -34,7 +34,7 @@ export const getSearchClient = (): SearchClient => {
   if (!searchClientInstance) {
     const algoliaClient = algoliasearch(
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
+      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!,
     );
     searchClientInstance = algoliaClient;
   }
@@ -50,7 +50,7 @@ export const getWriteClient = (): SearchClient => {
   if (!writeClientInstance) {
     writeClientInstance = algoliasearch(
       process.env.ALGOLIA_APP_ID!,
-      process.env.ALGOLIA_WRITE_API_KEY!
+      process.env.ALGOLIA_WRITE_API_KEY!,
     );
   }
   return writeClientInstance;
@@ -69,7 +69,7 @@ export const getWriteClient = (): SearchClient => {
  * @throws {Error} If search operation fails
  */
 export const getSearchAccounts = async (
-  params: SearchAccountsParams
+  params: SearchAccountsParams,
 ): Promise<SearchResults> => {
   const client = getSearchClient();
   const BASE_INDEX_NAME = "accounts";
@@ -90,7 +90,7 @@ export const getSearchAccounts = async (
     // Handle category filters
     if (params.filters.categories && params.filters.categories.length > 0) {
       const categoryFilters = params.filters.categories.map(
-        (c: string) => `categories:"${c}"`
+        (c: string) => `categories:"${c}"`,
       );
       filters.push(`(${categoryFilters.join(" OR ")})`);
     }
@@ -98,7 +98,7 @@ export const getSearchAccounts = async (
     // Handle platform filters
     if (params.filters.platform && params.filters.platform.length > 0) {
       const platformFilters = params.filters.platform.map(
-        (p: string) => `platform:${p.toUpperCase()}`
+        (p: string) => `platform:${p.toUpperCase()}`,
       );
       filters.push(`(${platformFilters.join(" OR ")})`);
     }
@@ -146,7 +146,7 @@ export const getSearchAccounts = async (
     // Handle country filters
     if (params.filters.country && params.filters.country.length > 0) {
       const countryFilters = params.filters.country.map(
-        (c: string) => `country:${c}`
+        (c: string) => `country:${c}`,
       );
       filters.push(`(${countryFilters.join(" OR ")})`);
     }
@@ -154,7 +154,7 @@ export const getSearchAccounts = async (
     // Handle language filters
     if (params.filters.language && params.filters.language.length > 0) {
       const languageFilters = params.filters.language.map(
-        (l: string) => `language_code:${l}`
+        (l: string) => `language_code:${l}`,
       );
       filters.push(`(${languageFilters.join(" OR ")})`);
     }
