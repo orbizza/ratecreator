@@ -1,3 +1,16 @@
+/**
+ * HeroTextNew Component
+ *
+ * This component renders the main hero text section of the landing page, featuring:
+ * - Animated text highlighting using RoughNotation
+ * - Device-specific keyboard shortcuts
+ * - Search and category navigation buttons
+ * - Responsive layout with icon cloud section
+ *
+ * The component uses Framer Motion for animations and includes device detection
+ * for platform-specific keyboard shortcuts.
+ */
+
 "use client";
 import { cn } from "@ratecreator/ui/utils";
 import { Manrope } from "next/font/google";
@@ -11,12 +24,16 @@ import { useRouter } from "next/navigation";
 import Kbd from "../../ui/kbd";
 import { ChevronRightIcon } from "lucide-react";
 
+// Initialize Manrope font with specific weights
 const manrope = Manrope({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
 
-// Device detection utility
+/**
+ * Custom hook to detect the user's device type
+ * Returns: 'mac', 'windows', 'touch', or 'other'
+ */
 const useDeviceType = () => {
   const [deviceType, setDeviceType] = useState<
     "mac" | "windows" | "touch" | "other"
@@ -47,6 +64,10 @@ const useDeviceType = () => {
   return deviceType;
 };
 
+/**
+ * Main HeroTextNew Component
+ * Renders the hero section with animated text and call-to-action buttons
+ */
 export function HeroTextNew() {
   const ref = useRef(null);
   const isInView = useInView(ref);
@@ -54,6 +75,7 @@ export function HeroTextNew() {
   const router = useRouter();
   const deviceType = useDeviceType();
 
+  // Handle search button click
   const handleSerarchClick = useCallback(() => {
     query.toggle();
   }, [query]);
@@ -89,8 +111,10 @@ export function HeroTextNew() {
   return (
     <div ref={ref} className="w-full mb-0">
       <div className="flex flex-col-reverse lg:grid lg:grid-cols-5 max-h-[50rem] md:max-h-[40rem] overflow-hidden gap-2 sm:gap-4 max-w-7xl mx-auto pt-0 sm:-mt-10 lg:-mt-0 -mt-7 lg:pt-20 items-start">
+        {/* Main content section */}
         <div className="w-full lg:col-span-3 py-6 sm:py-10 md:py-10 px-4 md:px-8">
           <RoughNotationGroup show={isInView}>
+            {/* Animated heading with highlighted text */}
             <h2
               className={cn(
                 "text-2xl sm:text-4xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 text-center sm:text-left",
@@ -119,6 +143,7 @@ export function HeroTextNew() {
               </RoughNotation>
             </h2>
 
+            {/* Animated description text */}
             <p className="text-neutral-500 dark:text-neutral-400 text-sm md:text-lg max-w-2xl mt-4 md:mt-8 text-center sm:text-left">
               Rate Creator offers an extensive catalog of categories and
               subcategories, making it easy to search, and review{" "}
@@ -133,6 +158,8 @@ export function HeroTextNew() {
               creators and communities.
             </p>
           </RoughNotationGroup>
+
+          {/* Call-to-action buttons */}
           <div className="flex sm:flex-row flex-col gap-4 items-center mt-8 [perspective:800px]">
             <button
               onClick={handleSerarchClick}
@@ -148,9 +175,13 @@ export function HeroTextNew() {
             </button>
           </div>
         </div>
+
+        {/* Icon cloud section - visible on large screens */}
         <div className="hidden lg:flex lg:col-span-2 justify-end overflow-hidden h-full w-full relative flex-shrink-0">
           <IconCloudSection />
         </div>
+
+        {/* Icon cloud section - visible on small screens */}
         <div className="sm:hidden w-full flex justify-center overflow-hidden relative flex-shrink-0 -mb-4 sm:mb-0">
           <IconCloudSection />
         </div>

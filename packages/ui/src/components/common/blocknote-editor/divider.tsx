@@ -4,6 +4,14 @@ import React from "react";
 
 import { createReactBlockSpec } from "@blocknote/react";
 
+/**
+ * Divider Component for BlockNote
+ *
+ * This component creates a horizontal divider block in the BlockNote editor.
+ * It provides a visual separation between different sections of content.
+ * The divider is styled to be theme-aware and responsive.
+ */
+
 export const Divider = createReactBlockSpec(
   {
     type: "divider",

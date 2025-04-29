@@ -9,13 +9,21 @@ import SearchResults from "./search-results";
 import { SearchResult } from "@ratecreator/types/review";
 import { searchCache } from "@ratecreator/db/utils";
 
+/**
+ * Props for the SearchContent component
+ */
 interface SearchContentProps {
+  /** Current search term */
   searchTerm: string;
+  /** Function to update the search term */
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  /** Array of placeholder texts for the search input */
   placeholders: string[];
 }
 
-// Define the structure of Algolia hits
+/**
+ * Structure of Algolia search hits
+ */
 interface AlgoliaHit {
   objectID: string;
   name: string;
@@ -32,6 +40,20 @@ interface AlgoliaHit {
   deletedAt?: string | null;
 }
 
+/**
+ * SearchContent Component
+ *
+ * A search component that integrates with Algolia for category search functionality.
+ * Features include:
+ * - Debounced search input
+ * - Search result caching
+ * - Real-time search results display
+ * - Navigation to search results page
+ *
+ * @component
+ * @param {SearchContentProps} props - Component props
+ * @returns {JSX.Element} A search component with results display
+ */
 const SearchContent: React.FC<SearchContentProps> = ({
   searchTerm,
   setSearchTerm,
@@ -45,6 +67,10 @@ const SearchContent: React.FC<SearchContentProps> = ({
     null,
   );
 
+  /**
+   * Debounced search refinement function
+   * Checks cache first, then falls back to Algolia search
+   */
   const debouncedRefine = useCallback(
     debounce(async (value: string) => {
       const cached = await searchCache.getCachedResults(value);
@@ -60,12 +86,20 @@ const SearchContent: React.FC<SearchContentProps> = ({
     [refine],
   );
 
+  /**
+   * Handle search input changes
+   * Updates search term and triggers debounced search
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
     debouncedRefine(newValue);
   };
 
+  /**
+   * Handle search form submission
+   * Navigates to search results page and resets search state
+   */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchTerm) {
@@ -76,10 +110,19 @@ const SearchContent: React.FC<SearchContentProps> = ({
     setIsSearchOpen(false);
   };
 
+  /**
+   * Handle search box focus
+   * Opens search results panel
+   */
   const handleSearch = () => {
     setIsSearchOpen(true);
   };
 
+  /**
+   * Map Algolia hits to SearchResult format
+   * @param {AlgoliaHit[]} hits - Array of Algolia search hits
+   * @returns {SearchResult[]} Formatted search results
+   */
   const mapHitsToSearchResults = (hits: AlgoliaHit[]): SearchResult[] => {
     return hits.map((hit) => ({
       id: hit.objectID,
@@ -102,6 +145,9 @@ const SearchContent: React.FC<SearchContentProps> = ({
     }));
   };
 
+  /**
+   * Cache search results when new hits are received
+   */
   useEffect(() => {
     if (hits.length > 0 && searchTerm) {
       const results = mapHitsToSearchResults(hits);
@@ -109,6 +155,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
     }
   }, [hits, searchTerm]);
 
+  // Use cached results if available, otherwise use current hits
   const displayResults = cachedResults || mapHitsToSearchResults(hits);
 
   return (

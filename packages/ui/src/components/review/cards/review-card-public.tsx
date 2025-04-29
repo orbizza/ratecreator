@@ -30,8 +30,14 @@ import {
 import { getRedditPostData } from "@ratecreator/actions/review";
 import { useState, useEffect } from "react";
 
+// Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
+/**
+ * Determines the color class for a rating based on its value
+ * @param {number} rating - The rating value (1-5)
+ * @returns {string} Tailwind color class
+ */
 const getRatingColor = (rating: number) => {
   if (rating >= 4.5) return "text-emerald-500";
   if (rating >= 4.0) return "text-green-500";
@@ -41,6 +47,10 @@ const getRatingColor = (rating: number) => {
   return "text-red-600";
 };
 
+/**
+ * Star Component
+ * Renders a single star with fill state and color
+ */
 const Star = ({ filled, color }: { filled: boolean; color: string }) => {
   return (
     <svg
@@ -59,6 +69,10 @@ const Star = ({ filled, color }: { filled: boolean; color: string }) => {
   );
 };
 
+/**
+ * StarRating Component
+ * Displays a row of 5 stars based on the rating value
+ */
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const color = getRatingColor(rating);
   return (
@@ -70,10 +84,17 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   );
 };
 
+/**
+ * Props for the ReviewCardPublic component
+ */
 interface ReviewCardPublicProps {
   review: ReviewType;
 }
 
+/**
+ * PlatformContent Component
+ * Renders embedded content from different social media platforms
+ */
 const PlatformContent: React.FC<{
   platform: string;
   contentUrl: string;
@@ -84,6 +105,9 @@ const PlatformContent: React.FC<{
 
   if (!contentUrl) return null;
 
+  /**
+   * Renders the appropriate embedded content based on the platform
+   */
   const renderContent = () => {
     switch (platform.toLowerCase()) {
       case "youtube":
@@ -153,6 +177,7 @@ const PlatformContent: React.FC<{
 
   return (
     <div className="text-lg sm:text-xl text-primary/70 gap-4 font-semibold mt-6 ">
+      {/* Platform-specific title */}
       {(() => {
         switch (platform.toLowerCase()) {
           case "youtube":
@@ -167,6 +192,7 @@ const PlatformContent: React.FC<{
             return "Supporting Content";
         }
       })()}
+      {/* Embedded content container */}
       <div
         className={`relative w-full mt-4 ${platform.toLowerCase() === "reddit" ? "h-auto" : "aspect-video"}`}
       >
@@ -176,11 +202,22 @@ const PlatformContent: React.FC<{
   );
 };
 
+/**
+ * ReviewCardPublic Component
+ *
+ * A public review card that displays review information, author details,
+ * rating, and embedded content from various platforms.
+ *
+ * @component
+ * @param {ReviewCardPublicProps} props - Component props
+ * @returns {JSX.Element} A review card component
+ */
 export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
   review,
 }) => {
   return (
     <Card className="w-full h-full lg:w-3/4 lg:h-auto p-6 bg-background border dark:bg-card shadow-lg">
+      {/* Author information section */}
       <div className="flex flex-row gap-4 justify-between">
         <div className="flex items-center gap-3 mb-4">
           {review.author?.imageUrl && (
@@ -209,6 +246,7 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
             </div>
           </div>
         </div>
+        {/* Options menu */}
         <div>
           <Button variant="ghost" size="icon" className="rounded-full">
             <EllipsisVertical className="w-4 h-4 sm:w-6 sm:h-6 " />
@@ -216,7 +254,10 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
           </Button>
         </div>
       </div>
+
       <Separator className="my-4" />
+
+      {/* Rating and date section */}
       <div className="flex flex-row gap-2 items-center justify-between">
         <div>
           <StarRating rating={review.stars} />
@@ -231,10 +272,12 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         </div>
       </div>
 
+      {/* Review title */}
       <h1 className="font-bold mb-8 text-2xl sm:text-3xl md:text-4xl mt-4">
         {review.title}
       </h1>
 
+      {/* Review content */}
       <div className="prose dark:prose-invert prose-2xl max-w-none">
         {!review.content ? (
           <span className="text-lg sm:text-xl text-muted-foreground">
@@ -254,7 +297,8 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
         )}
       </div>
 
-      {review.contentUrl && (
+      {/* Platform content section */}
+      {review.platform && review.contentUrl && (
         <PlatformContent
           platform={review.platform}
           contentUrl={review.contentUrl}

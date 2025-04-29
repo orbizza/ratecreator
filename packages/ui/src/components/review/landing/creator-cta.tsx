@@ -1,3 +1,15 @@
+/**
+ * CreatorCTA Component
+ *
+ * This component displays a call-to-action section for creators, featuring:
+ * - Animated social media platform cards in a marquee layout
+ * - A centered message asking if the user is a creator
+ * - A call-to-action button to get started
+ *
+ * The component uses Framer Motion for animations and includes a dynamic
+ * shuffling of social media platform cards to create an engaging visual effect.
+ */
+
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
@@ -16,6 +28,10 @@ import {
 import { Button, Marquee } from "@ratecreator/ui";
 import { cn, ny } from "@ratecreator/ui/utils";
 
+/**
+ * Array of social media platform tiles with their icons and background gradients
+ * Each tile represents a platform that creators can be rated on
+ */
 const tiles = [
   {
     icon: <Facebook className="size-full" />,
@@ -55,6 +71,10 @@ const tiles = [
   },
 ];
 
+/**
+ * Utility function to shuffle an array
+ * Used to randomize the order of social media platform tiles
+ */
 const shuffleArray = (array: any[]) => {
   let currentIndex = array.length,
     randomIndex;
@@ -72,6 +92,10 @@ const shuffleArray = (array: any[]) => {
   return array;
 };
 
+/**
+ * Card Component
+ * Renders an individual social media platform card with animation
+ */
 const Card = (card: { icon: JSX.Element; bg: JSX.Element }) => {
   const id = useId();
   const controls = useAnimation();
@@ -107,12 +131,18 @@ const Card = (card: { icon: JSX.Element; bg: JSX.Element }) => {
   );
 };
 
+/**
+ * Main CreatorCTA Component
+ * Renders the call-to-action section with animated social media platform cards
+ */
 export function CreatorCTA() {
+  // State for storing shuffled versions of the tiles array
   const [randomTiles1, setRandomTiles1] = useState<typeof tiles>([]);
   const [randomTiles2, setRandomTiles2] = useState<typeof tiles>([]);
   const [randomTiles3, setRandomTiles3] = useState<typeof tiles>([]);
   const [randomTiles4, setRandomTiles4] = useState<typeof tiles>([]);
 
+  // Shuffle tiles on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Ensures this runs client-side
@@ -128,6 +158,7 @@ export function CreatorCTA() {
       <div className="py-5 sm:py-14">
         <div className="container flex w-full flex-col items-center justify-center p-4">
           <div className="relative flex w-full  flex-col items-center justify-center overflow-hidden rounded-[2rem] border-none">
+            {/* Animated marquee rows of social media platform cards */}
             <Marquee
               reverse
               className="-delay-[200ms] [--duration:20s]"
@@ -156,6 +187,8 @@ export function CreatorCTA() {
                 <Card key={idx} {...review} />
               ))}
             </Marquee>
+
+            {/* Centered CTA content */}
             <div className="absolute z-10">
               <div className="z-10 flex flex-col items-center text-center text-primary">
                 <h1 className=" text-3xl md:text-5xl text-primary font-bold my-[2rem] lg:text-7xl">

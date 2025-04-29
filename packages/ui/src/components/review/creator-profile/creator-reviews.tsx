@@ -23,6 +23,23 @@ import {
   AccordionTrigger,
 } from "@ratecreator/ui";
 
+/**
+ * CreatorReviews Component
+ *
+ * A component that displays reviews for a creator, including both public and user-specific reviews.
+ * Features include:
+ * - Infinite scrolling for public reviews
+ * - Separate section for user's own reviews
+ * - Loading states and skeletons
+ * - Intersection observer for pagination
+ * - Platform-specific review handling
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.accountId - The creator's account ID
+ * @param {string} props.platform - The platform (youtube, twitter, tiktok, reddit)
+ * @returns {JSX.Element} A reviews section with public and user reviews
+ */
 export const CreatorReviews = ({
   accountId,
   platform,
@@ -73,6 +90,10 @@ export const CreatorReviews = ({
     }
   }, [isSignedIn]);
 
+  /**
+   * Fetches the user's own reviews for the creator
+   * Updates the selfReviews state with the fetched data
+   */
   const fetchSelfReviews = async () => {
     try {
       setLoadingSelfReviews(true);

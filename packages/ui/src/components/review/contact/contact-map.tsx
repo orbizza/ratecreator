@@ -6,6 +6,22 @@ import { cn } from "@ratecreator/ui/utils";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
+/**
+ * ContactFormGridWithDetails Component
+ *
+ * A contact page layout that combines a contact form with company details and an interactive map.
+ * Features include:
+ * - Responsive grid layout
+ * - Company contact information
+ * - Interactive world map with location pin
+ * - Animated UI elements
+ * - Dark mode support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.image - URL of the world map image
+ * @returns {JSX.Element} A contact page with form and map
+ */
 export function ContactFormGridWithDetails({ image }: { image: string }) {
   return (
     <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-4 py-10 md:px-6 md:py-20 lg:grid-cols-2">
@@ -116,6 +132,20 @@ export function ContactFormGridWithDetails({ image }: { image: string }) {
   );
 }
 
+/**
+ * Pin Component
+ *
+ * An animated location pin for the world map
+ * Features:
+ * - Pulsing animation effect
+ * - Gradient styling
+ * - Responsive positioning
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} [props.className] - Optional CSS class name
+ * @returns {JSX.Element} An animated location pin
+ */
 const Pin = ({ className }: { className?: string }) => {
   return (
     <motion.div
@@ -215,6 +245,22 @@ const Pin = ({ className }: { className?: string }) => {
   );
 };
 
+/**
+ * FeatureIconContainer Component
+ *
+ * A styled container for feature icons with gradient effects
+ * Features:
+ * - Gradient background
+ * - Blur effects
+ * - Responsive sizing
+ * - Dark mode support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Icon to be displayed
+ * @param {string} [props.className] - Optional CSS class name
+ * @returns {JSX.Element} A styled icon container
+ */
 export const FeatureIconContainer = ({
   children,
   className,
@@ -244,6 +290,21 @@ export const FeatureIconContainer = ({
   );
 };
 
+/**
+ * Grid Component
+ *
+ * A decorative grid pattern component
+ * Features:
+ * - Customizable pattern
+ * - Responsive sizing
+ * - Dark mode support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} [props.pattern] - Optional pattern type
+ * @param {number} [props.size] - Optional size of grid cells
+ * @returns {JSX.Element} A decorative grid pattern
+ */
 export const Grid = ({
   pattern,
   size,
@@ -274,6 +335,25 @@ export const Grid = ({
   );
 };
 
+/**
+ * GridPattern Component
+ *
+ * A complex grid pattern with customizable properties
+ * Features:
+ * - Customizable width and height
+ * - Position control
+ * - Square count control
+ * - Responsive design
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {number} props.width - Width of the grid
+ * @param {number} props.height - Height of the grid
+ * @param {number} props.x - X position offset
+ * @param {number} props.y - Y position offset
+ * @param {number} props.squares - Number of squares in the grid
+ * @returns {JSX.Element} A complex grid pattern
+ */
 export function GridPattern({ width, height, x, y, squares, ...props }: any) {
   const patternId = useId();
 

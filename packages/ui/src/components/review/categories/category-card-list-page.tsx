@@ -8,13 +8,30 @@ import { Separator } from "@ratecreator/ui";
 
 import { getIconForCategory } from "./category-icons";
 
+/**
+ * CategoryCardListPage Component
+ *
+ * A card component that displays a category and its subcategories.
+ * Features include:
+ * - Category icon and name display
+ * - Dynamic background and hover colors
+ * - Subcategory list with separators
+ * - Responsive hover effects
+ * - Dark mode support
+ *
+ * @component
+ * @param {CategoryCardProps} props - Component props
+ * @returns {JSX.Element} A category card component for list pages
+ */
 export const CategoryCardListPage: React.FC<CategoryCardProps> = ({
   category,
 }) => {
+  // Get the appropriate icon for the category
   const icon = getIconForCategory(category.name);
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md flex flex-col h-full">
+      {/* Category header with icon and name */}
       <Link href={`/categories/${category.slug}`} passHref className="block">
         <div
           className={`${category.bgColor} ${category.hoverColor} p-4 transition-transform hover:scale-105`}
@@ -29,6 +46,8 @@ export const CategoryCardListPage: React.FC<CategoryCardProps> = ({
           </div>
         </div>
       </Link>
+
+      {/* Subcategories list */}
       {category.subcategories && category.subcategories.length > 0 && (
         <div className="bg-white dark:bg-gray-900 p-4 flex-grow">
           <ul className="list-none p-0 m-0">

@@ -17,6 +17,20 @@ import {
 import { FaYoutube } from "react-icons/fa";
 import { cn } from "@ratecreator/ui/utils";
 
+/**
+ * YouTube Block Component for BlockNote
+ *
+ * This component enables embedding YouTube videos in the BlockNote editor.
+ * It provides:
+ * - Video embedding functionality
+ * - Responsive video player
+ * - Theme-aware styling
+ * - Error handling for invalid video IDs
+ *
+ * The component uses the YouTube iframe API to display videos
+ * and maintains aspect ratio for proper display.
+ */
+
 export const Youtube = createReactBlockSpec(
   {
     type: "youtube",

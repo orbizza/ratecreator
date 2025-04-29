@@ -1,3 +1,16 @@
+/**
+ * HeroText Component
+ *
+ * This component renders the main hero text section of the landing page, featuring:
+ * - Animated text generation effects for heading and subheading
+ * - Search bar with dynamic placeholders
+ * - Staggered reveal animations
+ * - Integration with kbar for search functionality
+ *
+ * The component uses a combination of custom animations and the kbar
+ * search interface to create an engaging hero section.
+ */
+
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -11,9 +24,13 @@ import { SearchPlaceholders } from "@ratecreator/store";
 import { useKBar } from "kbar";
 
 export const HeroText = () => {
-  // const headingWords = `Where You Go for Creators.`;
+  // Main heading text
   const headingWords = `Find the Creators.`;
+
+  // Subheading text with statistics
   const subHeadingWords = `Search and review from 3,100,000+ creators and communities.`;
+
+  // Alternative heading and subheading options (commented out)
   /*
   Heading:
     Question Format:
@@ -38,12 +55,14 @@ export const HeroText = () => {
     Your gateway to millions of creators and communities.
     Find and review creators effortlessly.
    */
+
+  // Search placeholders from store
   const placeholders = SearchPlaceholders;
 
-  // State to control visibility of heading, subheading, and search bar
-
+  // State to control visibility of subheading and search bar
   const [isSubheadingVisible, setIsSubheadingVisible] = useState(false);
 
+  // Set up delayed visibility for subheading
   useEffect(() => {
     const subheadingTimer = setTimeout(() => {
       setIsSubheadingVisible(true);
@@ -54,8 +73,10 @@ export const HeroText = () => {
     };
   }, []);
 
+  // Initialize kbar for search functionality
   const { query } = useKBar();
 
+  // Handle search bar click
   const handleSerarchClick = useCallback(() => {
     query.toggle();
   }, [query]);
@@ -63,7 +84,7 @@ export const HeroText = () => {
   return (
     <div className="flex flex-col items-start m-2 md:m-10 gap-y-8 mx-auto w-full max-w-3xl">
       <div className="flex flex-col items-start gap-y-2 w-full">
-        {/* Render heading with delay */}
+        {/* Animated heading text */}
         {
           <TextGenerateEffect
             words={headingWords}
@@ -72,7 +93,7 @@ export const HeroText = () => {
           />
         }
 
-        {/* Render subheading with delay */}
+        {/* Animated subheading text - appears after delay */}
         {isSubheadingVisible && (
           <TextGenerateEffect
             words={subHeadingWords}
@@ -83,7 +104,7 @@ export const HeroText = () => {
         )}
       </div>
 
-      {/* Render search bar with delay */}
+      {/* Search bar - appears after subheading */}
       {isSubheadingVisible && (
         <div
           id="hero-search-bar"

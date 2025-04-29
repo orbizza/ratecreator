@@ -25,6 +25,29 @@ interface TwitterCashtag extends TwitterEntity {
   tag?: string;
 }
 
+/**
+ * Twitter Description Renderer Component
+ *
+ * A component that renders Twitter/X user descriptions with rich text formatting.
+ * Features include:
+ * - URL detection and linking
+ * - Mention (@username) linking
+ * - Hashtag (#tag) linking
+ * - Cashtag ($tag) linking
+ * - Dark mode support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {CreatorData["account"]} props.account - Twitter account data
+ * @returns {JSX.Element} A formatted description with interactive elements
+ */
+
+/**
+ * Formats a Twitter description by replacing entities with HTML links
+ * @param {string} description - The raw description text
+ * @param {CreatorData["account"]["xData"]} [xData] - Twitter API data containing entities
+ * @returns {string} HTML string with formatted entities
+ */
 const formatDescription = (
   description: string,
   xData?: CreatorData["account"]["xData"],

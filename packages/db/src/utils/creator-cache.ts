@@ -1,19 +1,57 @@
+/**
+ * @fileoverview Creator cache implementation for Rate Creator platform
+ * @module utils/creator-cache
+ * @description Provides caching functionality for creator-related data using IndexedDB.
+ * Implements cache management, data retrieval, and automatic cache invalidation.
+ */
+
 import { CreatorData } from "@ratecreator/types/review";
 
+/**
+ * Interface for cached creator data
+ * @interface
+ */
 interface CachedCreatorData {
   data: CreatorData;
   timestamp: number;
 }
 
+/**
+ * Database name for the cache
+ * @constant
+ */
 const DB_NAME = "CreatorCache";
-const STORE_NAME = "creators";
-const CACHE_EXPIRATION = 1000 * 60 * 5; // Reduced to 5 minutes
-const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB limit
 
+/**
+ * Store name for the cache
+ * @constant
+ */
+const STORE_NAME = "creators";
+
+/**
+ * Cache expiration time in milliseconds (5 minutes)
+ * @constant
+ */
+const CACHE_EXPIRATION = 1000 * 60 * 5;
+
+/**
+ * Maximum cache size in bytes (50MB)
+ * @constant
+ */
+const MAX_CACHE_SIZE = 50 * 1024 * 1024;
+
+/**
+ * Class for managing creator data caching
+ * @class
+ */
 export class CreatorCache {
   private db: IDBDatabase | null = null;
   private currentSize: number = 0;
 
+  /**
+   * Initializes the IndexedDB database
+   * @returns {Promise<void>} Promise that resolves when initialization is complete
+   */
   async init() {
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, 1);
@@ -31,10 +69,23 @@ export class CreatorCache {
     });
   }
 
+  /**
+   * Generates a unique key for a creator
+   * @param {string} platform - The platform name
+   * @param {string} accountId - The account ID
+   * @returns {string} Unique key for the creator
+   * @private
+   */
   private generateKey(platform: string, accountId: string): string {
     return `${platform}-${accountId}`;
   }
 
+  /**
+   * Retrieves cached creator data
+   * @param {string} platform - The platform name
+   * @param {string} accountId - The account ID
+   * @returns {Promise<CreatorData | null>} Cached creator data or null if expired/not found
+   */
   async getCachedCreator(
     platform: string,
     accountId: string,
@@ -61,6 +112,11 @@ export class CreatorCache {
     });
   }
 
+  /**
+   * Calculates the current size of the cache
+   * @returns {Promise<number>} Current cache size in bytes
+   * @private
+   */
   private async calculateSize(): Promise<number> {
     if (!this.db) await this.init();
 
@@ -80,6 +136,11 @@ export class CreatorCache {
     });
   }
 
+  /**
+   * Cleans up expired cache entries
+   * @returns {Promise<void>} Promise that resolves when cleanup is complete
+   * @private
+   */
   private async cleanup() {
     if (!this.db) await this.init();
 
@@ -115,6 +176,13 @@ export class CreatorCache {
     });
   }
 
+  /**
+   * Caches creator data
+   * @param {string} platform - The platform name
+   * @param {string} accountId - The account ID
+   * @param {CreatorData} data - Creator data to cache
+   * @returns {Promise<void>} Promise that resolves when caching is complete
+   */
   async setCachedCreator(
     platform: string,
     accountId: string,
@@ -144,4 +212,7 @@ export class CreatorCache {
   }
 }
 
+/**
+ * Singleton instance of the creator cache
+ */
 export const creatorCache = new CreatorCache();

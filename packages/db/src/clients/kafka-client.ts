@@ -1,10 +1,36 @@
+/**
+ * @fileoverview Kafka client implementation for Rate Creator platform
+ * @module clients/kafka-client
+ * @description Provides a singleton client for interacting with Kafka message broker,
+ * handling message publishing, consumption, and topic management.
+ */
+
 import { Kafka, Producer, Consumer, Admin, Partitioners } from "kafkajs";
 import "../utils/loadEnv";
 
+/**
+ * Singleton instance of the Kafka client
+ * @private
+ */
 let kafkaInstance: Kafka | null = null;
+
+/**
+ * Singleton instance of the Kafka producer
+ * @private
+ */
 let producerInstance: Producer | null = null;
+
+/**
+ * Promise tracking the producer connection status
+ * @private
+ */
 let producerConnectPromise: Promise<void> | null = null;
 
+/**
+ * Returns a singleton instance of the Kafka client
+ * @returns {Kafka} The Kafka client instance
+ * @throws {Error} If Kafka credentials are not configured
+ */
 export function getKafkaClient(): Kafka {
   if (!kafkaInstance) {
     // Validate required environment variables
@@ -45,6 +71,12 @@ export function getKafkaClient(): Kafka {
   return kafkaInstance;
 }
 
+/**
+ * Connects the Kafka producer with retry logic
+ * @param {Producer} producer - The Kafka producer instance
+ * @returns {Promise<void>} Promise that resolves when the producer is connected
+ * @private
+ */
 async function connectProducer(producer: Producer): Promise<void> {
   if (!producerConnectPromise) {
     producerConnectPromise = producer
@@ -67,6 +99,11 @@ async function connectProducer(producer: Producer): Promise<void> {
   return producerConnectPromise;
 }
 
+/**
+ * Returns a singleton instance of the Kafka producer
+ * @returns {Promise<Producer>} The Kafka producer instance
+ * @throws {Error} If producer initialization fails
+ */
 export async function getKafkaProducer(): Promise<Producer> {
   if (!producerInstance) {
     producerInstance = getKafkaClient().producer({
@@ -107,6 +144,10 @@ export async function getKafkaProducer(): Promise<Producer> {
   return producerInstance;
 }
 
+/**
+ * Disconnects the Kafka producer
+ * @returns {Promise<void>} Promise that resolves when the producer is disconnected
+ */
 export async function disconnectProducer() {
   if (producerInstance) {
     try {
@@ -120,10 +161,21 @@ export async function disconnectProducer() {
   }
 }
 
+/**
+ * Returns a new Kafka consumer instance
+ * @param {string} groupId - The consumer group ID
+ * @returns {Consumer} The Kafka consumer instance
+ */
 export function getKafkaConsumer(groupId: string): Consumer {
   return getKafkaClient().consumer({ groupId });
 }
 
+/**
+ * Creates a Kafka topic if it doesn't exist
+ * @param {string} topicName - The name of the topic to create
+ * @returns {Promise<void>} Promise that resolves when the topic is created
+ * @throws {Error} If topic creation fails
+ */
 export async function createTopicIfNotExists(topicName: string) {
   const kafka = getKafkaClient();
   const admin: Admin = kafka.admin();

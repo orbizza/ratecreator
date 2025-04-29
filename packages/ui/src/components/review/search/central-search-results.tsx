@@ -53,10 +53,35 @@ import {
   FilterSkeleton,
 } from "../skeletons/skeleton-category-search-results";
 
-export const CentralSearchResults: React.FC<{
+/**
+ * Props for the CentralSearchResults component
+ */
+interface CentralSearchResultsProps {
+  /** Optional search query string */
   searchQuery?: string;
+  /** Optional initial platform filter */
   platform?: string;
-}> = ({ searchQuery, platform: initialPlatform }) => {
+}
+
+/**
+ * CentralSearchResults Component
+ *
+ * A comprehensive search results component that displays creator search results with filtering and sorting capabilities.
+ * Features include:
+ * - Real-time search results display
+ * - Multiple filter options (platform, followers, rating, etc.)
+ * - Sorting and pagination
+ * - Loading states and error handling
+ * - Responsive design with mobile and desktop layouts
+ *
+ * @component
+ * @param {CentralSearchResultsProps} props - Component props
+ * @returns {JSX.Element} A search results page with filtering and sorting
+ */
+export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
+  searchQuery,
+  platform: initialPlatform,
+}) => {
   const [creators, setCreators] = useState<SearchAccount[]>([]);
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
   const [filterSidebarLoading, setFilterSidebarLoading] =
@@ -158,11 +183,19 @@ export const CentralSearchResults: React.FC<{
     }
   }, [initialPlatform, setPlatformFilter]);
 
+  /**
+   * Toggle sort order between ascending and descending
+   * Resets pagination to first page when sort order changes
+   */
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
     setCurrentPage(0);
   };
 
+  /**
+   * Fetch creators based on current filters and pagination
+   * Implements error handling and loading states
+   */
   const fetchCreators = useCallback(async () => {
     try {
       setCreatorLoading(true);
@@ -236,6 +269,10 @@ export const CentralSearchResults: React.FC<{
     fetchCreators();
   }, [fetchCreators]);
 
+  /**
+   * Handle page change in pagination
+   * @param {number} page - The new page number
+   */
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };

@@ -47,6 +47,20 @@ import { RootCategorySelect } from "../filters/filter-root-category-select";
 
 interface FilterSidebarProps {}
 
+/**
+ * FilterSidebar Component
+ *
+ * A responsive filter sidebar component that provides filtering capabilities for search results.
+ * Features include:
+ * - Mobile-friendly sheet interface
+ * - Desktop sidebar with accordion
+ * - Multiple filter options (platform, followers, rating, etc.)
+ * - Clear filters functionality
+ * - Real-time filter state management using Recoil
+ *
+ * @component
+ * @returns {JSX.Element} A filter sidebar with mobile and desktop layouts
+ */
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -79,6 +93,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [isDescending] = useRecoilState(isDescendingFilterState);
   const [rootCategoryFilter] = useRecoilState(rootCategoryFiltersState);
 
+  /**
+   * Check if any filters are currently active
+   * @returns {boolean} True if any filter is active, false otherwise
+   */
   const hasActiveFilters = () => {
     return (
       platformFilters.length > 0 ||
@@ -96,6 +114,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     );
   };
 
+  /**
+   * Reset all filter states to their default values
+   * Called when the user clicks the "Clear Filters" button
+   */
   const handleClearFilters = () => {
     resetPlatformFilters();
     resetFollowersFilters();
@@ -138,6 +160,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     return null;
   }
 
+  /**
+   * FilterContent Component
+   *
+   * Renders the filter options in a consistent layout for both mobile and desktop views
+   * @returns {JSX.Element} A container with all filter options
+   */
   const FilterContent = () => (
     <div className="space-y-4">
       <PlatformCheckbox />

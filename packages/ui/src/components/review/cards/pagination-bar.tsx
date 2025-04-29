@@ -13,14 +13,33 @@ import {
   PaginationPrevious,
 } from "@ratecreator/ui";
 
+/**
+ * Props for the PaginationBar component
+ */
 interface PaginationBarProps {
+  /** Current page number (0-based) */
   currentPage: number;
+  /** Total number of pages */
   totalPages: number;
+  /** Callback function when page changes */
   onPageChange: (page: number) => void;
+  /** Total number of items */
   totalItems: number;
+  /** Number of items per page */
   itemsPerPage: number;
 }
 
+/**
+ * PaginationBar Component
+ *
+ * A pagination component that displays page navigation controls.
+ * Shows page numbers, previous/next buttons, and ellipsis for large page ranges.
+ * Handles both signed-in and signed-out user states with appropriate UI and behavior.
+ *
+ * @component
+ * @param {PaginationBarProps} props - Component props
+ * @returns {JSX.Element} A pagination bar component
+ */
 export const PaginationBar: React.FC<PaginationBarProps> = ({
   currentPage,
   totalPages,
@@ -32,18 +51,29 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   const displayPage = currentPage + 1;
   const isDisabled = true;
 
+  /**
+   * Handles redirect to sign-in page while preserving the current URL
+   */
   const handleSignInRedirect = () => {
     const returnUrl = encodeURIComponent(
       window.location.pathname + window.location.search,
     );
     router.push(`/sign-in?redirect_url=${returnUrl}`);
   };
+
+  /**
+   * Handles page click events
+   * @param {number} page - The page number to navigate to
+   */
   const handlePageClick = (page: number) => {
     if (page >= 0 && page <= maxPage) {
       onPageChange(page);
     }
   };
 
+  /**
+   * Handles click events on disabled pagination items
+   */
   const handleDisabledClick = () => {
     if (isDisabled) return;
   };
@@ -53,6 +83,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
       {isSignedIn ? (
         <Pagination>
           <PaginationContent>
+            {/* Previous page button */}
             <PaginationItem>
               <PaginationPrevious
                 href="#"
@@ -65,6 +96,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               />
             </PaginationItem>
 
+            {/* First page link */}
             {displayPage > 2 && (
               <PaginationItem>
                 <PaginationLink href="#" onClick={() => handlePageClick(0)}>
@@ -73,12 +105,14 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
+            {/* First ellipsis */}
             {displayPage > 3 && (
               <PaginationItem>
                 <PaginationEllipsis />
               </PaginationItem>
             )}
 
+            {/* Previous page link */}
             {displayPage > 1 && (
               <PaginationItem>
                 <PaginationLink
@@ -90,6 +124,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
+            {/* Current page link */}
             <PaginationItem>
               <PaginationLink
                 href="#"
@@ -101,6 +136,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationLink>
             </PaginationItem>
 
+            {/* Next page link */}
             {displayPage < maxPage + 1 && (
               <PaginationItem>
                 <PaginationLink
@@ -112,12 +148,14 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
+            {/* Second ellipsis */}
             {displayPage < maxPage && (
               <PaginationItem>
                 <PaginationEllipsis />
               </PaginationItem>
             )}
 
+            {/* Last page link */}
             {displayPage < maxPage && (
               <PaginationItem>
                 <PaginationLink
@@ -129,6 +167,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationItem>
             )}
 
+            {/* Next page button */}
             <PaginationItem>
               <PaginationNext
                 href="#"
@@ -147,6 +186,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
       ) : (
         <Pagination>
           <PaginationContent>
+            {/* Previous page button (disabled for non-signed-in users) */}
             <PaginationItem>
               <PaginationPrevious
                 href="#"
@@ -157,6 +197,8 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
                 }
               />
             </PaginationItem>
+
+            {/* Current page link */}
             <PaginationItem>
               <PaginationLink
                 href="#"
@@ -169,6 +211,8 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
                 1
               </PaginationLink>
             </PaginationItem>
+
+            {/* Next page link (requires sign-in) */}
             <PaginationItem>
               <PaginationLink
                 href="#"
@@ -181,9 +225,12 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               </PaginationLink>
             </PaginationItem>
 
+            {/* Ellipsis for non-signed-in users */}
             <PaginationItem>
               <PaginationEllipsis />
             </PaginationItem>
+
+            {/* Last page link (requires sign-in) */}
             {displayPage < maxPage - 1 && (
               <PaginationItem>
                 <PaginationLink
@@ -197,6 +244,8 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
                 </PaginationLink>
               </PaginationItem>
             )}
+
+            {/* Next page button (requires sign-in) */}
             <PaginationItem>
               <PaginationNext
                 href="#"
@@ -209,6 +258,8 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           </PaginationContent>
         </Pagination>
       )}
+
+      {/* Sign-in prompt for non-signed-in users */}
       {!isSignedIn && (
         <div className="text-center mt-4 text-muted-foreground text-sm">
           Please{" "}

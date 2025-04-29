@@ -43,12 +43,30 @@ import {
   pageNumberState,
 } from "@ratecreator/store/review";
 
+/**
+ * Props for the FilterSidebar component
+ */
 interface FilterSidebarProps {}
 
+/**
+ * FilterSidebar Component
+ *
+ * A responsive filter sidebar component that provides filtering options for category search.
+ * Features include:
+ * - Mobile sheet view for small screens
+ * - Desktop accordion view for large screens
+ * - Multiple filter types (platform, followers, rating, etc.)
+ * - Filter state management with Recoil
+ * - Clear filters functionality
+ *
+ * @component
+ * @param {FilterSidebarProps} props - Component props
+ * @returns {JSX.Element} A responsive filter sidebar component
+ */
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [isMounted, setIsMounted] = useState(false);
 
-  // state reset functions
+  // State reset functions for all filter types
   const resetPlatformFilters = useResetRecoilState(platformFiltersState);
   const resetFollowersFilters = useResetRecoilState(followersFiltersState);
   const resetRatingFilters = useResetRecoilState(ratingFiltersState);
@@ -62,7 +80,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const resetIsDescendingFilter = useResetRecoilState(isDescendingFilterState);
   const resetPageNumber = useResetRecoilState(pageNumberState);
 
-  // state selectors
+  // State selectors for all filter types
   const [platformFilters] = useRecoilState(platformFiltersState);
   const [followersFilters] = useRecoilState(followersFiltersState);
   const [ratingFilters] = useRecoilState(ratingFiltersState);
@@ -75,6 +93,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
   const [sortBy] = useRecoilState(sortByFilterState);
   const [isDescending] = useRecoilState(isDescendingFilterState);
 
+  /**
+   * Check if any filters are currently active
+   * @returns {boolean} True if any filter is active
+   */
   const hasActiveFilters = () => {
     return (
       platformFilters.length > 0 ||
@@ -91,6 +113,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     );
   };
 
+  /**
+   * Reset all filters to their default values
+   */
   const handleClearFilters = () => {
     resetPlatformFilters();
     resetFollowersFilters();
@@ -106,10 +131,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     resetPageNumber();
   };
 
+  // Handle component mounting
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Reset page number when any filter changes
   useEffect(() => {
     resetPageNumber();
   }, [
@@ -131,6 +158,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     return null;
   }
 
+  /**
+   * FilterContent Component
+   * Renders the filter options and clear filters button
+   */
   const FilterContent = () => (
     <div className="space-y-4">
       <PlatformCheckbox />
@@ -157,6 +188,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
       </Button>
     </div>
   );
+
   return (
     <>
       {/* Mobile Sheet Filter */}

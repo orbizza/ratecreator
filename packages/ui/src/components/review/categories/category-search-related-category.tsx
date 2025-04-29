@@ -16,15 +16,37 @@ import {
 } from "@ratecreator/ui";
 import { ArrowRightLeft } from "lucide-react";
 
+/**
+ * Props for the RelatedCategories component
+ */
 interface RelatedCategoriesProps {
+  /** Array of related category objects to display */
   categories: Category[];
 }
 
+/**
+ * RelatedCategories Component
+ *
+ * A responsive component that displays related categories in both mobile and desktop views.
+ * Features include:
+ * - Mobile sheet view for small screens
+ * - Desktop accordion view for large screens
+ * - Links to category pages
+ * - Empty state handling
+ *
+ * @component
+ * @param {RelatedCategoriesProps} props - Component props
+ * @returns {JSX.Element} A responsive related categories component
+ */
 export const RelatedCategories: React.FC<RelatedCategoriesProps> = ({
   categories,
 }) => {
   const length = categories.length === 0;
 
+  /**
+   * CategoryContent Component
+   * Renders the list of related categories or an empty state message
+   */
   const CategoryContent = () => (
     <div className="w-full">
       {!length && (

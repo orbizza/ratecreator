@@ -1,12 +1,29 @@
+/**
+ * CataloguedStats Component
+ *
+ * This component serves as a container for displaying catalogued statistics, featuring:
+ * - Scroll-based visibility using Intersection Observer
+ * - Animated opacity transitions
+ * - Decorative sphere mask element
+ * - Statistics section with platform-wise data
+ *
+ * The component manages the visibility of the statistics section based on
+ * scroll position, providing a smooth reveal animation when the section
+ * comes into view.
+ */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { SphereMask } from "@ratecreator/ui";
 
 import { StatsSection } from "./stats-section";
+
 export function CataloguedStats() {
+  // State to track visibility of the catalogued stats section
   const [isCataloguedVisible, setIsCataloguedVisible] = useState(false);
 
+  // Set up Intersection Observer to handle scroll-based visibility
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
@@ -31,7 +48,10 @@ export function CataloguedStats() {
       >
         {isCataloguedVisible && (
           <>
+            {/* Decorative sphere mask element */}
             <SphereMask />
+
+            {/* Statistics section with platform-wise data */}
             <StatsSection />
           </>
         )}

@@ -26,10 +26,28 @@ import { contact } from "@ratecreator/actions/review";
 import { FormError } from "../common/form-error";
 import { FormSuccess } from "../common/form-success";
 
+/**
+ * ContactForm Component
+ *
+ * A form component for collecting user contact information and messages.
+ * Features include:
+ * - Form validation using Zod schema
+ * - Real-time error handling
+ * - Success/error message display
+ * - Responsive design
+ * - Privacy policy and terms links
+ *
+ * @component
+ * @returns {JSX.Element} A contact form with validation and submission handling
+ */
 export const ContactForm = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+
+  /**
+   * Form configuration using react-hook-form with Zod validation
+   */
   const form = useForm<z.infer<typeof ContactSchema>>({
     resolver: zodResolver(ContactSchema),
     defaultValues: {
@@ -39,6 +57,14 @@ export const ContactForm = () => {
     },
   });
 
+  /**
+   * Handles form submission
+   * - Clears previous error/success messages
+   * - Submits form data to the server
+   * - Updates error/success state based on response
+   *
+   * @param {z.infer<typeof ContactSchema>} values - The validated form data
+   */
   const onSubmit = (values: z.infer<typeof ContactSchema>) => {
     setError("");
     setSuccess("");

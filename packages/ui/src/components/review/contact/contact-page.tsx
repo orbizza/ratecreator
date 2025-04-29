@@ -6,6 +6,19 @@ import { Spotlight, HeroHighlight, Highlight } from "@ratecreator/ui";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+/**
+ * ContactFormPage Component
+ *
+ * A responsive contact page that combines a hero section with a contact form.
+ * Features include:
+ * - Dynamic theme support (light/dark mode)
+ * - Animated hero section with spotlight effect
+ * - Responsive layout (mobile and desktop)
+ * - Integrated contact form
+ *
+ * @component
+ * @returns {JSX.Element} A contact page with hero section and form
+ */
 export const ContactFormPage = () => {
   const { theme, resolvedTheme } = useTheme(); // `resolvedTheme` accounts for system theme automatically
   const [fill, setFill] = useState("");

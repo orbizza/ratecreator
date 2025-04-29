@@ -34,6 +34,34 @@ interface ChannelDetailsSectionProps {
   categories: CreatorData["categories"];
 }
 
+/**
+ * YouTube Channel Details Section Component
+ *
+ * A comprehensive section displaying detailed information about a YouTube channel.
+ * Features include:
+ * - Channel statistics (subscribers, videos, views)
+ * - Channel description
+ * - Keywords and tags
+ * - Categories
+ * - Responsive design with accordion sections
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {CreatorData["account"]} props.account - YouTube channel account data
+ * @param {CreatorData["categories"]} props.categories - Channel categories
+ * @returns {JSX.Element} A detailed channel information section
+ */
+
+/**
+ * StatCard Component
+ *
+ * Displays a single statistic with an icon and formatted value
+ * @param {Object} props - Component props
+ * @param {React.ComponentType} props.icon - Icon component to display
+ * @param {string} props.label - Statistic label
+ * @param {string | number} props.value - Statistic value
+ * @returns {JSX.Element} A card displaying a single statistic
+ */
 const StatCard = ({
   icon: Icon,
   label,
@@ -67,6 +95,14 @@ const StatCard = ({
   </div>
 );
 
+/**
+ * CategoryCard Component
+ *
+ * Displays a grid of channel categories with links
+ * @param {Object} props - Component props
+ * @param {string[]} props.categories - Array of category names
+ * @returns {JSX.Element} A grid of category cards
+ */
 const CategoryCard = ({ categories }: { categories: string[] }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,6 +122,14 @@ const CategoryCard = ({ categories }: { categories: string[] }) => {
   );
 };
 
+/**
+ * KeywordBadge Component
+ *
+ * Displays a clickable keyword badge with search functionality
+ * @param {Object} props - Component props
+ * @param {string} props.keyword - The keyword to display
+ * @returns {JSX.Element} A clickable keyword badge
+ */
 const KeywordBadge = ({ keyword }: { keyword: string }) => (
   <Link href={`/search?q=${keyword}`}>
     <Badge

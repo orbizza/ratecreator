@@ -1,3 +1,14 @@
+/**
+ * HeroSection Component
+ *
+ * This component renders the main hero section of the landing page, featuring:
+ * - A hero text section with search functionality
+ * - An icon cloud section (visible on small screens)
+ * - A call-to-action link for adding new creators
+ *
+ * The component uses a responsive layout that adapts to different screen sizes.
+ */
+
 "use client";
 
 import { ChevronRight } from "lucide-react";
@@ -14,22 +25,27 @@ import { ny } from "@ratecreator/ui/utils";
 import { IconCloudSection } from "./icon-cloud-section";
 import { HeroText } from "./hero-text";
 import { HeroTextNew } from "./hero-text-new";
+
 export const HeroSection = () => {
   return (
     <section className="hero-section">
-      {/* Hero Text Section */}
+      {/* Hero Text Section - Contains the main content and search functionality */}
       <div className="hero-text flex min-h-screen flex-col items-center p-6 lg:p-4 justify-center">
         <div className="flex flex-col-reverse lg:flex-row items-center p-6 lg:p-4 justify-center lg:w-full">
+          {/* Search bar container - Full width on large screens */}
           <div id="hero-search-bar" className="lg:w-full">
             <HeroTextNew />
           </div>
+          {/* Icon cloud section - Only visible on small screens */}
           <div className="hidden sm:flex lg:hidden">
             <IconCloudSection />
           </div>
         </div>
-        {/* Radial gradient background */}
+        {/* Radial gradient background - Currently commented out */}
         {/* <RadialGradient /> */}
         {/* <SphereMask /> */}
+
+        {/* Call-to-action link for adding new creators */}
         <Link
           href="/wip"
           className="flex items-center mt-4 hover:opacity-80 transition-opacity"

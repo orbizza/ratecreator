@@ -24,6 +24,27 @@ import { TiktokDetailsSection } from "./tiktok/tiktok-details-section";
 import RedditHeader from "./reddit/header-reddit";
 import { RedditDetailsSection } from "./reddit/reddit-details-section";
 
+/**
+ * CreatorProfile Component
+ *
+ * A comprehensive profile page for creators across different platforms (YouTube, Twitter, TikTok, Reddit).
+ * Features include:
+ * - Platform-specific header and details sections
+ * - User rating card
+ * - Reviews section
+ * - Caching support using IndexedDB
+ * - Loading states and error handling
+ * - Responsive design
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.accountId - The creator's account ID
+ * @param {string} props.platform - The platform (youtube, twitter, tiktok, reddit)
+ * @param {Object} [props.user] - Optional user information
+ * @param {string} [props.user.name] - User's name
+ * @param {string} [props.user.image] - User's profile image URL
+ * @returns {JSX.Element} A creator profile page with platform-specific content
+ */
 export const CreatorProfile = ({
   accountId,
   platform,
@@ -101,6 +122,10 @@ export const CreatorProfile = ({
     );
   }
 
+  /**
+   * Renders platform-specific content based on the platform type
+   * @returns {JSX.Element} Platform-specific profile content
+   */
   const renderPlatformContent = () => {
     switch (platform.toLowerCase()) {
       case "youtube":

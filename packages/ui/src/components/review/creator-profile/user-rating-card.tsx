@@ -9,7 +9,30 @@ import { cn } from "@ratecreator/ui/utils";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { getInitials } from "@ratecreator/db/utils";
 
+/**
+ * UserRatingCard Component
+ *
+ * A card component that allows users to rate creators and write reviews.
+ * Features include:
+ * - Interactive star rating system
+ * - User profile display
+ * - Hover effects for ratings
+ * - Platform-specific review creation
+ * - Responsive design
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.accountId - The creator's account ID
+ * @param {string} props.platform - The platform (youtube, twitter, tiktok, reddit)
+ * @returns {JSX.Element} A rating card with user profile and star rating interface
+ */
+
 const getRatingColor = (rating: number) => {
+  /**
+   * Determines the color class for a rating value
+   * @param {number} rating - The rating value (1-5)
+   * @returns {string} CSS class name for the rating color
+   */
   if (rating >= 4.5) return "text-emerald-500";
   if (rating >= 4.0) return "text-green-500";
   if (rating >= 3.0) return "text-yellow-500";
@@ -19,6 +42,15 @@ const getRatingColor = (rating: number) => {
 };
 
 const Star = ({ filled, color }: { filled: boolean; color: string }) => {
+  /**
+   * Star Component
+   *
+   * Renders a single star in the rating interface
+   * @param {Object} props - Component props
+   * @param {boolean} props.filled - Whether the star should be filled
+   * @param {string} props.color - The color class for the star
+   * @returns {JSX.Element} A star icon with appropriate styling
+   */
   return (
     <svg
       className={`sm:w-10 sm:h-10 w-6 h-6 ${filled ? color : "text-gray-400 dark:text-gray-600"}`}
@@ -49,12 +81,21 @@ const UserRatingCard = ({
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
 
+  /**
+   * Handles star click events
+   * Navigates to the review creation page with the selected rating
+   * @param {number} rating - The selected rating value
+   */
   const handleStarClick = (rating: number) => {
     router.push(
       `/review/create?stars=${rating}&platform=${platform}&accountId=${accountId}`,
     );
   };
 
+  /**
+   * Handles the "Write a review" click event
+   * Navigates to the review creation page without a pre-selected rating
+   */
   const handleWriteReviewClick = () => {
     router.push(
       `/review/create?stars=0&platform=${platform}&accountId=${accountId}`,

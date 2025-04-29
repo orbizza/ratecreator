@@ -10,11 +10,17 @@ import {
 
 import { capitalizeEachWord } from "@ratecreator/db/utils";
 
+/**
+ * Type definition for select options
+ */
 type SelectOption = {
   value: string;
   label: string;
 };
 
+/**
+ * Props for the SelectComponent
+ */
 interface SelectComponentProps {
   placeholder: string;
   items: string[] | SelectOption[];
@@ -23,8 +29,19 @@ interface SelectComponentProps {
   showAll?: boolean;
 }
 
+// Constant for the "All" option value
 const ALL_VALUE = "__all__";
 
+/**
+ * SelectComponent
+ *
+ * A reusable select component that supports both string arrays and SelectOption arrays.
+ * It includes an optional "All" option and handles value normalization.
+ *
+ * @component
+ * @param {SelectComponentProps} props - Component props
+ * @returns {JSX.Element} A select component
+ */
 export const SelectComponent = ({
   placeholder,
   items,
@@ -32,6 +49,10 @@ export const SelectComponent = ({
   selectedItem = "",
   showAll = false,
 }: SelectComponentProps) => {
+  /**
+   * Handles the selection of an item
+   * If the selected value is ALL_VALUE, it clears the selection
+   */
   const handleSelect = (item: string) => {
     onSelect(item === ALL_VALUE ? "" : item);
   };
@@ -66,6 +87,7 @@ export const SelectComponent = ({
 
   return (
     <Select value={currentValue} onValueChange={handleSelect}>
+      {/* Container with conditional styling based on selection */}
       <div
         className={`${
           selectedItem && selectedItem !== placeholder
@@ -73,10 +95,13 @@ export const SelectComponent = ({
             : ""
         }`}
       >
+        {/* Select trigger button */}
         <SelectTrigger className="ml-2 bg-transparent border-transparent ring-0 outline-none focus:ring-0 focus:outline-none  text-sm md:text-sm">
           {currentOption?.label || capitalizeEachWord(placeholder)}
         </SelectTrigger>{" "}
       </div>
+
+      {/* Select dropdown content */}
       <SelectContent className="pl-0 bg-neutral-800 border-transparent ring-0 outline-none focus:ring-0 focus:outline-none">
         <SelectGroup className="pl-0 bg-neutral-800 ">
           {finalOptions.map((item) => (

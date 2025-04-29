@@ -1,3 +1,17 @@
+/**
+ * BlockNoteRenderer Component
+ *
+ * This component is responsible for rendering BlockNote content in a read-only format.
+ * It uses the BlockNoteView component from @blocknote/mantine to display rich text content
+ * with support for various block types including YouTube videos and dividers.
+ *
+ * The component handles:
+ * - Parsing and rendering BlockNote content
+ * - Theme-aware styling (dark/light mode)
+ * - Custom styling for various block types
+ * - Responsive layout and typography
+ */
+
 "use client";
 
 import React from "react";
@@ -9,11 +23,20 @@ import "@blocknote/mantine/style.css";
 import { Youtube } from "./youtube-blocknote";
 import { Divider } from "./divider";
 import { useTheme } from "next-themes";
+
+/**
+ * Props for the BlockNoteRenderer component
+ * @property {any} content - The BlockNote content to render (can be string or parsed JSON)
+ * @property {string} [className] - Optional additional CSS classes
+ */
 interface BlockNoteRendererProps {
   content: any;
   className?: string;
 }
 
+/**
+ * Custom BlockNote schema that extends the default specs with YouTube and Divider blocks
+ */
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,

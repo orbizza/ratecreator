@@ -16,15 +16,37 @@ import {
 } from "@ratecreator/ui";
 import { SquareStack } from "lucide-react";
 
+/**
+ * Props for the SubCategoriesList component
+ */
 interface SubCategoriesProps {
+  /** Array of subcategory objects to display */
   categories: Category[];
 }
 
+/**
+ * SubCategoriesList Component
+ *
+ * A responsive component that displays subcategories in both mobile and desktop views.
+ * Features include:
+ * - Mobile sheet view for small screens
+ * - Desktop accordion view for large screens
+ * - Links to subcategory pages
+ * - Empty state handling
+ *
+ * @component
+ * @param {SubCategoriesProps} props - Component props
+ * @returns {JSX.Element} A responsive subcategories component
+ */
 export const SubCategoriesList: React.FC<SubCategoriesProps> = ({
   categories,
 }) => {
   const length = categories.length === 0;
 
+  /**
+   * CategoryContent Component
+   * Renders the list of subcategories or an empty state message
+   */
   const CategoryContent = () => (
     <div className="w-full">
       {!length && (

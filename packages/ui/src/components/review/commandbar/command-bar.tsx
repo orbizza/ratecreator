@@ -55,10 +55,37 @@ import { CommandBarReset } from "./commandbar-reset";
 import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@ratecreator/ui";
 
+/**
+ * Command Bar Component
+ *
+ * A powerful command palette interface that provides quick access to various actions and search functionality.
+ * Features include:
+ * - Global search with Algolia integration
+ * - Keyboard shortcuts for common actions
+ * - Platform-specific filtering (YouTube, X, TikTok, Reddit)
+ * - Real-time search results
+ * - Responsive design with mobile support
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Child components to render
+ * @returns {JSX.Element} A command bar interface with search and action capabilities
+ */
+
 // Type Definitions
+/**
+ * Supported platform types for search results
+ */
 type Platform = "YOUTUBE" | "X" | "TIKTOK" | "REDDIT";
+
+/**
+ * Available tab types for filtering results
+ */
 type TabType = "All" | "YouTube" | "X" | "TikTok" | "Reddit";
 
+/**
+ * Structure of a search result item
+ */
 interface SearchResult {
   accountId: string;
   platform: Platform;
@@ -72,29 +99,47 @@ interface SearchResult {
   reviews: number;
 }
 
+/**
+ * Props for the ResultItem component
+ */
 interface ResultItemProps {
   action: ActionImpl;
   active: boolean;
   currentRootActionId: ActionId | null;
 }
 
+/**
+ * Props for the SearchComponent
+ */
 interface SearchComponentProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
 }
 
+/**
+ * Props for the CommandBarContent component
+ */
 interface CommandBarContentProps {
   children: ReactNode;
 }
 
+/**
+ * Props for the main CommandBar component
+ */
 interface CommandBarProps {
   children: ReactNode;
 }
 
+/**
+ * Props for the GroupName component
+ */
 interface GroupNameProps {
   name: string;
 }
 
+/**
+ * Structure of a KBar action
+ */
 interface KBarAction {
   id: string;
   name: string;
@@ -107,6 +152,11 @@ interface KBarAction {
 }
 
 // Helper function to type guard the search hits
+/**
+ * Type guard to validate search hit objects
+ * @param {any} hit - The object to validate
+ * @returns {boolean} True if the object is a valid search hit
+ */
 function isSearchHit(hit: any): hit is SearchResult {
   return (
     typeof hit === "object" &&
@@ -119,6 +169,13 @@ function isSearchHit(hit: any): hit is SearchResult {
 }
 
 // Results rendering components
+/**
+ * ResultItem Component
+ *
+ * Renders a single result item in the command bar results list
+ * @param {ResultItemProps} props - Component props
+ * @returns {JSX.Element} A styled result item with icon, text, and keyboard shortcuts
+ */
 const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
   ({ action, active, currentRootActionId }, ref) => {
     const ancestors = [...(action.ancestors || [])].reverse();
@@ -174,12 +231,25 @@ const ResultItem = forwardRef<HTMLDivElement, ResultItemProps>(
 
 ResultItem.displayName = "ResultItem";
 
+/**
+ * GroupName Component
+ *
+ * Renders a section header in the command bar results
+ * @param {GroupNameProps} props - Component props
+ * @returns {JSX.Element} A styled section header
+ */
 const GroupName = ({ name }: GroupNameProps): JSX.Element => (
   <div className="px-4 py-2 mt-2 text-xs font-medium text-muted-foreground uppercase">
     {name}
   </div>
 );
 
+/**
+ * RenderResults Component
+ *
+ * Renders the list of search results and action items in the command bar
+ * @returns {JSX.Element} A list of results with proper grouping and styling
+ */
 const RenderResults = (): JSX.Element => {
   const { results, rootActionId } = useMatches();
 
@@ -201,6 +271,19 @@ const RenderResults = (): JSX.Element => {
   );
 };
 
+/**
+ * SearchComponent
+ *
+ * Handles the search functionality and results display
+ * Features:
+ * - Real-time search with Algolia
+ * - Results sorting by follower count
+ * - Loading states
+ * - Error handling
+ *
+ * @param {SearchComponentProps} props - Component props
+ * @returns {JSX.Element} A search interface with results display
+ */
 const SearchComponent = ({
   searchTerm,
   onSearchChange,
@@ -329,6 +412,13 @@ const SearchComponent = ({
   );
 };
 
+/**
+ * CommandBarContent Component
+ *
+ * Wrapper component that provides the command bar interface structure
+ * @param {CommandBarContentProps} props - Component props
+ * @returns {JSX.Element} The command bar interface structure
+ */
 const CommandBarContent = ({
   children,
 }: CommandBarContentProps): JSX.Element => {
@@ -591,6 +681,13 @@ interface CustomSearchProps {
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * CustomKBarSearch Component
+ *
+ * A customizable search input component for the command bar
+ * @param {CustomSearchProps} props - Component props
+ * @returns {JSX.Element} A styled search input with custom functionality
+ */
 export const CustomKBarSearch: React.FC<CustomSearchProps> = ({
   defaultPlaceholder = "Type your search here...",
   className = "",

@@ -7,6 +7,23 @@ import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { Youtube } from "./youtube-blocknote";
 import { Divider } from "./divider";
 
+/**
+ * BlockNote to Markdown Conversion Utilities
+ *
+ * This file contains functions for converting BlockNote content to Markdown format.
+ * It handles various block types including:
+ * - Text blocks with formatting (bold, italic, etc.)
+ * - Headings
+ * - Lists (ordered and unordered)
+ * - Code blocks
+ * - Blockquotes
+ * - YouTube embeds
+ * - Dividers
+ *
+ * The conversion process maintains the structure and formatting of the original content
+ * while transforming it into standard Markdown syntax.
+ */
+
 interface NewsletterMarkdownProps {
   content: string;
   onMarkdownChange?: (markdown: string) => void;

@@ -65,6 +65,15 @@ const ratingOptions = [
     color: "text-red-600",
   },
 ];
+
+/**
+ * RatingStars Component
+ *
+ * Displays a star rating with support for half stars and color coding
+ * @param {Object} props - Component props
+ * @param {number | null} props.count - The rating value (0-5)
+ * @returns {JSX.Element} A star rating display
+ */
 const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
   if (count === null) return null;
 
@@ -144,6 +153,20 @@ const RatingStars: React.FC<{ count: number | null }> = ({ count }) => {
   );
 };
 
+/**
+ * ChannelNavigation Component
+ *
+ * A navigation component for the channel profile sections
+ * Features:
+ * - Smooth scrolling to sections
+ * - Active tab highlighting
+ * - Responsive design
+ *
+ * @param {Object} props - Component props
+ * @param {string} props.activeTab - Currently active tab
+ * @param {function} props.onTabChange - Callback for tab changes
+ * @returns {JSX.Element} A navigation bar with tabs
+ */
 const ChannelNavigation = ({
   activeTab,
   onTabChange,
@@ -197,6 +220,14 @@ const ChannelNavigation = ({
   );
 };
 
+/**
+ * ChannelHeader Component
+ *
+ * Main header component for YouTube channel profiles
+ * @param {Object} props - Component props
+ * @param {CreatorData["account"]} props.account - YouTube channel account data
+ * @returns {JSX.Element} The complete channel header
+ */
 const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [activeTab, setActiveTab] = useState("About");

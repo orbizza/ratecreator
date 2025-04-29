@@ -1,29 +1,95 @@
 # Rate Creator
 
-## Built With
+Rate Creator is a comprehensive platform for creators to manage their online
+presence, engage with their audience, and grow their brand. The platform
+consists of multiple applications and services built using modern web
+technologies.
 
-- [Next.js](https://nextjs.org/?ref=ratecreator.com)
-- [React.js](https://reactjs.org/?ref=ratecreator.com)
-- [Express.js](https://expressjs.com/?ref=ratecreator.com)
-- [Hono.js](https://hono.dev/?ref=ratecreator.com)
-- [Tailwind CSS](https://tailwindcss.com/?ref=ratecreator.com)
-- [Shadcn-UI](https://ui.shadcn.com/?ref=ratecreator.com)
-- [MagicUI](https://magicui.design/?ref=ratecreator.com)
-- [Aceternity](https://ui.aceternity.com/?ref=ratecreator.com)
-- [Prisma.io](https://prisma.io/?ref=ratecreator.com)
-- [MongoDB](https://www.mongodb.com/?ref=ratecreator.com)
-- [AWS SES](https://aws.amazon.com/?ref=ratecreator.com)
-- [AWS SNS](https://aws.amazon.com/?ref=ratecreator.com)
-- [Auth.js](https://authjs.dev/?ref=ratecreator.com)
-- [AWS ElastiCache](https://aws.amazon.com/?ref=ratecreator.com)
-- [AWS Cloudfront](https://aws.amazon.com/?ref=ratecreator.com)
-- [AWS OpenSearch](https://aws.amazon.com/?ref=ratecreator.com)
-- [Posthog](https://posthog.com/?ref=ratecreator.com)
-- [Vercel](https://vercel.com/?ref=ratecreator.com)
-- [TurboRepo](https://turbo.build//?ref=ratecreator.com)
-- [HarnessIO](https://harness.io/?ref=ratecreator.com)
+## Project Structure
 
-### Contact us
+The project is organized as a monorepo using Turborepo, with the following main
+components:
+
+### Apps (`/apps`)
+
+- `web/` - Main web application (Next.js)
+- `content/` - Content management system (Next.js)
+- `admin/` - Admin dashboard (Next.js)
+- `consumer/` - Consumer-facing application (Next.js)
+- `api/` - Backend services (Express.js/Hono.js)
+- `webhooks/` - Webhook handlers for various services
+
+### Packages (`/packages`)
+
+- `ui/` - Shared UI components
+- `config/` - Shared configuration files
+- `db/` - Database models and migrations
+- `store/` - State management
+- `features/` - Shared business logic
+
+## Tech Stack
+
+### Frontend
+
+- [Next.js](https://nextjs.org) - React framework
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Shadcn-UI](https://ui.shadcn.com) - UI component library
+- [MagicUI](https://magicui.design) - Advanced UI components
+- [Aceternity](https://ui.aceternity.com) - UI components and animations
+
+### Backend
+
+- [Express.js](https://expressjs.com) - Web framework
+- [Hono.js](https://hono.dev) - Lightweight web framework
+- [Prisma](https://prisma.io) - ORM
+- [MongoDB](https://www.mongodb.com) - Database
+- [Clerk](https://clerk.dev) - Authentication and User Management
+
+### Infrastructure
+
+- [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces) - Object
+  Storage
+- [Digital Ocean Managed Databases](https://www.digitalocean.com/products/managed-databases) -
+  Database hosting
+- [Digital Ocean Redis](https://www.digitalocean.com/products/managed-databases-redis) -
+  Caching
+- [Digital Ocean Kafka](https://www.digitalocean.com/products/managed-databases-kafka) -
+  Message queuing
+- [Resend](https://resend.com) - Email service
+- [Posthog](https://posthog.com) - Analytics
+- [Vercel](https://vercel.com) - Deployment
+- [HarnessIO](https://harness.io) - CI/CD
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   yarn install
+   ```
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+4. Start the development server:
+   ```bash
+   yarn dev
+   ```
+
+## Development
+
+- `yarn dev` - Start all applications in development mode
+- `yarn build` - Build all applications
+- `yarn test` - Run tests
+- `yarn lint` - Run linting
+- `yarn format` - Format code
+
+## Deployment
+
+The project is deployed on Vercel. Each application has its own deployment
+configuration in the `vercel.json` file.
+
+## Contact
 
 <a href="https://ratecreator.com/contact" style="text-decoration: none; display: flex; align-items: center;">
   <img src="https://www.orbizza.com/logos/ratecreator-logo.svg" style="width: 27px; height: 27px;" width="27" height="27" alt="Join the waitlist ratecreator.com">
@@ -115,4 +181,57 @@
 
 ### UI
 
-## Deployment
+The UI package contains shared components used across the platform, including:
+
+#### BlockNote Editor
+
+A rich text editor component built on top of BlockNote, providing a modern and
+feature-rich editing experience. The editor supports:
+
+- Text formatting (bold, italic, etc.)
+- Headings
+- Lists (ordered and unordered)
+- Code blocks
+- Blockquotes
+- YouTube video embeds
+- Dividers
+- Theme-aware styling (dark/light mode)
+
+##### Usage in Apps
+
+The BlockNote editor is used in various applications:
+
+1. **Content Management System (`/apps/content`)**
+
+   - Blog post creation and editing
+   - Newsletter content management
+   - Rich text content creation
+
+2. **Review Site (`/apps/web`)**
+
+   **_Used in Rendering_**
+
+- Blogs
+- Newsletters
+- Glossaries
+
+##### Key Features
+
+- **Rich Text Editing**: Full support for text formatting and styling
+- **Media Integration**: Easy embedding of YouTube videos and other media
+- **Theme Support**: Automatic dark/light mode adaptation
+- **Custom Blocks**: Extensible block system for custom content types
+- **Markdown Export**: Built-in support for converting content to Markdown
+  format
+
+##### Implementation
+
+The editor is implemented in the
+`packages/ui/src/components/common/blocknote-editor` directory with the
+following components:
+
+- `editor.tsx`: Main editor component
+- `blocknote-render.tsx`: Content rendering component
+- `blocknote-to-markdown.tsx`: Markdown conversion utilities
+- `youtube-blocknote.tsx`: YouTube video block implementation
+- `divider.tsx`: Divider block implementation

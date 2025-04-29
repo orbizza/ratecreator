@@ -9,15 +9,15 @@ This directory contains the infrastructure setup for the review services:
 
 ### review-algolia-update
 
-- Consumes messages from Kafka topic `new-review-algolia-update`
+- Consumes messages from Digital Ocean Kafka topic `new-review-algolia-update`
 - Updates Algolia search indices with review data (rating and review count)
 - Requires Algolia and Kafka credentials
 
 ### review-calculate
 
-- Consumes messages from Kafka
+- Consumes messages from Digital Ocean Kafka
 - Calculates review metrics
-- Updates the database with calculated metrics
+- Updates the Digital Ocean Managed Database with calculated metrics
 - Requires database and Kafka credentials
 
 ## Prerequisites
@@ -29,13 +29,13 @@ This directory contains the infrastructure setup for the review services:
 ## Required Environment Variables
 
 ```bash
-# Kafka
+# Kafka (Digital Ocean)
 KAFKA_SERVICE_URI=<kafka-service-uri>
 KAFKA_CA_CERT=<kafka-ca-cert>
 KAFKA_USERNAME=<kafka-username>
 KAFKA_PASSWORD=<kafka-password>
 
-# Database
+# Database (Digital Ocean Managed Database)
 DATABASE_URL_ONLINE=<database-url>
 
 # Algolia
@@ -94,8 +94,8 @@ docker-compose restart review-calculate
 1. If services fail to start, check:
 
    - Environment variables are correctly set
-   - Kafka connection is available
-   - Database connection is available
+   - Digital Ocean Kafka connection is available
+   - Digital Ocean Managed Database connection is available
    - Algolia credentials are valid
 
 2. Common issues:

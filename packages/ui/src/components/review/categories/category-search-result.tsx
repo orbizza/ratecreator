@@ -61,10 +61,27 @@ import {
 } from "../skeletons/skeleton-category-search-results";
 import { truncateText } from "@ratecreator/db/utils";
 
+/**
+ * CategoriesSearchResults Component
+ *
+ * A comprehensive search results page for categories that displays:
+ * - Category details and breadcrumb navigation
+ * - Filter sidebar for refining search results
+ * - Grid of creator cards matching the category
+ * - Related categories and subcategories
+ * - Pagination controls
+ *
+ * The component manages multiple states for filters, sorting, and pagination,
+ * and implements caching for category details to improve performance.
+ *
+ * @component
+ * @returns {JSX.Element} A category search results page
+ */
 export const CategoriesSearchResults: React.FC = () => {
   const params = useParams();
   const slug = params?.slug as string;
 
+  // State management for categories and creators
   const [categories, setCategories] = useState<Category[]>([]);
   const [creators, setCreators] = useState<SearchAccount[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -75,7 +92,7 @@ export const CategoriesSearchResults: React.FC = () => {
   const [hitsPerPage, setHitsPerPage] = useState<number>(0);
   const [currentPage, setCurrentPage] = useRecoilState(pageNumberState);
 
-  // Filters and Sorting
+  // Recoil state for filters and sorting
   const platform = useRecoilValue(platformFiltersState);
   const followers = useRecoilValue(followersFiltersState);
   const rating = useRecoilValue(ratingFiltersState);
@@ -86,13 +103,14 @@ export const CategoriesSearchResults: React.FC = () => {
   const claimed = useRecoilValue(claimedFilterState);
   const madeForKids = useRecoilValue(madeForKidsFilterState);
 
+  // Debounced platform filter to prevent excessive API calls
   const debouncedPlatform = useDebounce(platform, 1000);
   const [sortBy, setSortBy] = useRecoilState(sortByFilterState);
   const [isDescending, setIsDescending] = useRecoilState(
     isDescendingFilterState,
   );
 
-  // Add reset functions for all states
+  // Reset functions for all filter states
   const resetPlatform = useResetRecoilState(platformFiltersState);
   const resetFollowers = useResetRecoilState(followersFiltersState);
   const resetRating = useResetRecoilState(ratingFiltersState);
@@ -106,7 +124,9 @@ export const CategoriesSearchResults: React.FC = () => {
   const resetIsDescending = useResetRecoilState(isDescendingFilterState);
   const resetPageNumber = useResetRecoilState(pageNumberState);
 
-  // Add useEffect to reset all states on mount
+  /**
+   * Reset all filter states when the component mounts
+   */
   useEffect(() => {
     resetPlatform();
     resetFollowers();
@@ -135,11 +155,18 @@ export const CategoriesSearchResults: React.FC = () => {
     resetPageNumber,
   ]);
 
+  /**
+   * Toggle sort order between ascending and descending
+   */
   const handleToggle = () => {
     setIsDescending((prev) => !prev);
     setCurrentPage(0);
   };
 
+  /**
+   * Fetch creators based on current filters and pagination
+   * Implements caching and error handling
+   */
   const fetchCreators = useCallback(async () => {
     try {
       setCreatorLoading(true);
@@ -208,14 +235,23 @@ export const CategoriesSearchResults: React.FC = () => {
     slug,
   ]);
 
+  // Fetch creators when filters or pagination changes
   useEffect(() => {
     fetchCreators();
   }, [fetchCreators]);
 
+  /**
+   * Handle page change in pagination
+   * @param {number} page - The new page number
+   */
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
+  /**
+   * Fetch category details with caching
+   * Implements a 24-hour cache for category details
+   */
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
@@ -240,7 +276,6 @@ export const CategoriesSearchResults: React.FC = () => {
         }
 
         const data = await getCategoryDetails(slug);
-        // console.log("Fetched categories:", data);
         if (data) {
           setCategories(data);
           localStorage.setItem(slugDetails, JSON.stringify(data));
@@ -249,7 +284,6 @@ export const CategoriesSearchResults: React.FC = () => {
         }
         setLoading(false);
       } catch (err) {
-        console.error("Error in fetchCategoryDetails:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
         setLoading(false);
       }

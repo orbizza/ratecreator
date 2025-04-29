@@ -1,3 +1,15 @@
+/**
+ * WriteReviewCTA Component
+ *
+ * This component displays a call-to-action section for writing reviews, featuring:
+ * - Animated creator cards with hover effects
+ * - Creator statistics and ratings
+ * - Responsive layout with staggered animations
+ *
+ * The component uses Framer Motion for animations and includes interactive
+ * elements to showcase popular creators and encourage user engagement.
+ */
+
 "use client";
 
 import React from "react";
@@ -5,8 +17,14 @@ import { cubicBezier, motion } from "framer-motion";
 import { UsersRound } from "lucide-react";
 import { formatValue } from "@ratecreator/db/utils";
 import { useRouter } from "next/navigation";
+
 export function WriteReviewCTA() {
   const router = useRouter();
+
+  /**
+   * Animation variants for the first creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant1 = {
     initial: {
       y: 0,
@@ -31,6 +49,11 @@ export function WriteReviewCTA() {
       },
     },
   };
+
+  /**
+   * Animation variants for the second creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant2 = {
     initial: {
       y: 0,
@@ -56,6 +79,10 @@ export function WriteReviewCTA() {
     },
   };
 
+  /**
+   * Animation variants for the third creator card
+   * Defines initial and hover states with custom transitions
+   */
   const variant3 = {
     initial: {
       y: 0,
@@ -83,6 +110,10 @@ export function WriteReviewCTA() {
     },
   };
 
+  /**
+   * Container animation variants
+   * Controls the staggered animation of child elements
+   */
   const containerVariants = {
     initial: {},
     whileHover: {
@@ -94,6 +125,7 @@ export function WriteReviewCTA() {
 
   return (
     <div className="flex flex-col-reverse lg:flex-row justify-between items-center p-4 md:p-2 lg:p-0">
+      {/* Main container with creator cards */}
       <div className="hidden sm:block relative h-full w-full lg:w-1/2  transform-gpu rounded-lg border bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] dark:bg-black dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] md:max-h-[500px]">
         <motion.div
           variants={containerVariants}
@@ -103,6 +135,7 @@ export function WriteReviewCTA() {
         >
           <div className="flex h-[350px] w-full items-center justify-center rounded-t-xl bg-transparent ">
             <div className="relative flex cursor-pointer flex-col items-center justify-center gap-y-2 p-14">
+              {/* First creator card - MrBeast */}
               <motion.div
                 variants={variant1}
                 className="dark:bg-neutral-980 -top-10 z-[3] flex h-full w-full items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"
@@ -152,6 +185,8 @@ export function WriteReviewCTA() {
                   </div>
                 </div>
               </motion.div>
+
+              {/* Second creator card - Cocomelon */}
               <motion.div
                 variants={variant2}
                 className="absolute bottom-14 z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"
@@ -201,6 +236,8 @@ export function WriteReviewCTA() {
                   </div>
                 </div>
               </motion.div>
+
+              {/* Third creator card - T-Series */}
               <motion.div
                 variants={variant3}
                 className="absolute top-24 bottom-14  z-[2] m-auto flex h-fit w-fit items-center justify-between gap-x-2 rounded-md border border-neutral-400/20 bg-white p-5 px-2.5 transition-all duration-100 ease-linear dark:border-neutral-800 dark:bg-neutral-900"

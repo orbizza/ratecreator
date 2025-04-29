@@ -35,7 +35,7 @@ import {
   MostPopularCreatorLoadingCard,
 } from "../skeletons/skeleton-category-search-results";
 
-// CategoryList component
+// Props type for CategoryList component
 type CategoryListProps = {
   categories: PopularCategory[];
   selectedCategory: string;
@@ -43,6 +43,11 @@ type CategoryListProps = {
   isMobileSheet?: boolean;
 };
 
+/**
+ * CategoryList Component
+ * Renders a list of categories with selection functionality
+ * Used in both mobile sheet and desktop views
+ */
 const CategoryList = ({
   categories,
   selectedCategory,
@@ -65,7 +70,7 @@ const CategoryList = ({
   </div>
 );
 
-// CategoryItem component
+// Props type for CategoryItem component
 type CategoryItemProps = {
   category: string;
   isSelected: boolean;
@@ -73,6 +78,11 @@ type CategoryItemProps = {
   isMobileSheet?: boolean;
 };
 
+/**
+ * CategoryItem Component
+ * Individual category item with selection state and click handler
+ * Adapts its behavior based on whether it's in a mobile sheet or desktop view
+ */
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
   isSelected,
@@ -99,14 +109,18 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   );
 };
 
-// CategoryGrid component
+/**
+ * CategoryGrid Component
+ * Displays a responsive grid of account cards
+ * Adapts the number of displayed items based on screen size
+ */
 const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   const [screenSize, setScreenSize] = useState("");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
+  // Monitor screen size changes for responsive layout
   useEffect(() => {
     const checkScreenSize = () => {
-      //ToDo: change this to 640
       if (window.innerWidth < 720) {
         setScreenSize("small");
       } else if (window.innerWidth < 1024) {
@@ -116,16 +130,12 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
       }
     };
 
-    // Check on mount
     checkScreenSize();
-
-    // Add event listener
     window.addEventListener("resize", checkScreenSize);
-
-    // Clean up
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  // Determine number of accounts to display based on screen size
   const displayedAccounts = useMemo(() => {
     switch (screenSize) {
       case "small":
@@ -171,6 +181,7 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   );
 };
 
+// Cache configuration
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 const CACHE_KEYS = {
   popularCategories: "mostPopularCategories",
@@ -179,11 +190,18 @@ const CACHE_KEYS = {
   categoryAccountsExpiry: "mostPopularCategoryAccountExpiry",
 };
 
+/**
+ * Validates if cached data is still valid based on expiry time
+ */
 const isValidCache = (expiryKey: string) => {
   const cacheExpiry = localStorage.getItem(expiryKey);
   return cacheExpiry && new Date().getTime() < Number(cacheExpiry);
 };
 
+/**
+ * Sets data in localStorage with expiry time
+ * Includes error handling for storage quota exceeded
+ */
 const setCacheWithExpiry = (key: string, expiryKey: string, data: any) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
@@ -209,6 +227,9 @@ const setCacheWithExpiry = (key: string, expiryKey: string, data: any) => {
   }
 };
 
+/**
+ * Retrieves cached data if it exists and is still valid
+ */
 const getCachedData = (key: string, expiryKey: string) => {
   try {
     const cachedData = localStorage.getItem(key);
@@ -221,7 +242,12 @@ const getCachedData = (key: string, expiryKey: string) => {
   return null;
 };
 
-// Main component
+/**
+ * Main PopularCategories Component
+ * Manages the display of popular categories and their associated accounts
+ * Implements responsive design for both mobile and desktop views
+ * Includes caching mechanism for better performance
+ */
 const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
     [],
@@ -234,6 +260,7 @@ const PopularCategories = () => {
   const [loadingAccounts, setLoadingAccounts] = useState<boolean>(true);
   const router = useRouter();
 
+  // Fetch categories and their associated data
   useEffect(() => {
     const fetchCategories = async () => {
       try {

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+/**
+ * @fileoverview Deployment script for Review Create Sync service
+ * @description This script handles the deployment process for the Review Create Sync service,
+ * including environment validation, configuration updates, and service deployment.
+ * It ensures proper deployment configuration and handles the deployment process.
+ */
+
 # Exit on error
 set -e
 

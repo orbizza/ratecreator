@@ -1,5 +1,12 @@
 #!/bin/bash
 
+/**
+ * @fileoverview Build script for Review Create Sync service
+ * @description This script handles the build process for the Review Create Sync service,
+ * including environment setup, dependency installation, and Docker image building.
+ * It ensures proper configuration and builds the service for deployment.
+ */
+
 # Exit on error
 set -e
 

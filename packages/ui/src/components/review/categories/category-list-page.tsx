@@ -11,6 +11,9 @@ import SearchBar from "./search-bar";
 import { CategoryCardListPage } from "./category-card-list-page";
 import { CategoryListLoadingCard } from "../skeletons/skeleton-category-search-results";
 
+/**
+ * Light mode background colors for category cards
+ */
 const lightBgColors = [
   "bg-green-200",
   "bg-blue-200",
@@ -29,6 +32,9 @@ const lightBgColors = [
   "bg-rose-200",
 ];
 
+/**
+ * Dark mode background colors for category cards
+ */
 const darkBgColors = [
   "dark:bg-green-800",
   "dark:bg-blue-800",
@@ -47,6 +53,9 @@ const darkBgColors = [
   "dark:bg-rose-800",
 ];
 
+/**
+ * Light mode hover colors for category cards
+ */
 const lightHoverColors = [
   "hover:bg-green-300",
   "hover:bg-blue-300",
@@ -65,6 +74,9 @@ const lightHoverColors = [
   "hover:bg-rose-300",
 ];
 
+/**
+ * Dark mode hover colors for category cards
+ */
 const darkHoverColors = [
   "dark:hover:bg-green-900",
   "dark:hover:bg-blue-900",
@@ -83,11 +95,29 @@ const darkHoverColors = [
   "dark:hover:bg-rose-900",
 ];
 
+/**
+ * CategoryListPage Component
+ *
+ * A page component that displays a grid of category cards with search functionality.
+ * Features include:
+ * - Category data fetching with caching
+ * - Dynamic color assignment for categories
+ * - Responsive grid layout
+ * - Search bar integration
+ * - Loading and error states
+ *
+ * @component
+ * @returns {JSX.Element} A category list page with search and grid layout
+ */
 export const CategoryListPage: React.FC = () => {
   const [categories, setCategories] = useState<CategoryWithColor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Fetch categories with caching
+   * Implements a 24-hour cache for category data
+   */
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -134,6 +164,11 @@ export const CategoryListPage: React.FC = () => {
     fetchCategories();
   }, []);
 
+  /**
+   * Add background and hover colors to categories
+   * @param {CategoryWithColor[]} categories - Array of categories to colorize
+   * @returns {CategoryWithColor[]} Categories with assigned colors
+   */
   const addColorsToCategories = (
     categories: CategoryWithColor[],
   ): CategoryWithColor[] => {
@@ -146,6 +181,7 @@ export const CategoryListPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 mt-10">
+      {/* Search section */}
       <div className="flex flex-col items-start md:items-center w-full gap-y-4 pt-10 pb-14">
         <div className="text-2xl md:text-3xl font-bold mb-4 mx-0 sm:mx-6 md:mx-auto">
           What are you looking for?
@@ -155,6 +191,8 @@ export const CategoryListPage: React.FC = () => {
         </div>
       </div>
       <Separator className="my-0 md:my-4" />
+
+      {/* Categories grid section */}
       <div className="mt-10 lg:mt-20 my-[4rem]">
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold my-4 mb-10">
           Explore{" "}

@@ -1,7 +1,22 @@
+/**
+ * IconCloudSection Component
+ *
+ * This component displays a cloud of social media and communication platform icons.
+ * It's used to visually represent the various platforms that creators can be rated on.
+ *
+ * The component uses the IconCloud component from the UI library to render a dynamic
+ * cloud of icons based on the provided slugs.
+ */
+
 "use client";
 
 import { IconCloud } from "@ratecreator/ui";
 
+/**
+ * Array of social media and communication platform slugs
+ * These represent the icons that will be displayed in the cloud
+ * Each slug corresponds to a platform's icon in the IconCloud component
+ */
 const slugs = [
   // Popular Social Media Platforms with messaging apps
   "facebook",

@@ -11,6 +11,9 @@ import {
 import { cn } from "@ratecreator/ui/utils";
 import { Search } from "lucide-react";
 
+/**
+ * Structure for pixel data used in text animation
+ */
 interface PixelData {
   x: number;
   y: number;
@@ -18,14 +21,37 @@ interface PixelData {
   color: string;
 }
 
+/**
+ * Props for the AlgoliaSearchWithAnimations component
+ */
 interface AlgoliaSearchWithAnimationsProps {
+  /** Array of placeholder texts to cycle through */
   placeholders: string[];
+  /** Callback for input change events */
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Callback for form submission */
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  /** Callback for search initiation */
   onSearch?: () => void;
+  /** Current input value */
   value: string;
 }
 
+/**
+ * AlgoliaSearchWithAnimations Component
+ *
+ * An enhanced search input component that integrates with Algolia search.
+ * Features include:
+ * - Animated placeholder text cycling
+ * - Text particle animation on search
+ * - Responsive design
+ * - Dark mode support
+ * - Search state management
+ *
+ * @component
+ * @param {AlgoliaSearchWithAnimationsProps} props - Component props
+ * @returns {JSX.Element} An animated search input component
+ */
 export function AlgoliaSearchWithAnimations({
   placeholders,
   onChange,
@@ -45,13 +71,18 @@ export function AlgoliaSearchWithAnimations({
   const { status } = useInstantSearch();
   const isSearchStalled = status === "stalled";
 
-  // Placeholder animation logic
+  /**
+   * Start the placeholder text animation cycle
+   */
   const startAnimation = useCallback(() => {
     intervalRef.current = setInterval(() => {
       setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
     }, 3000);
   }, [placeholders.length]);
 
+  /**
+   * Handle visibility change to pause/resume animation
+   */
   const handleVisibilityChange = () => {
     if (document.visibilityState !== "visible" && intervalRef.current) {
       clearInterval(intervalRef.current); // Clear the interval when the tab is not visible
@@ -61,6 +92,7 @@ export function AlgoliaSearchWithAnimations({
     }
   };
 
+  // Initialize and cleanup placeholder animation
   useEffect(() => {
     startAnimation();
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -73,7 +105,9 @@ export function AlgoliaSearchWithAnimations({
     };
   }, [placeholders]);
 
-  // Drawing and animation logic
+  /**
+   * Draw the current input text to canvas for animation
+   */
   const draw = useCallback(() => {
     if (!inputRef.current || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -94,6 +128,7 @@ export function AlgoliaSearchWithAnimations({
     const pixelData = imageData.data;
     const newData: any[] = [];
 
+    // Convert text to pixel data for animation
     for (let t = 0; t < 800; t++) {
       let i = 4 * t * 800;
       for (let n = 0; n < 800; n++) {
@@ -125,10 +160,15 @@ export function AlgoliaSearchWithAnimations({
     }));
   }, [value]);
 
+  // Update canvas when input value changes
   useEffect(() => {
     draw();
   }, [value, draw]);
 
+  /**
+   * Animate the text particles
+   * @param {number} start - Starting position for animation
+   */
   const animate = (start: number) => {
     const animateFrame = (pos: number = 0) => {
       requestAnimationFrame(() => {
@@ -177,12 +217,19 @@ export function AlgoliaSearchWithAnimations({
     animateFrame(start);
   };
 
+  /**
+   * Handle keyboard input
+   * @param {React.KeyboardEvent<HTMLInputElement>} e - Keyboard event
+   */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !animating) {
       vanishAndSubmit();
     }
   };
 
+  /**
+   * Animate text disappearance and submit search
+   */
   const vanishAndSubmit = () => {
     setAnimating(true);
     draw();
@@ -198,6 +245,10 @@ export function AlgoliaSearchWithAnimations({
     }
   };
 
+  /**
+   * Handle form submission
+   * @param {React.FormEvent<HTMLFormElement>} e - Form event
+   */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSearch?.();
@@ -205,6 +256,10 @@ export function AlgoliaSearchWithAnimations({
     onSubmit && onSubmit?.(e);
   };
 
+  /**
+   * Handle input changes
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Input event
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!animating) {
       const newValue = e.target.value;

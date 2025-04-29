@@ -14,15 +14,34 @@ import {
   DropdownMenuTrigger,
 } from "@ratecreator/ui";
 
+/**
+ * Props for the CategoryBreadcrumb component
+ */
 interface CategoryBreadcrumbProps {
+  /** Array of category objects representing the breadcrumb path */
   categories: Category[];
 }
 
+/**
+ * CategoryBreadcrumb Component
+ *
+ * A breadcrumb navigation component that displays the category hierarchy.
+ * Features include:
+ * - Dynamic breadcrumb generation based on category depth
+ * - Dropdown menu for hidden categories
+ * - Responsive text sizing
+ * - Current category highlighting
+ *
+ * @component
+ * @param {CategoryBreadcrumbProps} props - Component props
+ * @returns {JSX.Element | null} A breadcrumb navigation component or null if no categories
+ */
 export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
   categories,
 }) => {
   if (categories.length === 0) return null;
 
+  // Get current and parent categories
   const currentCategory = categories[categories.length - 1];
   const parentCategory =
     categories.length > 1 ? categories[categories.length - 2] : null;
@@ -30,6 +49,9 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
   let visibleCategories: Category[];
   let hiddenCategories: Category[] = [];
 
+  /**
+   * Determine which categories to show and hide based on depth
+   */
   if (currentCategory.depth === 2) {
     // For depth 2, show only parent and current category
     visibleCategories = [parentCategory!, currentCategory];
@@ -46,6 +68,7 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
   return (
     <Breadcrumb className="lg:mb-4">
       <BreadcrumbList>
+        {/* Root category link */}
         <BreadcrumbItem>
           <BreadcrumbLink href="/categories" className="text-[12px] lg:text-sm">
             Category
@@ -53,6 +76,7 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
 
+        {/* Hidden categories dropdown */}
         {hiddenCategories.length > 0 && (
           <>
             <BreadcrumbItem>
@@ -79,6 +103,7 @@ export const CategoryBreadcrumb: React.FC<CategoryBreadcrumbProps> = ({
           </>
         )}
 
+        {/* Visible categories */}
         {visibleCategories.map((category, index) => (
           <React.Fragment key={category.id}>
             <BreadcrumbItem className="text-[12px] lg:text-sm">

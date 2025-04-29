@@ -24,6 +24,23 @@ import { Minus } from "lucide-react";
 import { Youtube } from "./youtube-blocknote";
 import { Divider } from "./divider";
 import { makeFilePublic } from "@ratecreator/actions";
+
+/**
+ * BlockNote Editor Component
+ *
+ * This component provides a rich text editor interface using BlockNote.
+ * It supports various block types and formatting options, including:
+ * - Text formatting (bold, italic, etc.)
+ * - Headings
+ * - Lists
+ * - Code blocks
+ * - Blockquotes
+ * - YouTube embeds
+ * - Dividers
+ *
+ * The editor is theme-aware and provides a user-friendly interface for content creation.
+ */
+
 interface EditorProps {
   onChange: (value: string) => void;
   initialContent?: string;

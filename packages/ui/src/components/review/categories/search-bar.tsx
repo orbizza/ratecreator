@@ -5,11 +5,26 @@ import { InstantSearch, Configure } from "react-instantsearch";
 import { getSearchClient } from "@ratecreator/db/algolia-client";
 import SearchContent from "./search-content";
 
+// Initialize Algolia search client
 const searchClient = getSearchClient();
 
+/**
+ * SearchBar Component
+ *
+ * A search component that integrates with Algolia for category search.
+ * Features include:
+ * - Real-time search with Algolia
+ * - Dynamic placeholder text
+ * - Search term state management
+ *
+ * @component
+ * @returns {JSX.Element} A search bar component with Algolia integration
+ */
 const SearchBar: React.FC = () => {
+  // State for managing the search input value
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Array of placeholder texts to cycle through in the search input
   const placeholders = [
     "Enter any category name",
     "Search for categories",
