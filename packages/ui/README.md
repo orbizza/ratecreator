@@ -86,7 +86,6 @@ To add new components:
 4. Add component documentation
 5. Test the component
 6. Build the package: `yarn build`
-7. Publish the package: `yarn publish`
 
 ## Best Practices
 
