@@ -107,7 +107,7 @@ export const CategoriesSearchResults: React.FC = () => {
   const debouncedPlatform = useDebounce(platform, 1000);
   const [sortBy, setSortBy] = useRecoilState(sortByFilterState);
   const [isDescending, setIsDescending] = useRecoilState(
-    isDescendingFilterState
+    isDescendingFilterState,
   );
 
   // Reset functions for all filter states
@@ -297,37 +297,37 @@ export const CategoriesSearchResults: React.FC = () => {
     categories.length > 1 ? categories[categories.length - 2] : null;
 
   return (
-    <div className='container mx-auto p-4 mt-16'>
-      <div className='flex flex-col'>
+    <div className="container mx-auto p-4 mt-16">
+      <div className="flex flex-col">
         {loading && (
-          <div className='flex flex-row gap-x-2 items-center'>
-            <span className='text-[12px] lg:text-sm text-muted-foreground hover:text-foreground'>
+          <div className="flex flex-row gap-x-2 items-center">
+            <span className="text-[12px] lg:text-sm text-muted-foreground hover:text-foreground">
               {" "}
               Category
             </span>
             <ChevronRight
-              className='text-sm text-muted-foreground '
+              className="text-sm text-muted-foreground "
               size={14}
             />
-            <Skeleton className='h-4 w-[300px]' />
+            <Skeleton className="h-4 w-[300px]" />
           </div>
         )}
         {!loading && <CategoryBreadcrumb categories={categories} />}
-        <div className='flex flex-col justify-center items-center w-full m-4 md:m-8 gap-2 md:gap-4'>
-          <div className='flex flex-wrap mx-auto justify-center items-baseline lg:text-5xl font-bold'>
-            <span className='sm:mr-2'>Best in</span>
+        <div className="flex flex-col justify-center items-center w-full m-4 md:m-8 gap-2 md:gap-4">
+          <div className="flex flex-wrap mx-auto justify-center items-baseline lg:text-5xl font-bold">
+            <span className="sm:mr-2">Best in</span>
             {loading ? (
-              <Skeleton className='h-8 w-[250px] inline-block' /> // Adjust width as needed
+              <Skeleton className="h-8 w-[250px] inline-block" /> // Adjust width as needed
             ) : (
               <span>{truncateText(currentCategory?.name, 30)}</span>
             )}
           </div>
-          <div className='flex flex-row items-center justify-center md:gap-x-2 text-muted-foreground'>
+          <div className="flex flex-row items-center justify-center md:gap-x-2 text-muted-foreground">
             {loading ? (
-              <Skeleton className='h-4 w-[250px]' />
+              <Skeleton className="h-4 w-[250px]" />
             ) : (
-              <div className='flex flex-col sm:flex-row items-center gap-x-2 gap-y-2'>
-                <span className='text-[13px] md:text-sm lg:text-xl'>
+              <div className="flex flex-col sm:flex-row items-center gap-x-2 gap-y-2">
+                <span className="text-[13px] md:text-sm lg:text-xl">
                   {truncateText(currentCategory?.shortDescription || "", 100)}
                 </span>
                 <Info size={14} />
@@ -335,10 +335,10 @@ export const CategoriesSearchResults: React.FC = () => {
             )}
           </div>
         </div>
-        <Separator className='my-[2rem] xl:my-[4rem]' />
+        <Separator className="my-[2rem] xl:my-[4rem]" />
       </div>
-      <div className='flex flex-row'>
-        <div className='hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4'>
+      <div className="flex flex-row">
+        <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
           {!loading && <FilterSidebar />}
           {!loading && (
             <>
@@ -351,32 +351,32 @@ export const CategoriesSearchResults: React.FC = () => {
             </>
           )}
           {loading && (
-            <div className='flex flex-col '>
+            <div className="flex flex-col ">
               <FilterSkeleton />
-              <CategoryLoadingCard text='Sub Categories' type='sub' />
-              <CategoryLoadingCard text='Related Categories' type='related' />
+              <CategoryLoadingCard text="Sub Categories" type="sub" />
+              <CategoryLoadingCard text="Related Categories" type="related" />
             </div>
           )}
-          {error && <div className='text-red-500'>{error}</div>}
+          {error && <div className="text-red-500">{error}</div>}
           {!loading && !error && !currentCategory && (
             <div>No category found</div>
           )}
         </div>
-        <div className='flex flex-col w-full xl:w-3/4 gap-4 mb-4'>
-          <div className='flex xl:hidden gap-y-2 flex-row items-center justify-between'>
+        <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
+          <div className="flex xl:hidden gap-y-2 flex-row items-center justify-between">
             {loading && (
               <Button
-                variant='default'
-                size='sm'
+                variant="default"
+                size="sm"
                 disabled
-                className='flex items-center gap-2'
+                className="flex items-center gap-2"
               >
                 <SlidersHorizontal size={16} />
-                <span className='hidden md:inline-block'>Filters</span>
+                <span className="hidden md:inline-block">Filters</span>
               </Button>
             )}
             {!loading && <FilterSidebar />}
-            <div className='flex flex-row items-center'>
+            <div className="flex flex-row items-center">
               {!loading && (
                 <SubCategoriesList
                   categories={currentCategory?.subcategories || []}
@@ -384,17 +384,17 @@ export const CategoriesSearchResults: React.FC = () => {
               )}
               {loading && (
                 <Button
-                  variant='default'
-                  size='sm'
+                  variant="default"
+                  size="sm"
                   disabled
-                  className='flex items-center gap-2'
+                  className="flex items-center gap-2"
                 >
                   <SquareStack size={16} />
-                  <span className='hidden md:inline-block'>Sub Categories</span>
+                  <span className="hidden md:inline-block">Sub Categories</span>
                 </Button>
               )}
             </div>
-            <div className='flex flex-row justify-between items-center '>
+            <div className="flex flex-row justify-between items-center ">
               {!loading && (
                 <RelatedCategories
                   categories={parentCategory?.subcategories || []}
@@ -402,26 +402,26 @@ export const CategoriesSearchResults: React.FC = () => {
               )}
               {loading && (
                 <Button
-                  variant='default'
-                  size='sm'
+                  variant="default"
+                  size="sm"
                   disabled
-                  className='flex items-center gap-2'
+                  className="flex items-center gap-2"
                 >
                   <ArrowRightLeft size={16} />
-                  <span className='hidden md:inline-block'>
+                  <span className="hidden md:inline-block">
                     Related Categories
                   </span>
                 </Button>
               )}
             </div>
           </div>
-          <div className='flex flex-row items-center justify-between'>
+          <div className="flex flex-row items-center justify-between">
             <div>
               {creatorLoading && (
-                <span className='text-muted-foreground text-sm'># of ###</span>
+                <span className="text-muted-foreground text-sm"># of ###</span>
               )}
               {!creatorLoading && (
-                <div className='flex flex-row items-center gap-x-2 text-muted-foreground text-sm'>
+                <div className="flex flex-row items-center gap-x-2 text-muted-foreground text-sm">
                   {" "}
                   {viewCount} of {count} <Info size={14} />
                 </div>

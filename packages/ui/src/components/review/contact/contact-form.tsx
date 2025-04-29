@@ -77,9 +77,9 @@ export const ContactForm = () => {
   };
 
   return (
-    <Card className='flex flex-col  w-full max-w-md'>
+    <Card className="flex flex-col  w-full max-w-md">
       <CardHeader>
-        <CardTitle className='text-2xl justify-center items-center'>
+        <CardTitle className="text-2xl justify-center items-center">
           Let&apos;s Talk
         </CardTitle>
         <CardDescription>
@@ -88,11 +88,11 @@ export const ContactForm = () => {
         </CardDescription>
       </CardHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-          <div className='space-y-0 px-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-0 px-4">
             <FormField
               control={form.control}
-              name='name'
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
@@ -100,7 +100,7 @@ export const ContactForm = () => {
                     <Input
                       {...field}
                       disabled={isPending}
-                      placeholder='John Doe'
+                      placeholder="John Doe"
                     />
                   </FormControl>
                   <FormMessage />
@@ -109,7 +109,7 @@ export const ContactForm = () => {
             />
             <FormField
               control={form.control}
-              name='email'
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -117,8 +117,8 @@ export const ContactForm = () => {
                     <Input
                       {...field}
                       disabled={isPending}
-                      placeholder='john.doe@example.com'
-                      type='email'
+                      placeholder="john.doe@example.com"
+                      type="email"
                     />
                   </FormControl>
                   <FormMessage />
@@ -127,17 +127,17 @@ export const ContactForm = () => {
             />
             <FormField
               control={form.control}
-              name='message'
+              name="message"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Message</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      className='min-h-[100px]'
-                      id='message'
+                      className="min-h-[100px]"
+                      id="message"
                       disabled={isPending}
-                      placeholder='Enter your message'
+                      placeholder="Enter your message"
                     />
                   </FormControl>
                   <FormMessage />
@@ -145,18 +145,18 @@ export const ContactForm = () => {
               )}
             />
           </div>
-          <div className='mx-auto pl-4 pr-4'>
+          <div className="mx-auto pl-4 pr-4">
             <FormError message={error} />
             <FormSuccess message={success} />
           </div>
-          <small className='text-center p-1 block text-gray-500'>
+          <small className="text-center p-1 block text-gray-500">
             By submitting the form, you confirm that you agree to the processing
             of your personal data by Orbizza, Inc as described in the
-            <a href='/privacy'> Privacy Statement</a> and our{" "}
-            <a href='/terms'>Terms of Use</a>.
+            <a href="/privacy"> Privacy Statement</a> and our{" "}
+            <a href="/terms">Terms of Use</a>.
           </small>
           <CardFooter>
-            <Button disabled={isPending} type='submit' className='w-full'>
+            <Button disabled={isPending} type="submit" className="w-full">
               Send message
             </Button>
           </CardFooter>

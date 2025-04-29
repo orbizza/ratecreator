@@ -29,7 +29,7 @@ export const ReviewListCardGridSelf: React.FC<ReviewListCardGridProps> = ({
   reviews,
 }) => {
   return (
-    <div className='w-full flex flex-col items-center justify-center gap-4 mt-4 mb-10'>
+    <div className="w-full flex flex-col items-center justify-center gap-4 mt-4 mb-10">
       {reviews.map((review) => (
         <ReviewCardSelf key={review._id} review={review} />
       ))}

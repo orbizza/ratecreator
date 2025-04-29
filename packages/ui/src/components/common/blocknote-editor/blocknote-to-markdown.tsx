@@ -181,7 +181,7 @@ export function NewsletterMarkdown({
                     bgColor || "#111111"
                   }; padding: 16px; border-radius: 8px; overflow-x: auto; color: ${
                     textColor || "#d4d4d4"
-                  }; font-family: monospace; font-size: 14px; line-height: 1.5; margin: 16px 0;">$2</pre>`
+                  }; font-family: monospace; font-size: 14px; line-height: 1.5; margin: 16px 0;">$2</pre>`,
                 );
               }
 

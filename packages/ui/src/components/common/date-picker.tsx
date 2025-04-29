@@ -43,23 +43,23 @@ export function DatePicker({
   return (
     <Popover>
       {/* Trigger button that displays the selected date or placeholder */}
-      <PopoverTrigger asChild className='z-50'>
+      <PopoverTrigger asChild className="z-50">
         <Button
           variant={"date"}
           className={cn(
             "w-[280px] justify-start text-left font-normal bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-600",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
           )}
         >
           {date ? format(date, "PPP") : <span>Pick a date</span>}
-          <CalendarIcon className='ml-auto h-4 w-4' />
+          <CalendarIcon className="ml-auto h-4 w-4" />
         </Button>
       </PopoverTrigger>
 
       {/* Calendar popover content */}
-      <PopoverContent className='w-auto p-0 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-200'>
+      <PopoverContent className="w-auto p-0 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-200">
         <Calendar
-          mode='single'
+          mode="single"
           selected={date}
           onSelect={(day) => {
             // Validate that the selected date is not before today

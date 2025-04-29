@@ -21,10 +21,10 @@ export const Divider = createReactBlockSpec(
   {
     render: () => {
       return (
-        <div className='p-2 w-full'>
-          <hr className='border-t border-neutral-200 mx-0 my-0' />
+        <div className="p-2 w-full">
+          <hr className="border-t border-neutral-200 mx-0 my-0" />
         </div>
       );
     },
-  }
+  },
 );

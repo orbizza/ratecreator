@@ -40,7 +40,7 @@ export function CataloguedStats() {
   }, []);
 
   return (
-    <section id='catalogued-section' className='mb-[5rem] sm:mb-[16rem]'>
+    <section id="catalogued-section" className="mb-[5rem] sm:mb-[16rem]">
       <div
         className={`total-accounts w-full mt-0  p-8 transition-opacity duration-1000 ${
           isCataloguedVisible ? "opacity-100" : "opacity-0"

@@ -37,7 +37,7 @@ export const LandingPage = () => {
           observer.disconnect(); // Stop observing once visible
         }
       },
-      { threshold: 0.1 } // Trigger when 10% of the element is visible
+      { threshold: 0.1 }, // Trigger when 10% of the element is visible
     );
 
     if (creatorCtaRef.current) {
@@ -52,11 +52,11 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <main className='min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto'>
+    <main className="min-h-[calc(100vh-20vh)] max-w-screen-xl mx-auto">
       {/* Hero Section with Create Creator CTA */}
       <HeroSection />
 
-      <Separator className='my-4' />
+      <Separator className="my-4" />
 
       {/* Popular Categories section with Write a review CTA */}
       <PopularCategories />
@@ -64,13 +64,13 @@ export const LandingPage = () => {
       {/* Statistics section showing catalogued data */}
       <CataloguedStats />
 
-      <Separator className='my-0 sm:my-4' />
+      <Separator className="my-0 sm:my-4" />
 
       {/* Why Rate Creator section explaining the platform's benefits */}
       <WhyRateCreator />
 
       {/* Decorative sphere mask element */}
-      <div className='mb-0 sm:mb-10'>
+      <div className="mb-0 sm:mb-10">
         <SphereMask />
       </div>
 
@@ -85,10 +85,10 @@ export const LandingPage = () => {
       </div>
 
       {/* Pre-footer section with animated text */}
-      <div className='ml-1 sm:ml-0 h-[10rem] -my-[2rem] flex items-center justify-center'>
+      <div className="ml-1 sm:ml-0 h-[10rem] -my-[2rem] flex items-center justify-center">
         <SparklesText
-          text='RATE CREATORS'
-          className='text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-rose-200'
+          text="RATE CREATORS"
+          className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-rose-200"
           colors={{ first: "#ff3131", second: "#fecdd3" }}
         />
       </div>

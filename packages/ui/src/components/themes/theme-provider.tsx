@@ -16,9 +16,9 @@ export function ThemeProvider({ children, ...props }: NextThemeProviderProps) {
   return (
     <NextThemesProvider
       // Use class attribute for theme switching
-      attribute='class'
+      attribute="class"
       // Default to system theme
-      defaultTheme='system'
+      defaultTheme="system"
       // Enable system theme detection
       enableSystem
       // Disable transition animation when changing themes

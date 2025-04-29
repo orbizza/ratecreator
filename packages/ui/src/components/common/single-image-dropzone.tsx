@@ -72,7 +72,7 @@ const ERROR_MESSAGES = {
 const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
   (
     { dropzoneOptions, width, height, value, className, disabled, onChange },
-    ref
+    ref,
   ) => {
     // Create image URL from File or string value
     const imageUrl = React.useMemo(() => {
@@ -118,7 +118,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
           imageUrl && variants.image,
           (isDragReject ?? fileRejections[0]) && variants.reject,
           isDragAccept && variants.accept,
-          className
+          className,
         ).trim(),
       [
         isFocused,
@@ -128,7 +128,7 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
         isDragReject,
         disabled,
         className,
-      ]
+      ],
     );
 
     // Generate error message based on rejection type
@@ -149,11 +149,11 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
     }, [fileRejections, dropzoneOptions]);
 
     return (
-      <div className='relative'>
+      <div className="relative">
         {/* Loading spinner when disabled */}
         {disabled && (
-          <div className='flex items-center justify-center absolute inset-y-0 h-full w-full bg-background/80 z-50'>
-            <Spinner size='lg' />
+          <div className="flex items-center justify-center absolute inset-y-0 h-full w-full bg-background/80 z-50">
+            <Spinner size="lg" />
           </div>
         )}
 
@@ -173,15 +173,15 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
           {imageUrl ? (
             // Image preview
             <img
-              className='h-full w-full rounded-md object-cover'
+              className="h-full w-full rounded-md object-cover"
               src={imageUrl}
               alt={acceptedFiles[0]?.name}
             />
           ) : (
             // Upload placeholder
-            <div className='flex flex-col items-center justify-center text-xs text-gray-400'>
-              <UploadCloudIcon className='mb-2 h-7 w-7' />
-              <div className='text-gray-400'>
+            <div className="flex flex-col items-center justify-center text-xs text-gray-400">
+              <UploadCloudIcon className="mb-2 h-7 w-7" />
+              <div className="text-gray-400">
                 Click or drag file to this area to upload
               </div>
             </div>
@@ -190,15 +190,15 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
           {/* Remove image button */}
           {imageUrl && !disabled && (
             <div
-              className='group absolute right-0 top-0 -translate-y-1/4 translate-x-1/4 transform'
+              className="group absolute right-0 top-0 -translate-y-1/4 translate-x-1/4 transform"
               onClick={(e) => {
                 e.stopPropagation();
                 void onChange?.(undefined);
               }}
             >
-              <div className='flex h-5 w-5 items-center justify-center rounded-md border border-solid border-gray-500 bg-white transition-all duration-300 hover:h-6 hover:w-6 dark:border-gray-400 dark:bg-black'>
+              <div className="flex h-5 w-5 items-center justify-center rounded-md border border-solid border-gray-500 bg-white transition-all duration-300 hover:h-6 hover:w-6 dark:border-gray-400 dark:bg-black">
                 <X
-                  className='text-gray-500 dark:text-gray-400'
+                  className="text-gray-500 dark:text-gray-400"
                   width={16}
                   height={16}
                 />
@@ -208,10 +208,10 @@ const SingleImageDropzone = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {/* Error message display */}
-        <div className='mt-1 text-xs text-red-500'>{errorMessage}</div>
+        <div className="mt-1 text-xs text-red-500">{errorMessage}</div>
       </div>
     );
-  }
+  },
 );
 SingleImageDropzone.displayName = "SingleImageDropzone";
 
@@ -237,7 +237,7 @@ const Button = React.forwardRef<
         "border border-gray-400 text-gray-400 shadow hover:bg-gray-100 hover:text-gray-500 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700",
         // size
         "h-6 rounded-md px-2 text-xs",
-        className
+        className,
       )}
       ref={ref}
       {...props}
