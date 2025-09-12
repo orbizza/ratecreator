@@ -45,9 +45,7 @@ export function getKafkaClient(): Kafka {
 
     kafkaInstance = new Kafka({
       clientId: "ratecreator-app",
-      brokers: [
-        "db-kafka-nyc3-91394-do-user-17726573-0.j.db.ondigitalocean.com:25073",
-      ],
+      brokers: [`${process.env.KAFKA_HOST}:${process.env.KAFKA_PORT}`],
       ssl: {
         rejectUnauthorized: true, // Enable certificate validation
         ca: [process.env.KAFKA_CA_CERT],
