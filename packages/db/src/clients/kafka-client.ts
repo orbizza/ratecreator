@@ -39,13 +39,15 @@ export function getKafkaClient(): Kafka {
     }
     if (!process.env.KAFKA_CA_CERT) {
       throw new Error(
-        "Kafka CA certificate not found in environment variables",
+        "Kafka CA certificate not found in environment variables"
       );
     }
 
     kafkaInstance = new Kafka({
       clientId: "ratecreator-app",
-      brokers: [`${process.env.KAFKA_HOST}:${process.env.KAFKA_PORT}`],
+      brokers: [
+        "kafka-ratecreator-nyc3-prod-do-user-24600032-0.j.db.ondigitalocean.com:25073",
+      ],
       ssl: {
         rejectUnauthorized: true, // Enable certificate validation
         ca: [process.env.KAFKA_CA_CERT],
@@ -122,7 +124,7 @@ export async function getKafkaProducer(): Promise<Producer> {
 
     producerInstance.on("producer.disconnect", async () => {
       console.warn(
-        "⚠️ Kafka Producer disconnected! Attempting reconnection...",
+        "⚠️ Kafka Producer disconnected! Attempting reconnection..."
       );
       producerConnectPromise = null;
       await connectProducer(producerInstance!);
