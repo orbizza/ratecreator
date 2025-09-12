@@ -54,9 +54,9 @@ fi
 # Check available disk space
 AVAILABLE_SPACE_KB=$(df -k / | tail -1 | awk '{print $4}')
 AVAILABLE_SPACE_GB=$((AVAILABLE_SPACE_KB/1024/1024))
-if [ "$AVAILABLE_SPACE_GB" -lt 25 ]; then
-    echo "⚠️  Warning: System has less than 25GB available space (${AVAILABLE_SPACE_GB}GB detected)"
-    echo "Recommended: 25GB or more available space"
+if [ "$AVAILABLE_SPACE_GB" -lt 18 ]; then
+    echo "⚠️  Warning: System has less than 18GB available space (${AVAILABLE_SPACE_GB}GB detected)"
+    echo "Recommended: 18GB or more available space"
     read -p "Continue anyway? (y/n) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then

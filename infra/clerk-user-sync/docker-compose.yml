@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   clerk-consumer:
-    image: registry.digitalocean.com/orbizza/clerk-consumer:latest
+    image: registry.digitalocean.com/ratecreator/clerk-consumer:latest
     restart: always
     environment:
       - KAFKA_SERVICE_URI=${KAFKA_SERVICE_URI}
@@ -16,7 +16,7 @@ services:
       - ${HOME}/.docker/config.json:/root/.docker/config.json:ro
 
   clerk-producer:
-    image: registry.digitalocean.com/orbizza/clerk-producer:latest
+    image: registry.digitalocean.com/ratecreator/clerk-producer:latest
     restart: always
     expose:
       - "3010"

@@ -30,7 +30,7 @@ docker login registry.digitalocean.com
 echo "🏭 Building and pushing clerk-user-sync..."
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
-    -t registry.digitalocean.com/orbizza/clerk-user-sync:latest \
+    -t registry.digitalocean.com/ratecreator/clerk-user-sync:latest \
     -f apps/consumers/clerk-user-sync/Dockerfile \
     --push \
     .

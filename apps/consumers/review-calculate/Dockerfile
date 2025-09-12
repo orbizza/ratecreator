@@ -18,7 +18,10 @@ RUN yarn install --frozen-lockfile --network-timeout 600000
 RUN cd apps/consumers/review-calculate && yarn build-review-calculate
 
 # Generate Prisma Client
-RUN cd packages/db && npx prisma generate --schema=prisma/schema.prisma
+# RUN cd packages/db && npx prisma generate --schema=prisma/schema.prisma
+RUN cd packages/db && \
+    PRISMA_CLI_QUERY_ENGINE_TYPE=binary \
+    npx prisma generate --schema=prisma/schema.prisma
 
 # Stage 2: Runtime
 FROM node:18-bullseye-slim as runtime

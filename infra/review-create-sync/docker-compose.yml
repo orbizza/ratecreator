@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   review-algolia-update:
-    image: registry.digitalocean.com/orbizza/review-algolia-update:latest
+    image: registry.digitalocean.com/ratecreator/review-algolia-update:latest
     restart: always
     environment:
       - KAFKA_SERVICE_URI=${KAFKA_SERVICE_URI}
@@ -17,7 +17,7 @@ services:
       - ${HOME}/.docker/config.json:/root/.docker/config.json:ro
 
   review-calculate:
-    image: registry.digitalocean.com/orbizza/review-calculate:latest
+    image: registry.digitalocean.com/ratecreator/review-calculate:latest
     restart: always
     environment:
       - KAFKA_SERVICE_URI=${KAFKA_SERVICE_URI}
