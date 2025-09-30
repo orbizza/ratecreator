@@ -80,7 +80,6 @@ export async function fetchReviewsAction(
     updatedAt: review.updatedAt,
     isEdited: review.isEdited,
     editHistory: review.editHistory,
-    reportCount: review.reportCount,
     lastActivityAt: review.lastActivityAt,
     viewCount: review.viewCount,
   })) as ReviewType[];

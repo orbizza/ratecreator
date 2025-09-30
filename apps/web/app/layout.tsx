@@ -6,7 +6,7 @@ import "@ratecreator/ui/styles.css";
 import "./globals.css";
 import { Providers, CSPostHogProvider } from "./providers";
 import { Appbar, Footer } from "@ratecreator/ui/review";
-import { Toaster } from "@ratecreator/ui";
+import { StickyBanner, Toaster } from "@ratecreator/ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -124,6 +124,21 @@ export default function RootLayout({
        }
      `}</style>
             <Providers>
+              {/* Sticky Banner: Remove this block to disable the site-wide banner.
+                  If you remove it, also set the navbar offset back to top-0 in
+                  `packages/ui/src/components/review/nav-bar/appbar.tsx`. */}
+              <StickyBanner className="bg-gradient-to-b from-amber-400 to-amber-500">
+                <p className="mx-0 max-w-[90%] text-black dark:text-black font-medium">
+                  Site is under maintenance. Expected to be back by 04/10/2025
+                  {/* <a
+                    href='#'
+                    className='transition duration-200 hover:underline'
+                  >
+                    
+                  </a> */}
+                </p>
+              </StickyBanner>
+              {/* Navbar appears below the banner; offset is configured inside Appbar. */}
               <Appbar />
               {children}
               <Footer />
