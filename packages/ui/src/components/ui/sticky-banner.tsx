@@ -30,7 +30,7 @@ export const StickyBanner = ({
       className={cn(
         // Ensure banner is above navbar and consistent height; shorter on mobile
         "sticky inset-x-0 top-0 z-[60] flex h-12 sm:h-16 w-full items-center justify-center bg-transparent px-4",
-        className
+        className,
       )}
       initial={{
         y: -100,
