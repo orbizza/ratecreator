@@ -70,32 +70,34 @@ export function Appbar() {
   }, [query]);
 
   return (
-    <header className="px-4 py-2">
-      <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
+    <header className='px-4 py-2'>
+      {/* Navbar is offset to sit below the StickyBanner. If you remove the banner,
+          change `top-12 sm:top-16` back to `top-0`. */}
+      <div className='max-w-screen-4xl mx-auto fixed top-12 sm:top-16 left-0 right-0 z-50 shadow-sm'>
         <div
-          className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
+          className='w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md'
           style={navBarStyle}
         >
-          <div className="w-full flex flex-row items-center justify-between p-2">
+          <div className='w-full flex flex-row items-center justify-between p-2'>
             {/* Logo */}
-            <div className="flex flex-row items-center gap-2 mx-2 mr-4">
-              <Link href="/" passHref className="flex items-center gap-1">
+            <div className='flex flex-row items-center gap-2 mx-2 mr-4'>
+              <Link href='/' passHref className='flex items-center gap-1'>
                 <Image
-                  src="/logo.svg"
-                  alt="Rate Creator"
+                  src='/logo.svg'
+                  alt='Rate Creator'
                   width={40}
                   height={40}
-                  className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10"
+                  className='w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10'
                 />
-                <span className="text-lg  xl:text-2xl font-semibold whitespace-nowrap">
-                  RATE<span className="text-[#ff3131]"> CREATOR</span>
+                <span className='text-lg  xl:text-2xl font-semibold whitespace-nowrap'>
+                  RATE<span className='text-[#ff3131]'> CREATOR</span>
                 </span>
               </Link>
             </div>
 
             {/* Search Bar */}
             {showSearchBar && (
-              <div className="hidden lg:block mx-[50px] xl:mx-20 w-full relative items-center justify-center">
+              <div className='hidden lg:block mx-[50px] xl:mx-20 w-full relative items-center justify-center'>
                 <PlaceholdersAndVanishInput
                   placeholders={placeholders}
                   onClick={handleSerarchClick}
@@ -104,14 +106,14 @@ export function Appbar() {
             )}
 
             {/* Additional Components */}
-            <div className="flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2">
-              <div className="hidden 2xl:flex items-center">
+            <div className='flex items-center space-x-2 lg:space-x-2 mr-0 md:mr-2'>
+              <div className='hidden 2xl:flex items-center'>
                 <MainMenu />
               </div>
               {showSearchBar && (
-                <div className="block lg:hidden">
+                <div className='block lg:hidden'>
                   <Button
-                    variant="ghost"
+                    variant='ghost'
                     size={"icon"}
                     onClick={handleSerarchClick}
                   >
@@ -120,7 +122,7 @@ export function Appbar() {
                 </div>
               )}
 
-              <div className="block 2xl:hidden">
+              <div className='block 2xl:hidden'>
                 <MobileSideNav />
               </div>
             </div>
