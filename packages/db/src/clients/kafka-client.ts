@@ -39,7 +39,7 @@ export function getKafkaClient(): Kafka {
     }
     if (!process.env.KAFKA_CA_CERT) {
       throw new Error(
-        "Kafka CA certificate not found in environment variables"
+        "Kafka CA certificate not found in environment variables",
       );
     }
 
@@ -122,7 +122,7 @@ export async function getKafkaProducer(): Promise<Producer> {
 
     producerInstance.on("producer.disconnect", async () => {
       console.warn(
-        "⚠️ Kafka Producer disconnected! Attempting reconnection..."
+        "⚠️ Kafka Producer disconnected! Attempting reconnection...",
       );
       producerConnectPromise = null;
       await connectProducer(producerInstance!);
