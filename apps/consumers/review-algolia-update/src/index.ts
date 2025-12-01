@@ -12,31 +12,91 @@ async function processMessage(message: any) {
   const payload = JSON.parse(message.value.toString());
   console.log("Processing message with payload:", JSON.stringify(payload));
 
-  try {
-    const objectID = payload.objectID;
-    const rating = payload.rating;
-    const reviewCount = payload.reviewCount;
+  const objectID = payload.objectID;
+  const rating = payload.rating;
+  const reviewCount = payload.reviewCount;
 
-    const algoliaClient = getWriteClient();
-    const BASE_INDEX_NAME = "accounts";
-
-    await algoliaClient.partialUpdateObject({
-      indexName: BASE_INDEX_NAME,
+  if (!objectID || rating === undefined || reviewCount === undefined) {
+    console.error("Invalid payload: missing required fields", {
       objectID,
-      attributesToUpdate: {
-        rating,
-        reviewCount,
-      },
-      createIfNotExists: false,
+      rating,
+      reviewCount,
     });
-    console.log(
-      `Updated algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`,
-    );
-  } catch (error) {
-    console.error(
-      `Error processing message for rating in ${payload.objectID}:`,
-      error,
-    );
+    return;
+  }
+
+  const algoliaClient = getWriteClient();
+  const BASE_INDEX_NAME = "accounts";
+
+  // Retry logic for Algolia updates (handles transient failures)
+  const maxRetries = 3;
+  let retryCount = 0;
+  let lastError: Error | null = null;
+
+  while (retryCount < maxRetries) {
+    try {
+      // partialUpdateObject already waits for completion in the newer Algolia client
+      await algoliaClient.partialUpdateObject({
+        indexName: BASE_INDEX_NAME,
+        objectID,
+        attributesToUpdate: {
+          rating,
+          reviewCount,
+        },
+        createIfNotExists: false,
+      });
+
+      console.log(
+        `✅ Successfully updated Algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`
+      );
+      return; // Success, exit retry loop
+    } catch (error: any) {
+      retryCount++;
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Log detailed error information
+      const errorMessage =
+        error?.message || error?.toString() || "Unknown error";
+      const errorStatus = error?.status || error?.statusCode || "N/A";
+
+      console.error(
+        `❌ Algolia update failed (attempt ${retryCount}/${maxRetries}) for ${objectID}:`,
+        {
+          error: errorMessage,
+          status: errorStatus,
+          objectID,
+          rating,
+          reviewCount,
+        }
+      );
+
+      // If it's a 404 (object not found), don't retry
+      if (errorStatus === 404 || errorMessage.includes("not found")) {
+        console.error(
+          `⚠️ Object ${objectID} not found in Algolia index. Skipping retry.`
+        );
+        return;
+      }
+
+      // If it's the last retry, throw the error
+      if (retryCount >= maxRetries) {
+        console.error(
+          `❌ All retry attempts failed for ${objectID}. Last error:`,
+          lastError
+        );
+        throw lastError;
+      }
+
+      // Exponential backoff: wait 1s, 2s, 4s
+      const backoffMs = Math.pow(2, retryCount - 1) * 1000;
+      console.log(`⏳ Retrying in ${backoffMs}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    }
+  }
+
+  // This should never be reached, but TypeScript needs it
+  if (lastError) {
+    throw lastError;
   }
 }
 
@@ -67,8 +127,19 @@ async function startConsumer() {
 
     await consumer.run({
       eachMessage: async ({ message }) => {
-        console.log("Received message:", message?.value?.toString());
-        await processMessage(message);
+        try {
+          console.log("Received message:", message?.value?.toString());
+          await processMessage(message);
+        } catch (error) {
+          // Log error but don't crash the consumer
+          // The error is already logged in processMessage with retry logic
+          console.error(
+            "Error in message handler (message will be retried by Kafka if needed):",
+            error
+          );
+          // Re-throw to let Kafka handle retry logic
+          throw error;
+        }
       },
     });
   } catch (error) {
@@ -103,7 +174,7 @@ process.on("SIGINT", async () => {
 
 // Start the consumer if this is the main module
 if (require.main === module) {
-  console.log("Starting review-calculate consumer service...");
+  console.log("Starting review-algolia-update consumer service...");
   startConsumer().catch((error) => {
     console.error("Fatal error:", error);
     process.exit(1);
