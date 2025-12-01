@@ -71,9 +71,8 @@ export function Appbar() {
 
   return (
     <header className="px-4 py-2">
-      {/* Navbar is offset to sit below the StickyBanner. If you remove the banner,
-          change `top-12 sm:top-16` back to `top-0`. */}
-      <div className="max-w-screen-4xl mx-auto fixed top-12 sm:top-16 left-0 right-0 z-50 shadow-sm">
+      {/* Navbar positioned at the very top now that StickyBanner is removed. */}
+      <div className="max-w-screen-4xl mx-auto fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div
           className="w-full border-b-[1px] dark:border-b-neutral-600 backdrop-blur-md"
           style={navBarStyle}

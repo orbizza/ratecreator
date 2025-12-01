@@ -6,6 +6,8 @@ import {
 } from "@ratecreator/db/kafka-client";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { getRedisClient } from "@ratecreator/db/redis-do";
+import { getMongoClient } from "@ratecreator/db/mongo-client";
+import { ObjectId } from "mongodb";
 
 const prisma = getPrismaClient();
 const redis = getRedisClient();
@@ -57,9 +59,7 @@ async function processMessage(message: any) {
           accountId: accountId,
         },
       },
-      include: {
-        reviews: true,
-      },
+      select: { id: true },
     });
 
     if (!account) {
@@ -67,20 +67,129 @@ async function processMessage(message: any) {
       return;
     }
 
-    const reviewCount = account?.reviews.length || 0;
-    const currentAvgRating = account?.rating || 0;
-    const newAvgRating =
-      reviewCount < 100
-        ? simpleAverage(currentAvgRating, rating, reviewCount)
-        : bayesianAverage(currentAvgRating, rating, reviewCount);
+    // Use raw MongoDB aggregation queries with timeout to prevent transaction timeout
+    // Query only published, non-deleted reviews
+    console.log(`Aggregating reviews for account ${accountId}...`);
 
-    await prisma.account.update({
-      where: { id: account.id },
-      data: {
-        rating: newAvgRating,
-        reviewCount: reviewCount,
-      },
-    });
+    // Get MongoDB client once and reuse it
+    const mongoClient = await getMongoClient();
+    const db = mongoClient.db("ratecreator");
+
+    let newReviewCount = 0;
+    let aggregatedAvg: number | null = null;
+
+    try {
+      // Use raw MongoDB aggregation with maxTimeMS to prevent timeout
+      // Set timeout to 30 seconds (less than typical transaction lifetime limit)
+      const [countResult, avgResult] = await Promise.all([
+        db.collection("Review").countDocuments(
+          {
+            accountId: new ObjectId(account.id),
+            isDeleted: false,
+            status: "PUBLISHED",
+          },
+          { maxTimeMS: 30000 },
+        ),
+        db
+          .collection("Review")
+          .aggregate(
+            [
+              {
+                $match: {
+                  accountId: new ObjectId(account.id),
+                  isDeleted: false,
+                  status: "PUBLISHED",
+                },
+              },
+              {
+                $group: {
+                  _id: null,
+                  avgStars: { $avg: "$stars" },
+                },
+              },
+            ],
+            { maxTimeMS: 30000 },
+          )
+          .toArray(),
+      ]);
+
+      newReviewCount = countResult;
+      aggregatedAvg =
+        avgResult.length > 0 && avgResult[0].avgStars !== null
+          ? avgResult[0].avgStars
+          : null;
+    } catch (error) {
+      console.error(
+        `Aggregation query failed for account ${accountId}:`,
+        error,
+      );
+      throw error;
+    }
+
+    const newAvgRating =
+      aggregatedAvg !== null ? Number(aggregatedAvg.toFixed(2)) : rating;
+
+    console.log(
+      `Account ${accountId}: ${newReviewCount} reviews, avg rating ${newAvgRating}`,
+    );
+
+    // Update both Prisma and MongoDB independently to avoid transaction timeout
+    // Use Promise.allSettled to ensure both updates are attempted even if one fails
+    const [prismaResult, mongoResult] = await Promise.allSettled([
+      // Prisma update (no transaction wrapper - operations are independent)
+      prisma.account.update({
+        where: { id: account.id },
+        data: {
+          rating: newAvgRating,
+          reviewCount: newReviewCount,
+        },
+      }),
+      // Raw MongoDB update with timeout to avoid transaction issues
+      db.collection("Account").updateOne(
+        { _id: new ObjectId(account.id) },
+        {
+          $set: {
+            rating: newAvgRating,
+            reviewCount: newReviewCount,
+            updatedAt: new Date(),
+          },
+        },
+        { maxTimeMS: 10000 }, // 10 second timeout for update
+      ),
+    ]);
+
+    // Log results but don't fail if one succeeds
+    if (prismaResult.status === "fulfilled") {
+      console.log(
+        `Updated Prisma for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`,
+      );
+    } else {
+      console.error(
+        `Failed to update Prisma for account ${accountId}:`,
+        prismaResult.reason,
+      );
+    }
+
+    if (mongoResult.status === "fulfilled") {
+      console.log(
+        `Updated MongoDB for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`,
+      );
+    } else {
+      console.error(
+        `Failed to update MongoDB for account ${accountId}:`,
+        mongoResult.reason,
+      );
+    }
+
+    // If both updates failed, throw an error
+    if (
+      prismaResult.status === "rejected" &&
+      mongoResult.status === "rejected"
+    ) {
+      throw new Error(
+        `Both Prisma and MongoDB updates failed for account ${accountId}`,
+      );
+    }
 
     let cacheKey = "";
 
@@ -112,13 +221,13 @@ async function processMessage(message: any) {
         account: {
           ...existingData.account,
           rating: newAvgRating,
-          reviewCount: reviewCount,
+          reviewCount: newReviewCount,
         },
       };
       await redis.set(cacheKey, JSON.stringify(updatedData));
 
       console.log(
-        `Updated db and redis for account ${accountId} of platform ${platform} with new rating ${newAvgRating}`,
+        `Updated Redis cache for account ${accountId} of platform ${platform}`,
       );
     }
 
@@ -139,7 +248,7 @@ async function processMessage(message: any) {
                 value: JSON.stringify({
                   objectID: accountId,
                   rating: newAvgRating,
-                  reviewCount: reviewCount,
+                  reviewCount: newReviewCount,
                 }),
               },
             ],

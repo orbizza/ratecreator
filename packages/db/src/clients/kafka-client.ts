@@ -60,12 +60,11 @@ export function getKafkaClient(): Kafka {
       connectionTimeout: 30000,
       retry: {
         initialRetryTime: 100,
-        retries: 15, // Increased retries
+        retries: 8,
         maxRetryTime: 30000,
-        factor: 0.2, // Exponential backoff factor
-        multiplier: 2, // Retry time multiplier
+        multiplier: 2, // Exponential backoff multiplier
       },
-      requestTimeout: 30000, // Reduced from 60s to 30s
+      requestTimeout: 30000,
     });
   }
   return kafkaInstance;
@@ -108,13 +107,12 @@ export async function getKafkaProducer(): Promise<Producer> {
   if (!producerInstance) {
     producerInstance = getKafkaClient().producer({
       allowAutoTopicCreation: true,
-      retry: {
-        initialRetryTime: 100,
-        retries: 8,
-        maxRetryTime: 30000,
-      },
+      // For idempotent producers, don't limit retries to maintain EoS guarantees
+      // The client-level retry config will handle retries
       createPartitioner: Partitioners.LegacyPartitioner,
       idempotent: true, // Enable exactly-once delivery semantics
+      maxInFlightRequests: 5, // Required for idempotent producer (max 5)
+      // acks: -1 is default for idempotent producers
     });
 
     // Add connection error handlers
