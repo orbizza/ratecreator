@@ -106,7 +106,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang='en' suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
             <style>{`
@@ -127,17 +127,17 @@ export default function RootLayout({
               {/* Sticky Banner: Remove this block to disable the site-wide banner.
                   If you remove it, also set the navbar offset back to top-0 in
                   `packages/ui/src/components/review/nav-bar/appbar.tsx`. */}
-              <StickyBanner className="bg-gradient-to-b from-amber-400 to-amber-500">
+              {/* <StickyBanner className="bg-gradient-to-b from-amber-400 to-amber-500">
                 <p className="mx-0 max-w-[90%] text-black dark:text-black font-medium">
                   Site is under maintenance. Expected to be back by 04/10/2025
-                  {/* <a
+                  <a
                     href='#'
                     className='transition duration-200 hover:underline'
                   >
                     
-                  </a> */}
+                  </a>
                 </p>
-              </StickyBanner>
+              </StickyBanner> */}
               {/* Navbar appears below the banner; offset is configured inside Appbar. */}
               <Appbar />
               {children}
