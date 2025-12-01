@@ -100,14 +100,14 @@ export async function createReview(formData: unknown) {
             retryCount++;
             console.error(
               `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
-              error
+              error,
             );
             if (retryCount === maxRetries) {
               throw error;
             }
             // Wait before retrying
             await new Promise((resolve) =>
-              setTimeout(resolve, 1000 * retryCount)
+              setTimeout(resolve, 1000 * retryCount),
             );
           }
         }
@@ -124,10 +124,10 @@ export async function createReview(formData: unknown) {
       new Promise<void>((resolve) =>
         setTimeout(() => {
           console.warn(
-            "Kafka operation timed out after 5 seconds, continuing without blocking"
+            "Kafka operation timed out after 5 seconds, continuing without blocking",
           );
           resolve();
-        }, 5000)
+        }, 5000),
       ),
     ]).catch((error) => {
       console.error("Kafka operation failed:", error);
@@ -136,7 +136,7 @@ export async function createReview(formData: unknown) {
 
     // Revalidate the creator's page
     revalidatePath(
-      `/profile/${validatedData.platform}/${validatedData.accountId}`
+      `/profile/${validatedData.platform}/${validatedData.accountId}`,
     );
 
     return { success: true, data: review };
