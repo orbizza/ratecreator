@@ -5,10 +5,7 @@ import { ReviewValidator } from "@ratecreator/types/review";
 import { Platform } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { revalidatePath } from "next/cache";
-import {
-  createTopicIfNotExists,
-  getKafkaProducer,
-} from "@ratecreator/db/kafka-client";
+import { getKafkaProducer } from "@ratecreator/db/kafka-client";
 
 const prisma = getPrismaClient();
 
@@ -71,59 +68,75 @@ export async function createReview(formData: unknown) {
       },
     });
 
-    // Send message to Kafka
-    try {
-      const producer = await getKafkaProducer();
-      const topicName = "new-review-calculate";
+    // Send message to Kafka (non-blocking with timeout)
+    // Fire-and-forget: don't block the response even if Kafka is slow/unreachable
+    const sendToKafka = async () => {
+      try {
+        const producer = await getKafkaProducer();
+        const topicName = "new-review-calculate";
 
-      // Create topic if it doesn't exist
-      //await createTopicIfNotExists(topicName);
+        // Send the message with retries
+        const maxRetries = 3;
+        let retryCount = 0;
 
-      // Send the message with retries
-      const maxRetries = 3;
-      let retryCount = 0;
-
-      while (retryCount < maxRetries) {
-        try {
-          await producer.send({
-            topic: topicName,
-            messages: [
-              {
-                key: review.id,
-                value: JSON.stringify({
-                  accountId: validatedData.accountId,
-                  platform: validatedData.platform,
-                  rating: validatedData.stars,
-                }),
-              },
-            ],
-          });
-          console.log("Successfully sent message to Kafka");
-          break;
-        } catch (error) {
-          retryCount++;
-          console.error(
-            `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
-            error,
-          );
-          if (retryCount === maxRetries) {
-            throw error;
+        while (retryCount < maxRetries) {
+          try {
+            await producer.send({
+              topic: topicName,
+              messages: [
+                {
+                  key: review.id,
+                  value: JSON.stringify({
+                    accountId: validatedData.accountId,
+                    platform: validatedData.platform,
+                    rating: validatedData.stars,
+                  }),
+                },
+              ],
+            });
+            console.log("Successfully sent message to Kafka");
+            break;
+          } catch (error) {
+            retryCount++;
+            console.error(
+              `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
+              error
+            );
+            if (retryCount === maxRetries) {
+              throw error;
+            }
+            // Wait before retrying
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1000 * retryCount)
+            );
           }
-          // Wait before retrying
-          await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * retryCount),
-          );
         }
+      } catch (error) {
+        console.error("Error sending message to Kafka:", error);
+        // Don't throw - Kafka failures shouldn't block review creation
       }
-    } catch (error) {
-      console.error("Error sending message to Kafka:", error);
-      // Don't throw here - we want to return the review even if Kafka fails
-      // The review is already saved in the database
-    }
+    };
+
+    // Wrap Kafka operation with timeout to prevent hanging
+    // Use Promise.race to timeout after 5 seconds
+    Promise.race([
+      sendToKafka(),
+      new Promise<void>((resolve) =>
+        setTimeout(() => {
+          console.warn(
+            "Kafka operation timed out after 5 seconds, continuing without blocking"
+          );
+          resolve();
+        }, 5000)
+      ),
+    ]).catch((error) => {
+      console.error("Kafka operation failed:", error);
+      // Don't throw - continue execution
+    });
 
     // Revalidate the creator's page
     revalidatePath(
-      `/profile/${validatedData.platform}/${validatedData.accountId}`,
+      `/profile/${validatedData.platform}/${validatedData.accountId}`
     );
 
     return { success: true, data: review };
