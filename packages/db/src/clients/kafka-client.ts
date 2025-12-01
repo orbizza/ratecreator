@@ -33,7 +33,6 @@ let producerConnectPromise: Promise<void> | null = null;
  */
 export function getKafkaClient(): Kafka {
   if (!kafkaInstance) {
-    // Validate required environment variables
     if (!process.env.KAFKA_USERNAME || !process.env.KAFKA_PASSWORD) {
       throw new Error("Kafka credentials not found in environment variables");
     }
@@ -43,17 +42,30 @@ export function getKafkaClient(): Kafka {
       );
     }
 
+    // 🔑 Normalize CA from env (handles both local + Vercel)
+    const caRaw = process.env.KAFKA_CA_CERT;
+    const ca = caRaw!.includes("\\n") ? caRaw!.replace(/\\n/g, "\n") : caRaw!;
+
+    console.log(
+      "[kafka] broker:",
+      "kafka-ratecreator-nyc3-prod-do-user-24600032-0.j.db.ondigitalocean.com:25073",
+    );
+    console.log("[kafka] CA length:", ca.length);
+    console.log("[kafka] CA starts with:", ca.slice(0, 40));
+
     kafkaInstance = new Kafka({
       clientId: "ratecreator-app",
       brokers: [
         "kafka-ratecreator-nyc3-prod-do-user-24600032-0.j.db.ondigitalocean.com:25073",
       ],
       ssl: {
-        rejectUnauthorized: true, // Enable certificate validation
-        ca: [process.env.KAFKA_CA_CERT],
+        rejectUnauthorized: true,
+        ca: [ca], // ✅ normalized PEM
       },
       sasl: {
-        mechanism: "plain",
+        // mechanism is almost certainly *not* the current blocker,
+        // TLS has to succeed before SASL even matters.
+        mechanism: "plain", // keep as-is if this is what DO says
         username: process.env.KAFKA_USERNAME,
         password: process.env.KAFKA_PASSWORD,
       },
@@ -62,7 +74,7 @@ export function getKafkaClient(): Kafka {
         initialRetryTime: 100,
         retries: 8,
         maxRetryTime: 30000,
-        multiplier: 2, // Exponential backoff multiplier
+        multiplier: 2,
       },
       requestTimeout: 30000,
     });

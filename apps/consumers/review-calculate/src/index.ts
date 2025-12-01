@@ -133,62 +133,27 @@ async function processMessage(message: any) {
       `Account ${accountId}: ${newReviewCount} reviews, avg rating ${newAvgRating}`,
     );
 
-    // Update both Prisma and MongoDB independently to avoid transaction timeout
-    // Use Promise.allSettled to ensure both updates are attempted even if one fails
-    const [prismaResult, mongoResult] = await Promise.allSettled([
-      // Prisma update (no transaction wrapper - operations are independent)
-      prisma.account.update({
-        where: { id: account.id },
-        data: {
+    // Update MongoDB directly to avoid Prisma transaction timeout issues
+    // Prisma wraps MongoDB operations in transactions which can exceed transaction lifetime limits
+    // Using raw MongoDB update avoids this issue
+    const mongoResult = await db.collection("Account").updateOne(
+      { _id: new ObjectId(account.id) },
+      {
+        $set: {
           rating: newAvgRating,
           reviewCount: newReviewCount,
+          updatedAt: new Date(),
         },
-      }),
-      // Raw MongoDB update with timeout to avoid transaction issues
-      db.collection("Account").updateOne(
-        { _id: new ObjectId(account.id) },
-        {
-          $set: {
-            rating: newAvgRating,
-            reviewCount: newReviewCount,
-            updatedAt: new Date(),
-          },
-        },
-        { maxTimeMS: 10000 }, // 10 second timeout for update
-      ),
-    ]);
+      },
+      { maxTimeMS: 10000 }, // 10 second timeout for update
+    );
 
-    // Log results but don't fail if one succeeds
-    if (prismaResult.status === "fulfilled") {
-      console.log(
-        `Updated Prisma for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`,
-      );
-    } else {
-      console.error(
-        `Failed to update Prisma for account ${accountId}:`,
-        prismaResult.reason,
-      );
-    }
-
-    if (mongoResult.status === "fulfilled") {
+    if (mongoResult.modifiedCount > 0 || mongoResult.matchedCount > 0) {
       console.log(
         `Updated MongoDB for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`,
       );
     } else {
-      console.error(
-        `Failed to update MongoDB for account ${accountId}:`,
-        mongoResult.reason,
-      );
-    }
-
-    // If both updates failed, throw an error
-    if (
-      prismaResult.status === "rejected" &&
-      mongoResult.status === "rejected"
-    ) {
-      throw new Error(
-        `Both Prisma and MongoDB updates failed for account ${accountId}`,
-      );
+      console.warn(`No document matched for account ${accountId} update`);
     }
 
     let cacheKey = "";
