@@ -47,7 +47,7 @@ async function processMessage(message: any) {
       });
 
       console.log(
-        `✅ Successfully updated Algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`
+        `✅ Successfully updated Algolia for account ${objectID} with rating ${rating} and reviewCount ${reviewCount}`,
       );
       return; // Success, exit retry loop
     } catch (error: any) {
@@ -67,13 +67,13 @@ async function processMessage(message: any) {
           objectID,
           rating,
           reviewCount,
-        }
+        },
       );
 
       // If it's a 404 (object not found), don't retry
       if (errorStatus === 404 || errorMessage.includes("not found")) {
         console.error(
-          `⚠️ Object ${objectID} not found in Algolia index. Skipping retry.`
+          `⚠️ Object ${objectID} not found in Algolia index. Skipping retry.`,
         );
         return;
       }
@@ -82,7 +82,7 @@ async function processMessage(message: any) {
       if (retryCount >= maxRetries) {
         console.error(
           `❌ All retry attempts failed for ${objectID}. Last error:`,
-          lastError
+          lastError,
         );
         throw lastError;
       }
@@ -135,7 +135,7 @@ async function startConsumer() {
           // The error is already logged in processMessage with retry logic
           console.error(
             "Error in message handler (message will be retried by Kafka if needed):",
-            error
+            error,
           );
           // Re-throw to let Kafka handle retry logic
           throw error;

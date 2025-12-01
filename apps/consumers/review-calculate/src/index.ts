@@ -16,7 +16,7 @@ let consumer: ReturnType<typeof getKafkaConsumer>;
 function simpleAverage(
   currentAvgRating: number,
   newRating: number,
-  reviewCount: number
+  reviewCount: number,
 ) {
   return (currentAvgRating * reviewCount + newRating) / (reviewCount + 1);
 }
@@ -24,7 +24,7 @@ function simpleAverage(
 function bayesianAverage(
   currentAvgRating: number,
   newRating: number,
-  reviewCount: number
+  reviewCount: number,
 ) {
   const C = 3.5; // Prior mean (global average rating)
   const m = 10; // Prior weight (confidence parameter)
@@ -88,7 +88,7 @@ async function processMessage(message: any) {
             isDeleted: false,
             status: "PUBLISHED",
           },
-          { maxTimeMS: 30000 }
+          { maxTimeMS: 30000 },
         ),
         db
           .collection("Review")
@@ -108,7 +108,7 @@ async function processMessage(message: any) {
                 },
               },
             ],
-            { maxTimeMS: 30000 }
+            { maxTimeMS: 30000 },
           )
           .toArray(),
       ]);
@@ -121,7 +121,7 @@ async function processMessage(message: any) {
     } catch (error) {
       console.error(
         `Aggregation query failed for account ${accountId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -130,7 +130,7 @@ async function processMessage(message: any) {
       aggregatedAvg !== null ? Number(aggregatedAvg.toFixed(2)) : rating;
 
     console.log(
-      `Account ${accountId}: ${newReviewCount} reviews, avg rating ${newAvgRating}`
+      `Account ${accountId}: ${newReviewCount} reviews, avg rating ${newAvgRating}`,
     );
 
     // Update MongoDB directly to avoid Prisma transaction timeout issues
@@ -145,12 +145,12 @@ async function processMessage(message: any) {
           updatedAt: new Date(),
         },
       },
-      { maxTimeMS: 10000 } // 10 second timeout for update
+      { maxTimeMS: 10000 }, // 10 second timeout for update
     );
 
     if (mongoResult.modifiedCount > 0 || mongoResult.matchedCount > 0) {
       console.log(
-        `Updated MongoDB for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`
+        `Updated MongoDB for account ${accountId}: rating=${newAvgRating}, count=${newReviewCount}`,
       );
     } else {
       console.warn(`No document matched for account ${accountId} update`);
@@ -192,7 +192,7 @@ async function processMessage(message: any) {
       await redis.set(cacheKey, JSON.stringify(updatedData));
 
       console.log(
-        `Updated Redis cache for account ${accountId} of platform ${platform}`
+        `Updated Redis cache for account ${accountId} of platform ${platform}`,
       );
     }
 
@@ -219,21 +219,21 @@ async function processMessage(message: any) {
             ],
           });
           console.log(
-            `Sent message to algolia-update for account ${accountId} of platform ${platform}`
+            `Sent message to algolia-update for account ${accountId} of platform ${platform}`,
           );
           break;
         } catch (error) {
           retryCount++;
           console.error(
             `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
-            error
+            error,
           );
           if (retryCount === maxRetries) {
             throw error;
           }
           // Wait before retrying
           await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * retryCount)
+            setTimeout(resolve, 1000 * retryCount),
           );
         }
       }
@@ -243,7 +243,7 @@ async function processMessage(message: any) {
   } catch (error) {
     console.error(
       `Error processing message for rating in ${payload.accountId} of platform ${payload.platform}:`,
-      error
+      error,
     );
   }
 }
