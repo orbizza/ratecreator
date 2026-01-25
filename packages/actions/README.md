@@ -1,71 +1,110 @@
-# `@turbo/actions`
+# @ratecreator/actions
 
-A collection of server actions for the Rate Creator project. These actions
-provide server-side functionality that can be called directly from client
-components.
+Server actions and API logic for Rate Creator. Contains Next.js server actions for mutations and data fetching.
 
 ## Installation
 
 ```bash
-yarn add @turbo/actions
+yarn add @ratecreator/actions
 ```
 
 ## Usage
 
-Import and use actions in your components:
-
 ```typescript
-import { createReview } from "@turbo/actions";
-
-// In your component
-const handleSubmit = async () => {
-  await createReview({
-    // review data
-  });
-};
+import { uploadFile } from "@ratecreator/actions"
+import { createReview, fetchReviewsActions } from "@ratecreator/actions/review"
+import { createPost, fetchPosts } from "@ratecreator/actions/content"
 ```
 
-## Available Actions
+## Main Exports
+
+| Export | Description |
+|--------|-------------|
+| `uploadFile` | Upload file to Digital Ocean Spaces |
+
+## Review Actions (`@ratecreator/actions/review`)
+
+### Category Actions
+| Action | Description |
+|--------|-------------|
+| `getCategoryData()` | Fetch all categories (24h Redis cache) |
+| `singleCategoryAction(slug)` | Get single category details |
+| `mostPopularCategoryActions()` | Fetch trending categories |
+
+### Creator Actions
+| Action | Description |
+|--------|-------------|
+| `searchCreator(query, filters)` | Search creators with Algolia |
+| `creatorActions.getCreator(id)` | Get creator profile |
+| `creatorActions.getCreatorByHandle(handle)` | Get creator by username |
 
 ### Review Actions
+| Action | Description |
+|--------|-------------|
+| `createReview(data)` | Create new review (validates, authenticates, publishes Kafka event) |
+| `updateReview(id, data)` | Update existing review |
+| `deleteReview(id)` | Soft delete review |
+| `fetchReviewsActions(params)` | Fetch reviews with pagination |
 
-- `createReview`: Create a new review
-- `updateReview`: Update an existing review
-- `deleteReview`: Delete a review
-- `getReview`: Fetch a single review
-- `getReviews`: Fetch multiple reviews
+### Metadata Actions
+| Action | Description |
+|--------|-------------|
+| `metadata.fetchOG(url)` | Fetch OpenGraph metadata |
+| `reddit.extractMetadata(url)` | Extract Reddit-specific metadata |
 
-### User Actions
+### Contact Actions
+| Action | Description |
+|--------|-------------|
+| `contact.submit(data)` | Handle contact form submissions |
 
-- `updateUser`: Update user profile
-- `getUser`: Fetch user data
-- `getUserReviews`: Fetch user's reviews
+## Content Actions (`@ratecreator/actions/content`)
 
-### Content Actions
+### Tag Actions
+| Action | Description |
+|--------|-------------|
+| `createTag(data)` | Create new tag |
+| `updateTag(id, data)` | Update tag |
+| `deleteTag(id)` | Delete tag |
+| `getTags()` | Fetch all tags |
 
-- `createContent`: Create new content
-- `updateContent`: Update existing content
-- `deleteContent`: Delete content
-- `getContent`: Fetch content
+### Post Actions
+| Action | Description |
+|--------|-------------|
+| `createPost(data)` | Create new blog post |
+| `updatePost(id, data)` | Update existing post |
+| `publishPost(id)` | Publish draft post |
+| `deletePost(id)` | Soft delete post |
+| `fetchPosts(params)` | Fetch posts with pagination |
 
-## Development
-
-To add new actions:
-
-1. Create a new file in `src/` directory
-2. Export your action function
-3. Add proper TypeScript types
-4. Add error handling
-5. Test the action
-6. Build the package: `yarn build`
-7. Publish the package: `yarn publish`
+### Author Actions
+| Action | Description |
+|--------|-------------|
+| `getAuthor(id)` | Get author information |
 
 ## Error Handling
 
-All actions include proper error handling and return typed responses. Errors are
-thrown with descriptive messages and proper HTTP status codes.
+All actions throw typed errors and include proper validation:
 
-## Type Safety
+```typescript
+try {
+  const review = await createReview(data)
+} catch (error) {
+  if (error.code === "UNAUTHORIZED") {
+    // Handle auth error
+  }
+}
+```
 
-Actions are fully typed with TypeScript, providing type safety for both input
-parameters and return values.
+## Authentication
+
+All mutation actions require Clerk authentication:
+
+```typescript
+"use server"
+
+export async function createReview(data: ReviewInput) {
+  const user = await auth()
+  if (!user) throw new Error("Unauthorized")
+  // ...
+}
+```

@@ -1,75 +1,96 @@
-# `@turbo/types`
+# @ratecreator/types
 
-TypeScript type definitions for the Rate Creator project. This package provides
-shared types used across the application.
+Shared TypeScript type definitions for Rate Creator.
 
 ## Installation
 
 ```bash
-yarn add @turbo/types
+yarn add @ratecreator/types
 ```
 
 ## Usage
 
-Import types in your code:
-
 ```typescript
-import { User, Review, Content } from "@turbo/types";
-
-// Use types in your code
-const user: User = {
-  id: "1",
-  name: "John Doe",
-  // ...
-};
+import type { User, Review, Account } from "@ratecreator/types"
+import type { ReviewInput, ReviewFilter } from "@ratecreator/types/review"
+import type { Post, Tag } from "@ratecreator/types/content"
 ```
 
-## Available Types
+## Review Types (`@ratecreator/types/review`)
 
-### User Types
+### Category Types
+| Type | Description |
+|------|-------------|
+| `Category` | Category with hierarchy |
+| `GlossaryCategory` | Simplified category |
+| `SearchResult` | Category search result |
+| `CategoryWithColor` | Category with UI colors |
+| `PopularCategory` | Trending category |
+| `PopularCategoryWithAccounts` | Category with associated creators |
 
-- `User`: User profile data
-- `UserPreferences`: User settings and preferences
-- `UserStats`: User statistics and metrics
+### Account Types
+| Type | Description |
+|------|-------------|
+| `Account` | Creator account across platforms |
+| `PopularAccount` | Featured creator |
+| `CreatorData` | Creator profile data |
+| `SearchAccount` | Creator in search results |
+| `SearchAccountsParams` | Search filter parameters |
 
 ### Review Types
+| Type | Description |
+|------|-------------|
+| `ReviewFormData` | Form input for creating review |
+| `ReviewType` | Full review object with metadata |
+| `CommentFormData` | Comment creation data |
+| `ReviewVoteFormData` | Upvote/downvote data |
 
-- `Review`: Review data structure
-- `ReviewMetrics`: Review statistics
-- `ReviewFilters`: Review filtering options
+### Enums
+| Enum | Values |
+|------|--------|
+| `ReviewStatus` | PUBLISHED, DRAFT, DELETED |
+| `VerificationStatus` | IN_PROGRESS, VERIFIED, REJECTED |
+| `VoteType` | UPVOTE, DOWNVOTE |
+| `Platform` | YouTube, Twitter, Instagram, Reddit, TikTok, Twitch |
 
-### Content Types
+### Validators
+| Validator | Description |
+|-----------|-------------|
+| `ReviewValidator` | Zod schema for review validation |
+| `ContactValidator` | Contact form validation schema |
 
-- `Content`: Content data structure
-- `ContentMetadata`: Content metadata
-- `ContentFilters`: Content filtering options
+## Content Types (`@ratecreator/types/content`)
 
-### API Types
+### Post Types
+| Type | Description |
+|------|-------------|
+| `PostType` | Blog post full structure |
+| `UpdatePostType` | Post update input |
+| `FetchedPostType` | Post from database |
+| `Tags` | Tag interface |
+| `Author` | Author information |
 
-- `ApiResponse`: Standard API response format
-- `ApiError`: Error response format
-- `PaginationParams`: Pagination parameters
+### Enums
+| Enum | Values |
+|------|--------|
+| `ContentType` | BLOG, GLOSSARY, LEGAL, NEWS |
+| `PostStatus` | DRAFT, PUBLISHED, ARCHIVED |
+| `ContentPlatform` | Platform publishing target |
 
-## Development
+### Validators
+| Validator | Description |
+|-----------|-------------|
+| `TagSchema` | Tag validation schema |
+| `DateTimeValidator` | DateTime Zod validators |
 
-To add new types:
+## Type-Only Imports
 
-1. Create a new file in `src/` directory
-2. Define your types using TypeScript
-3. Export the types
-4. Update the package's index file
-5. Build the package: `yarn build`
-6. Publish the package: `yarn publish`
+Always use type-only imports for better tree-shaking:
 
-## Best Practices
+```typescript
+// Recommended
+import type { User } from "@ratecreator/types"
 
-- Keep types focused and specific
-- Use proper TypeScript features (unions, intersections, etc.)
-- Add JSDoc comments for documentation
-- Use strict type checking
-- Avoid using `any` type
-
-## Type Safety
-
-All types are strictly defined to ensure type safety throughout the application.
-The package is configured to use strict TypeScript settings.
+// Also works
+import { type User, type Review } from "@ratecreator/types"
+```

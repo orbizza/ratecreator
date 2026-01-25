@@ -1,73 +1,89 @@
-# `@turbo/store`
+# @ratecreator/store
 
-State management package for the Rate Creator project. This package provides
-global state management using Zustand.
+Global state management for Rate Creator using Recoil. Contains atoms and static data.
 
 ## Installation
 
 ```bash
-yarn add @turbo/store
+yarn add @ratecreator/store
 ```
 
 ## Usage
 
-Import and use stores in your components:
-
 ```typescript
-import { useAuthStore } from "@turbo/store";
-
-// In your component
-const { user, login, logout } = useAuthStore();
+import { toastState } from "@ratecreator/store"
+import { categoryState, searchState } from "@ratecreator/store/review"
+import { adminContentState } from "@ratecreator/store/content"
 ```
 
-## Available Stores
+## Atoms
 
-### Auth Store
+### Main Atoms
+| Atom | Description |
+|------|-------------|
+| `toastState` | Global toast notification state |
 
-- User authentication state
-- Login/logout functionality
-- User profile data
+### Review Atoms (`@ratecreator/store/review`)
+| Atom | Description |
+|------|-------------|
+| `categoryState` | Category selection and filtering |
+| `searchState` | Search query and results state |
 
-### UI Store
+### Content Atoms (`@ratecreator/store/content`)
+| Atom | Description |
+|------|-------------|
+| `adminContentNavbar` | Content admin navigation state |
+| `adminContentPost` | Content post editing state |
 
-- Theme preferences
-- Layout settings
-- Modal states
-- Toast notifications
+## Static Data
 
-### Review Store
+All static data exports from main index:
 
-- Review creation state
-- Review editing state
-- Review list state
+| Export | Description |
+|--------|-------------|
+| `categoriesData` | Full category hierarchy |
+| `categoriesListColors` | Color palette for categories |
+| `searchPlaceholder` | Search input placeholder texts |
+| `landingFeatures` | Features list for landing page |
+| `mostPopularCategories` | Trending categories list |
+| `filterCountryCode` | Country filter options |
+| `filterLanguageCode` | Language filter options |
+| `filterFollowersCheckbox` | Follower count filter options |
+| `filterVideoCountCheckbox` | Video count filter options |
+| `filterReviewCountCheckbox` | Review count filter options |
 
-### Content Store
+## Usage Example
 
-- Content creation state
-- Content editing state
-- Content list state
+```typescript
+import { useRecoilState, useRecoilValue } from "recoil"
+import { categoryState } from "@ratecreator/store/review"
 
-## Development
+function CategoryFilter() {
+  const [category, setCategory] = useRecoilState(categoryState)
 
-To add new stores:
+  return (
+    <Select
+      value={category}
+      onChange={setCategory}
+    />
+  )
+}
+```
 
-1. Create a new file in `src/` directory
-2. Define your store using Zustand
-3. Add proper TypeScript types
-4. Export the store hook
-5. Test the store
-6. Build the package: `yarn build`
-7. Publish the package: `yarn publish`
+## Static Data Usage
 
-## Best Practices
+```typescript
+import { filterCountryCode, mostPopularCategories } from "@ratecreator/store"
 
-- Keep stores focused and small
-- Use TypeScript for type safety
-- Implement proper error handling
-- Add persistence where needed
-- Use middleware for side effects
+function CountryFilter() {
+  return (
+    <Select options={filterCountryCode} />
+  )
+}
 
-## Type Safety
-
-All stores are fully typed with TypeScript, providing type safety for both state
-and actions.
+function PopularCategories() {
+  return (
+    <List items={mostPopularCategories} />
+  )
+}
+```

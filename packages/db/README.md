@@ -1,92 +1,128 @@
-# `@turbo/db`
+# @ratecreator/db
 
-Database package for the Rate Creator project. This package contains Prisma
-schema, migrations, and database utilities.
+Database package for Rate Creator. Contains Prisma ORM, Redis, Kafka, Algolia, and MongoDB clients.
 
 ## Installation
 
 ```bash
-yarn add @turbo/db
+yarn add @ratecreator/db
 ```
-
-## Setup
-
-1. Copy the environment file:
-
-   ```bash
-   cp env.example .env
-   ```
-
-2. Update the database URL in `.env`:
-
-   ```
-   DATABASE_URL="postgresql://user:password@localhost:5432/ratecreator"
-   ```
-
-3. Run migrations:
-   ```bash
-   yarn prisma migrate dev
-   ```
 
 ## Usage
 
-Import and use the database client:
-
 ```typescript
-import { db } from "@turbo/db";
-
-// Example query
-const users = await db.user.findMany({
-  include: {
-    reviews: true,
-  },
-});
+import { prisma } from "@ratecreator/db/client"
+import { redis } from "@ratecreator/db/redis-do"
+import { getMongoClient } from "@ratecreator/db/mongo-client"
+import { algoliaClient } from "@ratecreator/db/algolia-client"
+import { kafka, getProducer, getConsumer } from "@ratecreator/db/kafka-client"
 ```
 
-## Schema
+## Clients
 
-The database schema includes the following models:
+### Prisma Client (`@ratecreator/db/client`)
 
-- `User`: User profiles and authentication
-- `Review`: User reviews and ratings
-- `Content`: Blog posts and articles
-- `Comment`: Comments on reviews and content
-- `Category`: Content categories
-- `Tag`: Content tags
+| Export | Description |
+|--------|-------------|
+| `prisma` | Singleton Prisma ORM client for MongoDB |
+| `getPrismaClient()` | Get Prisma client instance |
 
-## Development
+### Redis Client (`@ratecreator/db/redis-do`)
 
-### Adding New Models
+| Export | Description |
+|--------|-------------|
+| `redis` | Singleton Redis client (ioredis) |
+| `getRedisClient()` | Get Redis client instance |
 
-1. Add the model to `prisma/schema.prisma`
-2. Create a migration:
-   ```bash
-   yarn prisma migrate dev --name add_new_model
-   ```
-3. Update the database client
-4. Test the changes
+### Kafka Client (`@ratecreator/db/kafka-client`)
 
-### Running Migrations
+| Export | Description |
+|--------|-------------|
+| `kafka` | Kafka instance with TLS support |
+| `getKafkaClient()` | Get Kafka client |
+| `getProducer()` | Get Kafka producer for publishing |
+| `getConsumer(groupId)` | Get Kafka consumer for subscribing |
 
-- Development: `yarn prisma migrate dev`
-- Production: `yarn prisma migrate deploy`
+### Algolia Client (`@ratecreator/db/algolia-client`)
 
-### Database Management
+| Export | Description |
+|--------|-------------|
+| `algoliaClient` | Algolia search client |
+| `getSearchClient()` | Read-only search client |
+| `getWriteClient()` | Write client for indexing |
+| `searchAccounts(query, filters)` | Search creator accounts |
 
-- View database: `yarn prisma studio`
-- Reset database: `yarn prisma db push --force-reset`
+### MongoDB Client (`@ratecreator/db/mongo-client`)
 
-## Docker Support
+| Export | Description |
+|--------|-------------|
+| `getMongoClient()` | Direct MongoDB connection |
 
-A `docker-compose.yml` file is included for local development. To use it:
+## Utilities (`@ratecreator/db/utils`)
+
+| Utility | Description |
+|---------|-------------|
+| `formatValue(number)` | Format numbers with B, M, K suffixes |
+| `toSlug(text)` | Convert text to URL-friendly slug |
+| `fromSlug(slug)` | Convert slug back to readable text |
+| `getCreatorData(id)` | Fetch creator from cache or database |
+| `cacheCreatorData(data)` | Store creator data in IndexedDB |
+| `clearCreatorCache()` | Clear expired cache entries |
+
+## Prisma Models
+
+| Model | Description |
+|-------|-------------|
+| `User` | Platform users (from Clerk) |
+| `Account` | Creator profiles across platforms |
+| `Review` | Star ratings and written reviews |
+| `Comment` | Threaded discussions |
+| `Vote` | Review upvotes/downvotes |
+| `CommentVote` | Comment upvotes/downvotes |
+| `Category` | Hierarchical categorization |
+| `CategoryMapping` | Account-to-category links |
+| `SaveToMyList` | User favorites |
+| `Newsletter` | Newsletter definitions |
+| `NewsletterAudience` | Newsletter subscribers |
+| `YouTubeVideo` | Cached video data |
+
+## Enums
+
+| Enum | Values |
+|------|--------|
+| `Platform` | YouTube, Twitter, Instagram, Reddit, TikTok, Twitch |
+| `UserRole` | USER |
+| `ReviewStatus` | PUBLISHED, DRAFT, DELETED |
+| `CommentStatus` | PUBLISHED, DELETED |
+| `VerificationStatus` | IN_PROGRESS, VERIFIED, REJECTED |
+| `VoteType` | UPVOTE, DOWNVOTE |
+
+## Environment Variables
+
+```env
+DATABASE_URL_ONLINE=mongodb+srv://...
+REDIS_HOST=
+REDIS_PORT=
+REDIS_USERNAME=
+REDIS_PASSWORD=
+KAFKA_SERVICE_URI=
+KAFKA_USERNAME=
+KAFKA_PASSWORD=
+KAFKA_CA_CERT=
+ALGOLIA_APP_ID=
+ALGOLIA_WRITE_API_KEY=
+ALGOLIA_SEARCH_API_KEY=
+```
+
+## Commands
 
 ```bash
-docker-compose up -d
+# Generate Prisma client
+yarn prisma-generate
+
+# View database
+yarn prisma studio
+
+# Push schema changes
+yarn prisma db push
 ```
-
-This will start a PostgreSQL database with the correct configuration.
-
-## Type Safety
-
-The package provides TypeScript types for all database models and queries,
-ensuring type safety throughout the application.

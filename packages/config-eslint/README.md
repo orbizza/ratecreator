@@ -1,36 +1,50 @@
-# `@turbo/eslint-config`
+# @ratecreator/eslint-config
 
-Collection of internal eslint configurations for the Rate Creator project.
+Shared ESLint configuration for Rate Creator monorepo.
 
 ## Installation
 
 ```bash
-yarn add -D @turbo/eslint-config
+yarn add -D @ratecreator/eslint-config
 ```
 
 ## Usage
 
-Add the following to your `.eslintrc.js`:
+Add to your `.eslintrc.js`:
 
 ```javascript
 module.exports = {
-  extends: ["@turbo/eslint-config"],
-};
+  extends: ["@ratecreator/eslint-config"],
+  rules: {
+    // Package-specific overrides
+  }
+}
 ```
 
 ## Features
 
-- TypeScript support
-- React best practices
-- Next.js specific rules
-- Import sorting
-- Code style consistency
+| Feature | Description |
+|---------|-------------|
+| TypeScript support | Full TypeScript linting |
+| React best practices | React-specific rules |
+| Next.js rules | Next.js specific optimizations |
+| Import sorting | Automatic import organization |
+| Accessibility | A11y rules enabled |
+| Turbo integration | Turborepo-aware configuration |
 
-## Development
+## Base Configuration
 
-To modify the configuration:
+Built on top of:
+- `@vercel/style-guide`
+- `eslint-config-turbo`
+- `@typescript-eslint`
 
-1. Make changes to the rules in `index.js`
-2. Test the changes locally
-3. Build the package: `yarn build`
-4. Publish the package: `yarn publish`
+## Key Rules
+
+| Rule | Setting | Description |
+|------|---------|-------------|
+| `no-unused-vars` | Error | Disallow unused variables |
+| `@typescript-eslint/no-explicit-any` | Warn | Discourage `any` type |
+| `react-hooks/rules-of-hooks` | Error | Enforce hooks rules |
+| `react-hooks/exhaustive-deps` | Warn | Verify effect dependencies |
+| `import/order` | Warn | Organize imports |
