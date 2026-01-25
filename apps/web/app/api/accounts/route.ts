@@ -3,6 +3,8 @@ import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
 
+export const dynamic = "force-dynamic";
+
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
 const CACHE_TWITTER_CREATOR = "accounts-twitter-";
 const CACHE_TIKTOK_CREATOR = "accounts-tiktok-";

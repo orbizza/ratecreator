@@ -4,7 +4,8 @@
   "main": "clerk-provider.tsx",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc --noEmit",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^5.1.6",
