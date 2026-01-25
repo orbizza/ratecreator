@@ -18,8 +18,8 @@ module.exports = {
   extends: ["@ratecreator/eslint-config"],
   rules: {
     // Package-specific overrides
-  }
-}
+  },
+};
 ```
 
 ## What Has Been Done
@@ -39,7 +39,7 @@ module.exports = {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `index.js` | Main ESLint config |
+| File           | Purpose               |
+| -------------- | --------------------- |
+| `index.js`     | Main ESLint config    |
 | `package.json` | Package configuration |

@@ -5,6 +5,7 @@ Kafka consumer that synchronizes Clerk authentication events to MongoDB.
 ## Overview
 
 This consumer processes Clerk user events:
+
 1. User creation (new signups)
 2. User updates (profile changes)
 3. User deletion (soft delete)
@@ -25,19 +26,19 @@ Clerk → Webhook → clerk-sync → Kafka → user-sync → MongoDB
 
 ## Functions
 
-| Function | Description |
-|----------|-------------|
-| `handleUserCreated(event)` | Upsert user record in MongoDB |
-| `handleUserUpdated(event)` | Update user profile fields |
+| Function                   | Description                           |
+| -------------------------- | ------------------------------------- |
+| `handleUserCreated(event)` | Upsert user record in MongoDB         |
+| `handleUserUpdated(event)` | Update user profile fields            |
 | `handleUserDeleted(event)` | Soft delete user (set isDeleted flag) |
-| `extractUserData(event)` | Map Clerk event to database schema |
+| `extractUserData(event)`   | Map Clerk event to database schema    |
 
 ## Event Types Handled
 
-| Event | Action |
-|-------|--------|
-| `user.created` | Upsert user record in MongoDB |
-| `user.updated` | Update user profile fields |
+| Event          | Action                           |
+| -------------- | -------------------------------- |
+| `user.created` | Upsert user record in MongoDB    |
+| `user.updated` | Update user profile fields       |
 | `user.deleted` | Soft delete (set isDeleted flag) |
 
 ## Data Mapping
@@ -57,6 +58,7 @@ Clerk → Webhook → clerk-sync → Kafka → user-sync → MongoDB
 ## Message Format
 
 Expected Kafka message structure:
+
 ```typescript
 {
   type: "user.created" | "user.updated" | "user.deleted",

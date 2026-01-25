@@ -5,6 +5,7 @@ Receives Clerk authentication events and publishes them to Kafka for async proce
 ## Overview
 
 This webhook service:
+
 1. Receives Clerk webhook events
 2. Verifies signatures using Svix
 3. Publishes events to Kafka `clerk-user-events` topic
@@ -24,18 +25,18 @@ Clerk → POST /webhook/clerk → Svix Verification → Kafka
 
 ## Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/webhook/clerk` | POST | Receive Clerk webhook events |
-| `/health` | GET | Health check |
+| Endpoint         | Method | Description                  |
+| ---------------- | ------ | ---------------------------- |
+| `/webhook/clerk` | POST   | Receive Clerk webhook events |
+| `/health`        | GET    | Health check                 |
 
 ## Functions
 
-| Function | Description |
-|----------|-------------|
-| `verifyWebhook(headers, body)` | Verify Svix signature |
-| `publishToKafka(event)` | Publish event to Kafka topic |
-| `formatKey(event)` | Generate Kafka message key |
+| Function                       | Description                  |
+| ------------------------------ | ---------------------------- |
+| `verifyWebhook(headers, body)` | Verify Svix signature        |
+| `publishToKafka(event)`        | Publish event to Kafka topic |
+| `formatKey(event)`             | Generate Kafka message key   |
 
 ## Security
 

@@ -11,7 +11,7 @@ yarn add @ratecreator/hooks
 ## Usage
 
 ```typescript
-import { useDebounce } from "@ratecreator/hooks"
+import { useDebounce } from "@ratecreator/hooks";
 ```
 
 ## Available Hooks
@@ -21,7 +21,7 @@ import { useDebounce } from "@ratecreator/hooks"
 Debounce value changes with configurable delay.
 
 ```typescript
-function useDebounce<T>(value: T, delay: number): T
+function useDebounce<T>(value: T, delay: number): T;
 ```
 
 **Parameters:**
@@ -61,11 +61,11 @@ function SearchComponent() {
 
 ## Planned Hooks
 
-| Hook | Description |
-|------|-------------|
-| `useThrottle` | Throttle value changes |
-| `useLocalStorage` | Persist state to localStorage |
-| `useMediaQuery` | Responsive design detection |
-| `useOnClickOutside` | Click outside detection |
-| `useIntersectionObserver` | Lazy loading support |
-| `useClipboard` | Copy to clipboard |
+| Hook                      | Description                   |
+| ------------------------- | ----------------------------- |
+| `useThrottle`             | Throttle value changes        |
+| `useLocalStorage`         | Persist state to localStorage |
+| `useMediaQuery`           | Responsive design detection   |
+| `useOnClickOutside`       | Click outside detection       |
+| `useIntersectionObserver` | Lazy loading support          |
+| `useClipboard`            | Copy to clipboard             |

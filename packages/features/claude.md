@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `features` package is intended to provide feature flag management for Rate Creator:
+
 - Feature toggles
 - A/B testing configuration
 - Gradual rollouts
@@ -50,19 +51,21 @@ function Component() {
 ## Planned Features
 
 ### Flag Types
+
 - **Boolean**: Simple on/off
 - **Percentage**: Gradual rollout (0-100%)
 - **User Segment**: Target specific users
 - **Environment**: Dev/staging/production
 
 ### Administration
+
 - Create/update flags via admin UI
 - Override flags for testing
 - Audit log of flag changes
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main exports (empty) |
+| File           | Purpose               |
+| -------------- | --------------------- |
+| `src/index.ts` | Main exports (empty)  |
 | `package.json` | Package configuration |

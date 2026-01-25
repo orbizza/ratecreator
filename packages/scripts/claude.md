@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `scripts` package contains database seeding, data import, and utility scripts:
+
 - Algolia index seeding
 - Account data import (YouTube, Twitter)
 - Redis cache management
@@ -44,6 +45,7 @@ src/
 ## What Has Been Done
 
 ### Algolia Seeding
+
 - Category seeding with hierarchy
 - YouTube account import
 - Batch import for large datasets
@@ -51,12 +53,14 @@ src/
 - Account data updates
 
 ### Redis Utilities
+
 - Cache flush script
 - Key pattern deletion
 
 ## Restrictions
 
 ### Environment Variables
+
 ```
 ALGOLIA_APP_ID=...
 ALGOLIA_WRITE_API_KEY=...
@@ -66,11 +70,13 @@ REDIS_PASSWORD=...
 ```
 
 ### Data Sources
+
 - YouTube API for account data
 - Twitter API for account data
 - Manual CSV imports supported
 
 ### Execution
+
 - Run scripts locally or in CI/CD
 - Use proper environment configuration
 - Monitor for rate limits
@@ -87,9 +93,9 @@ REDIS_PASSWORD=...
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/algolia/seed-categories.ts` | Category seeding |
-| `src/algolia/seed-youtube-accounts.ts` | YouTube import |
+| File                                         | Purpose              |
+| -------------------------------------------- | -------------------- |
+| `src/algolia/seed-categories.ts`             | Category seeding     |
+| `src/algolia/seed-youtube-accounts.ts`       | YouTube import       |
 | `src/algolia/seed-twitter-accounts-batch.ts` | Twitter batch import |
-| `src/redis/flushRedisCache.ts` | Cache flush |
+| `src/redis/flushRedisCache.ts`               | Cache flush          |

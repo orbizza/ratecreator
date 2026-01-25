@@ -7,6 +7,7 @@ The `webhooks` directory contains webhook receivers that accept external events 
 ## Architecture
 
 All webhooks follow a similar pattern:
+
 - **Framework**: Hono.js
 - **Security**: Svix signature verification
 - **Output**: Kafka message publishing
@@ -21,6 +22,7 @@ External Service → Webhook Endpoint → Verification → Kafka Topic
 ## Available Webhooks
 
 ### clerk-sync
+
 - **Port**: 3010
 - **Endpoint**: `/webhook/clerk`
 - **Source**: Clerk authentication
@@ -30,27 +32,32 @@ External Service → Webhook Endpoint → Verification → Kafka Topic
 ## Shared Patterns
 
 ### Webhook Verification
-```typescript
-import { Webhook } from "svix"
 
-const wh = new Webhook(process.env.WEBHOOK_SECRET)
-const payload = wh.verify(body, headers)
+```typescript
+import { Webhook } from "svix";
+
+const wh = new Webhook(process.env.WEBHOOK_SECRET);
+const payload = wh.verify(body, headers);
 ```
 
 ### Kafka Publishing
+
 ```typescript
 await producer.send({
   topic: "topic-name",
-  messages: [{
-    key: `${eventType}:${id}`,
-    value: JSON.stringify(payload)
-  }]
-})
+  messages: [
+    {
+      key: `${eventType}:${id}`,
+      value: JSON.stringify(payload),
+    },
+  ],
+});
 ```
 
 ## Environment Variables
 
 All webhooks require:
+
 ```env
 KAFKA_SERVICE_URI=
 KAFKA_USERNAME=
@@ -59,6 +66,7 @@ KAFKA_CA_CERT=
 ```
 
 Webhook-specific:
+
 ```env
 CLERK_WEBHOOK_SECRET=whsec_...  # For clerk-sync
 ```
@@ -66,11 +74,13 @@ CLERK_WEBHOOK_SECRET=whsec_...  # For clerk-sync
 ## Restrictions
 
 ### Security
+
 - Always verify webhook signatures
 - Reject invalid requests with 400 status
 - Use TLS for Kafka connections
 
 ### Idempotency
+
 - Include event type and ID in Kafka key
 - Consumers must handle duplicate messages
 

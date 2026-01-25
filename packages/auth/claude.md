@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `auth` package provides Clerk authentication integration for Rate Creator applications:
+
 - ClerkProvider component for React apps
 - Authentication utilities
 - Server-side auth helpers
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
 ## Restrictions
 
 ### Environment Variables
+
 ```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
@@ -49,6 +51,7 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 ```
 
 ### Usage Patterns
+
 - Always wrap app with ClerkProvider
 - Use Clerk middleware for route protection
 - Use `auth()` on server, `useAuth()` on client
@@ -64,7 +67,7 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File                     | Purpose               |
+| ------------------------ | --------------------- |
 | `src/clerk-provider.tsx` | ClerkProvider wrapper |
-| `package.json` | Dependencies |
+| `package.json`           | Dependencies          |

@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `hooks` package provides reusable React custom hooks for Rate Creator:
+
 - Utility hooks (debounce, throttle)
 - Domain-specific hooks
 - Integration hooks
@@ -15,31 +16,34 @@ The `hooks` package provides reusable React custom hooks for Rate Creator:
 ### Usage
 
 ```typescript
-import { useDebounce } from "@ratecreator/hooks"
+import { useDebounce } from "@ratecreator/hooks";
 
 function SearchComponent() {
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebounce(search, 300)
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     // Fetch with debouncedSearch
-  }, [debouncedSearch])
+  }, [debouncedSearch]);
 }
 ```
 
 ## What Has Been Done
 
 ### Utility Hooks
+
 - `useDebounce`: Debounce value changes
 
 ## Restrictions
 
 ### Hook Rules
+
 - Follow React hooks rules (no conditional calls)
 - Prefix all hooks with `use`
 - Return stable references where possible
 
 ### Dependencies
+
 - Should only depend on React
 - No external state libraries
 
@@ -55,7 +59,7 @@ function SearchComponent() {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main exports |
+| File                 | Purpose       |
+| -------------------- | ------------- |
+| `src/index.ts`       | Main exports  |
 | `src/useDebounce.ts` | Debounce hook |

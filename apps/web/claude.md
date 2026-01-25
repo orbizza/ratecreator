@@ -3,6 +3,7 @@
 ## What This App Does
 
 The `web` app is the main user-facing platform for Rate Creator. It serves as the primary interface for:
+
 - Discovering and searching creators across platforms
 - Reading and writing reviews
 - Engaging with comments and votes
@@ -47,6 +48,7 @@ app/
 ## What Has Been Done
 
 ### Completed Features
+
 - Landing page with hero section
 - Creator profile pages with ratings and reviews
 - Review creation with rich text (BlockNote)
@@ -61,6 +63,7 @@ app/
 - Sentry error tracking
 
 ### Completed Pages
+
 - Landing page
 - Search results page
 - Creator profile page
@@ -72,16 +75,19 @@ app/
 ## Restrictions
 
 ### Authentication
+
 - Protected routes require Clerk authentication
 - Middleware handles route protection
 - User must be logged in to write reviews
 
 ### API Routes
+
 - All mutations go through server actions
 - Search reads from Algolia (not MongoDB directly)
 - Reviews trigger Kafka events for async processing
 
 ### Component Usage
+
 - Use `@ratecreator/ui` for all UI components
 - Use `@ratecreator/store` for global state
 - Use `@ratecreator/hooks` for custom hooks
@@ -89,6 +95,7 @@ app/
 ## What Needs To Be Done
 
 ### Features
+
 - [ ] Review edit functionality
 - [ ] Review delete with confirmation
 - [ ] User following/followers
@@ -99,6 +106,7 @@ app/
 - [ ] Share to social media
 
 ### Technical
+
 - [ ] Complete test coverage
 - [ ] Performance optimization (lazy loading)
 - [ ] Accessibility audit
@@ -107,10 +115,10 @@ app/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `app/layout.tsx` | Root layout with providers |
-| `app/providers.tsx` | Global providers (Clerk, Theme, Recoil) |
-| `middleware.ts` | Route protection logic |
-| `instrumentation.ts` | Sentry initialization |
-| `next.config.mjs` | Next.js configuration |
+| File                 | Purpose                                 |
+| -------------------- | --------------------------------------- |
+| `app/layout.tsx`     | Root layout with providers              |
+| `app/providers.tsx`  | Global providers (Clerk, Theme, Recoil) |
+| `middleware.ts`      | Route protection logic                  |
+| `instrumentation.ts` | Sentry initialization                   |
+| `next.config.mjs`    | Next.js configuration                   |

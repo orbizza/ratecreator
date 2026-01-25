@@ -25,18 +25,18 @@ export default function RootLayout({ children }) {
 
 ## Exports
 
-| Export | Description |
-|--------|-------------|
+| Export          | Description                           |
+| --------------- | ------------------------------------- |
 | `ClerkProvider` | Clerk authentication provider wrapper |
 
 ## Server-Side Usage
 
 ```typescript
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function getServerSideProps() {
-  const { userId } = auth()
-  const user = await currentUser()
+  const { userId } = auth();
+  const user = await currentUser();
   // ...
 }
 ```
@@ -44,11 +44,11 @@ export async function getServerSideProps() {
 ## Client-Side Usage
 
 ```typescript
-import { useAuth, useUser } from "@clerk/nextjs"
+import { useAuth, useUser } from "@clerk/nextjs";
 
 function Component() {
-  const { isSignedIn, userId } = useAuth()
-  const { user } = useUser()
+  const { isSignedIn, userId } = useAuth();
+  const { user } = useUser();
   // ...
 }
 ```
@@ -69,11 +69,11 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 Configure route protection in `middleware.ts`:
 
 ```typescript
-import { clerkMiddleware } from "@clerk/nextjs/server"
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware()
+export default clerkMiddleware();
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
-}
+};
 ```

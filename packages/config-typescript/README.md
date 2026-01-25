@@ -18,17 +18,17 @@ Extend in your package's `tsconfig.json`:
 
 ## Available Configurations
 
-| Config | Description |
-|--------|-------------|
+| Config      | Description                   |
+| ----------- | ----------------------------- |
 | `base.json` | Base TypeScript configuration |
 
 ## Key Settings
 
-| Setting | Value | Description |
-|---------|-------|-------------|
-| `strict` | `true` | Enable all strict type checks |
-| `target` | `ES2020` | JavaScript target version |
-| `module` | `ESNext` | Module system |
-| `moduleResolution` | `bundler` | Module resolution strategy |
-| `jsx` | `react-jsx` | JSX transform |
-| `skipLibCheck` | `true` | Skip type checking of declaration files |
+| Setting            | Value       | Description                             |
+| ------------------ | ----------- | --------------------------------------- |
+| `strict`           | `true`      | Enable all strict type checks           |
+| `target`           | `ES2020`    | JavaScript target version               |
+| `module`           | `ESNext`    | Module system                           |
+| `moduleResolution` | `bundler`   | Module resolution strategy              |
+| `jsx`              | `react-jsx` | JSX transform                           |
+| `skipLibCheck`     | `true`      | Skip type checking of declaration files |

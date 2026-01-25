@@ -5,6 +5,7 @@ Kafka consumer that processes review events and calculates creator ratings.
 ## Overview
 
 When a new review is submitted, this service:
+
 1. Consumes the review event from Kafka
 2. Fetches all reviews for the creator
 3. Calculates ratings using multiple algorithms
@@ -21,15 +22,19 @@ When a new review is submitted, this service:
 ## Rating Algorithms
 
 ### Simple Average
+
 ```
 rating = sum(stars) / count(reviews)
 ```
 
 ### Bayesian Average
+
 ```
 bayesian = (v/(v+m)) * R + (m/(v+m)) * C
 ```
+
 Where:
+
 - `v` = number of votes (reviews)
 - `m` = minimum votes required (tunable)
 - `R` = average rating for this creator
@@ -37,16 +42,17 @@ Where:
 
 ## Functions
 
-| Function | Description |
-|----------|-------------|
-| `calculateSimpleAverage(reviews)` | Compute arithmetic mean of ratings |
+| Function                                                  | Description                             |
+| --------------------------------------------------------- | --------------------------------------- |
+| `calculateSimpleAverage(reviews)`                         | Compute arithmetic mean of ratings      |
 | `calculateBayesianAverage(reviews, globalMean, minVotes)` | Compute weighted rating with confidence |
-| `updateCreatorRating(accountId, rating)` | Update rating in database |
-| `cacheRating(accountId, rating)` | Cache rating in Redis |
+| `updateCreatorRating(accountId, rating)`                  | Update rating in database               |
+| `cacheRating(accountId, rating)`                          | Cache rating in Redis                   |
 
 ## Message Format
 
 Expected Kafka message structure:
+
 ```typescript
 {
   eventType: "review.created" | "review.updated" | "review.deleted",

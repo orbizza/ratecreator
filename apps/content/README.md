@@ -32,62 +32,69 @@ app/
 ## Pages and Routes
 
 ### Post Management (`(posts)/`)
-| Route | Description |
-|-------|-------------|
+
+| Route       | Description          |
+| ----------- | -------------------- |
 | `/new-post` | Create new blog post |
-| `/editor` | Post editor |
-| `/[slug]` | Edit existing post |
+| `/editor`   | Post editor          |
+| `/[slug]`   | Edit existing post   |
 
 ### Content Dashboard (`(content)/`)
-| Route | Description |
-|-------|-------------|
+
+| Route          | Description            |
+| -------------- | ---------------------- |
 | `/ratecreator` | Content management hub |
 
 ### Tag Management (`tags/`)
-| Route | Description |
-|-------|-------------|
-| `/tags` | Tag listing |
+
+| Route           | Description    |
+| --------------- | -------------- |
+| `/tags`         | Tag listing    |
 | `/tags/new-tag` | Create new tag |
-| `/tags/[slug]` | Edit tag |
+| `/tags/[slug]`  | Edit tag       |
 
 ### API Routes
-| Route | Description |
-|-------|-------------|
+
+| Route         | Description               |
+| ------------- | ------------------------- |
 | `/api/upload` | Media file upload handler |
 
 ## Key Components
 
 ### Editor Components
-| Component | Description |
-|-----------|-------------|
-| `BlockNoteEditor` | Rich text editor |
-| `YouTubeEmbed` | YouTube video block |
-| `Divider` | Content divider block |
-| `ImageUpload` | Image upload component |
+
+| Component         | Description            |
+| ----------------- | ---------------------- |
+| `BlockNoteEditor` | Rich text editor       |
+| `YouTubeEmbed`    | YouTube video block    |
+| `Divider`         | Content divider block  |
+| `ImageUpload`     | Image upload component |
 
 ### Admin Components
-| Component | Description |
-|-----------|-------------|
-| `AdminSidebar` | Admin navigation |
-| `PostsNavbar` | Posts section navigation |
-| `PostsListComponent` | Posts table view |
-| `NewPostComponent` | New post form |
-| `EditContentPost` | Post editor |
+
+| Component            | Description              |
+| -------------------- | ------------------------ |
+| `AdminSidebar`       | Admin navigation         |
+| `PostsNavbar`        | Posts section navigation |
+| `PostsListComponent` | Posts table view         |
+| `NewPostComponent`   | New post form            |
+| `EditContentPost`    | Post editor              |
 
 ### Tag Components
-| Component | Description |
-|-----------|-------------|
-| `TagComponent` | Tag display |
+
+| Component          | Description     |
+| ------------------ | --------------- |
+| `TagComponent`     | Tag display     |
 | `EditTagComponent` | Tag editor form |
 
 ## Content Types
 
-| Type | Description |
-|------|-------------|
-| `BLOG` | Blog articles |
-| `GLOSSARY` | Glossary terms |
-| `LEGAL` | Legal documents |
-| `NEWS` | News updates |
+| Type       | Description     |
+| ---------- | --------------- |
+| `BLOG`     | Blog articles   |
+| `GLOSSARY` | Glossary terms  |
+| `LEGAL`    | Legal documents |
+| `NEWS`     | News updates    |
 
 ## Editor Features
 
@@ -122,9 +129,9 @@ DO_SPACES_BUCKET=
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Start development server |
-| `yarn build` | Build for production |
-| `yarn start` | Start production server |
-| `yarn lint` | Run ESLint |
+| Command      | Description              |
+| ------------ | ------------------------ |
+| `yarn dev`   | Start development server |
+| `yarn build` | Build for production     |
+| `yarn start` | Start production server  |
+| `yarn lint`  | Run ESLint               |

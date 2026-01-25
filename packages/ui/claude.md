@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `ui` package is the shared React component library for all Rate Creator applications. It provides:
+
 - Primitive UI components (buttons, inputs, dialogs)
 - Domain-specific components (review cards, creator profiles)
 - BlockNote editor integration
@@ -18,12 +19,12 @@ The `ui` package is the shared React component library for all Rate Creator appl
 ### Exports
 
 ```typescript
-import { Button, Card } from "@ratecreator/ui"
-import { ReviewCard } from "@ratecreator/ui/review"
-import { Editor } from "@ratecreator/ui/content"
-import { Logo } from "@ratecreator/ui/common"
-import { cn } from "@ratecreator/ui/utils"
-import "@ratecreator/ui/styles.css"
+import { Button, Card } from "@ratecreator/ui";
+import { ReviewCard } from "@ratecreator/ui/review";
+import { Editor } from "@ratecreator/ui/content";
+import { Logo } from "@ratecreator/ui/common";
+import { cn } from "@ratecreator/ui/utils";
+import "@ratecreator/ui/styles.css";
 ```
 
 ### Directory Structure
@@ -40,6 +41,7 @@ src/components/
 ## What Has Been Done
 
 ### UI Primitives (`src/components/ui/`)
+
 - Accordion, Alert, Alert Dialog, Avatar
 - Badge, Breadcrumb, Button, Calendar
 - Card, Checkbox, Collapsible, Command
@@ -51,6 +53,7 @@ src/components/
 - Tooltip, Animated components, Spinner
 
 ### Common Components (`src/components/common/`)
+
 - **BlockNote Editor Suite**:
   - `editor.tsx` - Main editor component
   - `blocknote-render.tsx` - Content renderer
@@ -63,6 +66,7 @@ src/components/
 - Logo components
 
 ### Review Components (`src/components/review/`)
+
 - Cards (review cards, creator cards)
 - Categories (filters, lists)
 - Creator Profile (header, stats)
@@ -78,22 +82,25 @@ src/components/
 ## Restrictions
 
 ### Import Patterns
+
 ```typescript
 // Correct
-import { Button } from "@ratecreator/ui"
-import { ReviewCard } from "@ratecreator/ui/review"
+import { Button } from "@ratecreator/ui";
+import { ReviewCard } from "@ratecreator/ui/review";
 
 // Incorrect - don't deep import
-import { Button } from "@ratecreator/ui/src/components/ui/button"
+import { Button } from "@ratecreator/ui/src/components/ui/button";
 ```
 
 ### Styling
+
 - Use `cn()` utility for className merging
 - Follow TailwindCSS patterns
 - Support dark mode via `dark:` prefix
 - Use CSS variables for theme colors
 
 ### Component Guidelines
+
 - All components must be accessible (ARIA)
 - All components must support ref forwarding
 - All components must be typed with TypeScript
@@ -110,9 +117,9 @@ import { Button } from "@ratecreator/ui/src/components/ui/button"
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main exports |
-| `lib/utils.ts` | Utility functions (cn, etc.) |
-| `tailwind.config.ts` | TailwindCSS configuration |
-| `package.json` | Package configuration |
+| File                 | Purpose                      |
+| -------------------- | ---------------------------- |
+| `src/index.ts`       | Main exports                 |
+| `lib/utils.ts`       | Utility functions (cn, etc.) |
+| `tailwind.config.ts` | TailwindCSS configuration    |
+| `package.json`       | Package configuration        |

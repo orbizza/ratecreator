@@ -38,7 +38,7 @@ The `config-typescript` package provides shared TypeScript configuration for all
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `base.json` | Base TypeScript config |
-| `package.json` | Package configuration |
+| File           | Purpose                |
+| -------------- | ---------------------- |
+| `base.json`    | Base TypeScript config |
+| `package.json` | Package configuration  |

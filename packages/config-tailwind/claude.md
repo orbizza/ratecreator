@@ -13,12 +13,12 @@ The `config-tailwind` package provides shared TailwindCSS configuration for all 
 
 ```javascript
 // In any app's tailwind.config.ts
-import sharedConfig from "@ratecreator/tailwind-config"
+import sharedConfig from "@ratecreator/tailwind-config";
 
 export default {
   presets: [sharedConfig],
   content: ["./app/**/*.tsx", "./components/**/*.tsx"],
-}
+};
 ```
 
 ## What Has Been Done
@@ -39,7 +39,7 @@ export default {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File                 | Purpose                |
+| -------------------- | ---------------------- |
 | `tailwind.config.ts` | Shared Tailwind config |
-| `package.json` | Package configuration |
+| `package.json`       | Package configuration  |

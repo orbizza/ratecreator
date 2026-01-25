@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `actions` package contains server actions and API logic for Rate Creator:
+
 - Server-side mutations
 - Data fetching utilities
 - File upload handlers
@@ -16,9 +17,9 @@ The `actions` package contains server actions and API logic for Rate Creator:
 ### Exports
 
 ```typescript
-import { uploadFile } from "@ratecreator/actions"
-import { createReview, updateReview } from "@ratecreator/actions/review"
-import { createPost, publishPost } from "@ratecreator/actions/content"
+import { uploadFile } from "@ratecreator/actions";
+import { createReview, updateReview } from "@ratecreator/actions/review";
+import { createPost, publishPost } from "@ratecreator/actions/content";
 ```
 
 ### Directory Structure
@@ -36,17 +37,20 @@ src/
 ## What Has Been Done
 
 ### Upload Actions
+
 - File upload to Digital Ocean Spaces
 - Image validation and processing
 - URL generation for uploaded files
 
 ### Review Actions
+
 - Review CRUD operations
 - Comment management
 - Vote handling
 - Kafka event publishing
 
 ### Content Actions
+
 - Blog post CRUD
 - Tag management
 - Newsletter operations
@@ -54,24 +58,27 @@ src/
 ## Restrictions
 
 ### Server Actions Pattern
+
 ```typescript
-"use server"
+"use server";
 
 export async function createReview(data: ReviewInput) {
   // Server-side only code
-  const user = await auth()
-  if (!user) throw new Error("Unauthorized")
+  const user = await auth();
+  if (!user) throw new Error("Unauthorized");
 
   // Create review...
 }
 ```
 
 ### Error Handling
+
 - All actions should throw typed errors
 - Use proper HTTP status semantics
 - Log errors for debugging
 
 ### Authentication
+
 - All mutation actions require authentication
 - Use `auth()` from Clerk for user context
 
@@ -87,9 +94,9 @@ export async function createReview(data: ReviewInput) {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main exports |
-| `src/upload-crud.ts` | File upload logic |
-| `src/review/index.ts` | Review domain actions |
+| File                   | Purpose                |
+| ---------------------- | ---------------------- |
+| `src/index.ts`         | Main exports           |
+| `src/upload-crud.ts`   | File upload logic      |
+| `src/review/index.ts`  | Review domain actions  |
 | `src/content/index.ts` | Content domain actions |

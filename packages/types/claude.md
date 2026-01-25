@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `types` package provides shared TypeScript type definitions for Rate Creator:
+
 - Domain types (Review, User, Account, etc.)
 - API types (request/response)
 - Utility types
@@ -15,9 +16,9 @@ The `types` package provides shared TypeScript type definitions for Rate Creator
 ### Exports
 
 ```typescript
-import type { User, Review, Account } from "@ratecreator/types"
-import type { ReviewInput, ReviewFilter } from "@ratecreator/types/review"
-import type { Post, Tag } from "@ratecreator/types/content"
+import type { User, Review, Account } from "@ratecreator/types";
+import type { ReviewInput, ReviewFilter } from "@ratecreator/types/review";
+import type { Post, Tag } from "@ratecreator/types/content";
 ```
 
 ### Directory Structure
@@ -34,6 +35,7 @@ src/
 ## What Has Been Done
 
 ### Core Types
+
 - User types (from Clerk and database)
 - Account types (creator profiles)
 - Review types (ratings, status, etc.)
@@ -41,12 +43,14 @@ src/
 - Vote types
 
 ### Review Domain Types
+
 - `ReviewInput`: Create/update review payload
 - `ReviewFilter`: Search filter options
 - `ReviewStatus`: Status enum
 - `Platform`: Platform enum
 
 ### Content Domain Types
+
 - `Post`: Blog post type
 - `Tag`: Tag type
 - `Newsletter`: Newsletter type
@@ -54,15 +58,17 @@ src/
 ## Restrictions
 
 ### Type-Only Imports
+
 ```typescript
 // Correct - type-only import
-import type { User } from "@ratecreator/types"
+import type { User } from "@ratecreator/types";
 
 // Also correct
-import { type User, type Review } from "@ratecreator/types"
+import { type User, type Review } from "@ratecreator/types";
 ```
 
 ### Naming Conventions
+
 - Use PascalCase for type names
 - Suffix input types with `Input`
 - Suffix response types with `Response`
@@ -79,8 +85,8 @@ import { type User, type Review } from "@ratecreator/types"
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main type exports |
-| `src/review/index.ts` | Review domain types |
+| File                   | Purpose              |
+| ---------------------- | -------------------- |
+| `src/index.ts`         | Main type exports    |
+| `src/review/index.ts`  | Review domain types  |
 | `src/content/index.ts` | Content domain types |

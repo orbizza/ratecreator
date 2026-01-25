@@ -43,6 +43,7 @@ Body: Clerk webhook payload (JSON)
 3. **TLS**: Kafka connection uses SSL certificates
 
 ### Message Key Format
+
 ```
 {eventType}:{userId}
 // Example: user.created:user_2abc123
@@ -51,10 +52,12 @@ Body: Clerk webhook payload (JSON)
 ## Restrictions
 
 ### Verification
+
 - All requests must have valid Svix headers
 - Invalid signatures are rejected with 400 status
 
 ### Environment Variables
+
 ```
 CLERK_WEBHOOK_SECRET=whsec_...
 KAFKA_SERVICE_URI=...
@@ -64,6 +67,7 @@ KAFKA_CA_CERT=...
 ```
 
 ### Idempotency
+
 - Kafka key includes event type and user ID
 - Consumers should handle duplicate messages
 
@@ -79,7 +83,7 @@ KAFKA_CA_CERT=...
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File           | Purpose                                     |
+| -------------- | ------------------------------------------- |
 | `src/index.ts` | Main entry, Hono server and webhook handler |
-| `package.json` | Dependencies and build config |
+| `package.json` | Dependencies and build config               |

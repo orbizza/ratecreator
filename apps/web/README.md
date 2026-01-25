@@ -32,76 +32,85 @@ app/
 ## Pages and Routes
 
 ### Authentication
-| Route | Description |
-|-------|-------------|
-| `/sign-in` | User sign in page |
+
+| Route      | Description            |
+| ---------- | ---------------------- |
+| `/sign-in` | User sign in page      |
 | `/sign-up` | User registration page |
 
 ### Protected Routes (`(protected)/`)
-| Route | Description |
-|-------|-------------|
-| `/review/*` | Review creation and management |
-| `/user-profile/*` | User profile settings |
+
+| Route             | Description                    |
+| ----------------- | ------------------------------ |
+| `/review/*`       | Review creation and management |
+| `/user-profile/*` | User profile settings          |
 
 ### Content Routes (`(content)/`)
-| Route | Description |
-|-------|-------------|
-| `/blog` | Blog articles listing |
-| `/blog/[slug]` | Individual blog post |
-| `/newsletter` | Newsletter archive |
-| `/glossary` | Glossary terms |
+
+| Route                | Description                  |
+| -------------------- | ---------------------------- |
+| `/blog`              | Blog articles listing        |
+| `/blog/[slug]`       | Individual blog post         |
+| `/newsletter`        | Newsletter archive           |
+| `/glossary`          | Glossary terms               |
 | `/category-glossary` | Category-specific glossaries |
 
 ### Public Routes (`(public)/`)
-| Route | Description |
-|-------|-------------|
-| `/search` | Creator search with filters |
-| `/profile/[id]` | Creator profile page |
-| `/contact` | Contact form |
-| `/privacy` | Privacy policy |
-| `/terms` | Terms of service |
-| `/cookie-policy` | Cookie policy |
-| `/legal` | Legal pages |
+
+| Route            | Description                 |
+| ---------------- | --------------------------- |
+| `/search`        | Creator search with filters |
+| `/profile/[id]`  | Creator profile page        |
+| `/contact`       | Contact form                |
+| `/privacy`       | Privacy policy              |
+| `/terms`         | Terms of service            |
+| `/cookie-policy` | Cookie policy               |
+| `/legal`         | Legal pages                 |
 
 ### API Routes (`api/`)
-| Route | Description |
-|-------|-------------|
-| `/api/accounts` | Account queries |
-| `/api/reviews` | Review CRUD operations |
-| `/api/categories` | Category data |
-| `/api/metadata` | Metadata fetching |
-| `/api/search/accounts` | Account search |
+
+| Route                  | Description            |
+| ---------------------- | ---------------------- |
+| `/api/accounts`        | Account queries        |
+| `/api/reviews`         | Review CRUD operations |
+| `/api/categories`      | Category data          |
+| `/api/metadata`        | Metadata fetching      |
+| `/api/search/accounts` | Account search         |
 
 ## Key Components
 
 ### Layout
-| Component | Location | Description |
-|-----------|----------|-------------|
-| `RootLayout` | `app/layout.tsx` | Root layout with providers |
-| `Providers` | `app/providers.tsx` | Global providers (Clerk, Theme, Recoil) |
+
+| Component    | Location            | Description                             |
+| ------------ | ------------------- | --------------------------------------- |
+| `RootLayout` | `app/layout.tsx`    | Root layout with providers              |
+| `Providers`  | `app/providers.tsx` | Global providers (Clerk, Theme, Recoil) |
 
 ### Navigation
-| Component | Description |
-|-----------|-------------|
-| `NavBar` | Main navigation bar |
-| `AppBar` | Top application bar |
-| `Footer` | Site footer |
+
+| Component    | Description                  |
+| ------------ | ---------------------------- |
+| `NavBar`     | Main navigation bar          |
+| `AppBar`     | Top application bar          |
+| `Footer`     | Site footer                  |
 | `CommandBar` | Quick search palette (Cmd+K) |
 
 ### Review Components
-| Component | Description |
-|-----------|-------------|
+
+| Component        | Description                     |
+| ---------------- | ------------------------------- |
 | `CreatorProfile` | Full creator profile with stats |
-| `CreatorRating` | Rating display and form |
-| `ReviewCard` | Individual review display |
-| `CommentThread` | Threaded discussions |
+| `CreatorRating`  | Rating display and form         |
+| `ReviewCard`     | Individual review display       |
+| `CommentThread`  | Threaded discussions            |
 
 ### Search & Filters
-| Component | Description |
-|-----------|-------------|
-| `CentralSearchResults` | Global search results |
-| `CategoryFilters` | Category-based filtering |
-| `PaginationBar` | Page navigation |
+
+| Component              | Description              |
+| ---------------------- | ------------------------ |
+| `CentralSearchResults` | Global search results    |
+| `CategoryFilters`      | Category-based filtering |
+| `PaginationBar`        | Page navigation          |
 
 ## Dependencies
 
@@ -124,10 +133,10 @@ NEXT_PUBLIC_POSTHOG_KEY=
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Start development server |
-| `yarn build` | Build for production |
-| `yarn start` | Start production server |
-| `yarn lint` | Run ESLint |
-| `yarn type-check` | Run TypeScript checks |
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `yarn dev`        | Start development server |
+| `yarn build`      | Build for production     |
+| `yarn start`      | Start production server  |
+| `yarn lint`       | Run ESLint               |
+| `yarn type-check` | Run TypeScript checks    |

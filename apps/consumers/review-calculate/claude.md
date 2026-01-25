@@ -43,7 +43,9 @@ The `review-calculate` consumer is a Kafka consumer that processes review events
 ## Restrictions
 
 ### Message Format
+
 Expected Kafka message structure:
+
 ```typescript
 {
   eventType: "review.created" | "review.updated" | "review.deleted",
@@ -55,11 +57,13 @@ Expected Kafka message structure:
 ```
 
 ### Dependencies
+
 - Requires Kafka connection (TLS with certificates)
 - Requires Redis connection
 - Requires MongoDB connection
 
 ### Processing
+
 - Messages are processed sequentially per partition
 - Failed messages are logged but not retried (dead letter queue pending)
 
@@ -75,7 +79,7 @@ Expected Kafka message structure:
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File           | Purpose                          |
+| -------------- | -------------------------------- |
 | `src/index.ts` | Main entry, Kafka consumer setup |
-| `package.json` | Dependencies and build config |
+| `package.json` | Dependencies and build config    |

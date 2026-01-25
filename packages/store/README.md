@@ -11,46 +11,49 @@ yarn add @ratecreator/store
 ## Usage
 
 ```typescript
-import { toastState } from "@ratecreator/store"
-import { categoryState, searchState } from "@ratecreator/store/review"
-import { adminContentState } from "@ratecreator/store/content"
+import { toastState } from "@ratecreator/store";
+import { categoryState, searchState } from "@ratecreator/store/review";
+import { adminContentState } from "@ratecreator/store/content";
 ```
 
 ## Atoms
 
 ### Main Atoms
-| Atom | Description |
-|------|-------------|
+
+| Atom         | Description                     |
+| ------------ | ------------------------------- |
 | `toastState` | Global toast notification state |
 
 ### Review Atoms (`@ratecreator/store/review`)
-| Atom | Description |
-|------|-------------|
+
+| Atom            | Description                      |
+| --------------- | -------------------------------- |
 | `categoryState` | Category selection and filtering |
-| `searchState` | Search query and results state |
+| `searchState`   | Search query and results state   |
 
 ### Content Atoms (`@ratecreator/store/content`)
-| Atom | Description |
-|------|-------------|
+
+| Atom                 | Description                    |
+| -------------------- | ------------------------------ |
 | `adminContentNavbar` | Content admin navigation state |
-| `adminContentPost` | Content post editing state |
+| `adminContentPost`   | Content post editing state     |
 
 ## Static Data
 
 All static data exports from main index:
 
-| Export | Description |
-|--------|-------------|
-| `categoriesData` | Full category hierarchy |
-| `categoriesListColors` | Color palette for categories |
-| `searchPlaceholder` | Search input placeholder texts |
-| `landingFeatures` | Features list for landing page |
-| `mostPopularCategories` | Trending categories list |
-| `filterCountryCode` | Country filter options |
-| `filterLanguageCode` | Language filter options |
-| `filterFollowersCheckbox` | Follower count filter options |
-| `filterVideoCountCheckbox` | Video count filter options |
-| `filterReviewCountCheckbox` | Review count filter options |
+| Export                      | Description                    |
+| --------------------------- | ------------------------------ |
+| `categoriesData`            | Full category hierarchy        |
+| `categoriesListColors`      | Color palette for categories   |
+| `searchPlaceholder`         | Search input placeholder texts |
+| `landingFeatures`           | Features list for landing page |
+| `mostPopularCategories`     | Trending categories list       |
+| `filterCountryCode`         | Country filter options         |
+| `filterLanguageCode`        | Language filter options        |
+| `filterFollowersCheckbox`   | Follower count filter options  |
+| `filterVideoCountCheckbox`  | Video count filter options     |
+| `filterReviewCountCheckbox` | Review count filter options    |
 
 ## Usage Example
 

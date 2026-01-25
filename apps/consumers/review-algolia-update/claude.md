@@ -20,6 +20,7 @@ The `review-algolia-update` consumer synchronizes review data to Algolia search 
 ### Index Updates
 
 Updates the following Algolia fields on review events:
+
 - `reviewCount`: Total number of reviews
 - `rating`: Average rating
 - `lastReviewDate`: Timestamp of most recent review
@@ -34,7 +35,9 @@ Updates the following Algolia fields on review events:
 ## Restrictions
 
 ### Message Format
+
 Expected Kafka message structure:
+
 ```typescript
 {
   eventType: "review.created" | "review.updated" | "review.deleted",
@@ -44,10 +47,12 @@ Expected Kafka message structure:
 ```
 
 ### Dependencies
+
 - Requires Kafka connection
 - Requires Algolia credentials (write API key)
 
 ### Rate Limits
+
 - Algolia has rate limits per plan
 - Batch updates where possible
 
@@ -62,7 +67,7 @@ Expected Kafka message structure:
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File           | Purpose                                       |
+| -------------- | --------------------------------------------- |
 | `src/index.ts` | Main entry, Kafka consumer and Algolia update |
-| `package.json` | Dependencies and build config |
+| `package.json` | Dependencies and build config                 |

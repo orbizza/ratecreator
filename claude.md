@@ -40,21 +40,21 @@ ratecreator/
 
 ### Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 14, React 18, TailwindCSS, Radix UI |
-| State | Recoil |
-| Editor | BlockNote |
-| Backend | Hono.js (microservices), Next.js API routes |
-| Database | MongoDB (Prisma ORM) |
-| Cache | Redis (Digital Ocean) |
-| Search | Algolia |
-| Queue | Kafka (Digital Ocean) |
-| Auth | Clerk |
-| Email | Resend |
-| Analytics | PostHog |
-| Monitoring | Sentry |
-| Hosting | Vercel (apps), Digital Ocean (infrastructure) |
+| Layer      | Technology                                    |
+| ---------- | --------------------------------------------- |
+| Frontend   | Next.js 14, React 18, TailwindCSS, Radix UI   |
+| State      | Recoil                                        |
+| Editor     | BlockNote                                     |
+| Backend    | Hono.js (microservices), Next.js API routes   |
+| Database   | MongoDB (Prisma ORM)                          |
+| Cache      | Redis (Digital Ocean)                         |
+| Search     | Algolia                                       |
+| Queue      | Kafka (Digital Ocean)                         |
+| Auth       | Clerk                                         |
+| Email      | Resend                                        |
+| Analytics  | PostHog                                       |
+| Monitoring | Sentry                                        |
+| Hosting    | Vercel (apps), Digital Ocean (infrastructure) |
 
 ### Data Flow
 
@@ -65,6 +65,7 @@ ratecreator/
 ## Key Data Models
 
 ### Core Entities
+
 - **Account**: Creator profiles across platforms (YouTube, Twitter, etc.)
 - **User**: Platform users (via Clerk)
 - **Review**: Star ratings (1-5) with rich text content
@@ -72,6 +73,7 @@ ratecreator/
 - **Category**: Hierarchical creator categorization
 
 ### Relationships
+
 - Users write Reviews for Accounts
 - Reviews have Comments (nested replies supported)
 - Reviews and Comments have Votes (upvote/downvote)
@@ -80,6 +82,7 @@ ratecreator/
 ## What Has Been Done
 
 ### Completed Features
+
 - Multi-platform creator profiles (YouTube, Twitter, Instagram, Reddit, TikTok, Twitch)
 - Full review system with star ratings, comments, voting
 - Algolia-powered search with filters (category, country, language, follower count)
@@ -92,6 +95,7 @@ ratecreator/
 - Soft delete with audit trails
 
 ### Implemented Consumers
+
 - `review-calculate`: Bayesian average rating calculations
 - `review-algolia-update`: Search index synchronization
 - `user-sync`: Clerk webhook event processing
@@ -99,12 +103,14 @@ ratecreator/
 ## Restrictions and Conventions
 
 ### Code Patterns
+
 - Package prefix: `@ratecreator/*`
 - Soft deletes: Use `isDeleted` flag, never hard delete
 - Audit trail: All models have `createdAt`, `updatedAt`, `deletedAt`
 - Event sourcing: Critical operations go through Kafka
 
 ### Environment Requirements
+
 - Node.js >= 18
 - Yarn 1.22.22
 - Digital Ocean managed services (MongoDB, Redis, Kafka)
@@ -112,6 +118,7 @@ ratecreator/
 - Algolia account for search
 
 ### Security
+
 - Svix webhook verification for Clerk events
 - No password storage (delegated to Clerk)
 - Environment separation (public vs. secret keys)
@@ -119,6 +126,7 @@ ratecreator/
 ## What Needs To Be Done
 
 ### Pending Features
+
 - Admin dashboard application
 - Creator site (for creators to claim and manage profiles)
 - Full mobile responsiveness
@@ -129,6 +137,7 @@ ratecreator/
 - A/B testing framework (feature flags package)
 
 ### Technical Debt
+
 - `apps/api/` - Empty, backend services to be built
 - `apps/services/` - Empty, microservices to be added
 - `packages/features/` - Feature flag system to be implemented
@@ -137,6 +146,7 @@ ratecreator/
 - Performance optimization for large datasets
 
 ### Infrastructure
+
 - Kubernetes deployment for consumers
 - CDN optimization
 - Database indexing review
@@ -161,12 +171,12 @@ yarn dev
 
 ## Key Commands
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Start all apps in development |
-| `yarn build` | Build all packages and apps |
-| `yarn test` | Run Vitest test suite |
-| `yarn lint` | Lint all code |
-| `yarn prisma-generate` | Generate Prisma client |
-| `yarn seed-category` | Seed categories to Algolia |
-| `yarn flush-redis-cache` | Clear Redis cache |
+| Command                  | Description                   |
+| ------------------------ | ----------------------------- |
+| `yarn dev`               | Start all apps in development |
+| `yarn build`             | Build all packages and apps   |
+| `yarn test`              | Run Vitest test suite         |
+| `yarn lint`              | Lint all code                 |
+| `yarn prisma-generate`   | Generate Prisma client        |
+| `yarn seed-category`     | Seed categories to Algolia    |
+| `yarn flush-redis-cache` | Clear Redis cache             |

@@ -3,6 +3,7 @@
 ## What This Package Does
 
 The `store` package provides global state management for Rate Creator using Recoil:
+
 - Atom definitions for shared state
 - Static data constants
 - Domain-specific state (review, content)
@@ -15,9 +16,9 @@ The `store` package provides global state management for Rate Creator using Reco
 ### Exports
 
 ```typescript
-import { toastState } from "@ratecreator/store"
-import { reviewFilterAtom } from "@ratecreator/store/review"
-import { editorStateAtom } from "@ratecreator/store/content"
+import { toastState } from "@ratecreator/store";
+import { reviewFilterAtom } from "@ratecreator/store/review";
+import { editorStateAtom } from "@ratecreator/store/content";
 ```
 
 ### Directory Structure
@@ -41,12 +42,14 @@ src/
 ## What Has Been Done
 
 ### Atoms
+
 - `toastState`: Global toast notification state
 - Review filters and sorting state
 - Content editor state
 - Search state
 
 ### Static Data
+
 - Category definitions and mappings
 - Color schemes for categories
 - Search placeholder texts
@@ -57,18 +60,20 @@ src/
 ## Restrictions
 
 ### Recoil Usage
+
 ```typescript
 // In components
-import { useRecoilState, useRecoilValue } from "recoil"
-import { reviewFilterAtom } from "@ratecreator/store/review"
+import { useRecoilState, useRecoilValue } from "recoil";
+import { reviewFilterAtom } from "@ratecreator/store/review";
 
 function FilterComponent() {
-  const [filters, setFilters] = useRecoilState(reviewFilterAtom)
+  const [filters, setFilters] = useRecoilState(reviewFilterAtom);
   // ...
 }
 ```
 
 ### State Design
+
 - Keep atoms small and focused
 - Use selectors for derived state
 - Avoid storing server state in atoms (use React Query)
@@ -84,10 +89,10 @@ function FilterComponent() {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main exports |
-| `src/toastState.ts` | Toast atom |
-| `src/atoms/review/index.ts` | Review domain atoms |
-| `src/atoms/content/index.ts` | Content domain atoms |
-| `src/data/*.ts` | Static data constants |
+| File                         | Purpose               |
+| ---------------------------- | --------------------- |
+| `src/index.ts`               | Main exports          |
+| `src/toastState.ts`          | Toast atom            |
+| `src/atoms/review/index.ts`  | Review domain atoms   |
+| `src/atoms/content/index.ts` | Content domain atoms  |
+| `src/data/*.ts`              | Static data constants |

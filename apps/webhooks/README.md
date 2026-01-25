@@ -4,8 +4,8 @@ Webhook receivers that accept external events and publish to Kafka.
 
 ## Available Webhooks
 
-| Webhook | Port | Source | Topic |
-|---------|------|--------|-------|
+| Webhook      | Port | Source     | Topic               |
+| ------------ | ---- | ---------- | ------------------- |
 | `clerk-sync` | 3010 | Clerk Auth | `clerk-user-events` |
 
 ## Architecture
@@ -15,6 +15,7 @@ External Service → Webhook → Svix Verification → Kafka
 ```
 
 All webhooks use:
+
 - **Framework**: Hono.js
 - **Verification**: Svix
 - **Output**: Kafka
@@ -34,10 +35,10 @@ cd clerk-sync && yarn start
 
 ### clerk-sync
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/webhook/clerk` | POST | Receive Clerk events |
-| `/health` | GET | Health check |
+| Endpoint         | Method | Description          |
+| ---------------- | ------ | -------------------- |
+| `/webhook/clerk` | POST   | Receive Clerk events |
+| `/health`        | GET    | Health check         |
 
 ## Environment Variables
 
@@ -61,6 +62,7 @@ CLERK_WEBHOOK_SECRET=whsec_...
 ## Development
 
 Each webhook follows the same structure:
+
 ```
 webhook-name/
 ├── src/

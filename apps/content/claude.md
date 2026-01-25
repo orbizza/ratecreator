@@ -3,6 +3,7 @@
 ## What This App Does
 
 The `content` app is the Content Management System (CMS) for Rate Creator. It handles:
+
 - Blog post creation and publishing
 - Newsletter management
 - Glossary term editing
@@ -44,6 +45,7 @@ app/
 ## What Has Been Done
 
 ### Completed Features
+
 - Rich text editor with BlockNote
 - Blog post CRUD operations
 - Tag creation and management
@@ -55,6 +57,7 @@ app/
 - Markdown export
 
 ### Editor Capabilities
+
 - Text formatting (bold, italic, etc.)
 - Headings (H1-H6)
 - Ordered and unordered lists
@@ -67,15 +70,18 @@ app/
 ## Restrictions
 
 ### Authentication
+
 - All routes require Clerk authentication
 - Only authorized content editors can access
 
 ### Content Workflow
+
 - Posts start as drafts
 - Publishing requires all required fields
 - Slug must be unique
 
 ### Media
+
 - Images uploaded to Digital Ocean Spaces
 - Maximum file size limits apply
 - Supported formats: JPG, PNG, GIF, WebP
@@ -83,6 +89,7 @@ app/
 ## What Needs To Be Done
 
 ### Features
+
 - [ ] Newsletter scheduling
 - [ ] Content calendar view
 - [ ] SEO analysis tools
@@ -93,6 +100,7 @@ app/
 - [ ] Analytics dashboard
 
 ### Technical
+
 - [ ] Autosave functionality
 - [ ] Collaborative editing
 - [ ] Better image optimization
@@ -101,9 +109,9 @@ app/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `app/layout.tsx` | Root layout |
-| `app/provider.tsx` | Global providers |
-| `app/sidebar-toggle.tsx` | Sidebar state |
+| File                      | Purpose              |
+| ------------------------- | -------------------- |
+| `app/layout.tsx`          | Root layout          |
+| `app/provider.tsx`        | Global providers     |
+| `app/sidebar-toggle.tsx`  | Sidebar state        |
 | `app/api/upload/route.ts` | Media upload handler |

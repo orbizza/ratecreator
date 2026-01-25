@@ -24,10 +24,10 @@ Clerk → Webhook → clerk-sync → Kafka → user-sync → MongoDB
 
 ### Event Types Handled
 
-| Event | Action |
-|-------|--------|
-| `user.created` | Upsert user record in MongoDB |
-| `user.updated` | Update user profile fields |
+| Event          | Action                           |
+| -------------- | -------------------------------- |
+| `user.created` | Upsert user record in MongoDB    |
+| `user.updated` | Update user profile fields       |
 | `user.deleted` | Soft delete (set isDeleted flag) |
 
 ## What Has Been Done
@@ -56,7 +56,9 @@ Clerk → Webhook → clerk-sync → Kafka → user-sync → MongoDB
 ## Restrictions
 
 ### Message Format
+
 Expected Kafka message structure:
+
 ```typescript
 {
   type: "user.created" | "user.updated" | "user.deleted",
@@ -72,10 +74,12 @@ Expected Kafka message structure:
 ```
 
 ### Dependencies
+
 - Requires Kafka connection
 - Requires MongoDB connection
 
 ### Data Integrity
+
 - Uses upsert to handle duplicate events
 - Soft deletes only (no hard deletes)
 - Stores full webhook payload for debugging
@@ -93,7 +97,7 @@ Expected Kafka message structure:
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File           | Purpose                                |
+| -------------- | -------------------------------------- |
 | `src/index.ts` | Main entry, Kafka consumer and DB sync |
-| `package.json` | Dependencies and build config |
+| `package.json` | Dependencies and build config          |
