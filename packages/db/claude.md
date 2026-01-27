@@ -7,7 +7,8 @@ The `db` package provides database access and client management for Rate Creator
 - Prisma ORM for MongoDB
 - Redis client for caching
 - Kafka client for messaging
-- Algolia client for search
+- Algolia client for search (legacy, being migrated)
+- Elasticsearch client for search (Elastic Cloud on GCP)
 - MongoDB native client for direct queries
 
 ## Architecture
@@ -23,6 +24,16 @@ import { prisma } from "@ratecreator/db/client";
 import { redis } from "@ratecreator/db/redis-do";
 import { getMongoClient } from "@ratecreator/db/mongo-client";
 import { algoliaClient } from "@ratecreator/db/algolia-client";
+import {
+  getElasticsearchClient,
+  searchAccounts,
+  indexAccount,
+  bulkIndexAccounts,
+  updateAccount,
+  deleteAccount,
+  createIndices,
+  checkHealth,
+} from "@ratecreator/db/elasticsearch-client";
 import { kafka } from "@ratecreator/db/kafka-client";
 ```
 
@@ -59,7 +70,8 @@ import { kafka } from "@ratecreator/db/kafka-client";
 - **Prisma Client**: ORM with type-safe queries
 - **Redis Client**: ioredis for Digital Ocean Redis
 - **Kafka Client**: kafkajs with TLS support
-- **Algolia Client**: Search and indexing
+- **Algolia Client**: Search and indexing (legacy)
+- **Elasticsearch Client**: Elastic Cloud on GCP (replacing Algolia)
 - **MongoDB Client**: Direct connection wrapper
 
 ## Restrictions
@@ -88,6 +100,11 @@ REDIS_PASSWORD=...
 KAFKA_SERVICE_URI=...
 ALGOLIA_APP_ID=...
 ALGOLIA_WRITE_API_KEY=...
+# Elasticsearch (Elastic Cloud on GCP)
+ELASTIC_CLOUD_ID=...
+ELASTIC_API_KEY=...
+ELASTIC_ACCOUNTS_INDEX=accounts
+ELASTIC_CATEGORIES_INDEX=categories
 ```
 
 ### Connection Management
@@ -109,11 +126,12 @@ ALGOLIA_WRITE_API_KEY=...
 
 ## Key Files
 
-| File                                  | Purpose                 |
-| ------------------------------------- | ----------------------- |
-| `prisma/schema.prisma`                | Database schema         |
-| `src/clients/index.ts`                | Prisma client export    |
-| `src/clients/redis-do.ts`             | Redis client            |
-| `src/clients/kafka-client.ts`         | Kafka producer/consumer |
-| `src/clients/algolia-client.ts`       | Algolia client          |
-| `src/clients/mongo-client-wrapper.ts` | MongoDB native client   |
+| File                                  | Purpose                              |
+| ------------------------------------- | ------------------------------------ |
+| `prisma/schema.prisma`                | Database schema                      |
+| `src/clients/index.ts`                | Prisma client export                 |
+| `src/clients/redis-do.ts`             | Redis client                         |
+| `src/clients/kafka-client.ts`         | Kafka producer/consumer              |
+| `src/clients/algolia-client.ts`       | Algolia client (legacy)              |
+| `src/clients/elasticsearch-client.ts` | Elasticsearch client (Elastic Cloud) |
+| `src/clients/mongo-client-wrapper.ts` | MongoDB native client                |

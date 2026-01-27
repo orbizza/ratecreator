@@ -23,6 +23,7 @@
   "devDependencies": {
     "@ratecreator/typescript-config": "*",
     "@types/algoliasearch": "^4.0.4",
+    "@vitest/coverage-v8": "3.0.5",
     "dotenv-cli": "^7.4.4",
     "esbuild": "^0.24.2",
     "eslint": "^8.57.1",

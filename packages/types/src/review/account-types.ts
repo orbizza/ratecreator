@@ -28,6 +28,7 @@ export interface Account {
   tiktokData?: any;
   redditData?: any;
   xData?: any;
+  instagramData?: any;
   isSeeded: boolean;
   isSuspended: boolean;
   ranking?: any;
@@ -163,6 +164,36 @@ export interface CreatorData {
           banner_background_image?: string;
         };
       };
+    };
+    instagramData?: {
+      username?: string;
+      fullName?: string;
+      biography?: string;
+      profilePictureUrl?: string;
+      followersCount?: number;
+      followingCount?: number;
+      mediaCount?: number;
+      isVerified?: boolean;
+      isBusinessAccount?: boolean;
+      businessCategory?: string;
+      externalUrl?: string;
+      recentMedia?: {
+        id: string;
+        mediaType: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+        permalink: string;
+        thumbnailUrl?: string;
+        caption?: string;
+        likeCount?: number;
+        commentsCount?: number;
+        timestamp: string;
+      }[];
+      insights?: {
+        impressions?: number;
+        reach?: number;
+        profileViews?: number;
+        websiteClicks?: number;
+      };
+      lastUpdated?: string;
     };
   };
   categories: string[];

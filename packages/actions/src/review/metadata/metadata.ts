@@ -272,6 +272,71 @@ async function getGenericMetadata(url: string): Promise<Metadata> {
   }
 }
 
+const getInstagramPostId = (url: string) => {
+  const patterns = [
+    /instagram\.com\/p\/([^/?#]+)/,
+    /instagram\.com\/reel\/([^/?#]+)/,
+    /instagram\.com\/tv\/([^/?#]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+};
+
+const getInstagramMetadata = async (url: string): Promise<Metadata> => {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      timeout: 10000,
+    });
+
+    const $ = load(response.data);
+
+    const title =
+      $('meta[property="og:title"]').attr("content") ||
+      $('meta[name="twitter:title"]').attr("content") ||
+      "Instagram Post";
+
+    const description =
+      $('meta[property="og:description"]').attr("content") ||
+      $('meta[name="description"]').attr("content") ||
+      "";
+
+    const image =
+      $('meta[property="og:image"]').attr("content") ||
+      $('meta[name="twitter:image"]').attr("content");
+
+    return {
+      title,
+      description,
+      image,
+    };
+  } catch (error) {
+    console.error("Error fetching Instagram metadata:", error);
+    const postId = getInstagramPostId(url);
+    return {
+      title: "Instagram Post",
+      description: postId
+        ? `Instagram post ID: ${postId}`
+        : "Unable to fetch post details",
+      image:
+        "https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png",
+    };
+  }
+};
+
 // Export the ID extraction functions
 export {
   getYouTubeVideoId,
@@ -279,6 +344,7 @@ export {
   getTwitterTweetId,
   getTikTokVideoId,
   getRedditPostId,
+  getInstagramPostId,
 };
 
 export const getMetadata = async (url: string): Promise<Metadata> => {
@@ -316,6 +382,10 @@ export const getMetadata = async (url: string): Promise<Metadata> => {
       if (postId) {
         metadata = await getRedditMetadata(postId);
       }
+    }
+    // Instagram
+    else if (url.includes("instagram.com") || url.includes("instagr.am")) {
+      metadata = await getInstagramMetadata(url);
     }
     // Generic URL
     else {

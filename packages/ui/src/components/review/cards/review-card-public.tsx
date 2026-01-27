@@ -1,14 +1,7 @@
 import { ReviewType } from "@ratecreator/types/review";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.bubble.css";
-import {
-  EllipsisVertical,
-  ArrowBigDown,
-  ArrowBigUp,
-  MessageCircle,
-  Share2,
-  FlagOff,
-} from "lucide-react";
+import { EllipsisVertical, MessageCircle, FlagOff } from "lucide-react";
 
 import {
   Avatar,
@@ -29,6 +22,8 @@ import {
 } from "@ratecreator/db/utils";
 import { getRedditPostData } from "@ratecreator/actions/review";
 import { useState, useEffect } from "react";
+import { VoteButtons, type VoteType } from "../interactions/vote-buttons";
+import { ShareButton } from "../interactions/share-button";
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -89,6 +84,19 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
  */
 interface ReviewCardPublicProps {
   review: ReviewType;
+  upvotes?: number;
+  downvotes?: number;
+  userVote?: VoteType | null;
+  commentCount?: number;
+  onVote?: (voteType: VoteType) => Promise<{
+    success: boolean;
+    upvotes?: number;
+    downvotes?: number;
+    userVote?: VoteType | null;
+    error?: string;
+  }>;
+  onCommentClick?: () => void;
+  shareUrl?: string;
 }
 
 /**
@@ -214,7 +222,23 @@ const PlatformContent: React.FC<{
  */
 export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
   review,
+  upvotes = 0,
+  downvotes = 0,
+  userVote = null,
+  commentCount = 0,
+  onVote,
+  onCommentClick,
+  shareUrl,
 }) => {
+  const handleVote = async (voteType: VoteType) => {
+    if (!onVote) {
+      return { success: false, error: "Voting not available" };
+    }
+    return onVote(voteType);
+  };
+
+  const defaultShareUrl =
+    shareUrl || (typeof window !== "undefined" ? window.location.href : "");
   return (
     <Card className="w-full h-full lg:w-3/4 lg:h-auto p-6 bg-background border dark:bg-card shadow-lg">
       {/* Author information section */}
@@ -308,32 +332,32 @@ export const ReviewCardPublic: React.FC<ReviewCardPublicProps> = ({
 
       <div className="text-sm mt-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-1 sm:gap-4">
-          <div className="flex flex-row items-center gap-1 rounded-full p-0 border border-gray-200 dark:border-gray-800">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowBigUp className="w-6 h-6" />
-            </Button>
-            <span className="text-sm">0</span>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowBigDown className="w-6 h-6" />
-            </Button>
-          </div>
+          <VoteButtons
+            upvotes={upvotes}
+            downvotes={downvotes}
+            userVote={userVote}
+            onVote={handleVote}
+            disabled={!onVote}
+          />
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               className="hover:text-foreground transition-colors rounded-full p-2 gap-2 sm:ml-2"
+              onClick={onCommentClick}
             >
               <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-sm">0</span>
+              <span className="text-sm">{commentCount}</span>
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-foreground transition-colors rounded-full p-2 gap-1 sm:gap-2"
-            >
-              <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-sm">Share</span>
-            </Button>
+            <ShareButton
+              url={defaultShareUrl}
+              title={review.title}
+              description={
+                typeof review.content === "string"
+                  ? review.content.slice(0, 200)
+                  : ""
+              }
+            />
           </div>
         </div>
         <Button

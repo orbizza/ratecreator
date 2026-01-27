@@ -35,46 +35,51 @@ model Category {
 }
 
 model Account {
-  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
-  platform             Platform
-  accountId            String
-  handle               String?
-  name                 String?
-  name_en              String?
-  followerCount        Int?
-  imageUrl             String?
-  bannerUrl            String?
-  country              String?
-  description          String?
-  description_en       String?
-  keywords             String?
-  keywords_en          String?
-  categories           CategoryMapping[] @relation("AccountToCategoryMapping")
-  ytData               Json?
-  redditData           Json?
-  xData                Json?
-  tiktokData           Json?
-  twitchData           Json?
-  instagramData        Json?
-  isSeeded             Boolean           @default(false)
-  isSuspended          Boolean           @default(false)
-  ranking              Json?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  language_code        String?
+  id                    String            @id @default(auto()) @map("_id") @db.ObjectId
+  platform              Platform
+  accountId             String
+  handle                String?
+  name                  String?
+  name_en               String?
+  followerCount         Int?
+  imageUrl              String?
+  bannerUrl             String?
+  country               String?
+  description           String?
+  description_en        String?
+  keywords              String?
+  keywords_en           String?
+  categories            CategoryMapping[] @relation("AccountToCategoryMapping")
+  ytData                Json?
+  redditData            Json?
+  xData                 Json?
+  tiktokData            Json?
+  twitchData            Json?
+  instagramData         Json?
+  isSeeded              Boolean           @default(false)
+  isSuspended           Boolean           @default(false)
+  ranking               Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  language_code         String?
   lang_confidence_score Float?
-  rating               Float?
-  reviewCount          Int?
-  isSubCategoryFailed  Boolean?          @default(false)
-  lastIndexedAt        DateTime?
-  isDeleted            Boolean?          @default(false)
-  isCategoryFailed     Boolean?          @default(false)
-  isTranslationFailed  Boolean?          @default(false)
-  videoFetch           Boolean?          
+  rating                Float?
+  reviewCount           Int?
+  isSubCategoryFailed   Boolean?          @default(false)
+  lastIndexedAt         DateTime?
+  isDeleted             Boolean?          @default(false)
+  isCategoryFailed      Boolean?          @default(false)
+  isTranslationFailed   Boolean?          @default(false)
+  videoFetch            Boolean?
+  lastDataRefresh       DateTime?
 
-  reviews              Review[]
-  saveToMyList        SaveToMyList[]
-  videos              YouTubeVideo[]
+  reviews               Review[]
+  saveToMyList          SaveToMyList[]
+  videos                YouTubeVideo[]
+  claimedBy             ClaimedAccount[]
+  linkedBy              UserLinkedAccount[]
+  organizationAccounts  OrganizationAccount[]
+  refreshLogs           DataRefreshLog[]
 
   @@unique([platform, accountId])
   @@index([platform])
@@ -100,6 +105,7 @@ model Account {
   @@index([isSeeded])
   @@index([videoFetch])
   @@index([bannerUrl])
+  @@index([lastDataRefresh])
 }
 
 model CategoryMapping {
@@ -119,7 +125,7 @@ model CategoryMapping {
 model User {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   clerkId        String         @unique
-  resendId       String?         
+  resendId       String?
   email          String         @unique
   firstName      String?        @default("")
   lastName       String?        @default("")
@@ -131,12 +137,15 @@ model User {
   webhookPayload Json?
   role           UserRole[]     @default([USER])
 
-  reviews        Review[]
-  comments       Comment[]
-  votes          Vote[]
-  commentVotes   CommentVote[]
-  saveToMyList   SaveToMyList[]
+  reviews            Review[]
+  comments           Comment[]
+  votes              Vote[]
+  commentVotes       CommentVote[]
+  saveToMyList       SaveToMyList[]
   newsletterAudience NewsletterAudience[]
+  claimedAccounts    ClaimedAccount[]
+  linkedAccounts     UserLinkedAccount[]
+  organizations      OrganizationMember[]
 
   @@index([firstName])
   @@index([lastName])
@@ -171,6 +180,116 @@ model NewsletterAudience {
   @@index([subscribed])
 
   @@unique([userId, newsletterId])
+}
+
+// -----------------------
+// Creator Portal Models
+// -----------------------
+
+model ClaimedAccount {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @db.ObjectId
+  accountId          String    @db.ObjectId
+  platform           String
+  claimedAt          DateTime  @default(now())
+  verifiedAt         DateTime?
+  verificationMethod String?   // oauth, email, dns, meta-tag
+  status             ClaimStatus @default(PENDING)
+
+  user    User    @relation(fields: [userId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@unique([userId, accountId])
+  @@index([accountId])
+  @@index([userId])
+  @@index([status])
+  @@index([platform])
+}
+
+model UserLinkedAccount {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  accountId String   @db.ObjectId
+  platform  String
+  isPrimary Boolean  @default(false)
+  linkedAt  DateTime @default(now())
+  nickname  String?
+
+  user    User    @relation(fields: [userId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@unique([userId, accountId])
+  @@index([userId])
+  @@index([userId, platform])
+  @@index([accountId])
+}
+
+// -----------------------
+// Organization Models
+// -----------------------
+
+model Organization {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  OrganizationMember[]
+  accounts OrganizationAccount[]
+
+  @@index([name])
+}
+
+model OrganizationMember {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String   @db.ObjectId
+  userId         String   @db.ObjectId
+  role           OrgRole  @default(MEMBER)
+  joinedAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model OrganizationAccount {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String   @db.ObjectId
+  accountId      String   @db.ObjectId
+  addedAt        DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
+
+  @@unique([organizationId, accountId])
+  @@index([organizationId])
+  @@index([accountId])
+}
+
+// -----------------------
+// Data Refresh Tracking
+// -----------------------
+
+model DataRefreshLog {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  accountId    String         @db.ObjectId
+  platform     String
+  status       RefreshStatus  @default(PENDING)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  error        String?
+  dataSnapshot Json?
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+  @@index([status])
+  @@index([startedAt])
+  @@index([platform])
 }
 
 model SaveToMyList {
@@ -395,6 +514,25 @@ enum CommentStatus {
   DELETED
   PENDING
   FLAGGED
+}
+
+enum ClaimStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum RefreshStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
 
 

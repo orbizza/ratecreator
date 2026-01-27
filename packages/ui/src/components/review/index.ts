@@ -18,3 +18,4 @@ export * from "./common/form-success";
 export * from "./common/form-error";
 export * from "./contact/contact-page";
 export * from "./cards/pagination-bar";
+export * from "./interactions";
