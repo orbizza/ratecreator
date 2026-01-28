@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-translate": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@google-cloud/vertexai",
+    "build-translate": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@google-cloud/vertexai --external:@prisma/client",
     "prisma-generate": "dotenv -e .env yarn prisma generate --schema=../../../packages/db/prisma/schema.prisma",
     "build": "yarn build-translate",
     "dev": "yarn build && node dist/index.js"

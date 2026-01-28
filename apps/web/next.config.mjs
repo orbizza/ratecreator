@@ -64,4 +64,10 @@ export default withSentryConfig(nextConfig, {
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
+
+  // Handle Sentry CLI errors gracefully to prevent build failures due to API timeouts
+  errorHandler: (err, invokeErr, compilation) => {
+    console.warn("Sentry CLI warning:", err.message);
+    // Don't invoke the error - this prevents build failure on Sentry API issues
+  },
 });

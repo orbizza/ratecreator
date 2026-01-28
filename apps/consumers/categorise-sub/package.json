@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-categorise-sub": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@google-cloud/vertexai",
+    "build-categorise-sub": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@google-cloud/vertexai --external:@prisma/client",
     "prisma-generate": "dotenv -e .env yarn prisma generate --schema=../../../packages/db/prisma/schema.prisma",
     "build": "yarn build-categorise-sub",
     "dev": "yarn build && node dist/index.js"

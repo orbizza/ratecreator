@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-user-sync": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js",
+    "build-user-sync": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@prisma/client",
     "prisma-generate": "dotenv -e .env yarn prisma generate --schema=../../../packages/db/prisma/schema.prisma",
     "build": "yarn build-user-sync",
     "dev": "yarn build && node dist/index.js"

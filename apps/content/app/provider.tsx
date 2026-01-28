@@ -1,32 +1,25 @@
 "use client";
 
+import React from "react";
 import { RecoilRoot } from "recoil";
-import { AppSidebar } from "@ratecreator/ui/content";
-import { SidebarToggle } from "./sidebar-toggle";
-import {
-  SidebarInset,
-  SidebarProvider,
-  ThemeProvider,
-  TooltipProvider,
-} from "@ratecreator/ui";
+import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { ContentSidebarLayout } from "./content-sidebar";
 
-export default function Provider({ children }: { children: React.ReactNode }) {
+export default function Provider({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="dark"
       disableTransitionOnChange
     >
       <RecoilRoot>
         <TooltipProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <SidebarToggle />
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          <ContentSidebarLayout>{children}</ContentSidebarLayout>
         </TooltipProvider>
       </RecoilRoot>
     </ThemeProvider>

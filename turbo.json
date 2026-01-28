@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "concurrency": "19",
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {

@@ -626,6 +626,7 @@ model Author {
   email   String @unique
   imageUrl String?
   posts   Post[]
+  ideas   Idea[]
   role    Role @default(WRITER)
 
   @@index([name])
@@ -636,4 +637,48 @@ enum Role {
   ADMIN
   OWNER
   WRITER
+}
+
+// -----------------------
+// Idea Management
+// -----------------------
+
+model Idea {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  description      String?
+  topics           String[]        @default([])
+  status           IdeaStatus      @default(NEW)
+  currentStage     IdeaStage       @default(ROUGH_IDEA)
+  contentPlatform  ContentPlatform @default(RATECREATOR)
+  generatedOutline String?
+  outlineContent   String?         // BlockNote JSON for outline
+  scriptContent    String?         // BlockNote JSON for script/draft
+  targetDate       DateTime?
+  createdPostId    String?         @db.ObjectId
+  authorId         String          @db.ObjectId
+  author           Author          @relation(fields: [authorId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([status])
+  @@index([currentStage])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([targetDate])
+  @@index([contentPlatform])
+}
+
+enum IdeaStage {
+  ROUGH_IDEA
+  OUTLINE
+  SCRIPT
+  READY
+}
+
+enum IdeaStatus {
+  NEW
+  IN_PROGRESS
+  DRAFT_CREATED
+  ARCHIVED
 }

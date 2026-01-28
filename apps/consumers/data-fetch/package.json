@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-data-fetch": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js",
+    "build-data-fetch": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@prisma/client",
     "prisma-generate": "dotenv -e .env yarn prisma generate --schema=../../../packages/db/prisma/schema.prisma",
     "build": "yarn build-data-fetch",
     "dev": "yarn build && node dist/index.js"
