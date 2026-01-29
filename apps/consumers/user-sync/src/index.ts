@@ -1,8 +1,44 @@
 import { getKafkaConsumer } from "@ratecreator/db/kafka-client";
 import { getPrismaClient } from "@ratecreator/db/client";
+import { UserRole } from "@prisma/client";
 
 const prisma = getPrismaClient();
 let consumer: ReturnType<typeof getKafkaConsumer>;
+
+// Protected admin emails - always get ADMIN role and cannot be removed
+const ADMIN_EMAILS = ["hi@deepshaswat.com", "deepshaswat@gmail.com"];
+
+interface UserRoleMetadata {
+  roles: string[];
+}
+
+/**
+ * Get roles from Clerk payload
+ * Checks admin emails first, then publicMetadata
+ */
+function getRolesFromPayload(payload: any): UserRole[] {
+  const email = payload.email_addresses?.[0]?.email_address;
+
+  // Admin emails always get ADMIN role
+  if (email && ADMIN_EMAILS.includes(email)) {
+    return ["ADMIN"];
+  }
+
+  // Check publicMetadata for roles
+  const metadata = payload.public_metadata as UserRoleMetadata | undefined;
+  const roles = metadata?.roles || ["USER"];
+
+  // Map string roles to UserRole enum values
+  const validRoles: UserRole[] = [];
+  for (const role of roles) {
+    const upperRole = role.toUpperCase();
+    if (["USER", "ADMIN", "WRITER", "CREATOR", "BRAND"].includes(upperRole)) {
+      validRoles.push(upperRole as UserRole);
+    }
+  }
+
+  return validRoles.length > 0 ? validRoles : ["USER"];
+}
 
 async function processMessage(message: any) {
   if (!message.value || !message.key) {
@@ -17,6 +53,8 @@ async function processMessage(message: any) {
   try {
     if (eventType === "user.created") {
       const email = payload.email_addresses[0].email_address;
+      const roles = getRolesFromPayload(payload);
+
       await prisma.user.upsert({
         where: { email },
         create: {
@@ -26,6 +64,7 @@ async function processMessage(message: any) {
           lastName: payload.last_name || "",
           username: payload.username || "",
           webhookPayload: payload,
+          role: roles,
           isDeleted: false,
           deletedAt: null,
         },
@@ -35,12 +74,17 @@ async function processMessage(message: any) {
           lastName: payload.last_name || "",
           username: payload.username || "",
           webhookPayload: payload,
+          role: roles,
           isDeleted: false,
           deletedAt: null,
         },
       });
-      console.log(`Upserted user with email ${email}`);
+      console.log(
+        `Upserted user with email ${email}, roles: ${roles.join(", ")}`,
+      );
     } else if (eventType === "user.updated") {
+      const roles = getRolesFromPayload(payload);
+
       await prisma.user.update({
         where: { clerkId: payload.id },
         data: {
@@ -49,9 +93,10 @@ async function processMessage(message: any) {
           lastName: payload.last_name,
           username: payload.username,
           webhookPayload: payload,
+          role: roles,
         },
       });
-      console.log(`Updated user: ${payload.id}`);
+      console.log(`Updated user: ${payload.id}, roles: ${roles.join(", ")}`);
     } else if (eventType === "user.deleted") {
       try {
         // First try to find the user
@@ -71,7 +116,6 @@ async function processMessage(message: any) {
           data: {
             isDeleted: true,
             deletedAt: new Date(),
-            // webhookPayload: payload,
           },
         });
         console.log(`Marked user as deleted: ${payload.id}`);

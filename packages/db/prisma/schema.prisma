@@ -481,6 +481,7 @@ enum Platform {
 enum UserRole {
   USER
   ADMIN
+  WRITER
   CREATOR
   BRAND
 }

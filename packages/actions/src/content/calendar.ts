@@ -1,6 +1,7 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
+import { withCache, invalidateCache, CACHE_TTL, CacheKeys } from "./cache";
 
 const prisma = getPrismaClient();
 
@@ -25,93 +26,103 @@ export async function fetchCalendarEvents(
   endDate: Date,
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<CalendarEvent[]> {
-  const platformFilter = contentPlatform ? { contentPlatform } : {};
+  // Create cache key based on month range
+  const startMonth = `${startDate.getFullYear()}-${startDate.getMonth()}`;
+  const endMonth = `${endDate.getFullYear()}-${endDate.getMonth()}`;
+  const cacheKey = CacheKeys.calendar(
+    contentPlatform,
+    `${startMonth}:${endMonth}`,
+  );
 
-  const [scheduledPosts, publishedPosts, ideas] = await Promise.all([
-    // Scheduled posts
-    prisma.post.findMany({
-      where: {
-        status: "SCHEDULED",
-        publishDate: { gte: startDate, lte: endDate },
-        ...platformFilter,
-      },
-      select: {
-        id: true,
-        title: true,
-        publishDate: true,
-        status: true,
-        postUrl: true,
-        contentType: true,
-        contentPlatform: true,
-      },
-    }),
-    // Published posts
-    prisma.post.findMany({
-      where: {
-        status: "PUBLISHED",
-        publishDate: { gte: startDate, lte: endDate },
-        ...platformFilter,
-      },
-      select: {
-        id: true,
-        title: true,
-        publishDate: true,
-        status: true,
-        postUrl: true,
-        contentType: true,
-        contentPlatform: true,
-      },
-    }),
-    // Ideas with target dates
-    prisma.idea.findMany({
-      where: {
-        targetDate: { gte: startDate, lte: endDate },
-        status: { not: "ARCHIVED" },
-        ...(contentPlatform ? { contentPlatform } : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        targetDate: true,
-        status: true,
-        contentPlatform: true,
-      },
-    }),
-  ]);
+  return withCache(cacheKey, CACHE_TTL.CALENDAR, async () => {
+    const platformFilter = contentPlatform ? { contentPlatform } : {};
 
-  const events: CalendarEvent[] = [
-    ...scheduledPosts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      date: p.publishDate!,
-      type: (p.contentType === "NEWSLETTER"
-        ? "newsletter"
-        : "scheduled") as CalendarEventType,
-      status: p.status,
-      postUrl: p.postUrl,
-      contentPlatform: p.contentPlatform,
-    })),
-    ...publishedPosts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      date: p.publishDate!,
-      type: (p.contentType === "NEWSLETTER"
-        ? "newsletter"
-        : "published") as CalendarEventType,
-      status: p.status,
-      postUrl: p.postUrl,
-      contentPlatform: p.contentPlatform,
-    })),
-    ...ideas.map((i) => ({
-      id: i.id,
-      title: i.title,
-      date: i.targetDate!,
-      type: "idea" as CalendarEventType,
-      status: i.status,
-    })),
-  ];
+    const [scheduledPosts, publishedPosts, ideas] = await Promise.all([
+      // Scheduled posts
+      prisma.post.findMany({
+        where: {
+          status: "SCHEDULED",
+          publishDate: { gte: startDate, lte: endDate },
+          ...platformFilter,
+        },
+        select: {
+          id: true,
+          title: true,
+          publishDate: true,
+          status: true,
+          postUrl: true,
+          contentType: true,
+          contentPlatform: true,
+        },
+      }),
+      // Published posts
+      prisma.post.findMany({
+        where: {
+          status: "PUBLISHED",
+          publishDate: { gte: startDate, lte: endDate },
+          ...platformFilter,
+        },
+        select: {
+          id: true,
+          title: true,
+          publishDate: true,
+          status: true,
+          postUrl: true,
+          contentType: true,
+          contentPlatform: true,
+        },
+      }),
+      // Ideas with target dates
+      prisma.idea.findMany({
+        where: {
+          targetDate: { gte: startDate, lte: endDate },
+          status: { not: "ARCHIVED" },
+          ...(contentPlatform ? { contentPlatform } : {}),
+        },
+        select: {
+          id: true,
+          title: true,
+          targetDate: true,
+          status: true,
+          contentPlatform: true,
+        },
+      }),
+    ]);
 
-  return events.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const events: CalendarEvent[] = [
+      ...scheduledPosts.map((p) => ({
+        id: p.id,
+        title: p.title,
+        date: p.publishDate!,
+        type: (p.contentType === "NEWSLETTER"
+          ? "newsletter"
+          : "scheduled") as CalendarEventType,
+        status: p.status,
+        postUrl: p.postUrl,
+        contentPlatform: p.contentPlatform,
+      })),
+      ...publishedPosts.map((p) => ({
+        id: p.id,
+        title: p.title,
+        date: p.publishDate!,
+        type: (p.contentType === "NEWSLETTER"
+          ? "newsletter"
+          : "published") as CalendarEventType,
+        status: p.status,
+        postUrl: p.postUrl,
+        contentPlatform: p.contentPlatform,
+      })),
+      ...ideas.map((i) => ({
+        id: i.id,
+        title: i.title,
+        date: i.targetDate!,
+        type: "idea" as CalendarEventType,
+        status: i.status,
+      })),
+    ];
+
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime());
+  });
 }
 
 export async function updateIdeaTargetDate(
@@ -122,6 +133,9 @@ export async function updateIdeaTargetDate(
     where: { id: ideaId },
     data: { targetDate },
   });
+
+  // Invalidate calendar cache
+  await invalidateCache("calendar:*");
 }
 
 export async function fetchIdeasWithTargetDates(): Promise<
@@ -159,4 +173,15 @@ export async function updatePostSchedule(
       status: publishDate ? "SCHEDULED" : "DRAFT",
     },
   });
+
+  // Invalidate calendar and dashboard caches
+  await invalidateCache("calendar:*");
+  await invalidateCache("dashboard:*");
+}
+
+/**
+ * Invalidate calendar cache
+ */
+export async function invalidateCalendarCache(): Promise<void> {
+  await invalidateCache("calendar:*");
 }
