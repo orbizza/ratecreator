@@ -6,7 +6,7 @@ import { CreatorProfile } from "@ratecreator/ui/review";
 import { Platform } from "@ratecreator/types/review";
 import { formatFloat, formatValue } from "@ratecreator/db/utils";
 
-import { metadataBase } from "../../../../layout";
+const metadataBase = new URL("https://ratecreator.com");
 
 export async function generateMetadata({
   params: { accountId, platform },

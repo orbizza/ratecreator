@@ -4,10 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "typescript": "^5.7.3",
+    "@google-cloud/vertexai": "^1.9.0",
     "@ratecreator/store": "*",
     "@ratecreator/db": "*",
-    "@ratecreator/types": "*"
+    "@ratecreator/types": "*",
+    "typescript": "^5.7.3"
   },
   "exports": {
     ".": "./src/index.ts",

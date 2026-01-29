@@ -1,2 +1,1 @@
-yarn format
-yarn 
+yarn lint-staged

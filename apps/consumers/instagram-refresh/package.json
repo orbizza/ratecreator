@@ -1,0 +1,29 @@
+{
+  "name": "@ratecreator/instagram-refresh",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build-instagram-refresh": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@prisma/client",
+    "prisma-generate": "dotenv -e .env yarn prisma generate --schema=../../../packages/db/prisma/schema.prisma",
+    "build": "yarn build-instagram-refresh",
+    "dev": "yarn build && node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14",
+    "@ratecreator/store": "1.0.0",
+    "@ratecreator/db": "1.0.0",
+    "@ratecreator/actions": "1.0.0",
+    "@ratecreator/auth": "1.0.0",
+    "@ratecreator/types": "1.0.0",
+    "@ratecreator/hooks": "1.0.0",
+    "esbuild": "^0.24.0",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.7.2"
+  }
+}

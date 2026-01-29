@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-review-algolia-update": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js",
+    "build-review-algolia-update": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@prisma/client",
     "build": " yarn build-review-algolia-update",
     "dev": "yarn build && node dist/index.js"
   },

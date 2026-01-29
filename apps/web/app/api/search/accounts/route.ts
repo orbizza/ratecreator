@@ -4,6 +4,8 @@ import qs from "qs";
 import { SearchAccountsParams } from "@ratecreator/types/review";
 import { getAuth } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     // Parse the URL and query string using qs

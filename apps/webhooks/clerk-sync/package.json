@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-clerk-sync": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js",
+    "build-clerk-sync": "esbuild src/index.ts --platform=node --bundle --outfile=dist/index.js --external:@prisma/client",
     "build": "yarn build-clerk-sync",
     "dev": "yarn build && node dist/index.js"
   },

@@ -8,7 +8,9 @@
     "@ratecreator/store": "*",
     "@ratecreator/types": "*",
     "@ratecreator/actions": "*",
+    "@elastic/elasticsearch": "^8.12.0",
     "@types/express": "^5.0.0",
+    "algoliasearch": "^5.20.0",
     "esbuild": "^0.24.0",
     "express": "^4.21.0",
     "p-limit": "^6.1.0",
@@ -24,6 +26,17 @@
     "seed-account-youtube-batch": "tsx src/algolia/seed-youtube-accounts-batch.ts",
     "seed-account-twitter-batch": "tsx src/algolia/seed-twitter-accounts-batch.ts",
     "update-account-youtube": "tsx src/algolia/update-youtube-accounts.ts",
-    "flush-redis-cache": "tsx src/redis/flushRedisCache.ts"
+    "flush-redis-cache": "tsx src/redis/flushRedisCache.ts",
+    "migrate-accounts-elastic": "tsx src/elasticsearch/migrate-accounts-batch.ts",
+    "migrate-accounts-elastic:youtube": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform youtube",
+    "migrate-accounts-elastic:twitter": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform x",
+    "migrate-accounts-elastic:tiktok": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform tiktok",
+    "migrate-accounts-elastic:reddit": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform reddit",
+    "migrate-accounts-elastic:instagram": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform instagram",
+    "migrate-categories-elastic": "tsx src/elasticsearch/migrate-categories.ts",
+    "migrate-from-algolia": "tsx src/elasticsearch/migrate-from-algolia.ts",
+    "migrate-from-algolia:accounts": "tsx src/elasticsearch/migrate-from-algolia.ts --index accounts",
+    "migrate-from-algolia:categories": "tsx src/elasticsearch/migrate-from-algolia.ts --index categories",
+    "validate-elastic-migration": "tsx src/elasticsearch/validate-migration.ts"
   }
 }

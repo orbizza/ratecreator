@@ -1,7 +1,7 @@
 export * from "./logos";
 export * from "./single-image-dropzone";
 export * from "./upload-image-component";
-export * from "./blocknote-editor/editor";
+export { default as Editor } from "./blocknote-editor/editor";
 export * from "./blocknote-editor/divider";
 export * from "./blocknote-editor/youtube-blocknote";
 export * from "./date-picker";

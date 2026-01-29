@@ -8,6 +8,8 @@ import { getMongoClient } from "@ratecreator/db/mongo-client";
 
 import { Account, Category, PopularCategory } from "@ratecreator/types/review";
 
+export const dynamic = "force-dynamic";
+
 const CACHE_ROOT_CATEGORIES = "category-root";
 const CACHE_ALL_CATEGORIES = "category-all";
 const CACHE_POPULAR_CATEGORIES = "category-popular";

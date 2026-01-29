@@ -10,9 +10,8 @@ import { StickyBanner, Toaster } from "@ratecreator/ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadataBase = new URL("https://ratecreator.com");
-
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ratecreator.com"),
   title: {
     default: "Rate Creator - Discover and Review Creators and Communities",
     template: "%s - Rate Creator",

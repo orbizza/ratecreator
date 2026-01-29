@@ -10,6 +10,7 @@ const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
 const CACHE_TWITTER_CREATOR = "accounts-twitter-";
 const CACHE_TIKTOK_CREATOR = "accounts-tiktok-";
 const CACHE_REDDIT_CREATOR = "accounts-reddit-";
+const CACHE_INSTAGRAM_CREATOR = "accounts-instagram-";
 
 const prisma = getPrismaClient();
 const redis = getRedisClient();
@@ -39,6 +40,8 @@ export async function getCreatorData({
         return await handleTiktokAccount(redis, accountId);
       case "reddit":
         return await handleRedditAccount(redis, accountId);
+      case "instagram":
+        return await handleInstagramAccount(redis, accountId);
       default:
         throw new Error("Invalid platform");
     }
@@ -344,5 +347,80 @@ async function handleRedditAccount(
   } catch (error) {
     console.error("Error fetching Reddit account:", error);
     return { error: "Failed to fetch account reddit data", status: 500 };
+  }
+}
+
+async function handleInstagramAccount(
+  redis: ReturnType<typeof getRedisClient>,
+  accountId: string,
+) {
+  try {
+    // Check cache first
+    const cachedData = await redis.get(
+      `${CACHE_INSTAGRAM_CREATOR}${accountId}`,
+    );
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+
+    const account = await prisma.account.findFirst({
+      where: {
+        accountId: accountId,
+        platform: "INSTAGRAM",
+      },
+    });
+
+    if (!account) {
+      return { error: "Account not found", status: 404 };
+    }
+
+    const categoryMappings = await prisma.categoryMapping.findMany({
+      where: { accountId: account.id },
+      include: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    const categorySlugs = categoryMappings.map(
+      (mapping) => mapping.category.slug,
+    );
+
+    const responseData: CreatorData = {
+      account: {
+        id: account.id,
+        platform: account.platform,
+        accountId: account.accountId,
+        handle: account.handle ?? "",
+        name: account.name ?? "",
+        name_en: account.name_en ?? "",
+        description: account.description ?? "",
+        description_en: account.description_en ?? "",
+        keywords: account.keywords ?? "",
+        keywords_en: account.keywords_en ?? "",
+        followerCount: account.followerCount ?? 0,
+        imageUrl: account.imageUrl ?? "",
+        country: account.country ?? null,
+        language_code: account.language_code ?? "",
+        rating: account.rating ?? 0,
+        reviewCount: account.reviewCount ?? 0,
+        instagramData: (account.instagramData as any) ?? {},
+      },
+      categories: categorySlugs,
+    };
+
+    // Cache the response for 1 hour
+    await redis.set(
+      `${CACHE_INSTAGRAM_CREATOR}${accountId}`,
+      JSON.stringify(responseData),
+      "EX",
+      3600, // 1 hour TTL
+    );
+
+    return responseData;
+  } catch (error) {
+    console.error("Error fetching Instagram account:", error);
+    return { error: "Failed to fetch account instagram data", status: 500 };
   }
 }
