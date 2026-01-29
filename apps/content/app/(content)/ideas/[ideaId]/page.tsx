@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { IdeaDetail } from "../../_components/ideas/idea-detail";
+import { IdeaFullPageEditor } from "../../_components/ideas/idea-full-page-editor";
 import { createAuthor } from "@ratecreator/actions/content";
 
 export const metadata = {
@@ -27,5 +27,9 @@ export default async function IdeaPage({ params }: IdeaPageProps) {
     redirect("/sign-in");
   }
 
-  return <IdeaDetail ideaId={params.ideaId} authorId={author.id} />;
+  return (
+    <div className="h-[calc(100vh-4rem)]">
+      <IdeaFullPageEditor ideaId={params.ideaId} authorId={author.id} />
+    </div>
+  );
 }

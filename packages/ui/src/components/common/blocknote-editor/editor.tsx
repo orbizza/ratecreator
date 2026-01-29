@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import axios from "axios";
 import { useTheme } from "next-themes";
 import {
@@ -115,27 +116,114 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
     }
   };
 
-  const editor = useCreateBlockNote({
-    // comment the initialContent to avoid the error on Markdown to Blocks
-    initialContent: initialContent
-      ? (JSON.parse(initialContent) as PartialBlock[])
-      : undefined,
+  const parsedContent = (() => {
+    if (!initialContent) return undefined;
+    try {
+      const parsed = JSON.parse(initialContent);
+      if (Array.isArray(parsed)) return parsed as PartialBlock[];
+      return undefined;
+    } catch {
+      // Content is not valid JSON - convert plain text to a paragraph block
+      if (initialContent.trim()) {
+        return [
+          {
+            type: "paragraph" as const,
+            content: [
+              { type: "text" as const, text: initialContent, styles: {} },
+            ],
+          },
+        ];
+      }
+      return undefined;
+    }
+  })();
 
+  const editor = useCreateBlockNote({
+    initialContent: parsedContent,
     uploadFile: handleUpload,
     schema,
   });
 
+  const isDark = resolvedTheme === "dark";
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Direct DOM manipulation to override BlockNote dark mode backgrounds.
+  // CSS-based approaches (globals.css, imported CSS files, <style> tags) all fail
+  // because @blocknote/mantine/style.css loads in a dynamic chunk that overrides them.
+  // Inline styles set via JS always win over any CSS rule.
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+
+    const container = wrapperRef.current.querySelector(
+      ".bn-container",
+    ) as HTMLElement | null;
+    const editorEl = wrapperRef.current.querySelector(
+      ".bn-editor",
+    ) as HTMLElement | null;
+
+    if (isDark) {
+      if (container) {
+        container.style.setProperty(
+          "--bn-colors-editor-background",
+          "transparent",
+        );
+        container.style.setProperty(
+          "--bn-colors-menu-background",
+          "hsl(240, 10%, 3.9%)",
+        );
+        container.style.setProperty(
+          "--bn-colors-hovered-background",
+          "hsl(240, 3.7%, 15.9%)",
+        );
+        container.style.setProperty(
+          "--bn-colors-selected-background",
+          "hsl(240, 3.7%, 15.9%)",
+        );
+        container.style.setProperty(
+          "--bn-colors-side-menu-background",
+          "transparent",
+        );
+        container.style.setProperty(
+          "background-color",
+          "transparent",
+          "important",
+        );
+        container.style.setProperty("border-radius", "0", "important");
+      }
+      if (editorEl) {
+        editorEl.style.setProperty(
+          "background-color",
+          "transparent",
+          "important",
+        );
+        editorEl.style.setProperty("border-radius", "0", "important");
+      }
+    } else {
+      if (container) {
+        container.style.removeProperty("--bn-colors-editor-background");
+        container.style.removeProperty("--bn-colors-menu-background");
+        container.style.removeProperty("--bn-colors-hovered-background");
+        container.style.removeProperty("--bn-colors-selected-background");
+        container.style.removeProperty("--bn-colors-side-menu-background");
+        container.style.removeProperty("background-color");
+        container.style.removeProperty("border-radius");
+      }
+      if (editorEl) {
+        editorEl.style.removeProperty("background-color");
+        editorEl.style.removeProperty("border-radius");
+      }
+    }
+  }, [isDark]);
+
   return (
-    <div>
+    <div ref={wrapperRef}>
       <BlockNoteView
         editor={editor}
         editable={editable}
-        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        theme={isDark ? "dark" : "light"}
         onChange={() => {
           onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
         }}
-        // uncomment the onChange to avoid the error on Markdown to Blocks
-        // onChange={onChangeMarkdown}
         slashMenu={false}
         data-theming-css-demo
       >

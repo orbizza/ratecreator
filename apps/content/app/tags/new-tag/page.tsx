@@ -17,6 +17,9 @@ import {
 import { createTagAction } from "@ratecreator/actions/content";
 
 import { useRouter } from "next/navigation";
+import { useRecoilValue } from "recoil";
+import { contentPlatformAtom } from "@ratecreator/store/content";
+import { getPlatformDomain } from "@ratecreator/ui/content";
 import { SingleImageDropzone } from "@ratecreator/ui/common";
 import { reverseAndHyphenate } from "@ratecreator/db/utils";
 import axios from "axios";
@@ -32,6 +35,8 @@ const NewTag = () => {
   const [descriptionError, setDescriptionError] = useState("");
 
   const router = useRouter();
+  const contentPlatform = useRecoilValue(contentPlatformAtom);
+  const tagBaseUrl = `${getPlatformDomain(contentPlatform)}/tags`;
 
   const handleSlugNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputSlug(reverseAndHyphenate(e.target.value));
@@ -166,7 +171,7 @@ const NewTag = () => {
                 } focus:border-green-500 focus:outline-none`}
               />
               <span className="text-xs text-neutral-500">
-                www.ratecreator.com/tags/{inputSlug || ""}
+                {tagBaseUrl}/{inputSlug || ""}
               </span>
               {slugError && (
                 <div className="text-red-500 text-sm mt-1">{slugError}</div>

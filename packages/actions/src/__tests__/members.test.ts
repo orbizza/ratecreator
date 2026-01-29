@@ -378,6 +378,64 @@ describe("Member Management Actions", () => {
         }),
       );
     });
+
+    it("should filter by CREATOROPS platform to only include CREATOR, WRITER, ADMIN roles", async () => {
+      setupAdminAuth();
+      mockPrisma.user.findMany.mockResolvedValueOnce([]);
+
+      await fetchMembers(undefined, "CREATOROPS");
+
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              { role: { hasSome: ["CREATOR", "WRITER", "ADMIN"] } },
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it("should not apply platform filter when platform is undefined", async () => {
+      setupAdminAuth();
+      mockPrisma.user.findMany.mockResolvedValueOnce([]);
+
+      await fetchMembers();
+
+      const call = mockPrisma.user.findMany.mock.calls[0][0];
+      expect(call.where.AND).toBeUndefined();
+    });
+
+    it("should not apply platform filter when platform is not CREATOROPS", async () => {
+      setupAdminAuth();
+      mockPrisma.user.findMany.mockResolvedValueOnce([]);
+
+      await fetchMembers(undefined, "RATECREATOR");
+
+      const call = mockPrisma.user.findMany.mock.calls[0][0];
+      expect(call.where.AND).toBeUndefined();
+    });
+
+    it("should combine platform filter with other filters", async () => {
+      setupAdminAuth();
+      mockPrisma.user.findMany.mockResolvedValueOnce([]);
+
+      await fetchMembers(
+        { email: { operator: "contains", value: "test" } },
+        "CREATOROPS",
+      );
+
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              { email: { contains: "test", mode: "insensitive" } },
+              { role: { hasSome: ["CREATOR", "WRITER", "ADMIN"] } },
+            ]),
+          }),
+        }),
+      );
+    });
   });
 
   describe("countMembers", () => {
@@ -437,6 +495,35 @@ describe("Member Management Actions", () => {
           }),
         }),
       );
+    });
+
+    it("should filter count by CREATOROPS platform", async () => {
+      setupAdminAuth();
+      mockPrisma.user.count.mockResolvedValueOnce(10);
+
+      const result = await countMembers(undefined, "CREATOROPS");
+
+      expect(result).toBe(10);
+      expect(mockPrisma.user.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: expect.arrayContaining([
+              { role: { hasSome: ["CREATOR", "WRITER", "ADMIN"] } },
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it("should not apply platform filter to count when platform is undefined", async () => {
+      setupAdminAuth();
+      mockPrisma.user.count.mockResolvedValueOnce(50);
+
+      const result = await countMembers();
+
+      expect(result).toBe(50);
+      const call = mockPrisma.user.count.mock.calls[0][0];
+      expect(call.where.AND).toBeUndefined();
     });
   });
 

@@ -45,21 +45,28 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Monitor,
+  Moon,
   Star,
-  SunMoon,
+  Sun,
   Tag,
   User,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { contentPlatformAtom } from "@ratecreator/store";
 import { ContentPlatform } from "@ratecreator/types/content";
+import {
+  saveContentPlatformPreference,
+  getContentPlatformPreference,
+  deleteContentPlatformPreference,
+} from "@ratecreator/actions/content";
 
 const platforms = [
   {
@@ -72,7 +79,7 @@ const platforms = [
     value: ContentPlatform.CREATOROPS,
     label: "Creator Ops",
     icon: Cog,
-    description: "creatorops.com",
+    description: "creator.ratecreator.com",
   },
 ];
 
@@ -120,6 +127,7 @@ const navProjectItems = [
 function ProductSwitcher() {
   const [contentPlatform, setContentPlatform] =
     useRecoilState(contentPlatformAtom);
+  const router = useRouter();
   const currentPlatform =
     platforms.find((p) => p.value === contentPlatform) || platforms[0];
 
@@ -156,7 +164,13 @@ function ProductSwitcher() {
         {platforms.map((platform) => (
           <DropdownMenuItem
             key={platform.value}
-            onClick={() => setContentPlatform(platform.value)}
+            onClick={() => {
+              if (platform.value !== contentPlatform) {
+                setContentPlatform(platform.value);
+                void saveContentPlatformPreference(platform.value);
+                router.push("/");
+              }
+            }}
             className="gap-2 p-2"
           >
             <div className="flex size-6 items-center justify-center rounded-sm border">
@@ -279,8 +293,7 @@ function NavProjects({
 function NavUser() {
   const user = useUser();
   const router = useRouter();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { setTheme, theme } = useTheme();
   const { signOut } = useAuth();
 
   return (
@@ -348,22 +361,44 @@ function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="justify-between">
-                <div className="flex items-center">
-                  <SunMoon className="mr-2 size-4" />
-                  {isDark ? "Dark Theme" : "Light Theme"}
-                </div>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Theme
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <Sun className="mr-2 size-4" />
+                Light
+                {theme === "light" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <Moon className="mr-2 size-4" />
+                Dark
+                {theme === "dark" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <Monitor className="mr-2 size-4" />
+                System
+                {theme === "system" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
+                await deleteContentPlatformPreference();
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("contentPlatform");
+                }
                 await signOut();
                 router.push("/");
               }}
             >
               <LogOut className="mr-2 size-4" />
-              Log out
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -412,6 +447,20 @@ export function ContentSidebarLayout({
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const pageTitle = getPageTitle(pathname);
+  const [, setContentPlatform] = useRecoilState(contentPlatformAtom);
+
+  useEffect(() => {
+    async function loadPlatformPreference() {
+      const saved = await getContentPlatformPreference();
+      if (
+        saved &&
+        Object.values(ContentPlatform).includes(saved as ContentPlatform)
+      ) {
+        setContentPlatform(saved as ContentPlatform);
+      }
+    }
+    loadPlatformPreference();
+  }, []);
 
   // Don't show sidebar for sign-in/sign-up routes
   if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) {

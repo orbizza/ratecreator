@@ -1,6 +1,12 @@
 export { IdeasComponent } from "./ideas-component";
 export { IdeaCard } from "./idea-card";
 export { IdeaDetail } from "./idea-detail";
+export { IdeaFullPageEditor } from "./idea-full-page-editor";
+export { IdeaStageSidebar } from "./idea-stage-sidebar";
+export { IdeaBlockNoteEditor } from "./idea-blocknote-editor";
 export { AIGenerateDialog } from "./ai-generate-dialog";
 export { ScriptGenerationDialog } from "./script-generation-dialog";
 export { OutlineEditor } from "./outline-editor";
+export { TrendingTopicsDialog } from "./trending-topics-dialog";
+export { TopicSuggestionsDialog } from "./topic-suggestions-dialog";
+export { ImageGenerationDialog } from "./image-generation-dialog";

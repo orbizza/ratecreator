@@ -16,6 +16,8 @@ import {
   tagsState,
   selectedTagsState,
   metadataToggleState,
+  contentPlatformAtom,
+  postPlatformState,
 } from "@ratecreator/store/content";
 import { makeFilePublic } from "@ratecreator/actions";
 import { MetadataSidebar } from "./metadata-sidebar";
@@ -24,12 +26,14 @@ import { useRouter } from "next/navigation";
 const NewPostComponent = () => {
   const router = useRouter();
   const isMetadataToggle = useRecoilValue(metadataToggleState);
+  const contentPlatform = useRecoilValue(contentPlatformAtom);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFeatureFileUploadOpen, setIsFeatureFileUploadOpen] = useState(false);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
 
   const [post, setPost] = useRecoilState(postState);
+  const [, setPostPlatform] = useRecoilState(postPlatformState);
 
   const resetPost = useResetRecoilState(postState);
   const resetSelectedTimeIst = useResetRecoilState(selectedTimeIst);
@@ -68,6 +72,12 @@ const NewPostComponent = () => {
     resetSelectedTags,
     resetPostData,
   ]);
+
+  // Sync post platform with the sidebar's selected platform
+  useEffect(() => {
+    setPost((prev) => ({ ...prev, contentPlatform: contentPlatform }));
+    setPostPlatform(contentPlatform);
+  }, [contentPlatform, setPost, setPostPlatform]);
 
   const Editor = useMemo(
     () =>

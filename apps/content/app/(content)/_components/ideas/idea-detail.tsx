@@ -39,6 +39,7 @@ import {
   TrendingUp,
   Lightbulb,
   FileText,
+  Image as ImageIcon,
   ChevronDown,
   Calendar as CalendarIcon,
 } from "lucide-react";
@@ -51,7 +52,10 @@ import {
 } from "@ratecreator/actions/content";
 import { AIGenerateDialog } from "./ai-generate-dialog";
 import { OutlineEditor } from "./outline-editor";
+import { TrendingTopicsDialog } from "./trending-topics-dialog";
+import { TopicSuggestionsDialog } from "./topic-suggestions-dialog";
 import { ScriptGenerationDialog } from "./script-generation-dialog";
+import { ImageGenerationDialog } from "./image-generation-dialog";
 
 interface IdeaDetailProps {
   ideaId: string;
@@ -78,7 +82,11 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
   const [targetDate, setTargetDate] = useState<Date | null>(null);
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showOutlineEditor, setShowOutlineEditor] = useState(false);
+  const [showTrendingDialog, setShowTrendingDialog] = useState(false);
+  const [showTopicSuggestionsDialog, setShowTopicSuggestionsDialog] =
+    useState(false);
   const [showScriptDialog, setShowScriptDialog] = useState(false);
+  const [showImageDialog, setShowImageDialog] = useState(false);
 
   const loadIdea = useCallback(async (): Promise<void> => {
     try {
@@ -165,9 +173,87 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
     setShowOutlineEditor(true);
   };
 
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setTitle(e.target.value);
+  };
+
+  const handleDescriptionChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ): void => {
+    setDescription(e.target.value);
+  };
+
+  const handleNewTopicChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    setNewTopic(e.target.value);
+  };
+
+  const handleStatusChange = (value: string): void => {
+    setStatus(value as IdeaStatus);
+  };
+
+  const handleShowAIDialog = (): void => {
+    setShowAIDialog(true);
+  };
+
+  const handleCloseAIDialog = (): void => {
+    setShowAIDialog(false);
+  };
+
+  const handleShowTrendingDialog = (): void => {
+    setShowTrendingDialog(true);
+  };
+
+  const handleCloseTrendingDialog = (): void => {
+    setShowTrendingDialog(false);
+  };
+
+  const handleSelectTrendingTopic = (
+    topic: string,
+    topicDescription: string,
+  ): void => {
+    setTitle(topic);
+    setDescription(topicDescription);
+  };
+
+  const handleShowTopicSuggestionsDialog = (): void => {
+    setShowTopicSuggestionsDialog(true);
+  };
+
+  const handleCloseTopicSuggestionsDialog = (): void => {
+    setShowTopicSuggestionsDialog(false);
+  };
+
+  const handleSelectSuggestedTopic = (
+    topic: string,
+    topicDescription: string,
+    keywords: string[],
+  ): void => {
+    setTitle(topic);
+    setDescription(topicDescription);
+    setTopics((prev) => Array.from(new Set([...prev, ...keywords])));
+  };
+
+  const handleShowScriptDialog = (): void => {
+    setShowScriptDialog(true);
+  };
+
+  const handleCloseScriptDialog = (): void => {
+    setShowScriptDialog(false);
+  };
+
   const handleScriptGenerated = (script: string): void => {
     setOutline(script);
     setShowOutlineEditor(true);
+  };
+
+  const handleShowImageDialog = (): void => {
+    setShowImageDialog(true);
+  };
+
+  const handleCloseImageDialog = (): void => {
+    setShowImageDialog(false);
   };
 
   const handleNavigateToIdeas = (): void => {
@@ -238,13 +324,27 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setShowAIDialog(true)}>
+                  <DropdownMenuItem onClick={handleShowTrendingDialog}>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Discover Trending Topics
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleShowTopicSuggestionsDialog}>
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Get Topic Suggestions
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleShowAIDialog}>
                     <Sparkles className="h-4 w-4 mr-2" />
                     Generate Outline
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowScriptDialog(true)}>
+                  <DropdownMenuItem onClick={handleShowScriptDialog}>
                     <FileText className="h-4 w-4 mr-2" />
                     Generate Full Script
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleShowImageDialog}>
+                    <ImageIcon className="h-4 w-4 mr-2" />
+                    Generate Blog Image
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -263,19 +363,12 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
-              />
+              <Input id="title" onChange={handleTitleChange} value={title} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select
-                onValueChange={(value) => setStatus(value as IdeaStatus)}
-                value={status}
-              >
+              <Select onValueChange={handleStatusChange} value={status}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -332,7 +425,7 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={handleDescriptionChange}
               rows={3}
               value={description}
             />
@@ -343,7 +436,7 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
             <div className="flex gap-2">
               <Input
                 id="topics"
-                onChange={(e) => setNewTopic(e.target.value)}
+                onChange={handleNewTopicChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Add a topic..."
                 value={newTopic}
@@ -359,7 +452,9 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
                     {topic}
                     <button
                       className="ml-1 hover:text-destructive"
-                      onClick={() => removeTopic(topic)}
+                      onClick={() => {
+                        removeTopic(topic);
+                      }}
                       type="button"
                     >
                       <X className="h-3 w-3" />
@@ -397,19 +492,39 @@ export function IdeaDetail({ ideaId, authorId }: IdeaDetailProps): JSX.Element {
       <AIGenerateDialog
         ideaDescription={description}
         ideaTitle={title}
-        onClose={() => setShowAIDialog(false)}
+        onClose={handleCloseAIDialog}
         onOutlineGenerated={handleOutlineGenerated}
         open={showAIDialog}
         topics={topics}
       />
 
+      <TrendingTopicsDialog
+        onClose={handleCloseTrendingDialog}
+        onSelectTopic={handleSelectTrendingTopic}
+        open={showTrendingDialog}
+      />
+
+      <TopicSuggestionsDialog
+        existingTopics={topics}
+        onClose={handleCloseTopicSuggestionsDialog}
+        onSelectTopic={handleSelectSuggestedTopic}
+        open={showTopicSuggestionsDialog}
+      />
+
       <ScriptGenerationDialog
         ideaDescription={description}
         ideaTitle={title}
-        onClose={() => setShowScriptDialog(false)}
+        onClose={handleCloseScriptDialog}
         onScriptGenerated={handleScriptGenerated}
         open={showScriptDialog}
         outline={outline}
+        topics={topics}
+      />
+
+      <ImageGenerationDialog
+        ideaTitle={title}
+        onClose={handleCloseImageDialog}
+        open={showImageDialog}
         topics={topics}
       />
     </div>

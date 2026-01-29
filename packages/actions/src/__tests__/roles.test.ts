@@ -42,6 +42,10 @@ vi.mock("@prisma/client", () => ({
   },
 }));
 
+vi.mock("../content/cache", () => ({
+  invalidateCache: vi.fn(),
+}));
+
 import {
   isCurrentUserAdmin,
   fetchAllUsersWithRoles,

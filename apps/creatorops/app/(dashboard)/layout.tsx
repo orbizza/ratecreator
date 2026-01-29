@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CreatorSidebar } from "@/components/dashboard/creator-sidebar";
 import { CreatorHeader } from "@/components/dashboard/creator-header";
+import { ensureCreatorRole } from "@ratecreator/actions/content";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,9 @@ export default async function DashboardLayout({
   if (!userId) {
     redirect("/sign-in");
   }
+
+  // Auto-promote USER → CREATOR on first CreatorOps access
+  await ensureCreatorRole(userId);
 
   return (
     <div className="flex min-h-screen">
