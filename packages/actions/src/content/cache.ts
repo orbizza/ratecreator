@@ -69,7 +69,7 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
       return parsed;
     }
   } catch (error) {
-    console.error("Redis cache get error:", error);
+    console.error(`[CACHE] REDIS ERROR on GET | ${fullKey}:`, error);
   }
 
   return null;
@@ -86,14 +86,15 @@ export async function setCachedData<T>(
   const fullKey = `${CACHE_PREFIX}${key}`;
 
   // Set local cache
-  setLocalCache(fullKey, data, Math.min(ttlSeconds, 30)); // Local cache max 30s
+  const localTtl = Math.min(ttlSeconds, 30);
+  setLocalCache(fullKey, data, localTtl); // Local cache max 30s
 
   // Set Redis cache
   try {
     const redis = getRedisClient();
     await redis.setex(fullKey, ttlSeconds, JSON.stringify(data));
   } catch (error) {
-    console.error("Redis cache set error:", error);
+    console.error(`[CACHE] REDIS ERROR on SET | ${fullKey}:`, error);
   }
 }
 
@@ -119,7 +120,7 @@ export async function invalidateCache(keyOrPattern: string): Promise<void> {
       await redis.del(fullPattern);
     }
   } catch (error) {
-    console.error("Redis cache invalidate error:", error);
+    console.error(`[CACHE] REDIS ERROR on INVALIDATE | ${fullPattern}:`, error);
   }
 }
 

@@ -23,6 +23,13 @@ vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
 }));
 
+vi.mock("../content/cache", () => ({
+  withCache: vi.fn(
+    (_key: string, _ttl: number, fetcher: () => Promise<unknown>) => fetcher(),
+  ),
+  CACHE_TTL: { RECENT_POSTS: 60 },
+}));
+
 vi.mock("@ratecreator/types/content", () => ({
   ContentType: { BLOG: "BLOG", NEWSLETTER: "NEWSLETTER", GLOSSARY: "GLOSSARY" },
   PostStatus: {

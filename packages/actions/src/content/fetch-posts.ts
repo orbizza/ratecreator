@@ -1,6 +1,7 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
+import { withCache, CACHE_TTL } from "./cache";
 
 import {
   ContentType,
@@ -17,28 +18,32 @@ export async function fetchAllPostsCount(
   platformType: string = "ratecreator",
   postStatus?: string,
 ) {
-  return await prisma.post.count({
-    where: {
-      contentPlatform: platformType.toUpperCase() as ContentPlatform,
-      ...(contentType &&
-        contentType.toLowerCase() !== "all" && {
-          contentType: contentType.toUpperCase() as ContentType,
-        }),
-      ...(postStatus &&
-        postStatus.toLowerCase() !== "all" && {
-          status: postStatus.toUpperCase() as PostStatus,
-        }),
-      ...(tagOption &&
-        tagOption.toLowerCase() !== "all" && {
-          tags: {
-            some: {
-              tag: {
-                slug: tagOption.toLowerCase(),
+  const cacheKey = `posts:count:${platformType}:${contentType || "all"}:${postStatus || "all"}:${tagOption || "all"}`;
+
+  return withCache(cacheKey, CACHE_TTL.RECENT_POSTS, async () => {
+    return await prisma.post.count({
+      where: {
+        contentPlatform: platformType.toUpperCase() as ContentPlatform,
+        ...(contentType &&
+          contentType.toLowerCase() !== "all" && {
+            contentType: contentType.toUpperCase() as ContentType,
+          }),
+        ...(postStatus &&
+          postStatus.toLowerCase() !== "all" && {
+            status: postStatus.toUpperCase() as PostStatus,
+          }),
+        ...(tagOption &&
+          tagOption.toLowerCase() !== "all" && {
+            tags: {
+              some: {
+                tag: {
+                  slug: tagOption.toLowerCase(),
+                },
               },
             },
-          },
-        }),
-    },
+          }),
+      },
+    });
   });
 }
 
@@ -52,38 +57,42 @@ export async function fetchAllPosts(
   const pageSize = 10;
   const offset = pageNumber * pageSize;
 
-  return (await prisma.post.findMany({
-    where: {
-      contentPlatform: platformType.toUpperCase() as ContentPlatform,
-      ...(contentType &&
-        contentType.toLowerCase() !== "all" && {
-          contentType: contentType.toUpperCase() as ContentType,
-        }),
-      ...(postStatus &&
-        postStatus.toLowerCase() !== "all" && {
-          status: postStatus.toUpperCase() as PostStatus,
-        }),
-      ...(tagOption &&
-        tagOption.toLowerCase() !== "all" && {
-          tags: {
-            some: {
-              tag: {
-                slug: tagOption.toLowerCase(),
+  const cacheKey = `posts:list:${platformType}:${contentType || "all"}:${postStatus || "all"}:${tagOption || "all"}:p${pageNumber}`;
+
+  return withCache(cacheKey, CACHE_TTL.RECENT_POSTS, async () => {
+    return (await prisma.post.findMany({
+      where: {
+        contentPlatform: platformType.toUpperCase() as ContentPlatform,
+        ...(contentType &&
+          contentType.toLowerCase() !== "all" && {
+            contentType: contentType.toUpperCase() as ContentType,
+          }),
+        ...(postStatus &&
+          postStatus.toLowerCase() !== "all" && {
+            status: postStatus.toUpperCase() as PostStatus,
+          }),
+        ...(tagOption &&
+          tagOption.toLowerCase() !== "all" && {
+            tags: {
+              some: {
+                tag: {
+                  slug: tagOption.toLowerCase(),
+                },
               },
             },
-          },
-        }),
-    },
-    skip: offset,
-    take: pageSize,
-    include: {
-      tags: true,
-      author: true,
-    },
-    orderBy: {
-      publishDate: "desc",
-    },
-  })) as FetchedPostType[];
+          }),
+      },
+      skip: offset,
+      take: pageSize,
+      include: {
+        tags: true,
+        author: true,
+      },
+      orderBy: {
+        publishDate: "desc",
+      },
+    })) as FetchedPostType[];
+  });
 }
 
 export async function fetchPublishedPostsCount(postOption: string) {

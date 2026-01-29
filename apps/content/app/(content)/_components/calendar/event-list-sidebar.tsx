@@ -69,7 +69,7 @@ export function EventListSidebar({
   };
 
   return (
-    <Card className="w-full lg:w-80">
+    <Card className="w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">
@@ -92,7 +92,7 @@ export function EventListSidebar({
             No events on this date
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {events.map((event) => (
               <button
                 key={event.id}

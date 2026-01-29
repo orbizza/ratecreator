@@ -1,20 +1,14 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import {
   contentTypeAtom,
-  contentPlatformAtom,
   postStatusAtom,
   listOfTagsState,
   postListTagsState,
 } from "@ratecreator/store/content";
-import {
-  ContentType,
-  ContentPlatform,
-  PostStatus,
-} from "@ratecreator/types/content";
+import { ContentType, PostStatus } from "@ratecreator/types/content";
 import { Button } from "@ratecreator/ui";
 import { capitalizeFirstLetter } from "@ratecreator/db/utils";
 import Link from "next/link";
@@ -22,11 +16,7 @@ import { SelectComponent } from "@ratecreator/ui/common";
 import { fetchAllTagsWithPostCount } from "@ratecreator/actions/content";
 
 export const PostsNavbar = () => {
-  const pathname = usePathname();
-
   const [contentType, setContentType] = useRecoilState(contentTypeAtom);
-  const [contentPlatformType, setContentPlatformType] =
-    useRecoilState(contentPlatformAtom);
   const [postStatus, setPostStatus] = useRecoilState(postStatusAtom);
   const [tags, setTags] = useRecoilState(listOfTagsState);
   const [postListTags, setPostListTags] = useRecoilState(postListTagsState);
@@ -44,26 +34,6 @@ export const PostsNavbar = () => {
     { value: PostStatus.SCHEDULED.toLowerCase(), label: "Scheduled" },
     { value: PostStatus.DELETED.toLowerCase(), label: "Deleted" },
   ];
-
-  useEffect(() => {
-    const pathSegments = pathname.split("/").filter(Boolean);
-
-    // Handle single segment (just platform)
-    if (pathSegments.length === 1) {
-      const platform = pathSegments[0].toUpperCase() as ContentPlatform;
-      setContentPlatformType(platform);
-      return;
-    }
-
-    // Handle platform and content type
-    if (pathSegments.length >= 2) {
-      const platform = pathSegments[0].toUpperCase() as ContentPlatform;
-      const contentType = pathSegments[1].toUpperCase() as ContentType;
-
-      setContentPlatformType(platform);
-      setContentType(contentType);
-    }
-  }, [pathname, setContentType, setContentPlatformType]);
 
   useEffect(() => {
     const fetchTags = async () => {

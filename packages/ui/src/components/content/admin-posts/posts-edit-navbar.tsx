@@ -94,7 +94,7 @@ export const PostsEditNavbar = () => {
 
   useEffect(() => {
     if (errorDuplicateUrl) {
-      console.log("Error state updated:", errorDuplicateUrl);
+      console.error("Error state updated:", errorDuplicateUrl);
     }
   }, [errorDuplicateUrl]);
 
@@ -178,14 +178,12 @@ export const PostsEditNavbar = () => {
       <nav className="w-full flex flex-row justify-between px-5 py-4">
         <div className="flex flex-row gap-2 items-center">
           <Link
-            href={`/${postPlatform?.toLowerCase() || "ratecreator"}`}
+            href="/posts"
             passHref
             className="flex flex-row items-center text-sm rounded-md hover:bg-neutral-300  dark:hover:bg-neutral-700 active:bg-gray-200 p-2"
           >
             <ChevronLeft className="size-4 mr-3" />
-            {!postFull
-              ? capitalizeFirstLetter(postPlatform)
-              : capitalizeFirstLetter(postFull.contentPlatform)}
+            Posts
           </Link>
           <Separator
             orientation="vertical"

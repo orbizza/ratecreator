@@ -32,7 +32,6 @@ import {
 } from "@ratecreator/actions/content";
 import { CalendarCell } from "./calendar-cell";
 import { EventListSidebar } from "./event-list-sidebar";
-import { CalendarLegend } from "./calendar-legend";
 import { CalendarFilters } from "./calendar-filters";
 
 type ViewMode = "month" | "week";
@@ -181,115 +180,112 @@ export function CalendarComponent(): JSX.Element {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <Card className="flex-1">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePreviousYear}
+                size="icon"
+                variant="outline"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button onClick={handlePrevious} size="icon" variant="outline">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <h2 className="text-lg font-semibold min-w-[180px] text-center">
+                {viewMode === "month"
+                  ? format(currentDate, "MMMM yyyy")
+                  : `Week of ${format(startOfWeek(currentDate, { weekStartsOn: 0 }), "MMM d, yyyy")}`}
+              </h2>
+              <Button onClick={handleNext} size="icon" variant="outline">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleNextYear} size="icon" variant="outline">
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+              <Button
+                className="ml-2"
+                onClick={handleToday}
+                size="sm"
+                variant="outline"
+              >
+                Today
+              </Button>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex border rounded-lg">
                 <Button
-                  onClick={handlePreviousYear}
-                  size="icon"
-                  variant="outline"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button onClick={handlePrevious} size="icon" variant="outline">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <h2 className="text-lg font-semibold min-w-[180px] text-center">
-                  {viewMode === "month"
-                    ? format(currentDate, "MMMM yyyy")
-                    : `Week of ${format(startOfWeek(currentDate, { weekStartsOn: 0 }), "MMM d, yyyy")}`}
-                </h2>
-                <Button onClick={handleNext} size="icon" variant="outline">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button onClick={handleNextYear} size="icon" variant="outline">
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  className="ml-2"
-                  onClick={handleToday}
+                  className="rounded-r-none"
+                  onClick={() => setViewMode("month")}
                   size="sm"
-                  variant="outline"
+                  variant={viewMode === "month" ? "default" : "ghost"}
                 >
-                  Today
+                  Month
+                </Button>
+                <Button
+                  className="rounded-l-none"
+                  onClick={() => setViewMode("week")}
+                  size="sm"
+                  variant={viewMode === "week" ? "default" : "ghost"}
+                >
+                  Week
                 </Button>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex border rounded-lg">
-                  <Button
-                    className="rounded-r-none"
-                    onClick={() => setViewMode("month")}
-                    size="sm"
-                    variant={viewMode === "month" ? "default" : "ghost"}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center h-96">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <div className="grid grid-cols-7 gap-px bg-muted">
+                {weekDays.map((day) => (
+                  <div
+                    className="bg-background p-2 text-center text-sm font-medium text-muted-foreground"
+                    key={day}
                   >
-                    Month
-                  </Button>
-                  <Button
-                    className="rounded-l-none"
-                    onClick={() => setViewMode("week")}
-                    size="sm"
-                    variant={viewMode === "week" ? "default" : "ghost"}
-                  >
-                    Week
-                  </Button>
-                </div>
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div
+                className={`grid grid-cols-7 gap-px bg-muted ${viewMode === "week" ? "" : "auto-rows-fr"}`}
+              >
+                {days.map((day) => (
+                  <CalendarCell
+                    currentMonth={currentDate}
+                    day={day}
+                    events={getEventsForDate(day)}
+                    isSelected={
+                      selectedDate ? isSameDay(day, selectedDate) : false
+                    }
+                    key={day.toISOString()}
+                    onClick={handleDateSelect}
+                    viewMode={viewMode}
+                  />
+                ))}
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4">
-              <CalendarFilters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-              />
-              <CalendarLegend />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center h-96">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="grid grid-cols-7 gap-px bg-muted">
-                  {weekDays.map((day) => (
-                    <div
-                      className="bg-background p-2 text-center text-sm font-medium text-muted-foreground"
-                      key={day}
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-                <div
-                  className={`grid grid-cols-7 gap-px bg-muted ${viewMode === "week" ? "" : "auto-rows-fr"}`}
-                >
-                  {days.map((day) => (
-                    <CalendarCell
-                      currentMonth={currentDate}
-                      day={day}
-                      events={getEventsForDate(day)}
-                      isSelected={
-                        selectedDate ? isSameDay(day, selectedDate) : false
-                      }
-                      key={day.toISOString()}
-                      onClick={handleDateSelect}
-                      viewMode={viewMode}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          )}
+          <CalendarFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+          />
+        </CardContent>
+      </Card>
 
+      {selectedDate && (
         <EventListSidebar
           events={selectedDateEvents}
           onRefresh={handleRefresh}
           selectedDate={selectedDate}
         />
-      </div>
+      )}
     </div>
   );
 }

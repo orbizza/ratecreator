@@ -69,7 +69,6 @@ async function fetchTagsFromTagOnPost({ postId }: { postId: string }) {
 
 async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
   try {
-    // console.log("Attempting to fetch tags...");
     const tags = await prisma.tag.findMany({
       include: {
         posts: true,
@@ -79,10 +78,7 @@ async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
       },
     });
 
-    // console.log("Tags fetched:", tags ? tags.length : 0);
-
     if (!tags) {
-      console.log("No tags found, returning empty array");
       return [];
     }
 
@@ -123,7 +119,6 @@ async function fetchTagDetails(slug: string) {
     if (existingTag) {
       return existingTag;
     } else {
-      console.log("Tag does not exist");
       return null;
     }
   } catch (error) {
@@ -138,7 +133,6 @@ async function createTagAction(data: TagIterface) {
   const validatedData = tagSchema.safeParse(data);
 
   if (!validatedData.success) {
-    console.log("Validation error:", validatedData.error.format());
     return {
       error: validatedData.error.format(),
     };
@@ -151,15 +145,11 @@ async function createTagAction(data: TagIterface) {
     });
 
     if (existingTag) {
-      console.log("Tag already exists");
       return {
         error: { slug: "Slug already exists" },
       };
     }
 
-    console.log("Data being passed to Prisma:", validatedData.data);
-
-    console.time("DB Operation");
     const newTag = await prisma.tag.create({
       data: {
         slug,
@@ -167,7 +157,6 @@ async function createTagAction(data: TagIterface) {
         imageUrl,
       },
     });
-    console.timeEnd("DB Operation");
 
     return { success: true, tag: newTag };
   } catch (error) {
@@ -188,7 +177,6 @@ async function updateTagAction(data: UpdateTagInterface) {
   const validatedData = updateTagSchema.safeParse(data);
 
   if (!validatedData.success) {
-    console.log("Validation error:", validatedData.error.format());
     return { error: validatedData.error.format() };
   }
 

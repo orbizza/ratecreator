@@ -171,20 +171,21 @@ export default function MembersPage(): JSX.Element {
       }
 
       const [membersData, statsData, count] = await Promise.all([
-        fetchMembers(queryFilters),
+        fetchMembers(queryFilters, contentPlatform ?? undefined),
         fetchMemberStats(),
-        countMembers(queryFilters),
+        countMembers(queryFilters, contentPlatform ?? undefined),
       ]);
-      setMembers(membersData);
+      setMembers(membersData ?? []);
       setStats(statsData);
       setTotalCount(count);
     } catch (error) {
       console.error("Error loading members:", error);
       toast.error("Failed to load members");
+      setMembers([]);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, appliedFilters, currentPage]);
+  }, [debouncedSearch, appliedFilters, currentPage, contentPlatform]);
 
   useEffect(() => {
     void loadData();

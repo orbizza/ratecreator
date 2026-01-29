@@ -2,20 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Loader2, Plus, FileText } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { useRecoilValue } from "recoil";
-import { contentPlatformAtom } from "@ratecreator/store";
+import { useRecoilValue, useRecoilState } from "recoil";
+import {
+  contentPlatformAtom,
+  contentTypeAtom,
+  postStatusAtom,
+  contentPageNumberState,
+  postListTagsState,
+} from "@ratecreator/store/content";
 import {
   Button,
-  Label,
   Separator,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Card,
   CardContent,
   Badge,
@@ -23,30 +21,14 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@ratecreator/ui";
+import { PostsNavbar } from "@ratecreator/ui/content";
 import {
   fetchAllPosts,
   fetchAllPostsCount,
 } from "@ratecreator/actions/content";
 import type { FetchedPostType } from "@ratecreator/types/content";
+import { ContentType, PostStatus } from "@ratecreator/types/content";
 import Link from "next/link";
-
-type PostStatusFilter = "all" | "DRAFT" | "PUBLISHED" | "SCHEDULED" | "DELETED";
-type ContentTypeFilter = "all" | "BLOG" | "GLOSSARY" | "NEWSLETTER" | "LEGAL";
-
-const statusOptions = [
-  { value: "all", label: "All Posts" },
-  { value: "DRAFT", label: "Drafts" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "SCHEDULED", label: "Scheduled" },
-];
-
-const contentTypeOptions = [
-  { value: "all", label: "All Types" },
-  { value: "BLOG", label: "Blog" },
-  { value: "GLOSSARY", label: "Glossary" },
-  { value: "NEWSLETTER", label: "Newsletter" },
-  { value: "LEGAL", label: "Legal" },
-];
 
 const statusColors: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
@@ -57,8 +39,8 @@ const statusColors: Record<string, string> = {
 };
 
 interface PostsListComponentProps {
-  defaultStatusFilter?: PostStatusFilter;
-  defaultContentTypeFilter?: ContentTypeFilter;
+  defaultStatusFilter?: string;
+  defaultContentTypeFilter?: string;
   pageTitle?: string;
 }
 
@@ -67,37 +49,41 @@ export function PostsListComponent({
   defaultContentTypeFilter = "all",
   pageTitle = "Posts",
 }: PostsListComponentProps): JSX.Element {
-  const router = useRouter();
   const [posts, setPosts] = useState<FetchedPostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(0);
-  const [statusFilter, setStatusFilter] =
-    useState<PostStatusFilter>(defaultStatusFilter);
-  const [contentTypeFilter, setContentTypeFilter] = useState<ContentTypeFilter>(
-    defaultContentTypeFilter,
-  );
+
   const contentPlatform = useRecoilValue(contentPlatformAtom);
+  const [contentType, setContentType] = useRecoilState(contentTypeAtom);
+  const [postStatus, setPostStatus] = useRecoilState(postStatusAtom);
+  const [page, setPage] = useRecoilState(contentPageNumberState);
+  const postListTags = useRecoilValue(postListTagsState);
 
+  // Set defaults on mount from props (NOT resetting platform)
   useEffect(() => {
-    setStatusFilter(defaultStatusFilter);
-  }, [defaultStatusFilter]);
-
-  useEffect(() => {
-    setContentTypeFilter(defaultContentTypeFilter);
-  }, [defaultContentTypeFilter]);
+    setPostStatus(
+      defaultStatusFilter === "all"
+        ? null
+        : (defaultStatusFilter as PostStatus),
+    );
+    setContentType(
+      defaultContentTypeFilter === "all"
+        ? null
+        : (defaultContentTypeFilter as ContentType),
+    );
+    setPage(0);
+  }, []);
 
   const loadPosts = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      const status = statusFilter === "all" ? undefined : statusFilter;
-      const contentType =
-        contentTypeFilter === "all" ? undefined : contentTypeFilter;
+      const status = postStatus ?? undefined;
+      const type = contentType ?? undefined;
       const platform = contentPlatform.toLowerCase();
 
       const [data, count] = await Promise.all([
-        fetchAllPosts("all", page, contentType, platform, status),
-        fetchAllPostsCount("all", contentType, platform, status),
+        fetchAllPosts("all", page, type, platform, status),
+        fetchAllPostsCount("all", type, platform, status),
       ]);
       setPosts(data);
       setTotalCount(count);
@@ -107,21 +93,11 @@ export function PostsListComponent({
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, contentTypeFilter, contentPlatform, page]);
+  }, [postStatus, contentType, contentPlatform, page, postListTags]);
 
   useEffect(() => {
     void loadPosts();
   }, [loadPosts]);
-
-  const handleStatusFilterChange = (value: string): void => {
-    setStatusFilter(value as PostStatusFilter);
-    setPage(0);
-  };
-
-  const handleContentTypeFilterChange = (value: string): void => {
-    setContentTypeFilter(value as ContentTypeFilter);
-    setPage(0);
-  };
 
   const renderContent = (): JSX.Element => {
     if (loading) {
@@ -214,58 +190,9 @@ export function PostsListComponent({
 
   return (
     <div className="p-8">
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6">
-        <div className="flex items-center gap-3 mb-4 lg:mb-0">
-          <FileText className="h-8 w-8 text-blue-500" />
-          <Label className="text-3xl lg:text-4xl font-semibold">
-            {pageTitle}
-          </Label>
-        </div>
+      <PostsNavbar />
 
-        <div className="flex items-center gap-4">
-          <Select
-            onValueChange={handleContentTypeFilterChange}
-            value={contentTypeFilter}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Content type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {contentTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Link href="/new-post">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Post
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <Separator className="bg-border h-[1px] mb-6" />
+      <Separator className="bg-border h-[1px] my-6" />
 
       <p className="text-sm text-muted-foreground mb-4">
         {totalCount} {totalCount === 1 ? "post" : "posts"} found

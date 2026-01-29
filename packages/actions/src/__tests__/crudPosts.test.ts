@@ -39,6 +39,10 @@ vi.mock("next/navigation", () => ({
   redirect: mockRedirect,
 }));
 
+vi.mock("../content/cache", () => ({
+  invalidateCache: vi.fn(),
+}));
+
 vi.mock("@ratecreator/types/content", () => ({
   ContentPlatform: { RATECREATOR: "RATECREATOR" },
   ContentType: { BLOG: "BLOG", NEWSLETTER: "NEWSLETTER", GLOSSARY: "GLOSSARY" },

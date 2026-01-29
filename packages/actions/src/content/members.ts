@@ -134,6 +134,7 @@ function applyDateFilter(
  */
 export async function fetchMembers(
   filters?: MemberFilters,
+  platform?: string,
 ): Promise<MemberInfo[]> {
   const isAdmin = await isCurrentUserAdmin();
   if (!isAdmin) {
@@ -201,6 +202,13 @@ export async function fetchMembers(
     if (dateFilter) {
       andConditions.push({ createdAt: dateFilter });
     }
+  }
+
+  // Platform filter: only show CreatorOps members (CREATOR, WRITER, ADMIN)
+  if (platform === "CREATOROPS") {
+    andConditions.push({
+      role: { hasSome: ["CREATOR", "WRITER", "ADMIN"] },
+    });
   }
 
   // Add AND conditions if any
@@ -297,6 +305,7 @@ export async function fetchMembers(
  */
 export async function countMembers(
   filters?: Omit<MemberFilters, "pageNumber" | "pageSize">,
+  platform?: string,
 ): Promise<number> {
   const isAdmin = await isCurrentUserAdmin();
   if (!isAdmin) {
@@ -359,6 +368,13 @@ export async function countMembers(
     if (dateFilter) {
       andConditions.push({ createdAt: dateFilter });
     }
+  }
+
+  // Platform filter: only count CreatorOps members (CREATOR, WRITER, ADMIN)
+  if (platform === "CREATOROPS") {
+    andConditions.push({
+      role: { hasSome: ["CREATOR", "WRITER", "ADMIN"] },
+    });
   }
 
   if (andConditions.length > 0) {

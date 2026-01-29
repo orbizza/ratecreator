@@ -57,9 +57,15 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { contentPlatformAtom } from "@ratecreator/store";
 import { ContentPlatform } from "@ratecreator/types/content";
+import {
+  saveContentPlatformPreference,
+  getContentPlatformPreference,
+  deleteContentPlatformPreference,
+} from "@ratecreator/actions/content";
 
 const platforms = [
   {
@@ -72,7 +78,7 @@ const platforms = [
     value: ContentPlatform.CREATOROPS,
     label: "Creator Ops",
     icon: Cog,
-    description: "creatorops.com",
+    description: "creator.ratecreator.com",
   },
 ];
 
@@ -156,7 +162,10 @@ function ProductSwitcher() {
         {platforms.map((platform) => (
           <DropdownMenuItem
             key={platform.value}
-            onClick={() => setContentPlatform(platform.value)}
+            onClick={() => {
+              setContentPlatform(platform.value);
+              void saveContentPlatformPreference(platform.value);
+            }}
             className="gap-2 p-2"
           >
             <div className="flex size-6 items-center justify-center rounded-sm border">
@@ -358,6 +367,10 @@ function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
+                await deleteContentPlatformPreference();
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("contentPlatform");
+                }
                 await signOut();
                 router.push("/");
               }}
@@ -412,6 +425,20 @@ export function ContentSidebarLayout({
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const pageTitle = getPageTitle(pathname);
+  const [, setContentPlatform] = useRecoilState(contentPlatformAtom);
+
+  useEffect(() => {
+    async function loadPlatformPreference() {
+      const saved = await getContentPlatformPreference();
+      if (
+        saved &&
+        Object.values(ContentPlatform).includes(saved as ContentPlatform)
+      ) {
+        setContentPlatform(saved as ContentPlatform);
+      }
+    }
+    loadPlatformPreference();
+  }, []);
 
   // Don't show sidebar for sign-in/sign-up routes
   if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) {

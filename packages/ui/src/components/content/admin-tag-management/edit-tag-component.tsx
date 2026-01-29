@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
+import { useRecoilValue } from "recoil";
 
 import {
   Button,
@@ -19,6 +20,8 @@ import {
 
 import { updateTagAction, deleteTagAction } from "@ratecreator/actions/content";
 import { Tags } from "@ratecreator/types/content";
+import { contentPlatformAtom } from "@ratecreator/store/content";
+import { getPlatformDomain } from "../admin-posts/metadata-baseUrl";
 import { SingleImageDropzone } from "@ratecreator/ui/common";
 import {
   capitalizeFirstLetter,
@@ -34,6 +37,8 @@ export const EditTagComponent = ({
 }: Tags) => {
   //   const { slug } = params;
   const router = useRouter();
+  const contentPlatform = useRecoilValue(contentPlatformAtom);
+  const tagBaseUrl = `${getPlatformDomain(contentPlatform)}/tags`;
   const [tagDescription, setTagDescription] = useState(description);
   const tagId = id;
   const [tagImageUrl, setTagImageUrl] = useState(imageUrl);
@@ -197,12 +202,12 @@ export const EditTagComponent = ({
 
                 {!isEmpty && (
                   <span className="text-[12px] text-neutral-500">
-                    www.ratecreator.com/tags/{inputSlug}/
+                    {tagBaseUrl}/{inputSlug}/
                   </span>
                 )}
                 {isEmpty && (
                   <span className="text-[12px] text-neutral-500">
-                    www.ratecreator.com/tags/
+                    {tagBaseUrl}/
                   </span>
                 )}
               </div>

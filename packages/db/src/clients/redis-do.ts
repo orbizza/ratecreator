@@ -20,9 +20,20 @@ let redisClient: Redis | null = null;
  */
 export const getRedisClient = (): Redis => {
   if (!redisClient) {
+    const host = process.env.REDIS_HOST || "";
+    const port = parseInt(process.env.REDIS_PORT || "6379", 10);
+
+    if (!host) {
+      console.warn(
+        "[Redis] REDIS_HOST environment variable is not set. " +
+          "Connection will fall back to 127.0.0.1:6379, which will fail in production. " +
+          "Ensure REDIS_HOST, REDIS_PORT, REDIS_USERNAME, and REDIS_PASSWORD are configured.",
+      );
+    }
+
     redisClient = new Redis({
-      host: process.env.REDIS_HOST || "",
-      port: parseInt(process.env.REDIS_PORT || "6379", 10),
+      host,
+      port,
       username: process.env.REDIS_USERNAME || "",
       password: process.env.REDIS_PASSWORD || "",
       tls: {},
@@ -33,7 +44,7 @@ export const getRedisClient = (): Redis => {
     });
 
     redisClient.on("connect", () => {
-      // console.log("Connected to Redis");
+      // Connection established
     });
 
     // process.on("SIGINT", async () => {

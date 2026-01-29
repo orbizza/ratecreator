@@ -3,6 +3,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { UserRole } from "@prisma/client";
+import { invalidateCache } from "./cache";
 
 const prisma = getPrismaClient();
 
@@ -138,6 +139,42 @@ export async function getUserRolesByEmail(
   });
 
   return user?.role || null;
+}
+
+/**
+ * Ensure a user has at least CREATOR role for CreatorOps access.
+ * If user already has CREATOR, WRITER, or ADMIN role, this is a no-op.
+ * Otherwise, adds CREATOR to their existing roles in both Clerk and MongoDB.
+ */
+export async function ensureCreatorRole(clerkId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { clerkId },
+    select: { id: true, role: true, email: true },
+  });
+
+  if (!user) return;
+
+  const hasCreatorAccess = user.role.some((r) =>
+    (["CREATOR", "WRITER", "ADMIN"] as string[]).includes(r),
+  );
+  if (hasCreatorAccess) return;
+
+  const newRoles = [...user.role, "CREATOR" as UserRole];
+
+  // Update Clerk publicMetadata
+  const client = await clerkClient();
+  await client.users.updateUserMetadata(clerkId, {
+    publicMetadata: { roles: newRoles },
+  });
+
+  // Update MongoDB
+  await prisma.user.update({
+    where: { clerkId },
+    data: { role: newRoles },
+  });
+
+  // Invalidate members cache
+  await invalidateCache("members:*");
 }
 
 /**

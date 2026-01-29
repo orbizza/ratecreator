@@ -65,6 +65,13 @@ export async function canAccessContent(): Promise<boolean> {
 }
 
 /**
+ * Check if current user can access CreatorOps (CREATOR, WRITER, or ADMIN)
+ */
+export async function canAccessCreatorOps(): Promise<boolean> {
+  return hasRole(["CREATOR", "WRITER", "ADMIN"]);
+}
+
+/**
  * Get roles from Clerk user object (for use in user-sync consumer)
  */
 export function getRolesFromClerkPayload(payload: any): UserRole[] {

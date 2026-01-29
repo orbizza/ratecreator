@@ -11,6 +11,7 @@ import { SignedIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 import { getPrismaClient } from "@ratecreator/db/client";
+import { invalidateCache } from "./cache";
 
 import {
   ContentPlatform,
@@ -52,7 +53,6 @@ async function createPost(data: PostType) {
     });
 
     if (existingPost) {
-      console.log("Post URL already exists");
       return { error: "Post URL already exists" };
     }
 
@@ -99,6 +99,8 @@ async function createPost(data: PostType) {
       where: { id: newPost.id },
       include: { tags: true },
     });
+
+    await invalidateCache("posts:*");
 
     return { post: updatedPost, success: true };
   } catch (error) {
@@ -148,7 +150,6 @@ async function updatePost(data: PostType, postId: string) {
     });
 
     if (existingPost) {
-      console.log("Post URL already exists");
       return { error: "Post URL already exists" };
     }
 
@@ -201,6 +202,8 @@ async function updatePost(data: PostType, postId: string) {
       include: { tags: true },
     });
 
+    await invalidateCache("posts:*");
+
     return { post: finalUpdatedPost, success: true };
   } catch (error) {
     console.error("Error updating post:", error);
@@ -222,6 +225,7 @@ async function deletePost(postId: string) {
         status: PostStatus.DELETED,
       },
     });
+    await invalidateCache("posts:*");
   } catch (error) {
     console.error("Error deleting post:", error);
     return { error: "Error deleting post" };
@@ -242,6 +246,7 @@ async function restorePost(postId: string) {
         status: PostStatus.DRAFT,
       },
     });
+    await invalidateCache("posts:*");
   } catch (error) {
     console.error("Error restoring post:", error);
     return { error: "Error restoring post" };
@@ -284,6 +289,8 @@ async function publishPost(
       // await sendBroadcastNewsletter({ post, sendData: data, markdown });
     }
 
+    await invalidateCache("posts:*");
+
     return { success: true };
   } catch (error) {
     console.error("Error publishing post:", error);
@@ -306,6 +313,8 @@ async function unpublishPost(postId: string) {
         publishDate: new Date(),
       },
     });
+
+    await invalidateCache("posts:*");
 
     return { success: true };
   } catch (error) {
@@ -337,6 +346,8 @@ async function unschedulePost(postData: FetchedPostType, postId: string) {
         broadcastIds: [],
       },
     });
+
+    await invalidateCache("posts:*");
 
     return { success: true };
   } catch (error) {
