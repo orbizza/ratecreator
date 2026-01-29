@@ -9,67 +9,46 @@ import {
   CardTitle,
   Button,
   Textarea,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Label,
 } from "@ratecreator/ui";
-import { Loader2, FileText, ArrowRight, Copy, Check } from "lucide-react";
-import { toast } from "sonner";
+import { Loader2, FileText, Save, Sparkles } from "lucide-react";
 import { convertIdeaToDraft } from "@ratecreator/actions/content";
 
 interface OutlineEditorProps {
+  ideaId: string;
+  authorId: string;
   outline: string;
   onOutlineChange: (outline: string) => void;
   onSave: () => void;
-  ideaId: string;
-  authorId: string;
 }
 
 export function OutlineEditor({
+  ideaId,
+  authorId,
   outline,
   onOutlineChange,
   onSave,
-  ideaId,
-  authorId,
 }: OutlineEditorProps): JSX.Element {
   const router = useRouter();
   const [converting, setConverting] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [contentPlatform, setContentPlatform] = useState<
-    "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION"
-  >("RATECREATOR");
-  const [contentType, setContentType] = useState<
-    "BLOG" | "GLOSSARY" | "NEWSLETTER"
-  >("BLOG");
 
-  const handleCopyOutline = (): void => {
-    navigator.clipboard.writeText(outline);
-    setCopied(true);
-    toast.success("Outline copied to clipboard");
-    setTimeout(() => setCopied(false), 2000);
+  const handleConvertToDraft = (): void => {
+    setConverting(true);
+    convertIdeaToDraft(ideaId, outline, authorId)
+      .then(({ postId }) => {
+        router.push(`/editor/${postId}`);
+      })
+      .catch(() => {
+        // Failed to convert to draft
+      })
+      .finally(() => {
+        setConverting(false);
+      });
   };
 
-  const handleConvertToDraft = async (): Promise<void> => {
-    setConverting(true);
-    try {
-      const result = await convertIdeaToDraft(
-        ideaId,
-        outline,
-        authorId,
-        contentPlatform,
-        contentType,
-      );
-      toast.success("Draft created successfully!");
-      router.push(`/editor/${result.postId}`);
-    } catch {
-      toast.error("Failed to create draft. Please try again.");
-    } finally {
-      setConverting(false);
-    }
+  const handleOutlineChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ): void => {
+    onOutlineChange(e.target.value);
   };
 
   return (
@@ -77,102 +56,45 @@ export function OutlineEditor({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Generated Content
+            <Sparkles className="h-5 w-5 text-yellow-500" />
+            Generated Outline
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopyOutline}
-            className="gap-2"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" />
-                Copy
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={onSave} size="sm" variant="outline">
+              <Save className="h-4 w-4 mr-2" />
+              Save Outline
+            </Button>
+            <Button
+              disabled={converting}
+              onClick={handleConvertToDraft}
+              size="sm"
+            >
+              {converting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Converting...
+                </>
+              ) : (
+                <>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Create Draft
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <Textarea
-          value={outline}
-          onChange={(e) => onOutlineChange(e.target.value)}
-          rows={15}
           className="font-mono text-sm"
-          placeholder="Generated outline will appear here..."
+          onChange={handleOutlineChange}
+          placeholder="Your generated outline will appear here..."
+          rows={20}
+          value={outline}
         />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Target Platform</Label>
-            <Select
-              value={contentPlatform}
-              onValueChange={(value) =>
-                setContentPlatform(
-                  value as "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
-                )
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="RATECREATOR">RateCreator</SelectItem>
-                  <SelectItem value="CREATOROPS">CreatorOps</SelectItem>
-                  <SelectItem value="DOCUMENTATION">Documentation</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Content Type</Label>
-            <Select
-              value={contentType}
-              onValueChange={(value) =>
-                setContentType(value as "BLOG" | "GLOSSARY" | "NEWSLETTER")
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="BLOG">Blog Post</SelectItem>
-                  <SelectItem value="GLOSSARY">Glossary Entry</SelectItem>
-                  <SelectItem value="NEWSLETTER">Newsletter</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={onSave}>
-            Save Outline
-          </Button>
-          <Button onClick={handleConvertToDraft} disabled={converting}>
-            {converting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating Draft...
-              </>
-            ) : (
-              <>
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Convert to Draft
-              </>
-            )}
-          </Button>
-        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          You can edit the outline before converting it to a draft post.
+        </p>
       </CardContent>
     </Card>
   );

@@ -4,83 +4,85 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
   Button,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Textarea,
   Label,
 } from "@ratecreator/ui";
-import { Loader2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { Loader2, Sparkles, AlertCircle } from "lucide-react";
 
 interface AIGenerateDialogProps {
   open: boolean;
   onClose: () => void;
-  onOutlineGenerated: (outline: string) => void;
   ideaTitle: string;
   ideaDescription: string;
   topics: string[];
+  onOutlineGenerated: (outline: string) => void;
 }
 
 export function AIGenerateDialog({
   open,
   onClose,
-  onOutlineGenerated,
   ideaTitle,
   ideaDescription,
   topics,
+  onOutlineGenerated,
 }: AIGenerateDialogProps): JSX.Element {
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [additionalContext, setAdditionalContext] = useState("");
-  const [contentPlatform, setContentPlatform] = useState<string>("RATECREATOR");
-  const [contentType, setContentType] = useState<string>("BLOG");
 
-  const handleGenerate = async (): Promise<void> => {
-    if (!ideaTitle.trim()) {
-      toast.error("Please add a title before generating an outline");
-      return;
-    }
-
+  const handleGenerate = (): void => {
     setGenerating(true);
-    try {
-      const response = await fetch("/api/ai/generate-outline", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: ideaTitle,
-          description: ideaDescription,
-          topics,
-          additionalContext,
-          contentPlatform,
-          contentType,
-        }),
+    setError(null);
+
+    fetch("/api/ai/generate-outline", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: ideaTitle,
+        description: ideaDescription,
+        topics,
+        additionalContext,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to generate outline");
+        }
+        return response.json();
+      })
+      .then((data: { outline: string }) => {
+        onOutlineGenerated(data.outline);
+        onClose();
+      })
+      .catch((err: Error) => {
+        setError(err.message || "Failed to generate outline");
+      })
+      .finally(() => {
+        setGenerating(false);
       });
+  };
 
-      if (!response.ok) {
-        throw new Error("Failed to generate outline");
-      }
+  const handleContextChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ): void => {
+    setAdditionalContext(e.target.value);
+  };
 
-      const data = await response.json();
-      onOutlineGenerated(data.outline);
-      toast.success("Outline generated successfully!");
+  const handleOpenChange = (openState: boolean): void => {
+    if (!openState) {
       onClose();
-    } catch {
-      toast.error("Failed to generate outline. Please try again.");
-    } finally {
-      setGenerating(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -88,86 +90,52 @@ export function AIGenerateDialog({
             Generate Outline with AI
           </DialogTitle>
           <DialogDescription>
-            Generate a structured outline for your content idea using AI.
+            Generate a detailed blog post outline based on your idea.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>Target Platform</Label>
-            <Select value={contentPlatform} onValueChange={setContentPlatform}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="RATECREATOR">RateCreator</SelectItem>
-                  <SelectItem value="CREATOROPS">CreatorOps</SelectItem>
-                  <SelectItem value="DOCUMENTATION">Documentation</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <Label className="text-sm font-medium">Idea Summary</Label>
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="font-medium">{ideaTitle}</p>
+              {ideaDescription ? (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {ideaDescription}
+                </p>
+              ) : null}
+              {topics.length > 0 ? (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Topics: {topics.join(", ")}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Content Type</Label>
-            <Select value={contentType} onValueChange={setContentType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="BLOG">Blog Post</SelectItem>
-                  <SelectItem value="GLOSSARY">Glossary Entry</SelectItem>
-                  <SelectItem value="NEWSLETTER">Newsletter</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="additional-context">
-              Additional Context (Optional)
-            </Label>
+            <Label htmlFor="context">Additional Context (Optional)</Label>
             <Textarea
-              id="additional-context"
-              placeholder="Add any specific requirements, target audience, or key points to include..."
-              value={additionalContext}
-              onChange={(e) => setAdditionalContext(e.target.value)}
+              id="context"
+              onChange={handleContextChange}
+              placeholder="Add any additional details, target audience, or specific points to cover..."
               rows={3}
+              value={additionalContext}
             />
           </div>
 
-          <div className="rounded-lg bg-muted p-4">
-            <p className="text-sm font-medium mb-2">
-              Will generate outline for:
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <strong>Title:</strong> {ideaTitle || "No title yet"}
-            </p>
-            {ideaDescription && (
-              <p className="text-sm text-muted-foreground mt-1">
-                <strong>Description:</strong>{" "}
-                {ideaDescription.substring(0, 100)}
-                {ideaDescription.length > 100 ? "..." : ""}
-              </p>
-            )}
-            {topics.length > 0 && (
-              <p className="text-sm text-muted-foreground mt-1">
-                <strong>Topics:</strong> {topics.join(", ")}
-              </p>
-            )}
-          </div>
+          {error ? (
+            <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
+              <AlertCircle className="h-4 w-4" />
+              <p className="text-sm">{error}</p>
+            </div>
+          ) : null}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={generating}>
+          <Button disabled={generating} onClick={onClose} variant="outline">
             Cancel
           </Button>
-          <Button
-            onClick={handleGenerate}
-            disabled={generating || !ideaTitle.trim()}
-          >
+          <Button disabled={generating} onClick={handleGenerate}>
             {generating ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

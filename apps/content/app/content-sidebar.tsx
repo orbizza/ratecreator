@@ -45,15 +45,16 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Monitor,
+  Moon,
   Star,
-  SunMoon,
+  Sun,
   Tag,
   User,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
@@ -126,6 +127,7 @@ const navProjectItems = [
 function ProductSwitcher() {
   const [contentPlatform, setContentPlatform] =
     useRecoilState(contentPlatformAtom);
+  const router = useRouter();
   const currentPlatform =
     platforms.find((p) => p.value === contentPlatform) || platforms[0];
 
@@ -163,8 +165,11 @@ function ProductSwitcher() {
           <DropdownMenuItem
             key={platform.value}
             onClick={() => {
-              setContentPlatform(platform.value);
-              void saveContentPlatformPreference(platform.value);
+              if (platform.value !== contentPlatform) {
+                setContentPlatform(platform.value);
+                void saveContentPlatformPreference(platform.value);
+                router.push("/");
+              }
             }}
             className="gap-2 p-2"
           >
@@ -288,8 +293,7 @@ function NavProjects({
 function NavUser() {
   const user = useUser();
   const router = useRouter();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { setTheme, theme } = useTheme();
   const { signOut } = useAuth();
 
   return (
@@ -357,11 +361,29 @@ function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="justify-between">
-                <div className="flex items-center">
-                  <SunMoon className="mr-2 size-4" />
-                  {isDark ? "Dark Theme" : "Light Theme"}
-                </div>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Theme
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <Sun className="mr-2 size-4" />
+                Light
+                {theme === "light" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <Moon className="mr-2 size-4" />
+                Dark
+                {theme === "dark" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <Monitor className="mr-2 size-4" />
+                System
+                {theme === "system" && (
+                  <span className="ml-auto text-xs text-green-500">Active</span>
+                )}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -376,7 +398,7 @@ function NavUser() {
               }}
             >
               <LogOut className="mr-2 size-4" />
-              Log out
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
