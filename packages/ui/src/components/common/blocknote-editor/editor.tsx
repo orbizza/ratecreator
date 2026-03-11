@@ -7,9 +7,11 @@ import {
   PartialBlock,
   BlockNoteSchema,
   defaultBlockSpecs,
-  insertOrUpdateBlock,
-  filterSuggestionItems,
 } from "@blocknote/core";
+import {
+  insertOrUpdateBlockForSlashMenu,
+  filterSuggestionItems,
+} from "@blocknote/core/extensions";
 import {
   DefaultReactSuggestionItem,
   getDefaultReactSlashMenuItems,
@@ -17,6 +19,7 @@ import {
   useCreateBlockNote,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
+import "@blocknote/core/style.css";
 import "@blocknote/mantine/style.css";
 
 import { FaYoutube, FaMarkdown, FaLightbulb } from "react-icons/fa";
@@ -51,15 +54,15 @@ interface EditorProps {
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    youtube: Youtube,
-    divider: Divider,
+    youtube: Youtube(),
+    divider: Divider(),
   },
 });
 
 const insertYoutube = (editor: typeof schema.BlockNoteEditor) => ({
   title: "Youtube",
   onItemClick: () => {
-    insertOrUpdateBlock(editor, {
+    insertOrUpdateBlockForSlashMenu(editor, {
       type: "youtube",
     });
   },
@@ -222,7 +225,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
         editable={editable}
         theme={isDark ? "dark" : "light"}
         onChange={() => {
-          onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+          onChange(JSON.stringify(editor.document, null, 2));
         }}
         slashMenu={false}
         data-theming-css-demo

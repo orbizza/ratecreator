@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { UsersRound } from "lucide-react";
 import {
   SiInstagram,
-  SiYoutube,
   SiX,
   SiReddit,
   SiTiktok,
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 
 import { SearchCreator } from "@ratecreator/types/review";
 import { formatFloat, formatValue } from "@ratecreator/db/utils";
@@ -96,7 +96,7 @@ export const CreatorCard: React.FC<
         {(() => {
           switch (platform) {
             case "YOUTUBE":
-              return <SiYoutube size={28} />;
+              return <YouTubeIcon size={28} />;
             case "INSTAGRAM":
               return <SiInstagram size={28} />;
             case "X":

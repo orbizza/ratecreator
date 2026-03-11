@@ -17,6 +17,7 @@ import {
 import { CreatorReviews } from "./creator-reviews";
 import { MessagesSquare } from "lucide-react";
 import { Info } from "lucide-react";
+import { DataSourceBadge } from "../creator-rating/data-source-badge";
 import TwitterChannelHeader from "./twitter/header-twitter";
 import { TwitterDetailsSection } from "./twitter/twitter-details-section";
 import TiktokChannelHeader from "./tiktok/header-tiktok";
@@ -149,6 +150,7 @@ export const CreatorProfile = ({
                 <div className="flex flex-row gap-x-2 items-center text-primary">
                   <MessagesSquare size={28} />
                   <span className="">Reviews</span>
+                  <DataSourceBadge source="community" />
                   <Info size={14} className="text-muted-foreground" />
                 </div>
 

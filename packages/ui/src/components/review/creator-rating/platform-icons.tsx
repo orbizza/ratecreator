@@ -1,3 +1,33 @@
+/**
+ * Official YouTube icon component using YouTube's branding guidelines.
+ * Uses the official play button SVG with YouTube red (#FF0000).
+ */
+export const YouTubeIcon = ({
+  size = 24,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) => (
+  <svg
+    viewBox="0 0 28.57 20"
+    width={size}
+    height={size * (20 / 28.57)}
+    className={className}
+    aria-label="YouTube"
+    role="img"
+  >
+    <path
+      d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5701 5.35042 27.9727 3.12324Z"
+      fill="#FF0000"
+    />
+    <path
+      d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z"
+      fill="white"
+    />
+  </svg>
+);
+
 export const PlatformIcon = ({ platform }: { platform: string }) => {
   switch (platform.toLowerCase()) {
     case "twitter":
@@ -13,15 +43,7 @@ export const PlatformIcon = ({ platform }: { platform: string }) => {
         </svg>
       );
     case "youtube":
-      return (
-        <svg
-          className="w-6 h-6 md:w-7 md:h-7 text-red-600"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-        </svg>
-      );
+      return <YouTubeIcon size={28} />;
     case "instagram":
       return (
         <svg

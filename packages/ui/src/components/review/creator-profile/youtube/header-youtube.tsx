@@ -32,6 +32,7 @@ import {
   truncateText,
 } from "@ratecreator/db/utils";
 import { PlatformIcon } from "../../creator-rating/platform-icons";
+import { DataSourceBadge } from "../../creator-rating/data-source-badge";
 
 export const defaultBg = cn(
   "bg-gradient-to-r",
@@ -318,10 +319,11 @@ const ChannelHeader = ({ account }: { account: CreatorData["account"] }) => {
                     className="hidden sm:block h-5 mr-2 bg-secondary-foreground"
                   />
                 </div>
-                <div className="flex items-center text-md text-green-500">
+                <div className="flex items-center gap-x-2 text-md text-green-500">
                   {account.reviewCount > 1
                     ? `${formatValue(account.reviewCount)} reviews`
                     : `${account.reviewCount} review`}
+                  <DataSourceBadge source="community" />
                 </div>
               </div>
 

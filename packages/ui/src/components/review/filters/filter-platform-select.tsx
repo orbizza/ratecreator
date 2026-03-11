@@ -14,12 +14,12 @@ import { platformFiltersState } from "@ratecreator/store/review";
 
 import {
   SiInstagram,
-  SiYoutube,
   SiX,
   SiReddit,
   SiTiktok,
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 
 const platformFilters = [
   {
@@ -37,8 +37,8 @@ const platformFilters = [
   {
     id: "youtube",
     label: "YouTube",
-    icon: SiYoutube,
-    color: "text-red-500",
+    icon: YouTubeIcon,
+    color: "",
   },
   {
     id: "twitter",

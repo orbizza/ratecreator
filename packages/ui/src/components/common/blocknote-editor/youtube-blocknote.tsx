@@ -14,7 +14,7 @@ import {
   Button,
   Input,
 } from "@ratecreator/ui";
-import { FaYoutube } from "react-icons/fa";
+import { YouTubeIcon } from "../../review/creator-rating/platform-icons";
 import { cn } from "@ratecreator/ui/utils";
 
 /**
@@ -68,7 +68,7 @@ export const Youtube = createReactBlockSpec(
                   size="lg"
                   className="w-full justify-start gap-x-2 hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
                 >
-                  <FaYoutube className="text-red-500" />
+                  <YouTubeIcon size={18} />
                   Add Video
                 </Button>
               </AlertDialogTrigger>

@@ -23,14 +23,8 @@ import {
   Variant,
 } from "framer-motion";
 import React from "react";
-import {
-  SiYoutube,
-  SiX,
-  SiInstagram,
-  SiTiktok,
-  SiTwitch,
-  SiReddit,
-} from "react-icons/si";
+import { SiX, SiInstagram, SiTiktok, SiTwitch, SiReddit } from "react-icons/si";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 import { formatValue } from "@ratecreator/db/utils";
 
 /**
@@ -40,7 +34,7 @@ const stats = [
   {
     value: 710000,
     label: "YouTube Channels",
-    icon: SiYoutube,
+    icon: YouTubeIcon,
     isAvailable: true,
   },
   { value: 1196918, label: "X Profiles", icon: SiX, isAvailable: true },

@@ -9,6 +9,7 @@ export * from "./dashboard";
 export * from "./roles";
 export * from "./members";
 export * from "./platform-preference";
+export * from "./subscribers";
 
 // Note: cache utilities are not exported as they use Node.js-only modules (ioredis)
 // and should only be used internally by server actions in this package

@@ -29,7 +29,7 @@ import {
   postTypeState,
 } from "@ratecreator/store/content";
 
-import { publishPost } from "@ratecreator/actions/content";
+import { publishPost, resendNewsletter } from "@ratecreator/actions/content";
 import { useRouter } from "next/navigation";
 import {
   dateTimeValidation,
@@ -40,9 +40,20 @@ import {
 interface PublishDialogProps {
   value: boolean;
   onOpenChange: (value: boolean) => void;
+  mode?: "publish" | "resend";
 }
 
-const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
+const SEGMENTS = [
+  { id: "all-users", label: "All Users" },
+  { id: "security", label: "Security" },
+  { id: "creator", label: "Creator" },
+] as const;
+
+const PublishDialog = ({
+  value,
+  onOpenChange,
+  mode = "publish",
+}: PublishDialogProps) => {
   const router = useRouter();
 
   const [isFirstDialogOpen, setFirstDialogOpen] = useState(value);
@@ -52,6 +63,10 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
     string | undefined
   >(undefined);
   const [error, setError] = useRecoilState(savePostErrorState);
+  const [selectedSegments, setSelectedSegments] = useState<string[]>([
+    "all-users",
+  ]);
+  const [resending, setResending] = useState(false);
 
   const [inputDate, setInputDate] = useRecoilState(selectDate);
   const [inputTimeIst, setInputTimeIst] = useRecoilState(selectedTimeIst);
@@ -63,6 +78,17 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
 
   const { markdown: newsletterMarkdown, NewsletterMarkdown } =
     useNewsletterMarkdown(post?.content || "");
+
+  const toggleSegment = (segmentId: string) => {
+    setSelectedSegments((prev) => {
+      if (prev.includes(segmentId)) {
+        // Don't allow deselecting all
+        if (prev.length === 1) return prev;
+        return prev.filter((s) => s !== segmentId);
+      }
+      return [...prev, segmentId];
+    });
+  };
 
   const handleScheduleTypeChange = (type: string) => {
     setScheduleType(type);
@@ -103,6 +129,7 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
         scheduleType,
         postId,
         markdown,
+        publishType === ContentType.NEWSLETTER ? selectedSegments : undefined,
       );
 
       if (result.success) {
@@ -117,6 +144,28 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
     } catch (error) {
       console.error("Error publishing post:", error);
       setError("An unexpected error occurred");
+    }
+  };
+
+  const handleResend = async () => {
+    if (!postId) {
+      console.error("Post ID is required");
+      return;
+    }
+    setResending(true);
+    try {
+      const result = await resendNewsletter(postId, selectedSegments);
+      if (result.success) {
+        setFirstDialogOpen(false);
+        onOpenChange(false);
+      } else {
+        setError(result.error || "Failed to resend newsletter");
+      }
+    } catch (error) {
+      console.error("Error resending newsletter:", error);
+      setError("An unexpected error occurred");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -143,6 +192,76 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
     return `Schedule for ${formatDayAndDate(inputDate)} at ${inputTimeIst} IST`;
   };
 
+  // Resend mode — simplified dialog
+  if (mode === "resend") {
+    return (
+      <Dialog
+        open={isFirstDialogOpen}
+        onOpenChange={(open) => {
+          setFirstDialogOpen(open);
+          if (!open) onOpenChange(false);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Resend Newsletter</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Select segments to resend this newsletter to:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SEGMENTS.map((seg) => (
+                  <Badge
+                    key={seg.id}
+                    className={`cursor-pointer text-base py-2 px-4 rounded-md ${
+                      selectedSegments.includes(seg.id)
+                        ? "bg-green-500"
+                        : "bg-gray-700"
+                    }`}
+                    onClick={() => toggleSegment(seg.id)}
+                  >
+                    {seg.label}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-sm text-gray-500 mt-2">
+                Select at least one segment. Security segment will not include
+                an unsubscribe button.
+              </p>
+            </div>
+
+            {error && <p className="text-sm text-red-400">{error}</p>}
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFirstDialogOpen(false);
+                  onOpenChange(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-green-500 hover:bg-green-600"
+                onClick={handleResend}
+                disabled={resending || selectedSegments.length === 0}
+              >
+                {resending
+                  ? "Resending..."
+                  : `Resend to ${selectedSegments.length} segment${selectedSegments.length > 1 ? "s" : ""}`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Publish mode — original two-step flow
   return (
     <>
       {/* Hidden component to generate markdown */}
@@ -183,13 +302,7 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
           </div>
 
           {/* Main Content Area */}
-          {/*
-            1) Use flex-1 to stretch
-            2) items-center + justify-center to center content
-            (If you'd rather keep it top-aligned but centered horizontally, remove justify-center.)
-          */}
           <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-8 ">
-            {/* You can also wrap this in a narrower container if desired */}
             <div className="w-full max-w-xl">
               <DialogHeader className="mb-10 text-left sm:text-center">
                 <DialogTitle className="-mt-12">
@@ -220,6 +333,40 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
                         : `Publish as ${publishType.toLowerCase()}`}
                     </AccordionTrigger>
                   </AccordionItem>
+
+                  {publishType === ContentType.NEWSLETTER && (
+                    <AccordionItem
+                      value="segments"
+                      className="border-b-[1px] border-gray-700"
+                    >
+                      <AccordionTrigger className="text-gray-200 text-lg">
+                        {`Send to ${selectedSegments.length} segment${selectedSegments.length > 1 ? "s" : ""}`}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-2">
+                            {SEGMENTS.map((seg) => (
+                              <Badge
+                                key={seg.id}
+                                className={`cursor-pointer text-base py-2 px-4 rounded-md ${
+                                  selectedSegments.includes(seg.id)
+                                    ? "bg-green-500"
+                                    : "bg-gray-700"
+                                }`}
+                                onClick={() => toggleSegment(seg.id)}
+                              >
+                                {seg.label}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2">
+                            Select at least one segment. Security segment will
+                            not include an unsubscribe button.
+                          </p>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
 
                   <AccordionItem value="schedule" className="border-none">
                     <AccordionTrigger className="text-gray-200 text-lg">
@@ -322,9 +469,21 @@ const PublishDialog = ({ value, onOpenChange }: PublishDialogProps) => {
                 <p className="text-gray-300 text-base sm:text-lg">
                   Your post will be published on your{" "}
                   {publishType === ContentType.NEWSLETTER
-                    ? "newsletter section, and delivered to all subscribers."
+                    ? `newsletter section, and delivered to ${selectedSegments.length} segment${selectedSegments.length > 1 ? "s" : ""}: ${selectedSegments
+                        .map(
+                          (s) =>
+                            SEGMENTS.find((seg) => seg.id === s)?.label || s,
+                        )
+                        .join(", ")}.`
                     : `${publishType.toLowerCase()} section.`}
                 </p>
+                {publishType === ContentType.NEWSLETTER &&
+                  scheduleType === "later" && (
+                    <p className="text-yellow-400 text-sm">
+                      Note: Scheduled newsletters will be broadcast when they go
+                      live at the scheduled time.
+                    </p>
+                  )}
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button

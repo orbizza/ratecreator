@@ -683,3 +683,55 @@ enum IdeaStatus {
   DRAFT_CREATED
   ARCHIVED
 }
+
+// -----------------------
+// Newsletter Email System
+// -----------------------
+
+model NewsletterSubscriber {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  email            String           @unique
+  name             String?
+  status           SubscriberStatus @default(PENDING)
+  verifyToken      String?          @unique
+  subscribedAt     DateTime?
+  unsubscribedAt   DateTime?
+  source           String?          @default("website")
+  segments         String[]         @default([])
+  resendContactIds Json?
+  note             String?
+  location         String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([segments])
+  @@map("newsletter_subscribers")
+}
+
+model EmailLog {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  to        String
+  subject   String
+  template  String
+  status    EmailStatus @default(SENT)
+  resendId  String?
+  error     String?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  @@index([to])
+  @@index([template])
+  @@map("email_logs")
+}
+
+enum SubscriberStatus {
+  PENDING
+  ACTIVE
+  UNSUBSCRIBED
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+  BOUNCED
+}

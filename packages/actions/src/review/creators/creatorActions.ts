@@ -5,6 +5,17 @@ import axios from "axios";
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
+import { refreshYoutubeData } from "./youtubeRefresh";
+
+const STALE_THRESHOLD_DAYS = 7;
+
+function isDataStale(lastDataRefresh: Date | null): boolean {
+  if (!lastDataRefresh) return true;
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(lastDataRefresh).getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays > STALE_THRESHOLD_DAYS;
+}
 
 const CACHE_YOUTUBE_CREATOR = "accounts-youtube-";
 const CACHE_TWITTER_CREATOR = "accounts-twitter-";
@@ -75,6 +86,13 @@ async function handleYoutubeAccount(
 
     if (!account) {
       return { error: "Account not found", status: 404 };
+    }
+
+    // Trigger background refresh if data is stale (>7 days)
+    if (isDataStale(account.lastDataRefresh)) {
+      refreshYoutubeData(account.accountId).catch((err) =>
+        console.error("[youtube-refresh] Background refresh failed:", err),
+      );
     }
 
     // Get category mappings for this account

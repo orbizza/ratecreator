@@ -1,17 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   SiInstagram,
-  SiYoutube,
   SiX,
   SiLinkedin,
   SiDiscord,
 } from "@icons-pack/react-simple-icons";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 
 export const Footer = () => {
+  const [footerEmail, setFooterEmail] = useState("");
+  const [footerMsg, setFooterMsg] = useState("");
+  const [footerLoading, setFooterLoading] = useState(false);
+
+  const handleFooterSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!footerEmail) return;
+    setFooterLoading(true);
+    setFooterMsg("");
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: footerEmail }),
+      });
+      const data = await res.json();
+      setFooterMsg(data.message || data.error || "Done!");
+      if (res.ok) setFooterEmail("");
+    } catch {
+      setFooterMsg("Something went wrong.");
+    } finally {
+      setFooterLoading(false);
+    }
+  };
+
   return (
     <footer className="z-50 bg-black text-white py-16">
       <div className="max-w-screen-xl mx-auto px-4">
@@ -68,7 +93,7 @@ export const Footer = () => {
                 aria-label="YouTube"
                 className="text-muted-foreground hover:text-primary-foreground/80"
               >
-                <SiYoutube size={20} />
+                <YouTubeIcon size={20} />
               </Link>
               <Link
                 href="https://www.linkedin.com/company/orbizza"
@@ -186,6 +211,36 @@ export const Footer = () => {
                 </li> */}
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Newsletter Signup */}
+        <div className="mt-12 pt-8 border-t border-gray-800">
+          <div className="max-w-md">
+            <h3 className="font-normal mb-2 text-white">Newsletter</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get creator economy insights delivered to your inbox.
+            </p>
+            <form onSubmit={handleFooterSubscribe} className="flex gap-2">
+              <input
+                type="email"
+                placeholder="Your email"
+                value={footerEmail}
+                onChange={(e) => setFooterEmail(e.target.value)}
+                required
+                className="flex-1 h-10 px-3 rounded-md bg-gray-800 border border-gray-700 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-gray-500"
+              />
+              <button
+                type="submit"
+                disabled={footerLoading}
+                className="h-10 px-4 rounded-md bg-green-500 hover:bg-green-600 text-black font-medium text-sm disabled:opacity-50"
+              >
+                {footerLoading ? "..." : "Subscribe"}
+              </button>
+            </form>
+            {footerMsg && (
+              <p className="text-xs text-green-400 mt-2">{footerMsg}</p>
+            )}
           </div>
         </div>
 

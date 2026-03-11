@@ -22,6 +22,17 @@ import {
   UpdatePostType,
 } from "@ratecreator/types/content";
 
+import {
+  blocknoteToEmailHtml,
+  sendBroadcastToSegments,
+  deleteBroadcast,
+  NewsletterIssueEmail,
+  BASE_URL,
+  type SegmentType,
+} from "@ratecreator/email";
+
+import React from "react";
+
 /**
  * Prisma client instance for database operations
  * @private
@@ -259,6 +270,7 @@ async function restorePost(postId: string) {
  * @param {string} scheduleType - Type of scheduling ("later" or immediate)
  * @param {string} postId - ID of the post to publish
  * @param {string} markdown - Markdown content of the post
+ * @param {string[]} segments - Newsletter audience segments to broadcast to
  * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
  */
 async function publishPost(
@@ -266,12 +278,19 @@ async function publishPost(
   scheduleType: string,
   postId: string,
   markdown: string,
+  segments?: string[],
 ) {
-  let data = {};
+  const selectedSegments = (segments || ["all-users"]) as SegmentType[];
+
+  let data: any = {};
   if (scheduleType === "later") {
     data = {
       status: PostStatus.SCHEDULED,
     };
+    // Store segments for scheduled newsletters so cron can pick them up
+    if (postData.contentType === ContentType.NEWSLETTER) {
+      data.broadcastIds = selectedSegments.map((s) => `segment:${s}`);
+    }
   } else {
     data = { status: PostStatus.PUBLISHED, publishDate: new Date() };
   }
@@ -283,10 +302,14 @@ async function publishPost(
       data,
     });
 
-    // TODO: Send broadcast newsletter
-
-    if (postData.contentType === ContentType.NEWSLETTER) {
-      // await sendBroadcastNewsletter({ post, sendData: data, markdown });
+    // Send broadcast newsletter when publishing immediately
+    if (
+      postData.contentType === ContentType.NEWSLETTER &&
+      scheduleType !== "later"
+    ) {
+      sendNewsletterBroadcast(postId, postData, selectedSegments).catch((err) =>
+        console.error("Newsletter broadcast error:", err),
+      );
     }
 
     await invalidateCache("posts:*");
@@ -295,6 +318,122 @@ async function publishPost(
   } catch (error) {
     console.error("Error publishing post:", error);
     return { error: "Error publishing post" };
+  }
+}
+
+/**
+ * Broadcast a newsletter to selected audience segments using React templates
+ */
+async function sendNewsletterBroadcast(
+  postId: string,
+  postData: FetchedPostType,
+  segments: SegmentType[],
+) {
+  try {
+    const emailHtml = blocknoteToEmailHtml(postData.content);
+    const postUrl = `${BASE_URL}/newsletter/${postData.postUrl}`;
+    const publishDate = postData.publishDate
+      ? new Date(postData.publishDate).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : undefined;
+
+    const results = await sendBroadcastToSegments({
+      segments,
+      subject: postData.title,
+      name: postData.title,
+      buildReact: (segment: SegmentType) =>
+        React.createElement(NewsletterIssueEmail, {
+          title: postData.title,
+          contentHtml: emailHtml,
+          featureImage: postData.featureImage || undefined,
+          authorName: postData.author?.name || undefined,
+          authorImageUrl: postData.author?.imageUrl || undefined,
+          publishDate,
+          postUrl,
+          hideUnsubscribe: segment === "security",
+          previewText: postData.excerpt || postData.title,
+        }),
+    });
+
+    const broadcastIds: string[] = [];
+
+    for (const result of results) {
+      broadcastIds.push(result.id);
+
+      // Log success
+      await prisma.emailLog.create({
+        data: {
+          to: `broadcast:${result.segment}`,
+          subject: postData.title,
+          template: "newsletter-issue",
+          status: "SENT",
+          resendId: result.id,
+          metadata: { postId, segment: result.segment },
+        },
+      });
+    }
+
+    // Log failures for segments that didn't produce results
+    const succeededSegments = results.map((r) => r.segment);
+    for (const segment of segments) {
+      if (!succeededSegments.includes(segment)) {
+        await prisma.emailLog.create({
+          data: {
+            to: `broadcast:${segment}`,
+            subject: postData.title,
+            template: "newsletter-issue",
+            status: "FAILED",
+            error: "Broadcast creation returned null",
+            metadata: { postId, segment },
+          },
+        });
+      }
+    }
+
+    // Update post with broadcast IDs
+    if (broadcastIds.length > 0) {
+      await prisma.post.update({
+        where: { id: postId },
+        data: { broadcastIds },
+      });
+    }
+  } catch (error) {
+    console.error("sendNewsletterBroadcast error:", error);
+  }
+}
+
+/**
+ * Resend a previously published newsletter to selected segments
+ */
+async function resendNewsletter(postId: string, segments?: string[]) {
+  await authenticateUser();
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { author: true },
+    });
+    if (!post || post.status !== PostStatus.PUBLISHED) {
+      return { error: "Post not found or not published" };
+    }
+    if (post.contentType !== ContentType.NEWSLETTER) {
+      return { error: "Post is not a newsletter" };
+    }
+
+    const selectedSegments = (segments || ["all-users"]) as SegmentType[];
+    await sendNewsletterBroadcast(
+      postId,
+      post as unknown as FetchedPostType,
+      selectedSegments,
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error resending newsletter:", error);
+    return { error: "Error resending newsletter" };
   }
 }
 
@@ -333,10 +472,16 @@ async function unschedulePost(postData: FetchedPostType, postId: string) {
   await authenticateUser();
 
   try {
-    // TODO: Send broadcast newsletter
-
-    if (postData.contentType === ContentType.NEWSLETTER) {
-      // await deleteBroadcastNewsletter({ postData.broadcastIds });
+    if (
+      postData.contentType === ContentType.NEWSLETTER &&
+      postData.broadcastIds?.length > 0
+    ) {
+      // Delete any existing broadcasts (skip segment: prefixed entries)
+      for (const broadcastId of postData.broadcastIds) {
+        if (!broadcastId.startsWith("segment:")) {
+          await deleteBroadcast(broadcastId);
+        }
+      }
     }
 
     await prisma.post.update({
@@ -364,4 +509,5 @@ export {
   publishPost,
   unpublishPost,
   unschedulePost,
+  resendNewsletter,
 };

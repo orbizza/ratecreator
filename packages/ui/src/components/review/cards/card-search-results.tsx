@@ -4,12 +4,12 @@ import { cn } from "@ratecreator/ui/utils";
 import Image from "next/image";
 import {
   SiInstagram,
-  SiYoutube,
   SiX,
   SiReddit,
   SiTiktok,
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 
 import {
   CircleSlash2,
@@ -46,7 +46,7 @@ const getPlatformIcon = (platform: string) => {
     case "instagram":
       return <SiInstagram className="text-rose-700" size={32} />;
     case "youtube":
-      return <SiYoutube className="text-red-500" size={32} />;
+      return <YouTubeIcon size={32} />;
     case "twitter":
       return <SiX className="dark:text-neutral-500" size={32} />;
     case "reddit":
@@ -221,10 +221,15 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
 
             {/* Rating and review count row */}
             <div className="flex z-10 justify-between items-center">
-              <div className="flex items-center gap-2 ml-2">
-                <StarRating rating={rating} />{" "}
-                <span className={`font-bold ${colour}`}>
-                  {rating > 0 ? formatFloat(rating) : 0}
+              <div className="flex flex-col ml-2">
+                <div className="flex items-center gap-2">
+                  <StarRating rating={rating} />{" "}
+                  <span className={`font-bold ${colour}`}>
+                    {rating > 0 ? formatFloat(rating) : 0}
+                  </span>
+                </div>
+                <span className="text-[9px] text-muted-foreground">
+                  Community Rating
                 </span>
               </div>
               <div className="flex items-center gap-2">

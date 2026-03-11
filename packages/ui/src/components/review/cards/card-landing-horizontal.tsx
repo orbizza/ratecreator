@@ -4,12 +4,12 @@ import React from "react";
 import { UsersRound } from "lucide-react";
 import {
   SiInstagram,
-  SiYoutube,
   SiX,
   SiReddit,
   SiTiktok,
   SiTwitch,
 } from "@icons-pack/react-simple-icons";
+import { YouTubeIcon } from "../creator-rating/platform-icons";
 import { ny } from "@ratecreator/ui/utils";
 import { formatValue, truncateText } from "@ratecreator/db/utils";
 
@@ -58,7 +58,7 @@ export function CardLandingHorizontal({
       case "instagram":
         return <SiInstagram className="text-rose-700" />;
       case "youtube":
-        return <SiYoutube className="text-red-500" />;
+        return <YouTubeIcon size={20} />;
       case "twitter":
         return <SiX />;
       case "reddit":

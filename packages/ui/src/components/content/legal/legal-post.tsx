@@ -71,6 +71,52 @@ export const LegalPost = () => {
         <div className="mt-10 ">
           <BlockNoteRenderer content={post.content} />
         </div>
+
+        {postUrl === "terms" && (
+          <div className="mt-12 p-6 border rounded-lg bg-muted/50">
+            <h3 className="text-lg font-semibold mb-3">
+              YouTube Terms of Service
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              By using Rate Creator, you are agreeing to be bound by the{" "}
+              <a
+                href="https://www.youtube.com/t/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                YouTube Terms of Service
+              </a>
+              .
+            </p>
+          </div>
+        )}
+
+        {postUrl === "privacy" && (
+          <div className="mt-12 p-6 border rounded-lg bg-muted/50">
+            <h3 className="text-lg font-semibold mb-3">
+              YouTube API Services &amp; Google Privacy Policy
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Rate Creator uses YouTube API Services to display channel
+              information, statistics, and other publicly available data from
+              YouTube.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+              By using Rate Creator, you acknowledge that your use is also
+              subject to the{" "}
+              <a
+                href="http://www.google.com/policies/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                Google Privacy Policy
+              </a>
+              .
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
