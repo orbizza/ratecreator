@@ -267,8 +267,8 @@ gcloud builds submit \
 ### Cloud Run Configuration
 
 ```bash
-gcloud run deploy rc-workers \
-  --image=gcr.io/sinuous-aviary-410323/rc-workers \
+gcloud run deploy ratecreator-workers \
+  --image=gcr.io/sinuous-aviary-410323/ratecreator-workers \
   --region=us-central1 \
   --service-account=rc-services@sinuous-aviary-410323.iam.gserviceaccount.com \
   --memory=1Gi --cpu=2 \
@@ -281,18 +281,18 @@ gcloud run deploy rc-workers \
 
 ```bash
 # Direct env vars
-gcloud run services update rc-workers --region=us-central1 \
+gcloud run services update ratecreator-workers --region=us-central1 \
   --set-env-vars="NODE_ENV=production,GCP_LOCATION=us-central1,ELASTIC_ACCOUNTS_INDEX=accounts,ELASTIC_CATEGORIES_INDEX=categories,GCS_CONTENT_BUCKET=rc-content,GCS_PROFILES_BUCKET=rc-profiles,GCS_BANNERS_BUCKET=rc-banners,STORAGE_PROVIDER=do"
 
 # Secrets (from Secret Manager)
-gcloud run services update rc-workers --region=us-central1 \
+gcloud run services update ratecreator-workers --region=us-central1 \
   --set-secrets="DATABASE_URL_ONLINE=DATABASE_URL_ONLINE:latest,REDIS_HOST=REDIS_HOST:latest,REDIS_PORT=REDIS_PORT:latest,REDIS_USERNAME=REDIS_USERNAME:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,GCP_PROJECT_ID=GCP_PROJECT_ID:latest,ELASTIC_URL=ELASTIC_URL:latest,ELASTIC_API_KEY=ELASTIC_API_KEY:latest,YOUTUBE_API_KEY=YOUTUBE_API_KEY:latest,TWITTER_BEARER_TOKEN=TWITTER_BEARER_TOKEN:latest,INSTAGRAM_ACCESS_TOKEN=INSTAGRAM_ACCESS_TOKEN:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=INSTAGRAM_BUSINESS_ACCOUNT_ID:latest,CLERK_WEBHOOK_SECRET=CLERK_WEBHOOK_SECRET:latest"
 ```
 
 ### Health Check
 
 ```bash
-curl $(gcloud run services describe rc-workers --region=us-central1 --format='value(status.url)')/health
+curl $(gcloud run services describe ratecreator-workers --region=us-central1 --format='value(status.url)')/health
 ```
 
 ---
@@ -315,7 +315,7 @@ done
 Push subscriptions POST to Cloud Run routes when messages arrive:
 
 ```bash
-WORKERS_URL=$(gcloud run services describe rc-workers --region=us-central1 --format='value(status.url)')
+WORKERS_URL=$(gcloud run services describe ratecreator-workers --region=us-central1 --format='value(status.url)')
 SA=rc-services@sinuous-aviary-410323.iam.gserviceaccount.com
 
 # Map topics to worker routes
@@ -351,12 +351,26 @@ done
 
 The workers service handles Clerk webhooks directly (no separate app needed).
 
+### Get the Workers URL
+
+```bash
+gcloud run services describe ratecreator-workers --region=us-central1 --format='value(status.url)'
+# Returns: https://ratecreator-workers-xxxxx-uc.a.run.app
+```
+
+The Clerk webhook URL is: `<WORKERS_URL>/webhook/clerk`
+
 ### Setup in Clerk Dashboard
 
 1. Go to **Clerk Dashboard** → **Webhooks**
-2. Add endpoint: `https://<WORKERS_URL>/webhook/clerk`
+2. Add endpoint: `https://ratecreator-workers-xxxxx-uc.a.run.app/webhook/clerk` (use your actual Workers URL from above)
 3. Select events: `user.created`, `user.updated`, `user.deleted`
-4. Copy signing secret → add to Secret Manager as `CLERK_WEBHOOK_SECRET`
+4. Copy the **Signing Secret** from Clerk (starts with `whsec_`)
+5. Add it to GCP Secret Manager:
+   ```bash
+   echo -n "whsec_..." | gcloud secrets create CLERK_WEBHOOK_SECRET --data-file=-
+   ```
+6. Verify it's linked to Cloud Run (already done in Section 5 env vars)
 
 ### Flow
 
@@ -559,12 +573,12 @@ No GitHub Actions. All CI/CD is handled by Vercel Git Integration and GCP Cloud 
 
 ## 15. Placeholder Apps (Not Deployed)
 
-| App                         | Status                                                          |
-| --------------------------- | --------------------------------------------------------------- |
-| `apps/api/`                 | Empty — future REST API (currently using Next.js API routes)    |
-| `apps/services/`            | Empty — future specialized microservices                        |
-| `apps/consumers/`           | Deprecated — replaced by `apps/workers/`                        |
-| `apps/webhooks/clerk-sync/` | Can be consolidated into workers (webhook route already exists) |
+| App                         | Status                                                       |
+| --------------------------- | ------------------------------------------------------------ |
+| `apps/api/`                 | Empty — future REST API (currently using Next.js API routes) |
+| `apps/services/`            | Empty — future specialized microservices                     |
+| `apps/consumers/`           | Deprecated — replaced by `apps/workers/`                     |
+| `apps/webhooks/clerk-sync/` | Consolidated into `apps/workers` (`/webhook/clerk` route)    |
 
 ---
 
@@ -612,6 +626,36 @@ No GitHub Actions. All CI/CD is handled by Vercel Git Integration and GCP Cloud 
 [ ] Clerk webhook endpoint configured and delivering
 [ ] PostHog receiving events
 [ ] Sentry receiving errors
+```
+
+---
+
+## GCP Quick Lookups
+
+```bash
+# List all Cloud Run services (find actual service names)
+gcloud run services list --region=us-central1
+
+# Get the URL for workers
+gcloud run services describe ratecreator-workers --region=us-central1 --format='value(status.url)'
+
+# List all Pub/Sub topics
+gcloud pubsub topics list
+
+# List all Pub/Sub subscriptions
+gcloud pubsub subscriptions list
+
+# Check which project is active
+gcloud config get-value project
+
+# List all secrets in Secret Manager
+gcloud secrets list
+
+# View Cloud Build triggers
+gcloud builds triggers list --region=us-central1
+
+# View recent Cloud Build logs
+gcloud builds list --limit=5
 ```
 
 ---

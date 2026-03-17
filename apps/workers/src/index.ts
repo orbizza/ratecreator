@@ -19,6 +19,7 @@ import { instagramRefreshRoute } from "./routes/instagram-refresh";
 import { redditRefreshRoute } from "./routes/reddit-refresh";
 import { tiktokRefreshRoute } from "./routes/tiktok-refresh";
 import { refreshSchedulerRoute } from "./routes/refresh-scheduler";
+import { clerkWebhookRoute } from "./routes/clerk-webhook";
 
 // Pull subscriber for local dev
 import {
@@ -46,6 +47,7 @@ app.route("/jobs/instagram-refresh", instagramRefreshRoute);
 app.route("/jobs/reddit-refresh", redditRefreshRoute);
 app.route("/jobs/tiktok-refresh", tiktokRefreshRoute);
 app.route("/jobs/refresh-scheduler", refreshSchedulerRoute);
+app.route("/webhook/clerk", clerkWebhookRoute);
 
 const port = parseInt(process.env.PORT || "8080");
 
@@ -62,7 +64,7 @@ const server = serve({ fetch: app.fetch, port }, () => {
 ║  Port: ${String(port).padEnd(37)}║
 ║  Environment: ${(process.env.NODE_ENV || "development").padEnd(30)}║
 ║  Pull Subscriber: ${(enablePull ? "ENABLED" : "disabled").padEnd(25)}║
-║  Endpoints: 13 job routes + scheduler        ║
+║  Endpoints: 13 job routes + webhook + sched   ║
 ╚══════════════════════════════════════════════╝
   `);
 
