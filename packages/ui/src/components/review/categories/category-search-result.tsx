@@ -339,8 +339,8 @@ export const CategoriesSearchResults: React.FC = () => {
       </div>
       <div className="flex flex-row">
         <div className="hidden xl:flex flex-col gap-y-2 xl:w-1/4 gap-x-2 pr-4">
-          {!loading && <FilterSidebar />}
-          {!loading && (
+          <FilterSidebar />
+          {!loading ? (
             <>
               <SubCategoriesList
                 categories={currentCategory?.subcategories || []}
@@ -349,10 +349,8 @@ export const CategoriesSearchResults: React.FC = () => {
                 categories={parentCategory?.subcategories || []}
               />
             </>
-          )}
-          {loading && (
-            <div className="flex flex-col ">
-              <FilterSkeleton />
+          ) : (
+            <div className="flex flex-col">
               <CategoryLoadingCard text="Sub Categories" type="sub" />
               <CategoryLoadingCard text="Related Categories" type="related" />
             </div>
@@ -364,18 +362,7 @@ export const CategoriesSearchResults: React.FC = () => {
         </div>
         <div className="flex flex-col w-full xl:w-3/4 gap-4 mb-4">
           <div className="flex xl:hidden gap-y-2 flex-row items-center justify-between">
-            {loading && (
-              <Button
-                variant="default"
-                size="sm"
-                disabled
-                className="flex items-center gap-2"
-              >
-                <SlidersHorizontal size={16} />
-                <span className="hidden md:inline-block">Filters</span>
-              </Button>
-            )}
-            {!loading && <FilterSidebar />}
+            <FilterSidebar />
             <div className="flex flex-row items-center">
               {!loading && (
                 <SubCategoriesList
@@ -427,7 +414,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 </div>
               )}
             </div>
-            {/* <div className="flex justify-end items-center gap-x-2">
+            <div className="flex justify-end items-center gap-x-2">
               <Toggle
                 aria-label="Toggle Sort Order"
                 pressed={!isDescending}
@@ -464,7 +451,7 @@ export const CategoriesSearchResults: React.FC = () => {
                 </SelectContent>
               </Select>
               <Info size={14} />
-            </div> */}
+            </div>
           </div>
           {creatorLoading && <CreatorLoadingCard />}
           {!creatorLoading && (

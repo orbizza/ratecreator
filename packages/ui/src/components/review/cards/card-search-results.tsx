@@ -142,7 +142,7 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
     categories = [],
     platform,
     createdDate = "",
-    bannerURL = "",
+    bannerUrl = "",
     viewCount = 0,
     objectID,
   } = creator;
@@ -243,11 +243,11 @@ export const CardForSearchResult: React.FC<CreatorProps> = ({ creator }) => {
         {/* Bottom section with categories and platform info */}
         <div
           style={
-            bannerURL ? { backgroundImage: `url(${bannerURL})` } : undefined
+            bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined
           }
           className={cn(
             "rounded-b-lg p-4 relative overflow-hidden border-x border-b bg-cover bg-center h-3/4",
-            !bannerURL && defaultBg,
+            !bannerUrl && defaultBg,
           )}
         >
           {/* Hover overlay effect */}

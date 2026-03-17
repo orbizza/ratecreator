@@ -1,0 +1,72 @@
+# GCP Cloud Build - Rate Creator Workers
+#
+# Usage:
+#   gcloud builds submit --config=apps/workers/cloudbuild.yaml --project=sinuous-aviary-410323
+#
+
+substitutions:
+  _REGION: 'us-central1'
+  _SERVICE_NAME: 'ratecreator-workers'
+
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/ratecreator-workers:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/ratecreator-workers:latest'
+      - '-f'
+      - 'apps/workers/Dockerfile'
+      - '.'
+
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/ratecreator-workers']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/ratecreator-workers:$COMMIT_SHA'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--no-allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '2'
+      - '--min-instances'
+      - '1'
+      - '--max-instances'
+      - '5'
+      - '--no-cpu-throttling'
+      - '--timeout'
+      - '600'
+      - '--concurrency'
+      - '80'
+      - '--service-account'
+      - 'rc-services@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,GCP_LOCATION=us-central1,ELASTIC_ACCOUNTS_INDEX=accounts,ELASTIC_CATEGORIES_INDEX=categories,GCS_CONTENT_BUCKET=rc-content,GCS_PROFILES_BUCKET=rc-profiles,GCS_BANNERS_BUCKET=rc-banners,STORAGE_PROVIDER=do'
+      - '--set-secrets'
+      - 'DATABASE_URL_ONLINE=db-url:latest,REDIS_HOST=redis-host:latest,REDIS_PORT=redis-port:latest,REDIS_USERNAME=redis-username:latest,REDIS_PASSWORD=redis-password:latest,GCP_PROJECT_ID=gcp-project-id:latest,ELASTIC_URL=elastic-url:latest,ELASTIC_API_KEY=elastic-api-key:latest,YOUTUBE_API_KEY=youtube-api-key:latest,TWITTER_BEARER_TOKEN=twitter-bearer-token:latest,INSTAGRAM_ACCESS_TOKEN=instagram-access-token:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=instagram-business-account-id:latest'
+
+images:
+  - 'gcr.io/$PROJECT_ID/ratecreator-workers:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/ratecreator-workers:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+timeout: '1200s'

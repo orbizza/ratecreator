@@ -154,10 +154,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     resetPageNumber,
   ]);
 
-  if (!isMounted) {
-    return null;
-  }
-
   /**
    * FilterContent Component
    * Renders the filter options and clear filters button

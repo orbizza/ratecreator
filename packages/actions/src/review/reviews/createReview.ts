@@ -5,7 +5,7 @@ import { ReviewValidator } from "@ratecreator/types/review";
 import { Platform } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { revalidatePath } from "next/cache";
-import { getKafkaProducer } from "@ratecreator/db/kafka-client";
+import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 
 const prisma = getPrismaClient();
 
@@ -68,38 +68,27 @@ export async function createReview(formData: unknown) {
       },
     });
 
-    // Send message to Kafka (non-blocking with timeout)
-    // Fire-and-forget: don't block the response even if Kafka is slow/unreachable
-    const sendToKafka = async () => {
+    // Send message to Pub/Sub (non-blocking with timeout)
+    // Fire-and-forget: don't block the response even if Pub/Sub is slow/unreachable
+    const sendToPubSub = async () => {
       try {
-        const producer = await getKafkaProducer();
-        const topicName = "new-review-calculate";
-
         // Send the message with retries
         const maxRetries = 3;
         let retryCount = 0;
 
         while (retryCount < maxRetries) {
           try {
-            await producer.send({
-              topic: topicName,
-              messages: [
-                {
-                  key: review.id,
-                  value: JSON.stringify({
-                    accountId: validatedData.accountId,
-                    platform: validatedData.platform,
-                    rating: validatedData.stars,
-                  }),
-                },
-              ],
+            await publishMessageWithKey("new-review-calculate", review.id, {
+              accountId: validatedData.accountId,
+              platform: validatedData.platform,
+              rating: validatedData.stars,
             });
-            console.log("Successfully sent message to Kafka");
+            console.log("Successfully sent message to Pub/Sub");
             break;
           } catch (error) {
             retryCount++;
             console.error(
-              `Failed to send message to Kafka (attempt ${retryCount}/${maxRetries}):`,
+              `Failed to send message to Pub/Sub (attempt ${retryCount}/${maxRetries}):`,
               error,
             );
             if (retryCount === maxRetries) {
@@ -112,25 +101,25 @@ export async function createReview(formData: unknown) {
           }
         }
       } catch (error) {
-        console.error("Error sending message to Kafka:", error);
-        // Don't throw - Kafka failures shouldn't block review creation
+        console.error("Error sending message to Pub/Sub:", error);
+        // Don't throw - Pub/Sub failures shouldn't block review creation
       }
     };
 
-    // Wrap Kafka operation with timeout to prevent hanging
+    // Wrap Pub/Sub operation with timeout to prevent hanging
     // Use Promise.race to timeout after 5 seconds
     Promise.race([
-      sendToKafka(),
+      sendToPubSub(),
       new Promise<void>((resolve) =>
         setTimeout(() => {
           console.warn(
-            "Kafka operation timed out after 5 seconds, continuing without blocking",
+            "Pub/Sub operation timed out after 5 seconds, continuing without blocking",
           );
           resolve();
         }, 5000),
       ),
     ]).catch((error) => {
-      console.error("Kafka operation failed:", error);
+      console.error("Pub/Sub operation failed:", error);
       // Don't throw - continue execution
     });
 

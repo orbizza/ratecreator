@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 
 import "@ratecreator/ui/styles.css";
@@ -122,6 +122,7 @@ export default function RootLayout({
          -webkit-background-clip: text;
        }
      `}</style>
+            <GoogleOneTap />
             <Providers>
               {/* Sticky Banner: Remove this block to disable the site-wide banner.
                   If you remove it, also set the navbar offset back to top-0 in

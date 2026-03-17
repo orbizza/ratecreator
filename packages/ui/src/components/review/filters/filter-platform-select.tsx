@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useRecoilState } from "recoil";
 import { AppWindow, Info, Layout } from "lucide-react";
 import {
@@ -71,6 +71,8 @@ interface PlatformCheckboxProps {}
 export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
   const [selectedFilters, setSelectedFilters] =
     useRecoilState(platformFiltersState);
+  // Controlled accordion state so it doesn't close on Recoil state changes
+  const [openValue, setOpenValue] = useState<string | undefined>("platform");
 
   const handleCheckboxChange = useCallback(
     (checked: boolean, id: string) => {
@@ -92,7 +94,13 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
   );
 
   return (
-    <Accordion type="single" collapsible className="space-y-2">
+    <Accordion
+      type="single"
+      collapsible
+      className="space-y-2"
+      value={openValue}
+      onValueChange={setOpenValue}
+    >
       <AccordionItem value="platform" className="border-0">
         <AccordionTrigger className="hover:no-underline p-1">
           <div className="flex flex-row gap-x-2 items-center">
@@ -107,7 +115,13 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
               <div
                 key={id}
                 className="flex items-center space-x-2 p-2 hover:bg-neutral-200 dark:hover:bg-accent hover:rounded-md cursor-pointer transition-colors duration-200 group"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCheckboxChange(
+                    !(selectedFilters as string[]).includes(id),
+                    id,
+                  );
+                }}
               >
                 <Checkbox
                   id={id}
@@ -116,21 +130,9 @@ export const PlatformCheckbox: React.FC<PlatformCheckboxProps> = () => {
                     handleCheckboxChange(checked as boolean, id)
                   }
                   className="group-hover:border-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
+                  onClick={(e) => e.stopPropagation()}
                 />
-                <div
-                  className="flex items-center gap-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleCheckboxChange(
-                      !(selectedFilters as string[]).includes(id),
-                      id,
-                    );
-                  }}
-                >
+                <div className="flex items-center gap-2">
                   <Icon size={16} className={color} />
                   <Label
                     htmlFor={id}

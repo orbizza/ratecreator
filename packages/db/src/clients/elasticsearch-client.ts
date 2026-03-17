@@ -6,39 +6,39 @@
  */
 
 import { Client } from "@elastic/elasticsearch";
-import type {
-  SearchResponse,
-  AggregationsAggregate,
-} from "@elastic/elasticsearch/lib/api/types";
+import type { estypes } from "@elastic/elasticsearch";
 
 // Singleton client instance
 let elasticClient: Client | null = null;
 
 /**
- * Get or create Elasticsearch client
+ * Get or create Elasticsearch client.
+ *
+ * Supports two connection modes:
+ *   1. Serverless (ELASTIC_URL + ELASTIC_API_KEY) — direct endpoint URL
+ *   2. Hosted (ELASTIC_CLOUD_ID + ELASTIC_API_KEY) — Cloud ID based
  */
 export function getElasticsearchClient(): Client {
   if (!elasticClient) {
+    const url = process.env.ELASTIC_URL;
     const cloudId = process.env.ELASTIC_CLOUD_ID;
     const apiKey = process.env.ELASTIC_API_KEY;
-    const username = process.env.ELASTIC_USERNAME;
-    const password = process.env.ELASTIC_PASSWORD;
 
-    if (cloudId && apiKey) {
-      // API Key authentication (recommended)
+    if (url && apiKey) {
+      // Serverless: direct endpoint URL
+      elasticClient = new Client({
+        node: url,
+        auth: { apiKey },
+      });
+    } else if (cloudId && apiKey) {
+      // Hosted: Cloud ID based
       elasticClient = new Client({
         cloud: { id: cloudId },
         auth: { apiKey },
       });
-    } else if (cloudId && username && password) {
-      // Basic authentication
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { username, password },
-      });
     } else {
       throw new Error(
-        "Elasticsearch credentials not configured. Set ELASTIC_CLOUD_ID and ELASTIC_API_KEY",
+        "Elasticsearch credentials not configured. Set ELASTIC_URL + ELASTIC_API_KEY (serverless) or ELASTIC_CLOUD_ID + ELASTIC_API_KEY (hosted)",
       );
     }
   }
@@ -136,23 +136,139 @@ function buildQuery(params: SearchAccountsParams): any {
   const must: any[] = [];
   const filter: any[] = [];
 
-  // Full-text search query
+  // Full-text search query with multiple strategies for comprehensive matching
   if (params.query && params.query.trim()) {
+    const query = params.query.trim();
+    const queryNoSpaces = query.replace(/\s+/g, "");
+
+    const queryLower = query.toLowerCase();
+    const queryNoSpacesLower = queryNoSpaces.toLowerCase();
+
+    const shouldClauses: any[] = [
+      // Strategy 1: Exact match on handle/name — highest priority
+      // "tseries" → @tseries (289M) ranks above @tseriesbhaktisagar (74.7M)
+      {
+        term: {
+          "handle.keyword": {
+            value: queryLower,
+            boost: 200,
+          },
+        },
+      },
+      {
+        wildcard: {
+          "name.keyword": {
+            value: query,
+            boost: 200,
+            case_insensitive: true,
+          },
+        },
+      },
+      // Strategy 2: Exact token multi_match (no fuzziness) — primary search
+      {
+        multi_match: {
+          query,
+          fields: [
+            "name^5",
+            "name_en^5",
+            "handle^4",
+            "keywords^2",
+            "keywords_en^2",
+            "categories^2",
+            "description",
+            "description_en",
+            "platform",
+            "language_code",
+            "country",
+          ],
+          type: "best_fields",
+        },
+      },
+      // Strategy 2b: Fuzzy multi_match for typo tolerance on longer queries
+      // AUTO:5,8 = exact for 1-4 chars, fuzziness 1 for 5-7, fuzziness 2 for 8+
+      // Prevents "sony" from matching "song" (edit distance 1)
+      {
+        multi_match: {
+          query,
+          fields: ["name^3", "name_en^3", "handle^2"],
+          type: "best_fields",
+          fuzziness: "AUTO:5,8",
+          prefix_length: 1,
+          boost: 0.5,
+        },
+      },
+      // Strategy 3: Phrase prefix on name/handle (handles "mrb" → "MrBeast")
+      { match_phrase_prefix: { name: { query, boost: 10 } } },
+      { match_phrase_prefix: { name_en: { query, boost: 10 } } },
+      { match_phrase_prefix: { handle: { query, boost: 8 } } },
+      // Strategy 4: Wildcard on keyword fields for substring matching
+      // Handles "beast" → "MrBeast" (infix match, not just prefix)
+      {
+        wildcard: {
+          "name.keyword": {
+            value: `*${query}*`,
+            boost: 3,
+            case_insensitive: true,
+          },
+        },
+      },
+      {
+        wildcard: {
+          "handle.keyword": {
+            value: `*${query}*`,
+            boost: 3,
+            case_insensitive: true,
+          },
+        },
+      },
+    ];
+
+    // Strategy 5: If query has spaces, also try concatenated version
+    // "mr beast" → "mrbeast" matches "MrBeast" via edge_ngram
+    if (queryNoSpacesLower !== queryLower) {
+      shouldClauses.push(
+        // Exact match on concatenated query
+        {
+          term: {
+            "handle.keyword": {
+              value: queryNoSpacesLower,
+              boost: 200,
+            },
+          },
+        },
+        { match_phrase_prefix: { name: { query: queryNoSpaces, boost: 10 } } },
+        {
+          match_phrase_prefix: {
+            name_en: { query: queryNoSpaces, boost: 10 },
+          },
+        },
+        {
+          match_phrase_prefix: {
+            handle: { query: queryNoSpaces, boost: 8 },
+          },
+        },
+      );
+    }
+
     must.push({
-      multi_match: {
-        query: params.query,
-        fields: [
-          "name^3",
-          "name_en^3",
-          "handle^2",
-          "description",
-          "description_en",
-          "keywords",
-          "keywords_en",
-          "categories",
+      function_score: {
+        query: {
+          bool: {
+            should: shouldClauses,
+            minimum_should_match: 1,
+          },
+        },
+        functions: [
+          {
+            field_value_factor: {
+              field: "followerCount",
+              factor: 0.0001,
+              modifier: "sqrt",
+              missing: 1,
+            },
+          },
         ],
-        type: "best_fields",
-        fuzziness: "AUTO",
+        boost_mode: "multiply",
       },
     });
   }
@@ -264,25 +380,52 @@ function buildQuery(params: SearchAccountsParams): any {
 }
 
 /**
- * Build sort configuration
+ * Map frontend sort field names to actual Elasticsearch field names.
+ * The frontend sends semantic names like "followed" or "rated" from URL params,
+ * but ES needs the actual document field names.
+ */
+const SORT_FIELD_MAP: Record<string, string> = {
+  followed: "followerCount",
+  followerCount: "followerCount",
+  "new-account": "createdDate",
+  createdDate: "createdDate",
+  rated: "rating",
+  rating: "rating",
+  "review-count": "reviewCount",
+  reviewCount: "reviewCount",
+  videos: "videoCount",
+  videoCount: "videoCount",
+};
+
+/**
+ * Build sort configuration.
+ * User's explicit sort choice is always primary.
+ * Relevance (_score) is used as tiebreaker when there's a search query.
+ * The function_score in buildQuery already incorporates follower count
+ * into relevance, so results are well-ordered even without _score as primary.
  */
 function buildSort(params: SearchAccountsParams): any[] {
-  const sortField = params.sortBy || "followerCount";
+  const rawField = params.sortBy || "followerCount";
+  const sortField = SORT_FIELD_MAP[rawField] || rawField;
   const sortOrder = params.sortOrder || "desc";
 
-  // If there's a search query, include relevance score
+  const sort: any[] = [
+    { [sortField]: { order: sortOrder, unmapped_type: "long" } },
+  ];
+
+  // Add relevance as tiebreaker when there's a search query
   if (params.query && params.query.trim()) {
-    return [{ _score: "desc" }, { [sortField]: sortOrder }];
+    sort.push({ _score: "desc" });
   }
 
-  return [{ [sortField]: sortOrder }];
+  return sort;
 }
 
 /**
  * Transform Elasticsearch aggregations to Algolia-style facets
  */
 function transformAggregations(
-  aggregations: Record<string, AggregationsAggregate> | undefined,
+  aggregations: Record<string, estypes.AggregationsAggregate> | undefined,
 ): SearchAccountsResult["facets"] {
   if (!aggregations) return {};
 
@@ -326,7 +469,7 @@ export async function searchAccounts(
   const from = (page - 1) * limit;
 
   try {
-    const response: SearchResponse = await client.search({
+    const response: estypes.SearchResponse = await client.search({
       index: ACCOUNTS_INDEX,
       body: {
         query: buildQuery(params),
@@ -351,7 +494,7 @@ export async function searchAccounts(
 
     const hits = response.hits.hits.map((hit) => ({
       objectID: hit._id,
-      ...hit._source,
+      ...(hit._source as Record<string, unknown>),
     }));
 
     return {
@@ -457,7 +600,13 @@ export async function searchCategories(query: string): Promise<any[]> {
       query: {
         multi_match: {
           query,
-          fields: ["name^3", "slug^2", "shortDescription", "keywords"],
+          fields: [
+            "name^5",
+            "keywords^2",
+            "shortDescription",
+            "longDescription",
+            "parentCategory",
+          ],
           type: "best_fields",
           fuzziness: "AUTO",
         },
@@ -468,7 +617,7 @@ export async function searchCategories(query: string): Promise<any[]> {
 
   return response.hits.hits.map((hit) => ({
     objectID: hit._id,
-    ...hit._source,
+    ...(hit._source as Record<string, unknown>),
   }));
 }
 
@@ -485,8 +634,6 @@ export async function createIndices(): Promise<void> {
       index: ACCOUNTS_INDEX,
       body: {
         settings: {
-          number_of_shards: 2,
-          number_of_replicas: 1,
           analysis: {
             analyzer: {
               autocomplete: {
@@ -566,10 +713,7 @@ export async function createIndices(): Promise<void> {
     await client.indices.create({
       index: CATEGORIES_INDEX,
       body: {
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 1,
-        },
+        settings: {},
         mappings: {
           properties: {
             objectID: { type: "keyword" },

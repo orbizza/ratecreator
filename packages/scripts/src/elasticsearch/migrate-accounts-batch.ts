@@ -1,64 +1,65 @@
 /**
  * Migrate Accounts from MongoDB to Elasticsearch
  *
- * This script migrates all account data from MongoDB to Elasticsearch (Elastic Cloud on GCP).
- * It uses checkpoint-based resumption for reliability with large datasets.
+ * Uses raw MongoDB cursor (not Prisma) for fast batch processing of 2.4M+ accounts.
+ * Checkpoint-based resumption — safe to re-run if interrupted.
  *
  * Usage:
  *   yarn migrate-accounts-elastic
- *
- * Environment Variables Required:
- *   - DATABASE_URL_ONLINE: MongoDB connection string
- *   - ELASTIC_CLOUD_ID: Elastic Cloud deployment ID
- *   - ELASTIC_API_KEY: Elastic Cloud API key
- *   - ELASTIC_ACCOUNTS_INDEX: Index name (default: 'accounts')
+ *   yarn migrate-accounts-elastic -- --platform youtube
  */
 
-import { getPrismaClient } from "@ratecreator/db/client";
-import { getMongoClient } from "@ratecreator/db/mongo-client";
-import { Client } from "@elastic/elasticsearch";
-import { ObjectId, Db } from "mongodb";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import { Client } from "@elastic/elasticsearch";
+import { MongoClient, ObjectId } from "mongodb";
 
-// Load the main .env file
+// Load env BEFORE any db client usage
 dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
-// Configuration
-const BATCH_SIZE = 5000; // Accounts per database query
-const ELASTIC_BATCH_SIZE = 500; // Documents per Elasticsearch bulk request
+// Direct MongoDB connection (bypasses the eager-init mongo-client wrapper)
+let mongoClient: MongoClient | null = null;
+
+async function getMongoClient(): Promise<MongoClient> {
+  if (!mongoClient) {
+    const uri = process.env.DATABASE_URL_ONLINE;
+    if (!uri) throw new Error("DATABASE_URL_ONLINE not set in .env");
+    mongoClient = new MongoClient(uri);
+    await mongoClient.connect();
+  }
+  return mongoClient;
+}
+
+const BATCH_SIZE = 5000;
+const ELASTIC_BATCH_SIZE = 500;
 const CHECKPOINT_FILE = "elastic_accounts_checkpoint.json";
 const ELASTIC_INDEX = process.env.ELASTIC_ACCOUNTS_INDEX || "accounts";
 
-// Elasticsearch client singleton
+// ── ES Client ───────────────────────────────────────────────
+
 let elasticClient: Client | null = null;
 
 function getElasticsearchClient(): Client {
   if (!elasticClient) {
+    const url = process.env.ELASTIC_URL;
     const cloudId = process.env.ELASTIC_CLOUD_ID;
     const apiKey = process.env.ELASTIC_API_KEY;
-    const username = process.env.ELASTIC_USERNAME;
-    const password = process.env.ELASTIC_PASSWORD;
 
-    if (cloudId && apiKey) {
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { apiKey },
-      });
-    } else if (cloudId && username && password) {
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { username, password },
-      });
+    if (url && apiKey) {
+      elasticClient = new Client({ node: url, auth: { apiKey } });
+    } else if (cloudId && apiKey) {
+      elasticClient = new Client({ cloud: { id: cloudId }, auth: { apiKey } });
     } else {
       throw new Error(
-        "Elasticsearch credentials not configured. Set ELASTIC_CLOUD_ID and ELASTIC_API_KEY",
+        "Set ELASTIC_URL + ELASTIC_API_KEY or ELASTIC_CLOUD_ID + ELASTIC_API_KEY",
       );
     }
   }
   return elasticClient;
 }
+
+// ── Checkpoint ──────────────────────────────────────────────
 
 interface Checkpoint {
   lastProcessedId: string | null;
@@ -70,50 +71,17 @@ interface Checkpoint {
   platform: string | null;
 }
 
-interface CategoryMapping {
-  _id: ObjectId;
-  categoryId: ObjectId;
-}
-
-interface Category {
-  _id: ObjectId;
-  slug: string;
-  name: string;
-}
-
-interface PlatformData {
-  snippet?: {
-    publishedAt?: string;
-  };
-  status?: {
-    madeForKids?: boolean;
-  };
-  statistics?: {
-    videoCount?: number;
-    viewCount?: string;
-  };
-  brandingSettings?: {
-    image?: {
-      bannerExternalUrl?: string;
-    };
-  };
-}
-
-// Cache for category data
-const categoryCache = new Map<string, { slug: string; name: string }>();
-
-const loadCheckpoint = (platform?: string): Checkpoint => {
-  const checkpointFile = platform
+function loadCheckpoint(platform?: string): Checkpoint {
+  const file = platform
     ? `elastic_${platform.toLowerCase()}_accounts_checkpoint.json`
     : CHECKPOINT_FILE;
 
   try {
-    if (fs.existsSync(checkpointFile)) {
-      return JSON.parse(fs.readFileSync(checkpointFile, "utf8"));
+    if (fs.existsSync(file)) {
+      return JSON.parse(fs.readFileSync(file, "utf8"));
     }
-  } catch (error) {
-    console.error("Error loading checkpoint:", error);
-  }
+  } catch {}
+
   return {
     lastProcessedId: null,
     totalProcessed: 0,
@@ -123,438 +91,355 @@ const loadCheckpoint = (platform?: string): Checkpoint => {
     lastUpdatedAt: new Date().toISOString(),
     platform: platform || null,
   };
-};
+}
 
-const saveCheckpoint = (checkpoint: Checkpoint) => {
-  const checkpointFile = checkpoint.platform
+function saveCheckpoint(checkpoint: Checkpoint) {
+  const file = checkpoint.platform
     ? `elastic_${checkpoint.platform.toLowerCase()}_accounts_checkpoint.json`
     : CHECKPOINT_FILE;
 
-  try {
-    checkpoint.lastUpdatedAt = new Date().toISOString();
-    fs.writeFileSync(checkpointFile, JSON.stringify(checkpoint, null, 2));
-  } catch (error) {
-    console.error("Error saving checkpoint:", error);
+  checkpoint.lastUpdatedAt = new Date().toISOString();
+  fs.writeFileSync(file, JSON.stringify(checkpoint, null, 2));
+}
+
+// ── Category Cache ──────────────────────────────────────────
+
+const categoryIdToSlug = new Map<string, string>();
+const accountToCategories = new Map<string, string[]>();
+
+async function preloadCaches(db: any) {
+  // 1. Load all category slugs
+  console.log("Preloading category slugs...");
+  const categories = await db
+    .collection("Category")
+    .find({})
+    .project({ _id: 1, slug: 1 })
+    .toArray();
+
+  for (const cat of categories) {
+    categoryIdToSlug.set(cat._id.toString(), cat.slug);
   }
-};
+  console.log(`  ${categoryIdToSlug.size} categories cached`);
 
-const getCategoryData = async (
-  categoryMappingIds: string[],
-  db: Db,
-): Promise<{ slugs: string[]; names: string[] }> => {
-  if (categoryMappingIds.length === 0) {
-    return { slugs: [], names: [] };
-  }
+  // 2. Load ALL category mappings into memory (accountId → slugs)
+  console.log("Preloading category mappings...");
+  const cursor = db
+    .collection("CategoryMapping")
+    .find({})
+    .project({ accountId: 1, categoryId: 1 })
+    .batchSize(50000);
 
-  const uncachedIds = categoryMappingIds.filter((id) => !categoryCache.has(id));
-
-  if (uncachedIds.length > 0) {
-    try {
-      // Fetch category mappings
-      const categoryMappings = await db
-        .collection<CategoryMapping>("CategoryMapping")
-        .find({ _id: { $in: uncachedIds.map((id) => new ObjectId(id)) } })
-        .toArray();
-
-      const categoryIds = categoryMappings.map((mapping) => mapping.categoryId);
-
-      // Fetch categories
-      const categories = await db
-        .collection<Category>("Category")
-        .find({ _id: { $in: categoryIds } })
-        .project({ slug: 1, name: 1, _id: 1 })
-        .toArray();
-
-      // Update cache
-      categoryMappings.forEach((mapping) => {
-        const category = categories.find(
-          (c) => c._id.toString() === mapping.categoryId.toString(),
-        );
-        const mappingId = mapping._id.toString();
-        if (category) {
-          categoryCache.set(mappingId, {
-            slug: category.slug,
-            name: category.name,
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching category data:", error);
+  let mappingCount = 0;
+  for await (const mapping of cursor) {
+    if (!mapping.accountId || !mapping.categoryId) {
+      mappingCount++;
+      continue;
+    }
+    const accId = mapping.accountId.toString();
+    const slug = categoryIdToSlug.get(mapping.categoryId.toString());
+    if (slug) {
+      const existing = accountToCategories.get(accId);
+      if (existing) {
+        existing.push(slug);
+      } else {
+        accountToCategories.set(accId, [slug]);
+      }
+    }
+    mappingCount++;
+    if (mappingCount % 500000 === 0) {
+      console.log(`  ...${mappingCount} mappings loaded`);
     }
   }
+  console.log(
+    `  ${mappingCount} mappings cached for ${accountToCategories.size} accounts`,
+  );
+}
 
-  const slugs: string[] = [];
-  const names: string[] = [];
+function getCategorySlugs(accountId: string): string[] {
+  return accountToCategories.get(accountId) || [];
+}
 
-  categoryMappingIds.forEach((id) => {
-    const cached = categoryCache.get(id);
-    if (cached) {
-      slugs.push(cached.slug);
-      names.push(cached.name);
-    }
-  });
+// ── Build Document ──────────────────────────────────────────
 
-  return { slugs, names };
-};
-
-const buildElasticDocument = (
-  account: any,
-  categorySlugs: string[],
-  categoryNames: string[],
-) => {
-  const platformData = (account.ytData ||
+function buildDocument(account: any, categorySlugs: string[]) {
+  const pd =
+    account.ytData ||
     account.xData ||
     account.tiktokData ||
     account.redditData ||
-    account.instagramData) as PlatformData | null;
+    account.instagramData;
 
   return {
     objectID: account.accountId,
     platform: account.platform,
-    accountId: account.accountId,
     handle: account.handle || "",
-    name: account.name || "",
-    name_en: account.name_en || "",
-    description: account.description || "",
-    description_en: account.description_en || "",
-    keywords: account.keywords || "",
-    keywords_en: account.keywords_en || "",
-    imageUrl: account.imageUrl || "",
-    bannerUrl:
-      account.bannerUrl ||
-      platformData?.brandingSettings?.image?.bannerExternalUrl ||
-      "",
+    name: account.name_en || account.name || "",
+    description: account.description_en || account.description || "",
+    keywords: account.keywords_en || account.keywords || "",
     followerCount: account.followerCount || 0,
+    imageUrl: account.imageUrl || "",
     country: account.country || "",
     language_code: account.language_code || "",
     rating: account.rating || 0,
     reviewCount: account.reviewCount || 0,
-    madeForKids: platformData?.status?.madeForKids ?? false,
-    claimed: account.claimed ?? false,
-    videoCount: Number(platformData?.statistics?.videoCount ?? 0),
-    viewCount: Number(platformData?.statistics?.viewCount ?? 0),
+    madeForKids: pd?.status?.madeForKids ?? false,
+    videoCount: Number(pd?.statistics?.videoCount ?? 0),
+    bannerUrl:
+      account.bannerUrl ?? pd?.brandingSettings?.image?.bannerExternalUrl ?? "",
     categories: categorySlugs,
-    categoryNames: categoryNames,
-    createdDate:
-      platformData?.snippet?.publishedAt ||
-      account.createdAt?.toISOString() ||
-      null,
-    isSeeded: account.isSeeded || false,
-    lastIndexedAt: new Date().toISOString(),
+    createdDate: pd?.snippet?.publishedAt ?? null,
   };
-};
+}
 
-const createIndexIfNotExists = async (client: Client) => {
-  try {
-    const indexExists = await client.indices.exists({ index: ELASTIC_INDEX });
+// ── Bulk Index ──────────────────────────────────────────────
 
-    if (!indexExists) {
-      console.log(`Creating index: ${ELASTIC_INDEX}`);
-      await client.indices.create({
-        index: ELASTIC_INDEX,
-        body: {
-          settings: {
-            number_of_shards: 2,
-            number_of_replicas: 1,
-            "index.mapping.total_fields.limit": 2000,
-            analysis: {
-              analyzer: {
-                autocomplete: {
-                  type: "custom",
-                  tokenizer: "standard",
-                  filter: ["lowercase", "autocomplete_filter"],
-                },
-                autocomplete_search: {
-                  type: "custom",
-                  tokenizer: "standard",
-                  filter: ["lowercase"],
-                },
-              },
-              filter: {
-                autocomplete_filter: {
-                  type: "edge_ngram",
-                  min_gram: 1,
-                  max_gram: 20,
-                },
-              },
-            },
-          },
-          mappings: {
-            properties: {
-              objectID: { type: "keyword" },
-              platform: { type: "keyword" },
-              accountId: { type: "keyword" },
-              handle: {
-                type: "text",
-                analyzer: "autocomplete",
-                search_analyzer: "autocomplete_search",
-                fields: { keyword: { type: "keyword" } },
-              },
-              name: {
-                type: "text",
-                analyzer: "autocomplete",
-                search_analyzer: "autocomplete_search",
-                fields: { keyword: { type: "keyword" } },
-              },
-              name_en: {
-                type: "text",
-                analyzer: "autocomplete",
-                search_analyzer: "autocomplete_search",
-              },
-              description: { type: "text" },
-              description_en: { type: "text" },
-              keywords: { type: "text" },
-              keywords_en: { type: "text" },
-              imageUrl: { type: "keyword", index: false },
-              bannerUrl: { type: "keyword", index: false },
-              followerCount: { type: "long" },
-              country: { type: "keyword" },
-              language_code: { type: "keyword" },
-              rating: { type: "float" },
-              reviewCount: { type: "integer" },
-              madeForKids: { type: "boolean" },
-              claimed: { type: "boolean" },
-              videoCount: { type: "integer" },
-              viewCount: { type: "long" },
-              categories: { type: "keyword" },
-              categoryNames: { type: "text" },
-              createdDate: { type: "date" },
-              isSeeded: { type: "boolean" },
-              lastIndexedAt: { type: "date" },
-            },
-          },
-        },
-      });
-      console.log(`Index ${ELASTIC_INDEX} created successfully`);
-    } else {
-      console.log(`Index ${ELASTIC_INDEX} already exists`);
-    }
-  } catch (error) {
-    console.error("Error creating index:", error);
-    throw error;
-  }
-};
-
-const bulkIndexToElasticsearch = async (
+async function bulkIndex(
   client: Client,
-  documents: any[],
-): Promise<{ success: number; failed: number; errors: string[] }> => {
-  if (documents.length === 0) {
-    return { success: 0, failed: 0, errors: [] };
-  }
+  docs: any[],
+): Promise<{ success: number; failed: number }> {
+  if (docs.length === 0) return { success: 0, failed: 0 };
 
-  const operations = documents.flatMap((doc) => [
+  const ops = docs.flatMap((doc) => [
     { index: { _index: ELASTIC_INDEX, _id: doc.objectID } },
     doc,
   ]);
 
-  try {
-    const response = await client.bulk({ body: operations, refresh: false });
+  const res = await client.bulk({ body: ops, refresh: false });
 
-    let success = 0;
-    let failed = 0;
-    const errors: string[] = [];
-
-    if (response.errors) {
-      response.items.forEach((item, idx) => {
-        if (item.index?.error) {
-          failed++;
-          errors.push(
-            `${documents[idx].accountId}: ${item.index.error.reason}`,
-          );
-        } else {
-          success++;
-        }
-      });
-    } else {
-      success = documents.length;
-    }
-
-    return { success, failed, errors };
-  } catch (error: any) {
-    console.error("Bulk indexing error:", error.message);
-    return { success: 0, failed: documents.length, errors: [error.message] };
+  if (res.errors) {
+    let success = 0,
+      failed = 0;
+    res.items.forEach((item) => {
+      if (item.index?.error) failed++;
+      else success++;
+    });
+    return { success, failed };
   }
-};
 
-const migrateAccounts = async (platform?: string) => {
+  return { success: docs.length, failed: 0 };
+}
+
+// ── Create Index ────────────────────────────────────────────
+
+async function createIndexIfNotExists(client: Client) {
+  const exists = await client.indices.exists({ index: ELASTIC_INDEX });
+  if (exists) {
+    console.log(`Index ${ELASTIC_INDEX} already exists`);
+    return;
+  }
+
+  console.log(`Creating index: ${ELASTIC_INDEX}`);
+  await client.indices.create({
+    index: ELASTIC_INDEX,
+    body: {
+      settings: {
+        analysis: {
+          analyzer: {
+            autocomplete: {
+              type: "custom",
+              tokenizer: "standard",
+              filter: ["lowercase", "autocomplete_filter"],
+            },
+            autocomplete_search: {
+              type: "custom",
+              tokenizer: "standard",
+              filter: ["lowercase"],
+            },
+          },
+          filter: {
+            autocomplete_filter: {
+              type: "edge_ngram",
+              min_gram: 1,
+              max_gram: 20,
+            },
+          },
+        },
+      },
+      mappings: {
+        properties: {
+          objectID: { type: "keyword" },
+          platform: { type: "keyword" },
+          handle: {
+            type: "text",
+            analyzer: "autocomplete",
+            search_analyzer: "autocomplete_search",
+            fields: { keyword: { type: "keyword" } },
+          },
+          name: {
+            type: "text",
+            analyzer: "autocomplete",
+            search_analyzer: "autocomplete_search",
+            fields: { keyword: { type: "keyword" } },
+          },
+          description: { type: "text" },
+          keywords: { type: "text" },
+          imageUrl: { type: "keyword", index: false },
+          bannerUrl: { type: "keyword", index: false },
+          followerCount: { type: "long" },
+          country: { type: "keyword" },
+          language_code: { type: "keyword" },
+          rating: { type: "float" },
+          reviewCount: { type: "integer" },
+          madeForKids: { type: "boolean" },
+          videoCount: { type: "integer" },
+          categories: { type: "keyword" },
+          createdDate: { type: "date" },
+        },
+      },
+    },
+  });
+  console.log(`Index ${ELASTIC_INDEX} created`);
+}
+
+// ── Main ────────────────────────────────────────────────────
+
+async function migrateAccounts(platform?: string) {
   console.log("=".repeat(60));
-  console.log("Elasticsearch Account Migration");
+  console.log("Elasticsearch Account Migration (raw MongoDB)");
   console.log("=".repeat(60));
   console.log(`Platform: ${platform || "ALL"}`);
-  console.log(`Batch Size: ${BATCH_SIZE}`);
-  console.log(`Elastic Batch Size: ${ELASTIC_BATCH_SIZE}`);
   console.log(`Index: ${ELASTIC_INDEX}`);
   console.log("=".repeat(60));
 
-  const prisma = getPrismaClient();
   const mongoClient = await getMongoClient();
   const db = mongoClient.db("ratecreator");
-  const elasticClient = getElasticsearchClient();
+  const esClient = getElasticsearchClient();
 
-  // Create index if not exists
-  await createIndexIfNotExists(elasticClient);
+  await createIndexIfNotExists(esClient);
+  // Skip category preload for speed — categories will be empty initially
+  // Run backfill later: yarn migrate-accounts-elastic -- --backfill-categories
+  const skipCategories = !args.includes("--backfill-categories");
+  if (!skipCategories) {
+    await preloadCaches(db);
+  } else {
+    console.log(
+      "Skipping category preload (run with --backfill-categories later)",
+    );
+  }
 
   const checkpoint = loadCheckpoint(platform);
-  console.log(`\nResuming from checkpoint:`);
-  console.log(`  - Total Processed: ${checkpoint.totalProcessed}`);
-  console.log(`  - Total Indexed: ${checkpoint.totalIndexed}`);
-  console.log(`  - Errors: ${checkpoint.errors.length}`);
-  console.log(`  - Last ID: ${checkpoint.lastProcessedId || "START"}`);
-  console.log("");
+  console.log(
+    `\nCheckpoint: ${checkpoint.totalProcessed} processed, ${checkpoint.totalIndexed} indexed`,
+  );
 
-  try {
-    let processedCount = 0;
-    let indexedCount = 0;
-    const startTime = Date.now();
+  // Build MongoDB query
+  const query: any = { isSuspended: false };
+  if (platform) query.platform = platform.toUpperCase();
+  if (checkpoint.lastProcessedId) {
+    query._id = { $gt: new ObjectId(checkpoint.lastProcessedId) };
+  }
 
-    while (true) {
-      // Build query
-      const whereClause: any = {
-        isSuspended: false,
-        isDeleted: false,
-      };
+  // Count total
+  const totalCount = await db.collection("Account").countDocuments(query);
+  console.log(`Accounts to process: ${totalCount}\n`);
 
-      if (platform) {
-        whereClause.platform = platform.toUpperCase();
-      }
-
-      if (checkpoint.lastProcessedId) {
-        whereClause.id = { gt: checkpoint.lastProcessedId };
-      }
-
-      // Fetch batch from database
-      const accounts = await prisma.account.findMany({
-        where: whereClause,
-        orderBy: { id: "asc" },
-        take: BATCH_SIZE,
-        include: { categories: true },
-      });
-
-      if (accounts.length === 0) {
-        console.log("\nNo more accounts to process.");
-        break;
-      }
-
-      console.log(`\nProcessing batch of ${accounts.length} accounts...`);
-
-      // Build documents for Elasticsearch
-      const elasticDocuments: any[] = [];
-
-      for (const account of accounts) {
-        try {
-          const categoryMappingIds = account.categories.map((c) => c.id);
-          const { slugs, names } = await getCategoryData(
-            categoryMappingIds,
-            db,
-          );
-
-          const doc = buildElasticDocument(account, slugs, names);
-          elasticDocuments.push(doc);
-
-          checkpoint.lastProcessedId = account.id;
-          checkpoint.totalProcessed++;
-
-          // Bulk index when batch is full
-          if (elasticDocuments.length >= ELASTIC_BATCH_SIZE) {
-            const result = await bulkIndexToElasticsearch(
-              elasticClient,
-              elasticDocuments,
-            );
-            indexedCount += result.success;
-            checkpoint.totalIndexed += result.success;
-
-            if (result.errors.length > 0) {
-              result.errors.forEach((err) => {
-                checkpoint.errors.push({ id: "bulk", error: err });
-              });
-            }
-
-            elasticDocuments.length = 0; // Clear array
-          }
-        } catch (error: any) {
-          console.error(
-            `Error processing account ${account.accountId}:`,
-            error.message,
-          );
-          checkpoint.errors.push({
-            id: account.id,
-            error: error.message,
-          });
-        }
-      }
-
-      // Index remaining documents
-      if (elasticDocuments.length > 0) {
-        const result = await bulkIndexToElasticsearch(
-          elasticClient,
-          elasticDocuments,
-        );
-        indexedCount += result.success;
-        checkpoint.totalIndexed += result.success;
-      }
-
-      processedCount += accounts.length;
-
-      // Calculate and display progress
-      const elapsedMinutes = (Date.now() - startTime) / 60000;
-      const rate = processedCount / elapsedMinutes;
-
-      console.log(
-        `  Processed: ${processedCount} | Indexed: ${indexedCount} | Rate: ${rate.toFixed(0)} acc/min | Errors: ${checkpoint.errors.length}`,
-      );
-
-      // Save checkpoint
-      saveCheckpoint(checkpoint);
-
-      // Update lastIndexedAt in MongoDB
-      await db.collection("Account").updateMany(
-        {
-          _id: {
-            $in: accounts.map((a) => new ObjectId(a.id)),
-          },
-        },
-        { $set: { lastIndexedAt: new Date() } },
-      );
-    }
-
-    // Final refresh to make documents searchable
-    console.log("\nRefreshing index...");
-    await elasticClient.indices.refresh({ index: ELASTIC_INDEX });
-
-    // Final summary
-    const totalTime = (Date.now() - startTime) / 1000;
-    console.log("\n" + "=".repeat(60));
-    console.log("MIGRATION COMPLETE");
-    console.log("=".repeat(60));
-    console.log(`Total Processed: ${checkpoint.totalProcessed}`);
-    console.log(`Total Indexed: ${checkpoint.totalIndexed}`);
-    console.log(`Total Errors: ${checkpoint.errors.length}`);
-    console.log(`Total Time: ${(totalTime / 60).toFixed(2)} minutes`);
-    console.log(
-      `Average Rate: ${(checkpoint.totalProcessed / (totalTime / 60)).toFixed(0)} accounts/minute`,
-    );
-
-    if (checkpoint.errors.length > 0) {
-      console.log(`\nErrors saved to checkpoint file`);
-    }
-  } catch (error) {
-    console.error("\nFatal error:", error);
-  } finally {
-    await prisma.$disconnect();
+  if (totalCount === 0) {
+    console.log("No accounts to process.");
     process.exit(0);
   }
-};
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-let platform: string | undefined;
+  const startTime = Date.now();
+  let processedCount = 0;
+  let indexedCount = 0;
+  let elasticDocs: any[] = [];
 
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === "--platform" && args[i + 1]) {
-    platform = args[i + 1];
+  // Use MongoDB cursor for memory-efficient batch processing
+  const cursor = db
+    .collection("Account")
+    .find(query)
+    .sort({ _id: 1 })
+    .batchSize(BATCH_SIZE)
+    .project({
+      _id: 1,
+      accountId: 1,
+      platform: 1,
+      handle: 1,
+      name: 1,
+      name_en: 1,
+      description: 1,
+      description_en: 1,
+      keywords: 1,
+      keywords_en: 1,
+      followerCount: 1,
+      imageUrl: 1,
+      bannerUrl: 1,
+      country: 1,
+      language_code: 1,
+      rating: 1,
+      reviewCount: 1,
+      ytData: 1,
+      xData: 1,
+      tiktokData: 1,
+      redditData: 1,
+      instagramData: 1,
+    });
+
+  for await (const account of cursor) {
+    const accountId = account._id.toString();
+    const slugs = getCategorySlugs(accountId);
+    const doc = buildDocument(account, slugs);
+    elasticDocs.push(doc);
+
+    checkpoint.lastProcessedId = accountId;
+    checkpoint.totalProcessed++;
+    processedCount++;
+
+    // Bulk index when batch full
+    if (elasticDocs.length >= ELASTIC_BATCH_SIZE) {
+      const result = await bulkIndex(esClient, elasticDocs);
+      indexedCount += result.success;
+      checkpoint.totalIndexed += result.success;
+      elasticDocs = [];
+
+      // Progress every 5000
+      if (processedCount % BATCH_SIZE === 0) {
+        const elapsedMin = (Date.now() - startTime) / 60000;
+        const rate = processedCount / elapsedMin;
+        const remaining = (totalCount - processedCount) / rate;
+        console.log(
+          `  Processed: ${processedCount}/${totalCount} | Indexed: ${indexedCount} | ${rate.toFixed(0)} acc/min | ETA: ${remaining.toFixed(1)} min`,
+        );
+        saveCheckpoint(checkpoint);
+      }
+    }
   }
+
+  // Flush remaining
+  if (elasticDocs.length > 0) {
+    const result = await bulkIndex(esClient, elasticDocs);
+    indexedCount += result.success;
+    checkpoint.totalIndexed += result.success;
+  }
+
+  saveCheckpoint(checkpoint);
+
+  // Refresh index
+  console.log("\nRefreshing index...");
+  await esClient.indices.refresh({ index: ELASTIC_INDEX });
+
+  const totalTime = (Date.now() - startTime) / 1000;
+  console.log("\n" + "=".repeat(60));
+  console.log("MIGRATION COMPLETE");
+  console.log("=".repeat(60));
+  console.log(`Total Processed: ${checkpoint.totalProcessed}`);
+  console.log(`Total Indexed: ${checkpoint.totalIndexed}`);
+  console.log(`Total Errors: ${checkpoint.errors.length}`);
+  console.log(`Total Time: ${(totalTime / 60).toFixed(2)} minutes`);
+  console.log(
+    `Average Rate: ${(processedCount / (totalTime / 60)).toFixed(0)} accounts/minute`,
+  );
+
+  process.exit(0);
 }
 
-// Run migration
-migrateAccounts(platform);
+// Parse args
+const args = process.argv.slice(2);
+let platform: string | undefined;
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === "--platform" && args[i + 1]) platform = args[i + 1];
+}
+
+migrateAccounts(platform).catch((err) => {
+  console.error("Fatal:", err);
+  process.exit(1);
+});

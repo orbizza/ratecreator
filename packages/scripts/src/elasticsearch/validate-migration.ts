@@ -17,7 +17,6 @@
 
 import { getPrismaClient } from "@ratecreator/db/client";
 import { Client } from "@elastic/elasticsearch";
-import { algoliasearch } from "algoliasearch";
 import dotenv from "dotenv";
 import path from "path";
 
@@ -32,17 +31,25 @@ let elasticClient: Client | null = null;
 
 function getElasticsearchClient(): Client {
   if (!elasticClient) {
+    const url = process.env.ELASTIC_URL;
     const cloudId = process.env.ELASTIC_CLOUD_ID;
     const apiKey = process.env.ELASTIC_API_KEY;
 
-    if (!cloudId || !apiKey) {
-      throw new Error("Elasticsearch credentials not configured");
+    if (url && apiKey) {
+      elasticClient = new Client({
+        node: url,
+        auth: { apiKey },
+      });
+    } else if (cloudId && apiKey) {
+      elasticClient = new Client({
+        cloud: { id: cloudId },
+        auth: { apiKey },
+      });
+    } else {
+      throw new Error(
+        "Elasticsearch credentials not configured. Set ELASTIC_URL + ELASTIC_API_KEY or ELASTIC_CLOUD_ID + ELASTIC_API_KEY",
+      );
     }
-
-    elasticClient = new Client({
-      cloud: { id: cloudId },
-      auth: { apiKey },
-    });
   }
   return elasticClient;
 }
@@ -121,7 +128,7 @@ const validateMigration = async () => {
         index: ACCOUNTS_INDEX,
       });
       const dbAccountsCount = await prisma.account.count({
-        where: { isSuspended: false, isDeleted: false },
+        where: { isSuspended: false },
       });
 
       const percentIndexed = (
@@ -342,70 +349,6 @@ const validateMigration = async () => {
       });
     }
     console.log("");
-
-    // 6. Optional: Compare with Algolia
-    const algoliaAppId = process.env.ALGOLIA_APP_ID;
-    const algoliaApiKey = process.env.ALGOLIA_WRITE_API_KEY;
-
-    if (algoliaAppId && algoliaApiKey) {
-      console.log("6. Algolia Comparison (Optional)");
-      console.log("-".repeat(40));
-
-      try {
-        const algoliaClient = algoliasearch(algoliaAppId, algoliaApiKey);
-
-        // Compare search results for same query
-        const testQuery = "gaming";
-
-        const algoliaResult = await algoliaClient.search({
-          requests: [
-            {
-              indexName: "accounts",
-              query: testQuery,
-              hitsPerPage: 10,
-            },
-          ],
-        });
-
-        const elasticResult = await elasticClient.search({
-          index: ACCOUNTS_INDEX,
-          body: {
-            query: {
-              multi_match: {
-                query: testQuery,
-                fields: ["name^3", "handle^2", "description", "keywords"],
-                type: "best_fields",
-                fuzziness: "AUTO",
-              },
-            },
-            size: 10,
-          },
-        });
-
-        const algoliaHits = (algoliaResult.results[0] as any).nbHits;
-        const elasticHits =
-          typeof elasticResult.hits.total === "number"
-            ? elasticResult.hits.total
-            : elasticResult.hits.total?.value || 0;
-
-        logResult({
-          check: `Search result count comparison ("${testQuery}")`,
-          status:
-            Math.abs(algoliaHits - elasticHits) < algoliaHits * 0.1
-              ? "PASS"
-              : "WARN",
-          expected: `Algolia: ${algoliaHits}`,
-          actual: `Elastic: ${elasticHits}`,
-        });
-      } catch (error: any) {
-        logResult({
-          check: "Algolia comparison",
-          status: "WARN",
-          message: `Could not compare: ${error.message}`,
-        });
-      }
-      console.log("");
-    }
 
     // Summary
     console.log("=".repeat(60));

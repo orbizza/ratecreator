@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import {
-  createTopicIfNotExists,
-  getKafkaProducer,
-} from "@ratecreator/db/kafka-client";
+import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 import { serve } from "@hono/node-server";
 import { Webhook } from "svix";
 
@@ -41,8 +38,6 @@ app.post("/webhook/clerk", async (c) => {
     return c.json({ error: "Webhook verification failed" }, 400);
   }
 
-  // Kafka integration
-  const producer = getKafkaProducer();
   const { type, data } = payload;
 
   // Validate payload data
@@ -51,29 +46,17 @@ app.post("/webhook/clerk", async (c) => {
   }
 
   try {
-    await producer.connect();
+    // Publish event to Pub/Sub
+    await publishMessageWithKey(
+      "clerk-user-events",
+      `${type}:${data.id}`,
+      data,
+    );
 
-    // Ensure topic exists
-    const topicName = "clerk-user-events";
-    await createTopicIfNotExists(topicName);
-
-    // Push event data to Kafka
-    await producer.send({
-      topic: topicName,
-      messages: [
-        {
-          key: `${type}:${data.id}`, // Combine event type and user ID
-          value: JSON.stringify(data),
-        },
-      ],
-    });
-
-    console.log("Event pushed to Kafka:", type);
+    console.log("Event pushed to Pub/Sub:", type);
   } catch (err) {
-    console.error("Error pushing event to Kafka:", err);
+    console.error("Error pushing event to Pub/Sub:", err);
     return c.json({ error: "Internal server error" }, 500);
-  } finally {
-    await producer.disconnect();
   }
 
   return c.json({ message: "Webhook processed successfully" });

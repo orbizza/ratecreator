@@ -59,7 +59,7 @@ export interface CreatorData {
     language_code: string;
     rating: number;
     reviewCount: number;
-    bannerURL?: string;
+    bannerUrl?: string;
     ytData?: {
       snippet?: {
         publishedAt: string;
@@ -245,7 +245,7 @@ export interface SearchAccount {
   madeForKids: boolean;
   viewCount?: number;
   videoCount?: number;
-  bannerURL?: string;
+  bannerUrl?: string;
   categories: string[];
   createdDate: string;
   objectID: string;

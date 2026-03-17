@@ -3,11 +3,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import {
-  useSearchBox,
-  UseSearchBoxProps,
-  useInstantSearch,
-} from "react-instantsearch";
 import { cn } from "@ratecreator/ui/utils";
 import { Search } from "lucide-react";
 
@@ -35,12 +30,14 @@ interface AlgoliaSearchWithAnimationsProps {
   onSearch?: () => void;
   /** Current input value */
   value: string;
+  /** Whether a search is currently in progress */
+  isLoading?: boolean;
 }
 
 /**
  * AlgoliaSearchWithAnimations Component
  *
- * An enhanced search input component that integrates with Algolia search.
+ * An enhanced search input component with animated placeholder text.
  * Features include:
  * - Animated placeholder text cycling
  * - Text particle animation on search
@@ -58,6 +55,7 @@ export function AlgoliaSearchWithAnimations({
   onSubmit,
   onSearch,
   value,
+  isLoading = false,
 }: AlgoliaSearchWithAnimationsProps) {
   const router = useRouter();
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
@@ -66,10 +64,6 @@ export function AlgoliaSearchWithAnimations({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const newDataRef = useRef<PixelData[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const { refine } = useSearchBox({} as UseSearchBoxProps);
-  const { status } = useInstantSearch();
-  const isSearchStalled = status === "stalled";
 
   /**
    * Start the placeholder text animation cycle
@@ -262,8 +256,6 @@ export function AlgoliaSearchWithAnimations({
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!animating) {
-      const newValue = e.target.value;
-      refine(newValue);
       onChange && onChange?.(e);
     }
   };
@@ -370,7 +362,7 @@ export function AlgoliaSearchWithAnimations({
         </AnimatePresence>
       </div>
 
-      {isSearchStalled && (
+      {isLoading && (
         <span className="absolute right-12 top-1/2 -translate-y-1/2 text-sm text-gray-500">
           Searching...
         </span>

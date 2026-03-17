@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Search,
   ChevronDown,
@@ -22,7 +22,10 @@ import {
   Menu,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth, useUser, SignIn } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { useTheme } from "next-themes";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 import {
   Button,
@@ -39,6 +42,7 @@ import {
   ModeToggle,
   IconToggle,
 } from "@ratecreator/ui";
+import { ny } from "@ratecreator/ui/utils";
 import { useKBar } from "kbar";
 
 import { getInitials } from "@ratecreator/db/utils";
@@ -53,6 +57,9 @@ export function MobileSideNav() {
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
   const { query } = useKBar();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleNavigation = (path: string) => {
     if (!isSignedIn && isProtectedRoute(path)) {
@@ -385,10 +392,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"default"}
-                  onClick={() => {
-                    const returnUrl = encodeURIComponent(pathname);
-                    router.push(`/sign-up?redirect_url=${returnUrl}`);
-                  }}
+                  onClick={() => setShowAuthModal(true)}
                 >
                   <div className="flex items-center">
                     <UserPlus className="mr-4 size-4" />
@@ -399,10 +403,7 @@ export function MobileSideNav() {
               <SheetClose asChild>
                 <Button
                   variant={"outline"}
-                  onClick={() => {
-                    const returnUrl = encodeURIComponent(pathname);
-                    router.push(`/sign-in?redirect_url=${returnUrl}`);
-                  }}
+                  onClick={() => setShowAuthModal(true)}
                 >
                   <div className="flex items-center">
                     <LogIn className="mr-4 size-4" />
@@ -414,6 +415,44 @@ export function MobileSideNav() {
           </SheetContent>
         </Sheet>
       )}
+
+      <DialogPrimitive.Root
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay
+            className={ny(
+              "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out",
+              "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            )}
+          />
+          <DialogPrimitive.Content
+            className={ny(
+              "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out",
+              "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+              "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+              "outline-none",
+            )}
+          >
+            <DialogPrimitive.Title className="sr-only">
+              Sign in to Rate Creator
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="sr-only">
+              Sign in or create an account to continue.
+            </DialogPrimitive.Description>
+            <SignIn
+              routing="hash"
+              appearance={{
+                baseTheme: isDark ? dark : undefined,
+              }}
+              fallbackRedirectUrl={pathname}
+            />
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </>
   );
 }
