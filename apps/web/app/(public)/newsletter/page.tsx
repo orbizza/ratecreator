@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button, Input, Card, CardContent } from "@ratecreator/ui";
 import {
   Send,
@@ -240,11 +241,12 @@ export default function NewsletterPage() {
                 >
                   <Card className="overflow-hidden transition-colors hover:border-green-500/50">
                     {post.featureImage && (
-                      <div className="aspect-video overflow-hidden">
-                        <img
+                      <div className="relative aspect-video overflow-hidden">
+                        <Image
                           src={post.featureImage}
                           alt={post.title}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
                         />
                       </div>
                     )}

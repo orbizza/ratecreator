@@ -126,7 +126,12 @@ export async function GET(request: NextRequest) {
       page: searchResults.page - 1,
     };
 
-    return NextResponse.json(response);
+    const jsonResponse = NextResponse.json(response);
+    jsonResponse.headers.set(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=120",
+    );
+    return jsonResponse;
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(

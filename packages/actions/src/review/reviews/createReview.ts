@@ -4,10 +4,19 @@ import { auth } from "@clerk/nextjs/server";
 import { ReviewValidator } from "@ratecreator/types/review";
 import { Platform } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
+import { getRedisClient } from "@ratecreator/db/redis-do";
 import { revalidatePath } from "next/cache";
 import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 
 const prisma = getPrismaClient();
+
+const ACCOUNT_CACHE_PREFIXES: Record<string, string> = {
+  YOUTUBE: "accounts-youtube-",
+  TWITTER: "accounts-twitter-",
+  TIKTOK: "accounts-tiktok-",
+  REDDIT: "accounts-reddit-",
+  INSTAGRAM: "accounts-instagram-",
+};
 
 export async function createReview(formData: unknown) {
   try {
@@ -122,6 +131,18 @@ export async function createReview(formData: unknown) {
       console.error("Pub/Sub operation failed:", error);
       // Don't throw - continue execution
     });
+
+    // Invalidate Redis cache for this account so fresh review count shows
+    try {
+      const redis = getRedisClient();
+      const prefix =
+        ACCOUNT_CACHE_PREFIXES[validatedData.platform.toUpperCase()];
+      if (prefix) {
+        await redis.del(`${prefix}${validatedData.accountId}`);
+      }
+    } catch (cacheError) {
+      console.error("Failed to invalidate account cache:", cacheError);
+    }
 
     // Revalidate the creator's page
     revalidatePath(

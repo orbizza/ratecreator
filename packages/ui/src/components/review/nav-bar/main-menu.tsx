@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth, useUser, SignIn } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
@@ -18,6 +18,9 @@ import {
   Settings,
   User,
   SunMoon,
+  BookOpen,
+  Newspaper,
+  Layers3,
 } from "lucide-react";
 
 import {
@@ -43,6 +46,82 @@ import { getInitials } from "@ratecreator/db/utils";
 const isProtectedRoute = (path: string) => {
   return path.startsWith("/review") || path.startsWith("/user-profile");
 };
+
+const HELP_CENTER_ITEMS = [
+  {
+    path: "/blog",
+    icon: Newspaper,
+    label: "Blog",
+    description: "Creator economy insights",
+  },
+  {
+    path: "/glossary",
+    icon: BookOpen,
+    label: "Glossary",
+    description: "Creator economy terms explained",
+  },
+  {
+    path: "/category-glossary",
+    icon: Layers3,
+    label: "Categories Glossary",
+    description: "Browse creator categories",
+  },
+];
+
+function HelpCenterDropdown({
+  onNavigate,
+}: {
+  onNavigate: (path: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEnter = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      <Button variant="ghost" className="gap-1">
+        Help Center
+        <ChevronDown
+          className={`size-3.5 opacity-60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-64 rounded-md border bg-popover text-popover-foreground p-1 shadow-lg z-50 animate-in fade-in-0 zoom-in-95 duration-100">
+          {HELP_CENTER_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => {
+                onNavigate(item.path);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 rounded-sm px-3 py-3 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+            >
+              <item.icon className="size-4 text-muted-foreground shrink-0" />
+              <div>
+                <div className="font-medium">{item.label}</div>
+                <div className="text-xs text-muted-foreground">
+                  {item.description}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function MainMenu() {
   const router = useRouter();
@@ -88,12 +167,7 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button
-            variant={"ghost"}
-            onClick={() => handleNavigation("/category-glossary")}
-          >
-            Help Center
-          </Button>
+          <HelpCenterDropdown onNavigate={handleNavigation} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -217,12 +291,7 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button
-            variant={"ghost"}
-            onClick={() => handleNavigation("/category-glossary")}
-          >
-            Help Center
-          </Button>
+          <HelpCenterDropdown onNavigate={handleNavigation} />
           <Button variant={"outline"} onClick={() => setShowAuthModal(true)}>
             Log in
           </Button>

@@ -15,8 +15,8 @@ const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
 
 // Redis TTLs in seconds
 const REDIS_TTL = {
-  POPULAR_CATEGORIES: 3600, // 1 hour
-  POPULAR_CATEGORY_ACCOUNTS: 3600, // 1 hour
+  POPULAR_CATEGORIES: 7 * 24 * 3600, // 7 days — categories rarely change
+  POPULAR_CATEGORY_ACCOUNTS: 3600, // 1 hour — account data changes more often
   INDIVIDUAL_CATEGORY: 3600, // 1 hour
 };
 

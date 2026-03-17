@@ -20,6 +20,8 @@ import {
   UserPlus,
   SunMoon,
   Menu,
+  Newspaper,
+  BookOpen,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth, useUser, SignIn } from "@clerk/nextjs";
@@ -209,6 +211,34 @@ export function MobileSideNav() {
                   </div>
                 </Button>
               </SheetClose> */}
+
+              <div className="pl-4 pt-2 pb-1 text-xs font-medium text-muted-foreground uppercase">
+                Help Center
+              </div>
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/blog")}
+                  className="flex justify-between"
+                >
+                  <div className="flex items-center">
+                    <Newspaper className="mr-4 size-4" />
+                    <span>Blog</span>
+                  </div>
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/glossary")}
+                  className="flex justify-between"
+                >
+                  <div className="flex items-center">
+                    <BookOpen className="mr-4 size-4" />
+                    <span>Glossary</span>
+                  </div>
+                </Button>
+              </SheetClose>
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
@@ -216,8 +246,8 @@ export function MobileSideNav() {
                   className="flex justify-between"
                 >
                   <div className="flex items-center">
-                    <Library className="mr-4 size-4" />
-                    <span>Help Center</span>
+                    <Layers3 className="mr-4 size-4" />
+                    <span>Categories Glossary</span>
                   </div>
                 </Button>
               </SheetClose>
@@ -365,6 +395,34 @@ export function MobileSideNav() {
                   </div>
                 </Button>
               </SheetClose> */}
+
+              <div className="pl-4 pt-2 pb-1 text-xs font-medium text-muted-foreground uppercase">
+                Help Center
+              </div>
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/blog")}
+                  className="flex justify-between"
+                >
+                  <div className="flex items-center">
+                    <Newspaper className="mr-4 size-4" />
+                    <span>Blog</span>
+                  </div>
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleNavigation("/glossary")}
+                  className="flex justify-between"
+                >
+                  <div className="flex items-center">
+                    <BookOpen className="mr-4 size-4" />
+                    <span>Glossary</span>
+                  </div>
+                </Button>
+              </SheetClose>
               <SheetClose asChild>
                 <Button
                   variant={"ghost"}
@@ -372,8 +430,8 @@ export function MobileSideNav() {
                   className="flex justify-between"
                 >
                   <div className="flex items-center">
-                    <Library className="mr-4 size-4" />
-                    <span>Help Center</span>
+                    <Layers3 className="mr-4 size-4" />
+                    <span>Categories Glossary</span>
                   </div>
                 </Button>
               </SheetClose>

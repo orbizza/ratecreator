@@ -15,7 +15,8 @@ const CACHE_ALL_CATEGORIES = "category-all";
 const CACHE_POPULAR_CATEGORIES = "category-popular";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
-const CACHE_TTL = 24 * 60 * 60; // 24 hours in seconds
+const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days in seconds — categories rarely change
+const CACHE_TTL_ACCOUNTS = 3600; // 1 hour — account data changes more often
 
 const prisma = getPrismaClient();
 
@@ -62,7 +63,11 @@ async function handleAllCategories(redis: ReturnType<typeof getRedisClient>) {
     orderBy: { depth: "asc" },
   });
 
-  await redis.set(CACHE_ALL_CATEGORIES, JSON.stringify(allCategories));
+  await redis.setex(
+    CACHE_ALL_CATEGORIES,
+    CACHE_TTL,
+    JSON.stringify(allCategories),
+  );
   console.log("All Categories cached in Redis");
 
   return NextResponse.json(allCategories);
@@ -97,9 +102,17 @@ async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
     }
   });
 
-  await redis.set(CACHE_ALL_CATEGORIES, JSON.stringify(allCategories));
+  await redis.setex(
+    CACHE_ALL_CATEGORIES,
+    CACHE_TTL,
+    JSON.stringify(allCategories),
+  );
   console.log("All Categories cached in Redis");
-  await redis.set(CACHE_ROOT_CATEGORIES, JSON.stringify(rootCategories));
+  await redis.setex(
+    CACHE_ROOT_CATEGORIES,
+    CACHE_TTL,
+    JSON.stringify(rootCategories),
+  );
   console.log("Root Categories cached in Redis");
 
   return NextResponse.json(rootCategories);
@@ -126,7 +139,11 @@ async function handlePopularCategories(
   // console.log(popularCategories);
   // console.log("Returning popular categories");
 
-  await redis.set(CACHE_POPULAR_CATEGORIES, JSON.stringify(popularCategories));
+  await redis.setex(
+    CACHE_POPULAR_CATEGORIES,
+    CACHE_TTL,
+    JSON.stringify(popularCategories),
+  );
   console.log("Popular Categories cached in Redis");
 
   return NextResponse.json(popularCategories);
@@ -184,7 +201,11 @@ async function fetchAccountsForPopularCategories(
                 },
                 accounts: [],
               };
-              await redis.set(categoryCacheKey, JSON.stringify(emptyCategory));
+              await redis.setex(
+                categoryCacheKey,
+                CACHE_TTL_ACCOUNTS,
+                JSON.stringify(emptyCategory),
+              );
               return emptyCategory;
             }
 
@@ -220,8 +241,9 @@ async function fetchAccountsForPopularCategories(
             };
 
             // Cache individual category data with TTL
-            await redis.set(
+            await redis.setex(
               categoryCacheKey,
+              CACHE_TTL_ACCOUNTS,
               JSON.stringify(categoryWithAccounts),
             );
 
@@ -247,8 +269,9 @@ async function fetchAccountsForPopularCategories(
     accountsByCategory.push(...results);
 
     // Cache the full response with TTL
-    await redis.set(
+    await redis.setex(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
+      CACHE_TTL_ACCOUNTS,
       JSON.stringify(accountsByCategory),
     );
 
