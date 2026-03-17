@@ -88,12 +88,31 @@ gcloud iam service-accounts create rc-services \
 
 SA=rc-services@sinuous-aviary-410323.iam.gserviceaccount.com
 
+# Project-level roles
 for ROLE in roles/pubsub.publisher roles/pubsub.subscriber \
             roles/storage.objectAdmin roles/aiplatform.user \
-            roles/secretmanager.secretAccessor roles/run.invoker; do
+            roles/secretmanager.secretAccessor \
+            roles/run.admin roles/run.invoker \
+            roles/iam.serviceAccountUser \
+            roles/artifactregistry.writer \
+            roles/cloudbuild.builds.builder \
+            roles/logging.logWriter; do
   gcloud projects add-iam-policy-binding sinuous-aviary-410323 \
     --member="serviceAccount:$SA" --role="$ROLE"
 done
+
+# SA must be able to "act as" itself for Cloud Run deploy
+gcloud iam service-accounts add-iam-policy-binding $SA \
+  --member="serviceAccount:$SA" \
+  --role="roles/iam.serviceAccountUser" \
+  --project=sinuous-aviary-410323
+
+# Allow unauthenticated access for Clerk webhooks (run after workers is deployed)
+gcloud run services add-iam-policy-binding ratecreator-workers \
+  --region=us-central1 \
+  --member="allUsers" \
+  --role="roles/run.invoker" \
+  --project=sinuous-aviary-410323
 ```
 
 ---
@@ -360,25 +379,12 @@ gcloud run services describe ratecreator-workers --region=us-central1 --format='
 
 The Clerk webhook URL is: `<WORKERS_URL>/webhook/clerk`
 
-### Allow Unauthenticated Access for Webhook
-
-Cloud Run defaults to `--no-allow-unauthenticated`, which blocks Clerk webhooks
-(Clerk doesn't send GCP IAM tokens). Since Svix signature verification secures
-the webhook route, allow unauthenticated access:
-
-```bash
-gcloud run services add-iam-policy-binding ratecreator-workers \
-  --region=us-central1 \
-  --member="allUsers" \
-  --role="roles/run.invoker"
-```
-
-> **Security note:** Pub/Sub push subscriptions still include OIDC tokens via
-> `--push-auth-service-account`. The webhook route is protected by Svix
-> signature verification. Job routes (`/jobs/*`) accept any POST but only
-> process valid Pub/Sub message formats.
-
 ### Setup in Clerk Dashboard
+
+> **Note:** Unauthenticated access (`allUsers → run.invoker`) must be granted
+> on the Cloud Run service for Clerk to reach the webhook endpoint. This is
+> configured in the prerequisites (Section 1) and in `01-create-service-account.sh`.
+> The webhook route is secured by Svix signature verification.
 
 1. Go to **Clerk Dashboard** → **Webhooks**
 2. Add endpoint: `https://ratecreator-workers-667931755762.us-central1.run.app/webhook/clerk`
@@ -651,6 +657,35 @@ No GitHub Actions. All CI/CD is handled by Vercel Git Integration and GCP Cloud 
 [ ] PostHog receiving events
 [ ] Sentry receiving errors
 ```
+
+---
+
+## IAM Permissions Reference
+
+### Service Account: `rc-services@sinuous-aviary-410323.iam.gserviceaccount.com`
+
+| Role                                 | Level        | Purpose                               |
+| ------------------------------------ | ------------ | ------------------------------------- |
+| `roles/run.admin`                    | Project      | Deploy/update Cloud Run services      |
+| `roles/run.invoker`                  | Project      | Pub/Sub push auth to Cloud Run        |
+| `roles/iam.serviceAccountUser`       | Project + SA | Act as itself during deploy (`actAs`) |
+| `roles/logging.logWriter`            | Project      | Write build and runtime logs          |
+| `roles/storage.objectAdmin`          | Project      | Push Docker images to GCR             |
+| `roles/artifactregistry.writer`      | Project      | Push to Artifact Registry             |
+| `roles/cloudbuild.builds.builder`    | Project      | Run Cloud Build steps                 |
+| `roles/secretmanager.secretAccessor` | Project      | Read secrets from Secret Manager      |
+| `roles/pubsub.publisher`             | Project      | Publish Pub/Sub messages              |
+| `roles/pubsub.subscriber`            | Project      | Consume Pub/Sub messages              |
+| `roles/aiplatform.user`              | Project      | Vertex AI (Gemini) for translations   |
+
+### Cloud Run: `ratecreator-workers`
+
+| Binding                        | Purpose                                      |
+| ------------------------------ | -------------------------------------------- |
+| `allUsers → roles/run.invoker` | Allows Clerk webhooks (unauthenticated POST) |
+
+> Clerk doesn't send GCP IAM tokens. Svix signature verification secures the `/webhook/clerk` route.
+> Pub/Sub push subscriptions still use OIDC auth via `--push-auth-service-account`.
 
 ---
 

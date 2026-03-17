@@ -28,9 +28,13 @@ ROLES=(
   "roles/pubsub.subscriber"
   "roles/aiplatform.user"
   "roles/secretmanager.secretAccessor"
+  "roles/run.admin"
   "roles/run.invoker"
+  "roles/iam.serviceAccountUser"
   "roles/artifactregistry.writer"
   "roles/cloudbuild.builds.builder"
+  "roles/logging.logWriter"
+  "roles/storage.objectAdmin"
 )
 
 echo ""
@@ -58,6 +62,26 @@ else
   echo "IMPORTANT: Add this to .gitignore:"
   echo "  echo 'gcp-service-account.json' >> .gitignore"
 fi
+
+# Grant SA permission to act as itself (required for Cloud Run deploy)
+gcloud iam service-accounts add-iam-policy-binding "${SA_EMAIL}" \
+  --member="serviceAccount:${SA_EMAIL}" \
+  --role="roles/iam.serviceAccountUser" \
+  --project="${PROJECT_ID}" \
+  --quiet 2>/dev/null
+echo "  + iam.serviceAccountUser on SA (actAs self)"
+
+# Allow unauthenticated access to Cloud Run (required for Clerk webhooks)
+# Svix signature verification secures the webhook route
+echo ""
+echo "Allowing unauthenticated invocations (for Clerk webhooks)..."
+gcloud run services add-iam-policy-binding ratecreator-workers \
+  --region="us-central1" \
+  --member="allUsers" \
+  --role="roles/run.invoker" \
+  --project="${PROJECT_ID}" \
+  --quiet 2>/dev/null || echo "  (Cloud Run service not deployed yet — run after step 05)"
+echo "  + allUsers → run.invoker (for webhook access)"
 
 echo ""
 echo "=== Service account setup complete ==="

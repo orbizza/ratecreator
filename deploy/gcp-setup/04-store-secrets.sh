@@ -24,7 +24,7 @@ echo "Project: ${PROJECT_ID}"
 echo ""
 
 read_env() {
-  grep -E "^${1}\s*=" "${ENV_FILE}" 2>/dev/null | head -1 | sed 's/^[^=]*=\s*//' | sed 's/\s*$//' | sed 's/^"//' | sed 's/"$//'
+  grep -E "^${1}\s*=" "${ENV_FILE}" 2>/dev/null | head -1 | sed 's/^[^=]*=\s*//' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/^"//' | sed 's/"$//'
 }
 
 store() {
