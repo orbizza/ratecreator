@@ -13,15 +13,45 @@ const CACHE_POPULAR_CATEGORIES = "category-popular";
 const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
 
+// Redis TTLs in seconds
+const REDIS_TTL = {
+  POPULAR_CATEGORIES: 7 * 24 * 3600, // 7 days — categories rarely change
+  POPULAR_CATEGORY_ACCOUNTS: 3600, // 1 hour — account data changes more often
+  INDIVIDUAL_CATEGORY: 3600, // 1 hour
+};
+
+// In-memory local cache — reduces Redis round-trips for repeated calls
+const localCache = new Map<string, { data: unknown; expiry: number }>();
+const LOCAL_CACHE_TTL = 60 * 1000; // 60 seconds
+
+function getLocal<T>(key: string): T | null {
+  const entry = localCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiry) {
+    localCache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+function setLocal<T>(key: string, data: T): void {
+  localCache.set(key, { data, expiry: Date.now() + LOCAL_CACHE_TTL });
+}
+
 const redis = getRedisClient();
 const prisma = getPrismaClient();
 
 export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   try {
+    // Check local cache first
+    const local = getLocal<PopularCategory[]>(CACHE_POPULAR_CATEGORIES);
+    if (local) return local;
+
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
     if (cachedCategories) {
-      // console.log("Returning cached popular categories");
-      return JSON.parse(cachedCategories);
+      const parsed = JSON.parse(cachedCategories);
+      setLocal(CACHE_POPULAR_CATEGORIES, parsed);
+      return parsed;
     }
 
     const popularCategories = await prisma.category.findMany({
@@ -35,10 +65,12 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
     // console.log(popularCategories);
     // console.log("Returning popular categories");
 
-    await redis.set(
+    await redis.setex(
       CACHE_POPULAR_CATEGORIES,
+      REDIS_TTL.POPULAR_CATEGORIES,
       JSON.stringify(popularCategories),
     );
+    setLocal(CACHE_POPULAR_CATEGORIES, popularCategories);
     console.log("Popular Categories cached in Redis");
 
     return popularCategories;
@@ -54,10 +86,18 @@ export async function getMostPopularCategoryWithData(): Promise<
   const client = await getMongoClient();
 
   try {
-    // Try to get cached full response first
+    // Check local cache first
+    const local = getLocal<PopularCategoryWithAccounts[]>(
+      CACHE_POPULAR_CATEGORY_ACCOUNTS,
+    );
+    if (local) return local;
+
+    // Try to get cached full response from Redis
     const cachedFullResponse = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedFullResponse) {
-      return JSON.parse(cachedFullResponse);
+      const parsed = JSON.parse(cachedFullResponse);
+      setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
+      return parsed;
     }
 
     const popularCategoriesResponse = await getMostPopularCategories();
@@ -75,10 +115,20 @@ export async function getMostPopularCategoryWithData(): Promise<
       try {
         const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${category.id}`;
 
-        // Try to get cached category data
+        // Try local cache for individual category
+        const localCat =
+          getLocal<PopularCategoryWithAccounts>(categoryCacheKey);
+        if (localCat) {
+          accountsByCategory.push(localCat);
+          continue;
+        }
+
+        // Try to get cached category data from Redis
         const cachedCategoryAccounts = await redis.get(categoryCacheKey);
         if (cachedCategoryAccounts) {
-          accountsByCategory.push(JSON.parse(cachedCategoryAccounts));
+          const parsed = JSON.parse(cachedCategoryAccounts);
+          setLocal(categoryCacheKey, parsed);
+          accountsByCategory.push(parsed);
           continue;
         }
 
@@ -99,7 +149,12 @@ export async function getMostPopularCategoryWithData(): Promise<
                 },
                 accounts: [],
               };
-              await redis.set(categoryCacheKey, JSON.stringify(emptyCategory));
+              await redis.setex(
+                categoryCacheKey,
+                REDIS_TTL.INDIVIDUAL_CATEGORY,
+                JSON.stringify(emptyCategory),
+              );
+              setLocal(categoryCacheKey, emptyCategory);
               return emptyCategory;
             }
 
@@ -135,10 +190,12 @@ export async function getMostPopularCategoryWithData(): Promise<
             };
 
             // Cache individual category data with TTL
-            await redis.set(
+            await redis.setex(
               categoryCacheKey,
+              REDIS_TTL.INDIVIDUAL_CATEGORY,
               JSON.stringify(categoryWithAccounts),
             );
+            setLocal(categoryCacheKey, categoryWithAccounts);
 
             return categoryWithAccounts;
           })(),
@@ -162,12 +219,12 @@ export async function getMostPopularCategoryWithData(): Promise<
     accountsByCategory.push(...results);
 
     // Cache the full response with TTL
-    await redis.set(
+    await redis.setex(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
+      REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(accountsByCategory),
-      // "EX",
-      // 3600, // 1 hour TTL
     );
+    setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
 
     return accountsByCategory;
   } catch (error) {
@@ -182,12 +239,19 @@ export async function getSingleCategoryWithAccounts(
   const client = await getMongoClient();
 
   try {
-    // Try to get cached category data first
     const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${categoryId}`;
+
+    // Check local cache first
+    const local = getLocal<PopularCategoryWithAccounts>(categoryCacheKey);
+    if (local) return local;
+
+    // Try to get cached category data from Redis
     const cachedCategoryAccounts = await redis.get(categoryCacheKey);
 
     if (cachedCategoryAccounts) {
-      return JSON.parse(cachedCategoryAccounts);
+      const parsed = JSON.parse(cachedCategoryAccounts);
+      setLocal(categoryCacheKey, parsed);
+      return parsed;
     }
 
     // If not in cache, fetch the category data
@@ -224,13 +288,13 @@ export async function getSingleCategoryWithAccounts(
         accounts: [],
       };
 
-      // Cache with 1-hour expiry
-      await redis.set(
+      // Cache with TTL
+      await redis.setex(
         categoryCacheKey,
+        REDIS_TTL.INDIVIDUAL_CATEGORY,
         JSON.stringify(emptyCategory),
-        "EX",
-        3600, // 1 hour TTL
       );
+      setLocal(categoryCacheKey, emptyCategory);
 
       return emptyCategory;
     }
@@ -266,13 +330,13 @@ export async function getSingleCategoryWithAccounts(
       })),
     };
 
-    // Cache with 1-hour expiry
-    await redis.set(
+    // Cache with TTL
+    await redis.setex(
       categoryCacheKey,
+      REDIS_TTL.INDIVIDUAL_CATEGORY,
       JSON.stringify(categoryWithAccounts),
-      "EX",
-      3600, // 1 hour TTL
     );
+    setLocal(categoryCacheKey, categoryWithAccounts);
 
     return categoryWithAccounts;
   } catch (error) {

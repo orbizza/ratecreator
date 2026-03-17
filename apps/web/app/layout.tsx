@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 
 import "@ratecreator/ui/styles.css";
@@ -108,20 +108,7 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <CSPostHogProvider>
           <body className={inter.className}>
-            <style>{`
-        ::selection {
-         background: oklch(90.5% 0.182 98.111);
-         color: #000;
-         -webkit-text-fill-color: #000;
-         -webkit-background-clip: text;
-       }
-       :is(.dark) ::selection {
-         background: oklch(86.5% 0.127 207.078);
-         color: #000;
-         -webkit-text-fill-color: #000;
-         -webkit-background-clip: text;
-       }
-     `}</style>
+            <GoogleOneTap />
             <Providers>
               {/* Sticky Banner: Remove this block to disable the site-wide banner.
                   If you remove it, also set the navbar offset back to top-0 in

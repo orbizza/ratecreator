@@ -84,8 +84,7 @@ export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
 }) => {
   const [creators, setCreators] = useState<SearchAccount[]>([]);
   const [creatorLoading, setCreatorLoading] = useState<boolean>(true);
-  const [filterSidebarLoading, setFilterSidebarLoading] =
-    useState<boolean>(true);
+  const [filterSidebarLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState<number>(0);
   const [viewCount, setViewCount] = useState<string>("");
@@ -277,13 +276,7 @@ export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
     setCurrentPage(page);
   };
 
-  // Add useEffect to handle initial filter sidebar loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterSidebarLoading(false);
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
+  // Filter sidebar renders immediately — no loading needed
 
   return (
     <div className="container mx-auto p-4 mt-16">
@@ -352,7 +345,7 @@ export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
                 </div>
               )}
             </div>
-            {/* <div className="flex justify-end items-center gap-x-2">
+            <div className="flex justify-end items-center gap-x-2">
               <Toggle
                 aria-label="Toggle Sort Order"
                 pressed={!isDescending}
@@ -389,7 +382,7 @@ export const CentralSearchResults: React.FC<CentralSearchResultsProps> = ({
                 </SelectContent>
               </Select>
               <Info size={14} />
-            </div> */}
+            </div>
           </div>
           {creatorLoading && <CreatorLoadingCard />}
           {!creatorLoading && (

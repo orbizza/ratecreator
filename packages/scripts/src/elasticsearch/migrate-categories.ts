@@ -29,24 +29,23 @@ let elasticClient: Client | null = null;
 
 function getElasticsearchClient(): Client {
   if (!elasticClient) {
+    const url = process.env.ELASTIC_URL;
     const cloudId = process.env.ELASTIC_CLOUD_ID;
     const apiKey = process.env.ELASTIC_API_KEY;
-    const username = process.env.ELASTIC_USERNAME;
-    const password = process.env.ELASTIC_PASSWORD;
 
-    if (cloudId && apiKey) {
+    if (url && apiKey) {
+      elasticClient = new Client({
+        node: url,
+        auth: { apiKey },
+      });
+    } else if (cloudId && apiKey) {
       elasticClient = new Client({
         cloud: { id: cloudId },
         auth: { apiKey },
       });
-    } else if (cloudId && username && password) {
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { username, password },
-      });
     } else {
       throw new Error(
-        "Elasticsearch credentials not configured. Set ELASTIC_CLOUD_ID and ELASTIC_API_KEY",
+        "Elasticsearch credentials not configured. Set ELASTIC_URL + ELASTIC_API_KEY or ELASTIC_CLOUD_ID + ELASTIC_API_KEY",
       );
     }
   }
@@ -63,8 +62,6 @@ const createIndexIfNotExists = async (client: Client) => {
         index: ELASTIC_INDEX,
         body: {
           settings: {
-            number_of_shards: 1,
-            number_of_replicas: 1,
             analysis: {
               analyzer: {
                 autocomplete: {
@@ -140,6 +137,28 @@ interface CategoryWithParent {
   } | null;
 }
 
+// Algolia-style: "GrandParent > Parent" (excludes current category name)
+const buildParentNamePath = (
+  category: CategoryWithParent,
+  categoriesMap: Map<string, CategoryWithParent>,
+): string => {
+  let path = "";
+  let current: CategoryWithParent | undefined = category;
+
+  while (current && current.parentId) {
+    const parent = categoriesMap.get(current.parentId);
+    if (parent) {
+      path = path ? `${parent.name} > ${path}` : parent.name;
+      current = parent;
+    } else {
+      break;
+    }
+  }
+
+  return path;
+};
+
+// Full slug path: "grandparent > parent > current"
 const buildCategoryPath = (
   category: CategoryWithParent,
   categoriesMap: Map<string, CategoryWithParent>,
@@ -197,6 +216,7 @@ const migrateCategories = async () => {
     });
 
     // Build Elasticsearch documents
+    // Includes Algolia fields + extras useful for search (path, parentSlug, longDescription)
     const documents = categories.map((category) => {
       const catWithParent = category as CategoryWithParent;
       return {
@@ -205,15 +225,15 @@ const migrateCategories = async () => {
         slug: category.slug,
         shortDescription: category.shortDescription || "",
         longDescription: category.longDescription || "",
-        keywords: (category.keywords || []).join(", "),
+        keywords: category.keywords || [],
         parentId: category.parentId || null,
-        parentCategory: category.parent?.name || null,
+        parentCategory: buildParentNamePath(catWithParent, categoriesMap),
         parentSlug: category.parent?.slug || null,
-        depth: category.depth,
         popular: category.popular,
+        depth: category.depth,
         path: buildCategoryPath(catWithParent, categoriesMap),
-        createdAt: category.createdAt.toISOString(),
-        updatedAt: category.updatedAt.toISOString(),
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt,
       };
     });
 

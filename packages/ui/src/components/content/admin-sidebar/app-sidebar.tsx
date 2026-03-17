@@ -11,6 +11,7 @@ import {
   Settings,
   Star,
   Tag,
+  Users,
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
@@ -153,6 +154,11 @@ const data = {
       name: "Tags",
       url: "/tags",
       icon: Tag,
+    },
+    {
+      name: "Subscribers",
+      url: "/subscribers",
+      icon: Users,
     },
     {
       name: "Analytics",

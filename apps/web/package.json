@@ -14,6 +14,7 @@
     "@ratecreator/actions": "*",
     "@ratecreator/auth": "*",
     "@ratecreator/db": "*",
+    "@ratecreator/email": "*",
     "@ratecreator/hooks": "*",
     "@ratecreator/store": "*",
     "@ratecreator/types": "*",

@@ -1,0 +1,9 @@
+.git
+.next
+node_modules
+dist
+.turbo
+.env
+.env.local
+gcp-service-account.json
+*.checkpoint.json

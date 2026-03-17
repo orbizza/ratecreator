@@ -29,14 +29,6 @@ echo "🔐 Logging into DigitalOcean registry..."
 docker login registry.digitalocean.com
 
 
-echo "🏭 Building and pushing review-algolia-update amd64..."
-docker buildx build \
-    --platform linux/amd64 \
-    -t registry.digitalocean.com/ratecreator/review-algolia-update:latest \
-    -f apps/consumers/review-algolia-update/Dockerfile \
-    --push \
-    .
-
 echo "🏭 Building and pushing review-calculate amd64..."
 docker buildx build \
     --platform linux/amd64 \
@@ -44,15 +36,6 @@ docker buildx build \
     -f apps/consumers/review-calculate/Dockerfile \
     --push \
     .
-
-echo "🏭 Building and pushing review-algolia-update arm64..."
-docker buildx build \
-    --platform linux/arm64 \
-    -t registry.digitalocean.com/ratecreator/review-algolia-update:latest \
-    -f apps/consumers/review-algolia-update/Dockerfile \
-    --push \
-    .
-
 
 echo "🏭 Building and pushing review-calculate arm64..."
 docker buildx build \

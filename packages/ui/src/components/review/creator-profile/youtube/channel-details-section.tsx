@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { countryCodes, languageCodes } from "@ratecreator/store";
+import { DataSourceBadge } from "../../creator-rating/data-source-badge";
 
 interface ChannelDetailsSectionProps {
   account: CreatorData["account"];
@@ -214,6 +215,7 @@ export const ChannelDetailsSection = ({
             <div className="flex flex-row gap-x-2 items-center text-primary">
               <ChartColumn size={28} />
               <span className="">Channel Statistics</span>
+              <DataSourceBadge source="youtube" />
               <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
@@ -235,6 +237,7 @@ export const ChannelDetailsSection = ({
             <div className="flex flex-row gap-x-2 items-center text-primary">
               <AppWindow size={28} />
               <span className="">Channel Description</span>
+              <DataSourceBadge source="youtube" />
               <Info size={14} className="text-muted-foreground" />
             </div>
           </AccordionTrigger>
@@ -259,6 +262,7 @@ export const ChannelDetailsSection = ({
                 <div className="flex flex-row gap-x-2 items-center text-primary">
                   <Hash size={28} />
                   <span className="">Channel Keywords</span>
+                  <DataSourceBadge source="youtube" />
                   <Info size={14} className="text-muted-foreground" />
                 </div>
               </AccordionTrigger>
@@ -283,6 +287,7 @@ export const ChannelDetailsSection = ({
                 <div className="flex flex-row gap-x-2 items-center text-primary">
                   <Hash size={28} />
                   <span className="">Channel Keywords</span>
+                  <DataSourceBadge source="youtube" />
                   <Info size={14} className="text-muted-foreground" />
                 </div>
               </AccordionTrigger>

@@ -63,7 +63,12 @@ async function handleYoutubeAccount(
     // Check cache first
     const cachedData = await redis.get(`${CACHE_YOUTUBE_CREATOR}${accountId}`);
     if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
+      const response = NextResponse.json(JSON.parse(cachedData));
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
+      return response;
     }
 
     const account = await prisma.account.findFirst({
@@ -116,12 +121,18 @@ async function handleYoutubeAccount(
     };
 
     // Cache the response for 1 hour
-    await redis.set(
+    await redis.setex(
       `${CACHE_YOUTUBE_CREATOR}${accountId}`,
+      3600,
       JSON.stringify(responseData),
     );
 
-    return NextResponse.json(responseData);
+    const response = NextResponse.json(responseData);
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600",
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching YouTube account:", error);
     return NextResponse.json(
@@ -139,7 +150,12 @@ async function handleTwitterAccount(
     // Check cache first
     const cachedData = await redis.get(`${CACHE_TWITTER_CREATOR}${accountId}`);
     if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
+      const response = NextResponse.json(JSON.parse(cachedData));
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
+      return response;
     }
 
     const account = await prisma.account.findFirst({
@@ -190,12 +206,18 @@ async function handleTwitterAccount(
     };
 
     // Cache the response for 1 hour
-    await redis.set(
+    await redis.setex(
       `${CACHE_TWITTER_CREATOR}${accountId}`,
+      3600,
       JSON.stringify(responseData),
     );
 
-    return NextResponse.json(responseData);
+    const response = NextResponse.json(responseData);
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600",
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching Twitter account:", error);
     return NextResponse.json(
@@ -213,7 +235,12 @@ async function handleTiktokAccount(
     // Check cache first
     const cachedData = await redis.get(`${CACHE_TIKTOK_CREATOR}${accountId}`);
     if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
+      const response = NextResponse.json(JSON.parse(cachedData));
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
+      return response;
     }
 
     const account = await prisma.account.findFirst({
@@ -264,12 +291,18 @@ async function handleTiktokAccount(
     };
 
     // Cache the response for 1 hour
-    await redis.set(
+    await redis.setex(
       `${CACHE_TIKTOK_CREATOR}${accountId}`,
+      3600,
       JSON.stringify(responseData),
     );
 
-    return NextResponse.json(responseData);
+    const response = NextResponse.json(responseData);
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600",
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching Tiktok account:", error);
     return NextResponse.json(
@@ -287,7 +320,12 @@ async function handleRedditAccount(
     // Check cache first
     const cachedData = await redis.get(`${CACHE_REDDIT_CREATOR}${accountId}`);
     if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
+      const response = NextResponse.json(JSON.parse(cachedData));
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
+      return response;
     }
 
     const account = await prisma.account.findFirst({
@@ -338,12 +376,18 @@ async function handleRedditAccount(
     };
 
     // Cache the response for 1 hour
-    await redis.set(
+    await redis.setex(
       `${CACHE_REDDIT_CREATOR}${accountId}`,
+      3600,
       JSON.stringify(responseData),
     );
 
-    return NextResponse.json(responseData);
+    const response = NextResponse.json(responseData);
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600",
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching Reddit account:", error);
     return NextResponse.json(

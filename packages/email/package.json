@@ -1,0 +1,19 @@
+{
+  "name": "@ratecreator/email",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@ratecreator/db": "*",
+    "@react-email/components": "^0.0.36",
+    "resend": "^4.4.1",
+    "react": "^18.3.1"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/react": "^18.3.18"
+  }
+}

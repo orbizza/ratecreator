@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { ChevronRight, List } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -23,10 +23,7 @@ import {
   PopularAccount,
   PopularCategoryWithAccounts,
 } from "@ratecreator/types/review";
-import {
-  getMostPopularCategories,
-  getMostPopularCategoryWithData,
-} from "@ratecreator/actions/review";
+import { getMostPopularCategoryWithData } from "@ratecreator/actions/review";
 
 import { CardLandingVertical } from "../cards/card-landing-vertical";
 import { WriteReviewCTA } from "./write-review-cta";
@@ -118,7 +115,7 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   const [screenSize, setScreenSize] = useState("");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Monitor screen size changes for responsive layout
+  // Monitor screen size changes for responsive layout (debounced)
   useEffect(() => {
     const checkScreenSize = () => {
       if (window.innerWidth < 720) {
@@ -131,8 +128,18 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
     };
 
     checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const debouncedCheck = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkScreenSize, 150);
+    };
+
+    window.addEventListener("resize", debouncedCheck);
+    return () => {
+      window.removeEventListener("resize", debouncedCheck);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Determine number of accounts to display based on screen size
@@ -181,66 +188,23 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
   );
 };
 
-// Cache configuration
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
-const CACHE_KEYS = {
-  popularCategories: "mostPopularCategories",
-  popularCategoriesExpiry: "mostPopularCategoriesExpiry",
-  categoryAccounts: "mostPopularCategoryAccount",
-  categoryAccountsExpiry: "mostPopularCategoryAccountExpiry",
-};
+// In-memory cache — survives across re-renders, cleared on page reload
+const memoryCache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-/**
- * Validates if cached data is still valid based on expiry time
- */
-const isValidCache = (expiryKey: string) => {
-  const cacheExpiry = localStorage.getItem(expiryKey);
-  return cacheExpiry && new Date().getTime() < Number(cacheExpiry);
-};
-
-/**
- * Sets data in localStorage with expiry time
- * Includes error handling for storage quota exceeded
- */
-const setCacheWithExpiry = (key: string, expiryKey: string, data: any) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-    localStorage.setItem(
-      expiryKey,
-      (new Date().getTime() + CACHE_TTL).toString(),
-    );
-  } catch (error) {
-    console.error("Error setting cache:", error);
-    // If localStorage is full, clear it and try again
-    if (error instanceof Error && error.name === "QuotaExceededError") {
-      localStorage.clear();
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-        localStorage.setItem(
-          expiryKey,
-          (new Date().getTime() + CACHE_TTL).toString(),
-        );
-      } catch (retryError) {
-        console.error("Failed to set cache after clearing:", retryError);
-      }
-    }
+function getCached<T>(key: string): T | null {
+  const entry = memoryCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiry) {
+    memoryCache.delete(key);
+    return null;
   }
-};
+  return entry.data as T;
+}
 
-/**
- * Retrieves cached data if it exists and is still valid
- */
-const getCachedData = (key: string, expiryKey: string) => {
-  try {
-    const cachedData = localStorage.getItem(key);
-    if (cachedData && isValidCache(expiryKey)) {
-      return JSON.parse(cachedData);
-    }
-  } catch (error) {
-    console.error("Error getting cached data:", error);
-  }
-  return null;
-};
+function setCache<T>(key: string, data: T): void {
+  memoryCache.set(key, { data, expiry: Date.now() + CACHE_TTL });
+}
 
 /**
  * Main PopularCategories Component
@@ -252,98 +216,57 @@ const PopularCategories = () => {
   const [categories, setCategories] = useState<PopularCategoryWithAccounts[]>(
     [],
   );
-  const [popularCategories, setPopularCategories] = useState<PopularCategory[]>(
-    [],
-  );
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [loadingCategories, setLoadingCategories] = useState<boolean>(true);
-  const [loadingAccounts, setLoadingAccounts] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  // Fetch categories and their associated data
+  // Derive popular categories from the full data (avoids redundant server call)
+  const popularCategories = useMemo(
+    () => categories.map((c) => c.category),
+    [categories],
+  );
+
+  // Fetch categories with accounts (single call replaces two separate calls)
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        // Check for cached categories
-        const cachedCategories = getCachedData(
-          CACHE_KEYS.popularCategories,
-          CACHE_KEYS.popularCategoriesExpiry,
+        // Check in-memory cache first
+        const cached = getCached<PopularCategoryWithAccounts[]>(
+          "popularCategoryData",
         );
-
-        if (cachedCategories) {
-          setPopularCategories(cachedCategories);
-          setLoadingCategories(false);
-          if (cachedCategories.length > 0) {
-            setSelectedCategory(cachedCategories[0].name);
-          }
-          return;
-        }
-
-        const category_data = await getMostPopularCategories();
-        setPopularCategories(category_data);
-        setLoadingCategories(false);
-        if (category_data.length > 0) {
-          setSelectedCategory(category_data[0].name);
-        }
-
-        setCacheWithExpiry(
-          CACHE_KEYS.popularCategories,
-          CACHE_KEYS.popularCategoriesExpiry,
-          category_data,
-        );
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        setLoadingCategories(false);
-      }
-    };
-
-    const fetchCategoriesWithData = async () => {
-      try {
-        // Check for cached category accounts
-        const cachedCategoryAccount = getCachedData(
-          CACHE_KEYS.categoryAccounts,
-          CACHE_KEYS.categoryAccountsExpiry,
-        );
-
-        if (cachedCategoryAccount) {
-          setCategories(cachedCategoryAccount);
-          setLoadingAccounts(false);
-          if (cachedCategoryAccount.length > 0) {
-            setSelectedCategory(cachedCategoryAccount[0].category.name);
+        if (cached) {
+          setCategories(cached);
+          setLoading(false);
+          if (cached.length > 0) {
+            setSelectedCategory(cached[0].category.name);
           }
           return;
         }
 
         const data = await getMostPopularCategoryWithData();
         setCategories(data);
-        setLoadingAccounts(false);
-
-        setCacheWithExpiry(
-          CACHE_KEYS.categoryAccounts,
-          CACHE_KEYS.categoryAccountsExpiry,
-          data,
-        );
+        setLoading(false);
+        setCache("popularCategoryData", data);
 
         if (data.length > 0) {
           setSelectedCategory(data[0].category.name);
         }
       } catch (error) {
         console.error("Failed to fetch categories with accounts:", error);
-        setLoadingAccounts(false);
+        setLoading(false);
       }
     };
 
-    fetchCategories();
-    fetchCategoriesWithData();
+    fetchData();
   }, []);
 
   const selectedCategoryData = categories.find(
     (cat) => cat.category.name === selectedCategory,
   );
 
-  const handleSelectCategory = (category: string) => {
+  const handleSelectCategory = useCallback((category: string) => {
     setSelectedCategory(category);
-  };
+  }, []);
 
   return (
     <div className="flex flex-col ml-0 sm:ml-5 my-0 sm:my-[5rem]">
@@ -370,7 +293,7 @@ const PopularCategories = () => {
             </SheetTitle>
 
             <div className="mt-6">
-              {loadingCategories ? (
+              {loading ? (
                 <MostPopularCategoryLoadingCard />
               ) : (
                 <CategoryList
@@ -394,7 +317,7 @@ const PopularCategories = () => {
         <div className="hidden sm:block w-2/5 md:w-1/4 pr-4">
           {/* Desktop Categories */}
           <div className="hidden sm:block">
-            {loadingCategories ? (
+            {loading ? (
               <MostPopularCategoryLoadingCard />
             ) : (
               <CategoryList
@@ -414,7 +337,7 @@ const PopularCategories = () => {
         </div>
 
         <div className="mr-0 sm:mr-5 w-full sm:w-3/5 md:w-3/4 ">
-          {loadingAccounts ? (
+          {loading ? (
             <MostPopularCreatorLoadingCard />
           ) : selectedCategoryData ? (
             <>

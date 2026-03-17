@@ -1,8 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth, useUser, SignIn } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { useTheme } from "next-themes";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 import {
   ChevronDown,
@@ -15,6 +18,9 @@ import {
   Settings,
   User,
   SunMoon,
+  BookOpen,
+  Newspaper,
+  Layers3,
 } from "lucide-react";
 
 import {
@@ -34,17 +40,97 @@ import {
   ModeToggle,
   IconToggle,
 } from "@ratecreator/ui";
+import { ny } from "@ratecreator/ui/utils";
 import { getInitials } from "@ratecreator/db/utils";
 
 const isProtectedRoute = (path: string) => {
   return path.startsWith("/review") || path.startsWith("/user-profile");
 };
 
+const HELP_CENTER_ITEMS = [
+  {
+    path: "/blog",
+    icon: Newspaper,
+    label: "Blog",
+    description: "Creator economy insights",
+  },
+  {
+    path: "/glossary",
+    icon: BookOpen,
+    label: "Glossary",
+    description: "Creator economy terms explained",
+  },
+  {
+    path: "/category-glossary",
+    icon: Layers3,
+    label: "Categories Glossary",
+    description: "Browse creator categories",
+  },
+];
+
+function HelpCenterDropdown({
+  onNavigate,
+}: {
+  onNavigate: (path: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEnter = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      <Button variant="ghost" className="gap-1">
+        Help Center
+        <ChevronDown
+          className={`size-3.5 opacity-60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-64 rounded-md border bg-popover text-popover-foreground p-1 shadow-lg z-50 animate-in fade-in-0 zoom-in-95 duration-100">
+          {HELP_CENTER_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => {
+                onNavigate(item.path);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 rounded-sm px-3 py-3 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+            >
+              <item.icon className="size-4 text-muted-foreground shrink-0" />
+              <div>
+                <div className="font-medium">{item.label}</div>
+                <div className="text-xs text-muted-foreground">
+                  {item.description}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MainMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleNavigation = (path: string) => {
     if (!isSignedIn && isProtectedRoute(path)) {
@@ -81,12 +167,7 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button
-            variant={"ghost"}
-            onClick={() => handleNavigation("/category-glossary")}
-          >
-            Help Center
-          </Button>
+          <HelpCenterDropdown onNavigate={handleNavigation} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -210,33 +291,54 @@ export function MainMenu() {
           {/* <Button variant={"ghost"} onClick={() => handleNavigation("/wip")}>
             Blog
           </Button> */}
-          <Button
-            variant={"ghost"}
-            onClick={() => handleNavigation("/category-glossary")}
-          >
-            Help Center
-          </Button>
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              const returnUrl = encodeURIComponent(pathname);
-              router.push(`/sign-in?redirect_url=${returnUrl}`);
-            }}
-          >
+          <HelpCenterDropdown onNavigate={handleNavigation} />
+          <Button variant={"outline"} onClick={() => setShowAuthModal(true)}>
             Log in
           </Button>
-          <Button
-            variant={"default"}
-            onClick={() => {
-              const returnUrl = encodeURIComponent(pathname);
-              router.push(`/sign-up?redirect_url=${returnUrl}`);
-            }}
-          >
+          <Button variant={"default"} onClick={() => setShowAuthModal(true)}>
             Get Started
           </Button>
           <div className="hidden lg:block">
             <ModeToggle />
           </div>
+
+          <DialogPrimitive.Root
+            open={showAuthModal}
+            onOpenChange={setShowAuthModal}
+          >
+            <DialogPrimitive.Portal>
+              <DialogPrimitive.Overlay
+                className={ny(
+                  "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
+                  "data-[state=open]:animate-in data-[state=closed]:animate-out",
+                  "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                )}
+              />
+              <DialogPrimitive.Content
+                className={ny(
+                  "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
+                  "data-[state=open]:animate-in data-[state=closed]:animate-out",
+                  "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                  "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+                  "outline-none",
+                )}
+              >
+                <DialogPrimitive.Title className="sr-only">
+                  Sign in to Rate Creator
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="sr-only">
+                  Sign in or create an account to continue.
+                </DialogPrimitive.Description>
+                <SignIn
+                  routing="hash"
+                  appearance={{
+                    baseTheme: isDark ? dark : undefined,
+                  }}
+                  fallbackRedirectUrl={pathname}
+                />
+              </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+          </DialogPrimitive.Root>
         </>
       )}
     </div>

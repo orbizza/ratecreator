@@ -39,8 +39,8 @@ export function NewsletterMarkdown({
   const schema = BlockNoteSchema.create({
     blockSpecs: {
       ...defaultBlockSpecs,
-      youtube: Youtube,
-      divider: Divider,
+      youtube: Youtube(),
+      divider: Divider(),
     },
   });
 
@@ -70,7 +70,7 @@ export function NewsletterMarkdown({
   useEffect(() => {
     const getMarkdown = async () => {
       if (editor) {
-        const blocks = editor.topLevelBlocks;
+        const blocks = editor.document as any[];
         let markdownContent = "";
 
         for (const block of blocks) {

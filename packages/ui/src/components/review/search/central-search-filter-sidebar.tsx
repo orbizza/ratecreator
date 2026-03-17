@@ -156,10 +156,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({}) => {
     resetRootCategoryFilter,
   ]);
 
-  if (!isMounted) {
-    return null;
-  }
-
   /**
    * FilterContent Component
    *

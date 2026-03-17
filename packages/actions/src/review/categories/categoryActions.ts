@@ -11,7 +11,7 @@ const CACHE_ALL_CATEGORIES = "category-all";
 export async function getCategoryData(): Promise<Category[]> {
   const redis = getRedisClient();
   const prisma = getPrismaClient();
-  const CACHE_EXPIRY = 60 * 60 * 24; // 24 hours in seconds
+  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
 
   try {
     // const response = await axios.get(
@@ -74,7 +74,7 @@ export async function getAllCategoriesAlphabetically(): Promise<{
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   const CACHE_ALPHABETICAL_CATEGORIES = "category-alphabetical";
-  const CACHE_EXPIRY = 60 * 60 * 24; // 24 hours in seconds
+  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
 
   try {
     // Check cache first
@@ -136,7 +136,7 @@ export async function getSingleGlossaryCategory(
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   const CACHE_SINGLE_GLOSSARY_CATEGORY = `category-single-glossary-${slug}`;
-  const CACHE_EXPIRY = 60 * 60 * 24; // 24 hours in seconds
+  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
 
   try {
     // Check cache first

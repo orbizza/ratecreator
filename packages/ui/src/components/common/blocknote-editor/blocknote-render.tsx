@@ -18,6 +18,7 @@ import React from "react";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
+import "@blocknote/core/style.css";
 import "@blocknote/mantine/style.css";
 
 import { Youtube } from "./youtube-blocknote";
@@ -40,8 +41,8 @@ interface BlockNoteRendererProps {
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    youtube: Youtube,
-    divider: Divider,
+    youtube: Youtube(),
+    divider: Divider(),
   },
 });
 

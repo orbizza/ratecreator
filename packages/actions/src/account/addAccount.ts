@@ -1,10 +1,7 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
-import {
-  getKafkaProducer,
-  createTopicIfNotExists,
-} from "@ratecreator/db/kafka-client";
+import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 
 type Platform =
   | "youtube"
@@ -115,29 +112,17 @@ export async function addAccount(
       },
     });
 
-    // Send event to Kafka for data fetch
+    // Send event to Pub/Sub for data fetch
     try {
-      const producer = await getKafkaProducer();
-      const topicName = "account-added";
-      await createTopicIfNotExists(topicName);
-
-      await producer.send({
-        topic: topicName,
-        messages: [
-          {
-            key: newAccount.id,
-            value: JSON.stringify({
-              accountId: newAccount.id,
-              platform: platformEnum,
-              platformAccountId,
-              addedByUserId,
-              timestamp: new Date().toISOString(),
-            }),
-          },
-        ],
+      await publishMessageWithKey("account-added", newAccount.id, {
+        accountId: newAccount.id,
+        platform: platformEnum,
+        platformAccountId,
+        addedByUserId,
+        timestamp: new Date().toISOString(),
       });
-    } catch (kafkaError) {
-      console.error("Failed to send Kafka event:", kafkaError);
+    } catch (pubsubError) {
+      console.error("Failed to send Pub/Sub event:", pubsubError);
       // Don't fail the operation, the account is created
     }
 

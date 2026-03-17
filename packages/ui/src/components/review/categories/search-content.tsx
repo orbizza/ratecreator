@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchBox, useHits } from "react-instantsearch";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
 import AlgoliaSearchWithAnimations from "./search-algolia-placeholder";
 import SearchResults from "./search-results";
 import { SearchResult } from "@ratecreator/types/review";
 import { searchCache } from "@ratecreator/db/utils";
+import { useCategorySearch } from "@ratecreator/hooks";
 
 /**
  * Props for the SearchContent component
@@ -22,9 +22,9 @@ interface SearchContentProps {
 }
 
 /**
- * Structure of Algolia search hits
+ * Structure of category search hits (from Elasticsearch)
  */
-interface AlgoliaHit {
+interface CategoryHit {
   objectID: string;
   name: string;
   slug: string;
@@ -43,7 +43,7 @@ interface AlgoliaHit {
 /**
  * SearchContent Component
  *
- * A search component that integrates with Algolia for category search functionality.
+ * A search component that integrates with Elasticsearch for category search functionality.
  * Features include:
  * - Debounced search input
  * - Search result caching
@@ -61,17 +61,19 @@ const SearchContent: React.FC<SearchContentProps> = ({
 }) => {
   const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { refine } = useSearchBox();
-  const { hits } = useHits<AlgoliaHit>();
+  const {
+    results: esResults,
+    isLoading,
+    error,
+  } = useCategorySearch(searchTerm);
   const [cachedResults, setCachedResults] = useState<SearchResult[] | null>(
     null,
   );
 
   /**
-   * Debounced search refinement function
-   * Checks cache first, then falls back to Algolia search
+   * Handle search input changes with debounced cache check
    */
-  const debouncedRefine = useCallback(
+  const debouncedCacheCheck = useCallback(
     debounce(async (value: string) => {
       const cached = await searchCache.getCachedResults(value);
       if (cached) {
@@ -79,21 +81,20 @@ const SearchContent: React.FC<SearchContentProps> = ({
         setIsSearchOpen(true);
       } else {
         setCachedResults(null);
-        refine(value);
         setIsSearchOpen(value.length > 0);
       }
     }, 300),
-    [refine],
+    [],
   );
 
   /**
    * Handle search input changes
-   * Updates search term and triggers debounced search
+   * Updates search term and triggers debounced cache check
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    debouncedRefine(newValue);
+    debouncedCacheCheck(newValue);
   };
 
   /**
@@ -106,7 +107,6 @@ const SearchContent: React.FC<SearchContentProps> = ({
       router.push(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
     setSearchTerm("");
-    refine("");
     setIsSearchOpen(false);
   };
 
@@ -119,11 +119,11 @@ const SearchContent: React.FC<SearchContentProps> = ({
   };
 
   /**
-   * Map Algolia hits to SearchResult format
-   * @param {AlgoliaHit[]} hits - Array of Algolia search hits
+   * Map ES hits to SearchResult format
+   * @param {CategoryHit[]} hits - Array of Elasticsearch search hits
    * @returns {SearchResult[]} Formatted search results
    */
-  const mapHitsToSearchResults = (hits: AlgoliaHit[]): SearchResult[] => {
+  const mapHitsToSearchResults = (hits: CategoryHit[]): SearchResult[] => {
     return hits.map((hit) => ({
       id: hit.objectID,
       name: hit.name,
@@ -146,17 +146,18 @@ const SearchContent: React.FC<SearchContentProps> = ({
   };
 
   /**
-   * Cache search results when new hits are received
+   * Cache search results when new hits are received from Elasticsearch
    */
   useEffect(() => {
-    if (hits.length > 0 && searchTerm) {
-      const results = mapHitsToSearchResults(hits);
+    if (esResults.length > 0 && searchTerm) {
+      const results = mapHitsToSearchResults(esResults as CategoryHit[]);
       searchCache.setCachedResults(searchTerm, results);
     }
-  }, [hits, searchTerm]);
+  }, [esResults, searchTerm]);
 
-  // Use cached results if available, otherwise use current hits
-  const displayResults = cachedResults || mapHitsToSearchResults(hits);
+  // Use cached results if available, otherwise use current ES results
+  const displayResults =
+    cachedResults || mapHitsToSearchResults(esResults as CategoryHit[]);
 
   return (
     <>
@@ -166,6 +167,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
         onChange={handleChange}
         onSearch={handleSearch}
         value={searchTerm}
+        isLoading={isLoading}
       />
       {isSearchOpen &&
         (displayResults.length > 0 ? (

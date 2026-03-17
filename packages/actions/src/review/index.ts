@@ -3,6 +3,7 @@ export * from "./categories/singleCategoryAction";
 export * from "./categories/mostPopularCategoryActions";
 export * from "./search/searchCreator";
 export * from "./creators/creatorActions";
+export * from "./creators/youtubeRefresh";
 export * from "./reviews/createReview";
 export * from "./reviews/fetchReviewsActions";
 export * from "./metadata/reddit";

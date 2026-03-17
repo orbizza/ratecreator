@@ -57,6 +57,10 @@ infra/**/secrets.yaml
 infra/**/*secret*.yaml
 infra/**/*secrets*.yaml
 infra/webhook/clerk-sync/secrets.yaml
+gcp-service-account.json
 
 
 
+
+# Migration checkpoints
+*checkpoint*.json

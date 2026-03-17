@@ -11,7 +11,7 @@ export default function SignInPage() {
             card: "bg-card border border-border shadow-lg",
           },
         }}
-        afterSignInUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         signUpUrl="/sign-up"
       />
     </div>

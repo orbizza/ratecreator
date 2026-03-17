@@ -87,7 +87,6 @@ docker-compose ps
 
 echo "✅ Deployment complete! Services are running."
 echo "📝 Services deployed:"
-echo "   - review-algolia-update"
 echo "   - review-calculate"
 
 # Show the logs

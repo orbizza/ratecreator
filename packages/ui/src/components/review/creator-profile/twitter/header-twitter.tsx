@@ -261,9 +261,9 @@ const TwitterChannelHeader = ({
     >
       {/* Banner Section */}
       <div className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] bg-muted rounded-lg ">
-        {account.bannerURL ? (
+        {account.bannerUrl ? (
           <Image
-            src={account.bannerURL}
+            src={account.bannerUrl}
             alt={`${account.name_en || account.name}'s banner`}
             fill
             priority

@@ -152,6 +152,35 @@ ratecreator/
 - Database indexing review
 - Rate limiting implementation
 
+## YouTube API ToS Compliance
+
+Rate Creator uses YouTube API Services and must comply with YouTube ToS. Key requirements:
+
+### Policy A - Legal Pages
+
+- `/legal/terms` must reference YouTube Terms of Service (https://www.youtube.com/t/terms)
+- `/legal/privacy` must reference Google Privacy Policy (http://www.google.com/policies/privacy)
+- Static compliance sections are rendered in `packages/ui/src/components/content/legal/legal-post.tsx`
+
+### Policy E.4 - Data Freshness
+
+- YouTube data must be refreshed at least every 7 days
+- On-demand refresh: `packages/actions/src/review/creators/youtubeRefresh.ts` triggers background refresh when `lastDataRefresh` > 7 days
+- Weekly cron: `apps/web/app/api/cron/youtube-refresh/route.ts` (Vercel Cron, Sundays 2 AM UTC)
+- Rate limited to 125 YouTube API calls/hour via Redis
+
+### Policy E.4h + F.2b - Content Differentiation
+
+- YouTube API data labeled with "Data from YouTube" badge (`DataSourceBadge source="youtube"`)
+- Community data (ratings, reviews) labeled with "Rate Creator Community" badge (`DataSourceBadge source="community"`)
+- Badge component: `packages/ui/src/components/review/creator-rating/data-source-badge.tsx`
+
+### Policy F.2a - YouTube Branding
+
+- All YouTube icons must use official SVG with `#FF0000` red
+- `YouTubeIcon` component in `packages/ui/src/components/review/creator-rating/platform-icons.tsx`
+- Do NOT use `SiYoutube` from `@icons-pack/react-simple-icons` or `react-icons` for YouTube
+
 ## Quick Start
 
 ```bash
