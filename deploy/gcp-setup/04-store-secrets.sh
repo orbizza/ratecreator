@@ -68,6 +68,10 @@ get "elastic-url" "ELASTIC_URL" "Elastic endpoint URL (https://...elastic.cloud:
 get "elastic-api-key" "ELASTIC_API_KEY" "Elastic API key"
 
 echo ""
+echo "── Clerk ──"
+get "clerk-webhook-secret" "CLERK_WEBHOOK_SECRET" "Clerk webhook signing secret (whsec_...)"
+
+echo ""
 echo "── Platform APIs ──"
 get "youtube-api-key" "YOUTUBE_API_KEY" "YouTube API key"
 get "twitter-bearer-token" "TWITTER_BEARER_TOKEN" "Twitter bearer token"

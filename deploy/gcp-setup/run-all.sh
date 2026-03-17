@@ -69,7 +69,7 @@ check_step_4() {
   # Core secrets exist?
   gcloud secrets describe db-url --project="${PROJECT_ID}" &>/dev/null && \
   gcloud secrets describe gcp-project-id --project="${PROJECT_ID}" &>/dev/null && \
-  gcloud secrets describe elastic-cloud-id --project="${PROJECT_ID}" &>/dev/null
+  gcloud secrets describe elastic-url --project="${PROJECT_ID}" &>/dev/null
 }
 
 check_step_5() {

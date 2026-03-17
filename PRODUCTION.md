@@ -355,22 +355,46 @@ The workers service handles Clerk webhooks directly (no separate app needed).
 
 ```bash
 gcloud run services describe ratecreator-workers --region=us-central1 --format='value(status.url)'
-# Returns: https://ratecreator-workers-xxxxx-uc.a.run.app
+# Returns: https://ratecreator-workers-667931755762.us-central1.run.app
 ```
 
 The Clerk webhook URL is: `<WORKERS_URL>/webhook/clerk`
 
+### Allow Unauthenticated Access for Webhook
+
+Cloud Run defaults to `--no-allow-unauthenticated`, which blocks Clerk webhooks
+(Clerk doesn't send GCP IAM tokens). Since Svix signature verification secures
+the webhook route, allow unauthenticated access:
+
+```bash
+gcloud run services add-iam-policy-binding ratecreator-workers \
+  --region=us-central1 \
+  --member="allUsers" \
+  --role="roles/run.invoker"
+```
+
+> **Security note:** Pub/Sub push subscriptions still include OIDC tokens via
+> `--push-auth-service-account`. The webhook route is protected by Svix
+> signature verification. Job routes (`/jobs/*`) accept any POST but only
+> process valid Pub/Sub message formats.
+
 ### Setup in Clerk Dashboard
 
 1. Go to **Clerk Dashboard** → **Webhooks**
-2. Add endpoint: `https://ratecreator-workers-xxxxx-uc.a.run.app/webhook/clerk` (use your actual Workers URL from above)
+2. Add endpoint: `https://ratecreator-workers-667931755762.us-central1.run.app/webhook/clerk`
 3. Select events: `user.created`, `user.updated`, `user.deleted`
 4. Copy the **Signing Secret** from Clerk (starts with `whsec_`)
 5. Add it to GCP Secret Manager:
    ```bash
-   echo -n "whsec_..." | gcloud secrets create CLERK_WEBHOOK_SECRET --data-file=-
+   echo -n "whsec_..." | gcloud secrets create clerk-webhook-secret --data-file=-
    ```
-6. Verify it's linked to Cloud Run (already done in Section 5 env vars)
+   Grant access to the service account:
+   ```bash
+   gcloud secrets add-iam-policy-binding clerk-webhook-secret \
+     --member="serviceAccount:rc-services@sinuous-aviary-410323.iam.gserviceaccount.com" \
+     --role="roles/secretmanager.secretAccessor"
+   ```
+6. Redeploy workers to pick up the new secret (or run `gcloud builds submit`)
 
 ### Flow
 
@@ -656,6 +680,49 @@ gcloud builds triggers list --region=us-central1
 
 # View recent Cloud Build logs
 gcloud builds list --limit=5
+```
+
+---
+
+## Deploy Scripts
+
+Pre-built setup scripts in `deploy/gcp-setup/`:
+
+```bash
+# Run all GCP setup steps (auto-skips completed steps)
+cd deploy/gcp-setup
+./run-all.sh
+
+# Run from a specific step
+./run-all.sh --from 5
+
+# Run only one step
+./run-all.sh --step 3
+
+# Force re-run all steps
+./run-all.sh --force
+```
+
+| Step | Script                               | What It Does                          |
+| ---- | ------------------------------------ | ------------------------------------- |
+| 00   | `00-setup-project.sh`                | Enable GCP APIs                       |
+| 01   | `01-create-service-account.sh`       | Create service account + IAM roles    |
+| 02   | `02-create-artifact-registry.sh`     | Create Artifact Registry              |
+| 03   | `03-create-pubsub.sh`                | Create Pub/Sub topics + subscriptions |
+| 04   | `04-store-secrets.sh`                | Store secrets in Secret Manager       |
+| 05   | `05-deploy-workers.sh`               | Build + deploy workers to Cloud Run   |
+| 06   | `06-configure-push-subscriptions.sh` | Configure push endpoints              |
+| 07   | `07-create-cloud-scheduler.sh`       | Create Cloud Scheduler jobs           |
+| 08   | `08-verify.sh`                       | Verify entire setup                   |
+| 09   | `09-create-storage-bucket.sh`        | Create GCS buckets                    |
+| 10   | `10-migrate-content-to-gcs.sh`       | Migrate DO Spaces to GCS (optional)   |
+| 11   | `11-migrate-elasticsearch.sh`        | Migrate accounts + categories to ES   |
+
+Quick deploy (after initial setup):
+
+```bash
+# Deploy workers only
+deploy/cloud-run/deploy.sh
 ```
 
 ---

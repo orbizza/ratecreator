@@ -55,7 +55,7 @@ gcloud run deploy "${SERVICE}" \
   --memory "${MEMORY}" \
   --cpu "${CPU}" \
   --port 8080 \
-  --set-secrets="DATABASE_URL_ONLINE=db-url:latest,REDIS_HOST=redis-host:latest,REDIS_PORT=redis-port:latest,REDIS_USERNAME=redis-username:latest,REDIS_PASSWORD=redis-password:latest,GCP_PROJECT_ID=gcp-project-id:latest,ELASTIC_CLOUD_ID=elastic-cloud-id:latest,ELASTIC_API_KEY=elastic-api-key:latest,YOUTUBE_API_KEY=youtube-api-key:latest,TWITTER_BEARER_TOKEN=twitter-bearer-token:latest,INSTAGRAM_ACCESS_TOKEN=instagram-access-token:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=instagram-business-account-id:latest" \
+  --set-secrets="DATABASE_URL_ONLINE=db-url:latest,REDIS_HOST=redis-host:latest,REDIS_PORT=redis-port:latest,REDIS_USERNAME=redis-username:latest,REDIS_PASSWORD=redis-password:latest,GCP_PROJECT_ID=gcp-project-id:latest,ELASTIC_URL=elastic-url:latest,ELASTIC_API_KEY=elastic-api-key:latest,YOUTUBE_API_KEY=youtube-api-key:latest,TWITTER_BEARER_TOKEN=twitter-bearer-token:latest,INSTAGRAM_ACCESS_TOKEN=instagram-access-token:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=instagram-business-account-id:latest,CLERK_WEBHOOK_SECRET=clerk-webhook-secret:latest" \
   --no-allow-unauthenticated
 
 echo ""
