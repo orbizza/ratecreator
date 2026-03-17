@@ -3,6 +3,12 @@
  *
  * Provides search functionality as a drop-in replacement for Algolia.
  * Supports full-text search, faceted filtering, and range queries.
+ *
+ * Search architecture:
+ *   - MUST layer: AND semantics — every search term must match somewhere
+ *   - SHOULD layer: Relevance boosting — exact, phrase, infix, fuzzy matches
+ *   - FILTER layer: Faceted filters (platform, country, range, etc.)
+ *   - function_score: Popularity boost via followerCount
  */
 
 import { Client } from "@elastic/elasticsearch";
@@ -49,6 +55,29 @@ export function getElasticsearchClient(): Client {
 // Index names
 const ACCOUNTS_INDEX = process.env.ELASTIC_ACCOUNTS_INDEX || "accounts";
 const CATEGORIES_INDEX = process.env.ELASTIC_CATEGORIES_INDEX || "categories";
+
+/**
+ * Search feature flags — tune search behavior without code changes.
+ * All default to enabled if the env var is not set.
+ */
+const SEARCH_CONFIG = {
+  enableFuzzy: process.env.SEARCH_ENABLE_FUZZY !== "false",
+  enableInfix: process.env.SEARCH_ENABLE_INFIX !== "false",
+  enablePopularityBoost: process.env.SEARCH_ENABLE_POPULARITY_BOOST !== "false",
+  fuzzyThreshold: process.env.SEARCH_FUZZY_THRESHOLD || "5,8",
+  fuzzyPrefixLength: parseInt(
+    process.env.SEARCH_FUZZY_PREFIX_LENGTH || "2",
+    10,
+  ),
+  infixMinQueryLength: parseInt(
+    process.env.SEARCH_INFIX_MIN_QUERY_LENGTH || "4",
+    10,
+  ),
+  popularityFactor: parseFloat(
+    process.env.SEARCH_POPULARITY_FACTOR || "0.0001",
+  ),
+  popularityModifier: process.env.SEARCH_POPULARITY_MODIFIER || "sqrt",
+};
 
 /**
  * Search parameters matching Algolia interface
@@ -130,178 +159,62 @@ function parseRange(
 }
 
 /**
- * Build Elasticsearch query from search parameters
+ * Searchable fields ordered by priority (matching Algolia's configuration).
+ * Boosts match Algolia's ordered/unordered attribute priority.
+ */
+const SEARCH_FIELDS = [
+  "name^5",
+  "handle^4",
+  "keywords^2",
+  "categoryNames^2",
+  "description",
+  "platform",
+  "language_code",
+  "country",
+];
+
+/**
+ * Build Elasticsearch query from search parameters.
+ *
+ * Architecture:
+ *   function_score {
+ *     query: bool {
+ *       must:   AND semantics — each term must match somewhere
+ *       should: Relevance boosting — exact/phrase/infix/fuzzy
+ *       filter: Faceted filters
+ *     }
+ *     functions: popularity boost (followerCount)
+ *   }
  */
 function buildQuery(params: SearchAccountsParams): any {
-  const must: any[] = [];
   const filter: any[] = [];
 
-  // Full-text search query with multiple strategies for comprehensive matching
-  if (params.query && params.query.trim()) {
-    const query = params.query.trim();
-    const queryNoSpaces = query.replace(/\s+/g, "");
+  // ── Filters (unchanged from previous implementation) ───────
 
-    const queryLower = query.toLowerCase();
-    const queryNoSpacesLower = queryNoSpaces.toLowerCase();
-
-    const shouldClauses: any[] = [
-      // Strategy 1: Exact match on handle/name — highest priority
-      // "tseries" → @tseries (289M) ranks above @tseriesbhaktisagar (74.7M)
-      {
-        term: {
-          "handle.keyword": {
-            value: queryLower,
-            boost: 200,
-          },
-        },
-      },
-      {
-        wildcard: {
-          "name.keyword": {
-            value: query,
-            boost: 200,
-            case_insensitive: true,
-          },
-        },
-      },
-      // Strategy 2: Exact token multi_match (no fuzziness) — primary search
-      {
-        multi_match: {
-          query,
-          fields: [
-            "name^5",
-            "name_en^5",
-            "handle^4",
-            "keywords^2",
-            "keywords_en^2",
-            "categories^2",
-            "description",
-            "description_en",
-            "platform",
-            "language_code",
-            "country",
-          ],
-          type: "best_fields",
-        },
-      },
-      // Strategy 2b: Fuzzy multi_match for typo tolerance on longer queries
-      // AUTO:5,8 = exact for 1-4 chars, fuzziness 1 for 5-7, fuzziness 2 for 8+
-      // Prevents "sony" from matching "song" (edit distance 1)
-      {
-        multi_match: {
-          query,
-          fields: ["name^3", "name_en^3", "handle^2"],
-          type: "best_fields",
-          fuzziness: "AUTO:5,8",
-          prefix_length: 1,
-          boost: 0.5,
-        },
-      },
-      // Strategy 3: Phrase prefix on name/handle (handles "mrb" → "MrBeast")
-      { match_phrase_prefix: { name: { query, boost: 10 } } },
-      { match_phrase_prefix: { name_en: { query, boost: 10 } } },
-      { match_phrase_prefix: { handle: { query, boost: 8 } } },
-      // Strategy 4: Wildcard on keyword fields for substring matching
-      // Handles "beast" → "MrBeast" (infix match, not just prefix)
-      {
-        wildcard: {
-          "name.keyword": {
-            value: `*${query}*`,
-            boost: 3,
-            case_insensitive: true,
-          },
-        },
-      },
-      {
-        wildcard: {
-          "handle.keyword": {
-            value: `*${query}*`,
-            boost: 3,
-            case_insensitive: true,
-          },
-        },
-      },
-    ];
-
-    // Strategy 5: If query has spaces, also try concatenated version
-    // "mr beast" → "mrbeast" matches "MrBeast" via edge_ngram
-    if (queryNoSpacesLower !== queryLower) {
-      shouldClauses.push(
-        // Exact match on concatenated query
-        {
-          term: {
-            "handle.keyword": {
-              value: queryNoSpacesLower,
-              boost: 200,
-            },
-          },
-        },
-        { match_phrase_prefix: { name: { query: queryNoSpaces, boost: 10 } } },
-        {
-          match_phrase_prefix: {
-            name_en: { query: queryNoSpaces, boost: 10 },
-          },
-        },
-        {
-          match_phrase_prefix: {
-            handle: { query: queryNoSpaces, boost: 8 },
-          },
-        },
-      );
-    }
-
-    must.push({
-      function_score: {
-        query: {
-          bool: {
-            should: shouldClauses,
-            minimum_should_match: 1,
-          },
-        },
-        functions: [
-          {
-            field_value_factor: {
-              field: "followerCount",
-              factor: 0.0001,
-              modifier: "sqrt",
-              missing: 1,
-            },
-          },
-        ],
-        boost_mode: "multiply",
-      },
-    });
-  }
-
-  // Platform filter
   if (params.filters?.platform?.length) {
     filter.push({
       terms: { platform: params.filters.platform.map((p) => p.toUpperCase()) },
     });
   }
 
-  // Country filter
   if (params.filters?.country?.length) {
     filter.push({
       terms: { country: params.filters.country },
     });
   }
 
-  // Language filter
   if (params.filters?.language?.length) {
     filter.push({
       terms: { language_code: params.filters.language },
     });
   }
 
-  // Categories filter
   if (params.filters?.categories?.length) {
     filter.push({
       terms: { categories: params.filters.categories },
     });
   }
 
-  // Boolean filters
   if (params.filters?.madeForKids !== undefined) {
     filter.push({
       term: { madeForKids: params.filters.madeForKids },
@@ -314,7 +227,6 @@ function buildQuery(params: SearchAccountsParams): any {
     });
   }
 
-  // Range filters
   if (params.filters?.followers) {
     const range = parseRange(params.filters.followers);
     if (range) {
@@ -371,10 +283,144 @@ function buildQuery(params: SearchAccountsParams): any {
     }
   }
 
+  // ── No query: match all with filters ───────────────────────
+
+  if (!params.query || !params.query.trim()) {
+    return {
+      bool: {
+        must: [{ match_all: {} }],
+        filter,
+      },
+    };
+  }
+
+  // ── Full-text search query ─────────────────────────────────
+
+  const query = params.query.trim();
+  const queryNoSpaces = query.replace(/\s+/g, "");
+  const terms = query.split(/\s+/).filter((t) => t.length > 0);
+
+  // LAYER 1: MUST — AND semantics (filters out non-matching docs)
+  let mustClause: any;
+
+  if (terms.length > 1) {
+    // Multi-word: EACH term must match in at least one field
+    mustClause = {
+      bool: {
+        must: terms.map((term) => ({
+          bool: {
+            should: [
+              { multi_match: { query: term, fields: SEARCH_FIELDS } },
+              { match_phrase_prefix: { name: { query: term } } },
+              { match_phrase_prefix: { handle: { query: term } } },
+            ],
+            minimum_should_match: 1,
+          },
+        })),
+      },
+    };
+  } else {
+    // Single-word: term must match in at least one field
+    const singleWordShould: any[] = [
+      { multi_match: { query, fields: SEARCH_FIELDS } },
+      { match_phrase_prefix: { name: { query } } },
+      { match_phrase_prefix: { handle: { query } } },
+    ];
+
+    // Infix matching for substrings ("beast" → "MrBeast")
+    if (
+      SEARCH_CONFIG.enableInfix &&
+      query.length >= SEARCH_CONFIG.infixMinQueryLength
+    ) {
+      singleWordShould.push(
+        { match: { "name.infix": { query } } },
+        { match: { "handle.infix": { query } } },
+      );
+    }
+
+    mustClause = {
+      bool: {
+        should: singleWordShould,
+        minimum_should_match: 1,
+      },
+    };
+  }
+
+  // LAYER 2: SHOULD — Relevance boosting (scores matched docs)
+  const shouldClauses: any[] = [
+    // Exact match on name/handle (boost: 200) — case-insensitive via exact_lowercase analyzer
+    { match: { "name.exact": { query, boost: 200 } } },
+    { match: { "handle.exact": { query, boost: 200 } } },
+    // Phrase match on name/handle (boost: 50) — rewards word-order match
+    { match_phrase: { name: { query, boost: 50 } } },
+    { match_phrase: { handle: { query, boost: 50 } } },
+    // Phrase prefix on name/handle (boost: 20) — handles partial typing
+    { match_phrase_prefix: { name: { query, boost: 20 } } },
+    { match_phrase_prefix: { handle: { query, boost: 20 } } },
+  ];
+
+  // Infix matching (boost: 5) — substring matching via ngram tokens
+  if (
+    SEARCH_CONFIG.enableInfix &&
+    query.length >= SEARCH_CONFIG.infixMinQueryLength
+  ) {
+    shouldClauses.push(
+      { match: { "name.infix": { query, boost: 5 } } },
+      { match: { "handle.infix": { query, boost: 5 } } },
+    );
+  }
+
+  // Fuzzy matching (boost: 0.3) — typo tolerance, gated and conservative
+  // AUTO:5,8 = exact for 1-4 chars, fuzziness 1 for 5-7, fuzziness 2 for 8+
+  if (SEARCH_CONFIG.enableFuzzy) {
+    shouldClauses.push({
+      multi_match: {
+        query,
+        fields: ["name^3", "handle^2"],
+        type: "best_fields",
+        fuzziness: `AUTO:${SEARCH_CONFIG.fuzzyThreshold}`,
+        prefix_length: SEARCH_CONFIG.fuzzyPrefixLength,
+        boost: 0.3,
+      },
+    });
+  }
+
+  // Concatenated form for multi-word queries ("mr beast" → "mrbeast")
+  if (terms.length > 1) {
+    shouldClauses.push(
+      { match: { "name.exact": { query: queryNoSpaces, boost: 200 } } },
+      { match: { "handle.exact": { query: queryNoSpaces, boost: 200 } } },
+      {
+        match_phrase_prefix: { name: { query: queryNoSpaces, boost: 20 } },
+      },
+      {
+        match_phrase_prefix: { handle: { query: queryNoSpaces, boost: 20 } },
+      },
+    );
+  }
+
   return {
-    bool: {
-      must: must.length > 0 ? must : [{ match_all: {} }],
-      filter,
+    function_score: {
+      query: {
+        bool: {
+          must: [mustClause],
+          should: shouldClauses,
+          filter,
+        },
+      },
+      functions: SEARCH_CONFIG.enablePopularityBoost
+        ? [
+            {
+              field_value_factor: {
+                field: "followerCount",
+                factor: SEARCH_CONFIG.popularityFactor,
+                modifier: SEARCH_CONFIG.popularityModifier,
+                missing: 1,
+              },
+            },
+          ]
+        : [],
+      boost_mode: "multiply",
     },
   };
 }
@@ -398,23 +444,39 @@ const SORT_FIELD_MAP: Record<string, string> = {
 };
 
 /**
- * Build sort configuration.
- * User's explicit sort choice is always primary.
- * Relevance (_score) is used as tiebreaker when there's a search query.
- * The function_score in buildQuery already incorporates follower count
- * into relevance, so results are well-ordered even without _score as primary.
+ * Build sort configuration with smart relevance handling.
+ *
+ * When user has a search query AND hasn't explicitly changed the sort
+ * dropdown (default is "followed"/followerCount), use _score as primary
+ * sort so relevance drives the ordering. The function_score already
+ * factors in followerCount via field_value_factor, so popular accounts
+ * still get boosted within relevance ranking.
+ *
+ * When user explicitly changes sort (e.g., "rated", "videos"), honor that.
  */
 function buildSort(params: SearchAccountsParams): any[] {
   const rawField = params.sortBy || "followerCount";
   const sortField = SORT_FIELD_MAP[rawField] || rawField;
   const sortOrder = params.sortOrder || "desc";
 
+  const hasQuery = params.query && params.query.trim();
+  const isDefaultSort = rawField === "followed" || rawField === "followerCount";
+
+  // When searching with default sort, prioritize relevance
+  if (hasQuery && isDefaultSort) {
+    return [
+      { _score: "desc" },
+      { followerCount: { order: "desc", unmapped_type: "long" } },
+    ];
+  }
+
+  // When user explicitly changed sort, honor it
   const sort: any[] = [
     { [sortField]: { order: sortOrder, unmapped_type: "long" } },
   ];
 
   // Add relevance as tiebreaker when there's a search query
-  if (params.query && params.query.trim()) {
+  if (hasQuery) {
     sort.push({ _score: "desc" });
   }
 
@@ -622,6 +684,109 @@ export async function searchCategories(query: string): Promise<any[]> {
 }
 
 /**
+ * Accounts index settings — analyzers and field mappings.
+ *
+ * Analyzers:
+ *   - autocomplete: edge_ngram (2-20) for prefix matching
+ *   - autocomplete_search: standard tokenizer for search-time (no ngrams)
+ *   - infix: ngram (3-8) for substring matching ("beast" → "MrBeast")
+ *   - exact_lowercase: keyword + lowercase for case-insensitive exact match
+ */
+const ACCOUNTS_INDEX_SETTINGS = {
+  settings: {
+    analysis: {
+      analyzer: {
+        autocomplete: {
+          type: "custom" as const,
+          tokenizer: "standard",
+          filter: ["lowercase", "autocomplete_filter"],
+        },
+        autocomplete_search: {
+          type: "custom" as const,
+          tokenizer: "standard",
+          filter: ["lowercase"],
+        },
+        infix: {
+          type: "custom" as const,
+          tokenizer: "standard",
+          filter: ["lowercase", "infix_filter"],
+        },
+        exact_lowercase: {
+          type: "custom" as const,
+          tokenizer: "keyword",
+          filter: ["lowercase", "trim"],
+        },
+      },
+      filter: {
+        autocomplete_filter: {
+          type: "edge_ngram" as const,
+          min_gram: 2,
+          max_gram: 20,
+        },
+        infix_filter: {
+          type: "ngram" as const,
+          min_gram: 4,
+          max_gram: 5,
+        },
+      },
+    },
+  },
+  mappings: {
+    properties: {
+      objectID: { type: "keyword" },
+      platform: { type: "keyword" },
+      accountId: { type: "keyword" },
+      handle: {
+        type: "text",
+        analyzer: "autocomplete",
+        search_analyzer: "autocomplete_search",
+        fields: {
+          keyword: { type: "keyword" },
+          exact: { type: "text", analyzer: "exact_lowercase" },
+          infix: {
+            type: "text",
+            analyzer: "infix",
+            search_analyzer: "autocomplete_search",
+          },
+        },
+      },
+      name: {
+        type: "text",
+        analyzer: "autocomplete",
+        search_analyzer: "autocomplete_search",
+        fields: {
+          keyword: { type: "keyword" },
+          exact: { type: "text", analyzer: "exact_lowercase" },
+          infix: {
+            type: "text",
+            analyzer: "infix",
+            search_analyzer: "autocomplete_search",
+          },
+        },
+      },
+      description: { type: "text" },
+      keywords: { type: "text" },
+      imageUrl: { type: "keyword", index: false },
+      bannerUrl: { type: "keyword", index: false },
+      followerCount: { type: "long" },
+      country: { type: "keyword" },
+      language_code: { type: "keyword" },
+      rating: { type: "float" },
+      reviewCount: { type: "integer" },
+      madeForKids: { type: "boolean" },
+      claimed: { type: "boolean" },
+      videoCount: { type: "integer" },
+      viewCount: { type: "long" },
+      categories: { type: "keyword" },
+      categoryNames: { type: "text" },
+      createdDate: { type: "date" },
+      isSeeded: { type: "boolean" },
+      lastIndexedAt: { type: "date" },
+    },
+  },
+};
+
+/**
  * Create indices with proper mappings
  */
 export async function createIndices(): Promise<void> {
@@ -632,75 +797,7 @@ export async function createIndices(): Promise<void> {
   if (!accountsExists) {
     await client.indices.create({
       index: ACCOUNTS_INDEX,
-      body: {
-        settings: {
-          analysis: {
-            analyzer: {
-              autocomplete: {
-                type: "custom",
-                tokenizer: "standard",
-                filter: ["lowercase", "autocomplete_filter"],
-              },
-              autocomplete_search: {
-                type: "custom",
-                tokenizer: "standard",
-                filter: ["lowercase"],
-              },
-            },
-            filter: {
-              autocomplete_filter: {
-                type: "edge_ngram",
-                min_gram: 1,
-                max_gram: 20,
-              },
-            },
-          },
-        },
-        mappings: {
-          properties: {
-            objectID: { type: "keyword" },
-            platform: { type: "keyword" },
-            accountId: { type: "keyword" },
-            handle: {
-              type: "text",
-              analyzer: "autocomplete",
-              search_analyzer: "autocomplete_search",
-              fields: { keyword: { type: "keyword" } },
-            },
-            name: {
-              type: "text",
-              analyzer: "autocomplete",
-              search_analyzer: "autocomplete_search",
-              fields: { keyword: { type: "keyword" } },
-            },
-            name_en: {
-              type: "text",
-              analyzer: "autocomplete",
-              search_analyzer: "autocomplete_search",
-            },
-            description: { type: "text" },
-            description_en: { type: "text" },
-            keywords: { type: "text" },
-            keywords_en: { type: "text" },
-            imageUrl: { type: "keyword", index: false },
-            bannerUrl: { type: "keyword", index: false },
-            followerCount: { type: "long" },
-            country: { type: "keyword" },
-            language_code: { type: "keyword" },
-            rating: { type: "float" },
-            reviewCount: { type: "integer" },
-            madeForKids: { type: "boolean" },
-            claimed: { type: "boolean" },
-            videoCount: { type: "integer" },
-            viewCount: { type: "long" },
-            categories: { type: "keyword" },
-            categoryNames: { type: "text" },
-            createdDate: { type: "date" },
-            isSeeded: { type: "boolean" },
-            lastIndexedAt: { type: "date" },
-          },
-        },
-      },
+      body: ACCOUNTS_INDEX_SETTINGS as any,
     });
     console.log(`Created index: ${ACCOUNTS_INDEX}`);
   }
@@ -735,6 +832,11 @@ export async function createIndices(): Promise<void> {
     console.log(`Created index: ${CATEGORIES_INDEX}`);
   }
 }
+
+/**
+ * Exported for use by migration/reindex scripts
+ */
+export { ACCOUNTS_INDEX_SETTINGS };
 
 /**
  * Check cluster health

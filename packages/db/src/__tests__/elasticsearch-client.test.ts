@@ -156,24 +156,26 @@ describe("Elasticsearch Client", () => {
       );
     });
 
-    it("should build multi_match query for search text", async () => {
+    it("should build function_score query with AND semantics for multi-word search", async () => {
       const { searchAccounts } =
         await import("../clients/elasticsearch-client");
 
       await searchAccounts({ query: "tech creator" });
 
+      // With multi-word queries, the new structure uses function_score wrapping
+      // a bool query where each term must match in at least one field (AND semantics)
       expect(mockElasticClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
             query: expect.objectContaining({
-              bool: expect.objectContaining({
-                must: expect.arrayContaining([
-                  expect.objectContaining({
-                    multi_match: expect.objectContaining({
-                      query: "tech creator",
-                    }),
+              function_score: expect.objectContaining({
+                query: expect.objectContaining({
+                  bool: expect.objectContaining({
+                    must: expect.any(Array),
+                    should: expect.any(Array),
                   }),
-                ]),
+                }),
+                boost_mode: "multiply",
               }),
             }),
           }),
@@ -523,7 +525,11 @@ describe("Elasticsearch Client", () => {
       expect(mockElasticClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
-            sort: expect.arrayContaining([{ rating: "desc" }]),
+            sort: expect.arrayContaining([
+              expect.objectContaining({
+                rating: expect.objectContaining({ order: "desc" }),
+              }),
+            ]),
           }),
         }),
       );

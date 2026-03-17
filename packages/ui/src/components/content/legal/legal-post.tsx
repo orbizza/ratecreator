@@ -61,7 +61,7 @@ export const LegalPost = ({ postUrl: postUrlProp }: LegalPostProps = {}) => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto mt-20">
+    <div className="max-w-6xl mx-auto mt-20 mb-20">
       {post && (
         <>
           <div className="flex gap-2 justify-center mb-10">

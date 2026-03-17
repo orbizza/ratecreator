@@ -187,6 +187,7 @@ function buildDocument(account: any, categorySlugs: string[]) {
     bannerUrl:
       account.bannerUrl ?? pd?.brandingSettings?.image?.bannerExternalUrl ?? "",
     categories: categorySlugs,
+    categoryNames: categorySlugs.map((slug) => slug.replace(/-/g, " ")),
     createdDate: pd?.snippet?.publishedAt ?? null,
   };
 }
@@ -245,12 +246,27 @@ async function createIndexIfNotExists(client: Client) {
               tokenizer: "standard",
               filter: ["lowercase"],
             },
+            infix: {
+              type: "custom",
+              tokenizer: "standard",
+              filter: ["lowercase", "infix_filter"],
+            },
+            exact_lowercase: {
+              type: "custom",
+              tokenizer: "keyword",
+              filter: ["lowercase", "trim"],
+            },
           },
           filter: {
             autocomplete_filter: {
               type: "edge_ngram",
-              min_gram: 1,
+              min_gram: 2,
               max_gram: 20,
+            },
+            infix_filter: {
+              type: "ngram",
+              min_gram: 4,
+              max_gram: 5,
             },
           },
         },
@@ -259,17 +275,34 @@ async function createIndexIfNotExists(client: Client) {
         properties: {
           objectID: { type: "keyword" },
           platform: { type: "keyword" },
+          accountId: { type: "keyword" },
           handle: {
             type: "text",
             analyzer: "autocomplete",
             search_analyzer: "autocomplete_search",
-            fields: { keyword: { type: "keyword" } },
+            fields: {
+              keyword: { type: "keyword" },
+              exact: { type: "text", analyzer: "exact_lowercase" },
+              infix: {
+                type: "text",
+                analyzer: "infix",
+                search_analyzer: "autocomplete_search",
+              },
+            },
           },
           name: {
             type: "text",
             analyzer: "autocomplete",
             search_analyzer: "autocomplete_search",
-            fields: { keyword: { type: "keyword" } },
+            fields: {
+              keyword: { type: "keyword" },
+              exact: { type: "text", analyzer: "exact_lowercase" },
+              infix: {
+                type: "text",
+                analyzer: "infix",
+                search_analyzer: "autocomplete_search",
+              },
+            },
           },
           description: { type: "text" },
           keywords: { type: "text" },
@@ -281,9 +314,14 @@ async function createIndexIfNotExists(client: Client) {
           rating: { type: "float" },
           reviewCount: { type: "integer" },
           madeForKids: { type: "boolean" },
+          claimed: { type: "boolean" },
           videoCount: { type: "integer" },
+          viewCount: { type: "long" },
           categories: { type: "keyword" },
+          categoryNames: { type: "text" },
           createdDate: { type: "date" },
+          isSeeded: { type: "boolean" },
+          lastIndexedAt: { type: "date" },
         },
       },
     },

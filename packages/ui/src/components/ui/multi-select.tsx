@@ -185,8 +185,9 @@ MultiSelect.displayName = "MultiSelect";
 
 type MultiSelectTriggerElement = React.ElementRef<typeof Primitive.div>;
 
-interface MultiSelectTriggerProps
-  extends React.ComponentPropsWithoutRef<typeof Primitive.div> {}
+interface MultiSelectTriggerProps extends React.ComponentPropsWithoutRef<
+  typeof Primitive.div
+> {}
 
 function PreventClick(e: React.MouseEvent | React.TouchEvent) {
   if (e.type === "touchstart") return; // Allow touch events to pass through
@@ -223,8 +224,9 @@ const MultiSelectTrigger = React.forwardRef<
 
 MultiSelectTrigger.displayName = "MultiSelectTrigger";
 
-interface MultiSelectValueProps
-  extends React.ComponentPropsWithoutRef<typeof Primitive.div> {
+interface MultiSelectValueProps extends React.ComponentPropsWithoutRef<
+  typeof Primitive.div
+> {
   placeholder?: string;
   maxDisplay?: number;
   maxItemLength?: number;
@@ -349,8 +351,9 @@ const MultiSelectList = React.forwardRef<
 
 MultiSelectList.displayName = "MultiSelectList";
 
-interface MultiSelectContentProps
-  extends React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> {}
+interface MultiSelectContentProps extends React.ComponentPropsWithoutRef<
+  typeof PopoverPrimitive.Content
+> {}
 
 const MultiSelectContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -359,12 +362,15 @@ const MultiSelectContent = React.forwardRef<
   const context = useMultiSelect();
 
   const fragmentRef = React.useRef<DocumentFragment>();
+  const [mounted, setMounted] = React.useState(false);
 
-  if (!fragmentRef.current && typeof window !== "undefined")
+  React.useEffect(() => {
     fragmentRef.current = document.createDocumentFragment();
+    setMounted(true);
+  }, []);
 
   if (!context.open) {
-    return fragmentRef.current
+    return mounted && fragmentRef.current
       ? createPortal(<Command>{children}</Command>, fragmentRef.current)
       : null;
   }
@@ -457,7 +463,7 @@ const MultiSelectItem = React.forwardRef<
 
     const disabled = Boolean(
       disabledProp ||
-        (!selected && maxCount && contextValue.length >= maxCount),
+      (!selected && maxCount && contextValue.length >= maxCount),
     );
 
     const handleClick = () => {

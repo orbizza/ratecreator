@@ -13,7 +13,7 @@ import { YouTubeIcon } from "../creator-rating/platform-icons";
 
 export const Footer = () => {
   return (
-    <footer className="z-50 bg-black text-white py-16 mt-16">
+    <footer className="z-50 bg-black text-white py-16">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row">
           {/* Logo, company name, and social icons */}
@@ -55,7 +55,7 @@ export const Footer = () => {
                 <SiX size={20} />
               </Link>
               <Link
-                href="https://www.instagram.com/_orbizza"
+                href="https://www.instagram.com/ratecreator/"
                 target="_blank"
                 aria-label="Instagram"
                 className="text-muted-foreground hover:text-primary-foreground/80"
@@ -71,7 +71,7 @@ export const Footer = () => {
                 <YouTubeIcon size={20} />
               </Link>
               <Link
-                href="https://www.linkedin.com/company/orbizza"
+                href="https://www.linkedin.com/company/ratecreator/"
                 target="_blank"
                 aria-label="LinkedIn"
                 className="text-muted-foreground hover:text-primary-foreground/80"
@@ -192,7 +192,7 @@ export const Footer = () => {
         {/* Bottom section with copyright and links */}
         <div className="flex flex-col-reverse gap-y-5 md:gap-y-0 md:flex-row justify-between items-center mt-16 pt-8 border-t border-gray-800">
           <div className="text-primary-foreground text-[11px]">
-            &copy; 2025{" "}
+            &copy; {new Date().getFullYear()}{" "}
             <Link href="https://orbizza.com" target="_blank">
               Orbizza, Inc.
             </Link>{" "}

@@ -29,6 +29,7 @@
     "migrate-accounts-elastic:instagram": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform instagram",
     "migrate-categories-elastic": "tsx src/elasticsearch/migrate-categories.ts",
     "validate-elastic-migration": "tsx src/elasticsearch/validate-migration.ts",
+    "reindex-accounts-v2": "tsx src/elasticsearch/reindex-accounts-v2.ts",
     "update-storage-urls": "tsx src/elasticsearch/update-storage-urls.ts"
   }
 }
