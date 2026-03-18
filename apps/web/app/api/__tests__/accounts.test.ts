@@ -10,7 +10,7 @@ import { NextRequest } from "next/server";
 const { mockRedis, mockPrisma } = vi.hoisted(() => {
   const mockRedis = {
     get: vi.fn(),
-    set: vi.fn(),
+    setex: vi.fn(),
   };
 
   const mockPrisma = {
@@ -127,6 +127,9 @@ describe("Accounts API Route", () => {
       expect(response.status).toBe(200);
       expect(data.account).toBeDefined();
       expect(mockPrisma.account.findFirst).not.toHaveBeenCalled();
+      expect(response.headers.get("Cache-Control")).toBe(
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
     });
 
     it("should fetch from database when cache miss", async () => {
@@ -166,7 +169,7 @@ describe("Accounts API Route", () => {
       expect(data.error).toBe("Account not found");
     });
 
-    it("should cache the fetched data", async () => {
+    it("should cache the fetched data with TTL", async () => {
       mockRedis.get.mockResolvedValueOnce(null);
       mockPrisma.account.findFirst.mockResolvedValueOnce(mockAccount);
       mockPrisma.categoryMapping.findMany.mockResolvedValueOnce([]);
@@ -177,8 +180,9 @@ describe("Accounts API Route", () => {
       });
       await GET(request);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "accounts-youtube-UC123",
+        3600,
         expect.any(String),
       );
     });
@@ -199,6 +203,9 @@ describe("Accounts API Route", () => {
       expect(data.account.platform).toBe("YOUTUBE");
       expect(data.account.ytData).toBeDefined();
       expect(data.categories).toEqual([]);
+      expect(response.headers.get("Cache-Control")).toBe(
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
     });
   });
 
@@ -245,8 +252,9 @@ describe("Accounts API Route", () => {
       });
       await GET(request);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "accounts-twitter-twitter123",
+        3600,
         expect.any(String),
       );
     });

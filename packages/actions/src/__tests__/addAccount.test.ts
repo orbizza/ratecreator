@@ -9,12 +9,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 const {
   mockAccountFindFirst,
   mockAccountCreate,
-  mockKafkaSend,
+  mockPublishMessageWithKey,
   mockPrismaInstance,
 } = vi.hoisted(() => {
   const mockAccountFindFirst = vi.fn();
   const mockAccountCreate = vi.fn();
-  const mockKafkaSend = vi.fn().mockResolvedValue(undefined);
+  const mockPublishMessageWithKey = vi.fn().mockResolvedValue(undefined);
   const mockPrismaInstance = {
     account: {
       findFirst: mockAccountFindFirst,
@@ -24,7 +24,7 @@ const {
   return {
     mockAccountFindFirst,
     mockAccountCreate,
-    mockKafkaSend,
+    mockPublishMessageWithKey,
     mockPrismaInstance,
   };
 });
@@ -34,13 +34,8 @@ vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrismaInstance),
 }));
 
-vi.mock("@ratecreator/db/kafka-client", () => ({
-  getKafkaProducer: vi.fn(() =>
-    Promise.resolve({
-      send: mockKafkaSend,
-    }),
-  ),
-  createTopicIfNotExists: vi.fn().mockResolvedValue(undefined),
+vi.mock("@ratecreator/db/pubsub-client", () => ({
+  publishMessageWithKey: mockPublishMessageWithKey,
 }));
 
 // Import after mocks
@@ -49,7 +44,7 @@ import { addAccount } from "../account/addAccount";
 describe("addAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockKafkaSend.mockResolvedValue(undefined);
+    mockPublishMessageWithKey.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -384,15 +379,13 @@ describe("addAccount", () => {
         addedByUserId: "user-123",
       });
 
-      expect(mockKafkaSend).toHaveBeenCalledWith({
-        topic: "account-added",
-        messages: [
-          {
-            key: "new-account-id",
-            value: expect.stringContaining("creator"),
-          },
-        ],
-      });
+      expect(mockPublishMessageWithKey).toHaveBeenCalledWith(
+        "account-added",
+        "new-account-id",
+        expect.objectContaining({
+          platformAccountId: "creator",
+        }),
+      );
     });
 
     it("should not fail if Kafka event fails", async () => {
@@ -402,7 +395,7 @@ describe("addAccount", () => {
         accountId: "creator",
         platform: "YOUTUBE",
       });
-      mockKafkaSend.mockRejectedValue(new Error("Kafka error"));
+      mockPublishMessageWithKey.mockRejectedValue(new Error("Kafka error"));
 
       const result = await addAccount({
         platform: "youtube",
