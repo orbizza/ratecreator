@@ -15,9 +15,9 @@ const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
 
 // Redis TTLs in seconds
 const REDIS_TTL = {
-  POPULAR_CATEGORIES: 7 * 24 * 3600, // 7 days — categories rarely change
-  POPULAR_CATEGORY_ACCOUNTS: 3600, // 1 hour — account data changes more often
-  INDIVIDUAL_CATEGORY: 3600, // 1 hour
+  POPULAR_CATEGORIES: 0, // No expiry — flush manually when categories change
+  POPULAR_CATEGORY_ACCOUNTS: 7 * 24 * 3600, // 7 days unless revalidated
+  INDIVIDUAL_CATEGORY: 7 * 24 * 3600, // 7 days
 };
 
 // In-memory local cache — reduces Redis round-trips for repeated calls
@@ -65,9 +65,8 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
     // console.log(popularCategories);
     // console.log("Returning popular categories");
 
-    await redis.setex(
+    await redis.set(
       CACHE_POPULAR_CATEGORIES,
-      REDIS_TTL.POPULAR_CATEGORIES,
       JSON.stringify(popularCategories),
     );
     setLocal(CACHE_POPULAR_CATEGORIES, popularCategories);

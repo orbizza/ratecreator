@@ -148,9 +148,9 @@ const CategoryGrid = ({ accounts }: { accounts: PopularAccount[] }) => {
       case "small":
         return accounts.slice(0, 5);
       case "medium":
-        return accounts.slice(0, 8);
+        return accounts.slice(0, 10);
       default:
-        return accounts.slice(0, 12);
+        return accounts.slice(0, 15);
     }
   }, [accounts, screenSize]);
 
@@ -220,9 +220,12 @@ const PopularCategories = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  // Derive popular categories from the full data (avoids redundant server call)
+  // Derive popular categories from the full data, sorted alphabetically
   const popularCategories = useMemo(
-    () => categories.map((c) => c.category),
+    () =>
+      categories
+        .map((c) => c.category)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [categories],
   );
 

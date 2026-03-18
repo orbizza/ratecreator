@@ -11,7 +11,7 @@ const CACHE_ALL_CATEGORIES = "category-all";
 export async function getCategoryData(): Promise<Category[]> {
   const redis = getRedisClient();
   const prisma = getPrismaClient();
-  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
+  // No TTL — categories cached indefinitely until manually flushed
 
   try {
     // const response = await axios.get(
@@ -25,7 +25,7 @@ export async function getCategoryData(): Promise<Category[]> {
     }
 
     const allCategories = await prisma.category.findMany({
-      orderBy: { depth: "asc" },
+      orderBy: [{ depth: "asc" }, { name: "asc" }],
     });
 
     const categoryMap: { [key: string]: Category } = {};
@@ -45,20 +45,10 @@ export async function getCategoryData(): Promise<Category[]> {
       }
     });
 
-    await redis.set(
-      CACHE_ALL_CATEGORIES,
-      JSON.stringify(allCategories),
-      "EX",
-      CACHE_EXPIRY,
-    );
+    await redis.set(CACHE_ALL_CATEGORIES, JSON.stringify(allCategories));
     console.log("All Categories cached in Redis for 24 hours");
 
-    await redis.set(
-      CACHE_ROOT_CATEGORIES,
-      JSON.stringify(rootCategories),
-      "EX",
-      CACHE_EXPIRY,
-    );
+    await redis.set(CACHE_ROOT_CATEGORIES, JSON.stringify(rootCategories));
     console.log("Root Categories cached in Redis for 24 hours");
 
     return rootCategories;
@@ -74,7 +64,7 @@ export async function getAllCategoriesAlphabetically(): Promise<{
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   const CACHE_ALPHABETICAL_CATEGORIES = "category-alphabetical";
-  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
+  // No TTL — categories cached indefinitely until manually flushed
 
   try {
     // Check cache first
@@ -109,12 +99,10 @@ export async function getAllCategoriesAlphabetically(): Promise<{
       categoriesByLetter[firstLetter].push(category);
     });
 
-    // Cache the result with 24-hour expiration
+    // Cache indefinitely — flush manually when categories change
     await redis.set(
       CACHE_ALPHABETICAL_CATEGORIES,
       JSON.stringify(categoriesByLetter),
-      "EX",
-      CACHE_EXPIRY,
     );
     console.log("Alphabetical Categories cached in Redis for 24 hours");
 
@@ -136,7 +124,7 @@ export async function getSingleGlossaryCategory(
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   const CACHE_SINGLE_GLOSSARY_CATEGORY = `category-single-glossary-${slug}`;
-  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days — categories rarely change
+  const CACHE_EXPIRY = 7 * 24 * 60 * 60; // 7 days
 
   try {
     // Check cache first
@@ -164,7 +152,7 @@ export async function getSingleGlossaryCategory(
       },
     });
 
-    // Cache the result with 24-hour expiration
+    // Cache the result
     await redis.set(
       CACHE_SINGLE_GLOSSARY_CATEGORY,
       JSON.stringify({ category, accounts }),

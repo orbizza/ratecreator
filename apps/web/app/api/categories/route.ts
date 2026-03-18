@@ -60,7 +60,7 @@ async function handleAllCategories(redis: ReturnType<typeof getRedisClient>) {
   }
 
   const allCategories = await prisma.category.findMany({
-    orderBy: { depth: "asc" },
+    orderBy: [{ depth: "asc" }, { name: "asc" }],
   });
 
   await redis.setex(
@@ -82,7 +82,7 @@ async function handleRootCategories(redis: ReturnType<typeof getRedisClient>) {
   }
 
   const allCategories = await prisma.category.findMany({
-    orderBy: { depth: "asc" },
+    orderBy: [{ depth: "asc" }, { name: "asc" }],
   });
 
   const categoryMap: { [key: string]: Category } = {};
