@@ -7,15 +7,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockGetSearchAccounts, mockGetAuth } = vi.hoisted(() => {
-  const mockGetSearchAccounts = vi.fn();
+const { mockSearchAccounts, mockGetAuth } = vi.hoisted(() => {
+  const mockSearchAccounts = vi.fn();
   const mockGetAuth = vi.fn();
-  return { mockGetSearchAccounts, mockGetAuth };
+  return { mockSearchAccounts, mockGetAuth };
 });
 
 // Mock modules
-vi.mock("@ratecreator/db/algolia-client", () => ({
-  getSearchAccounts: mockGetSearchAccounts,
+vi.mock("@ratecreator/db/elasticsearch-client", () => ({
+  searchAccounts: mockSearchAccounts,
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
@@ -48,10 +48,10 @@ describe("Search Accounts API Route", () => {
       const mockResults = {
         hits: [{ objectID: "1", name: "Test Account" }],
         nbHits: 1,
-        page: 0,
+        page: 1,
         nbPages: 1,
       };
-      mockGetSearchAccounts.mockResolvedValueOnce(mockResults);
+      mockSearchAccounts.mockResolvedValueOnce(mockResults);
 
       const request = createRequest("");
       const response = await GET(request);
@@ -59,24 +59,31 @@ describe("Search Accounts API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.hits).toBeDefined();
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(response.headers.get("Cache-Control")).toBe(
+        "public, s-maxage=60, stale-while-revalidate=120",
+      );
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           query: "",
-          page: 0,
+          page: 1,
           limit: 20,
           sortBy: "followerCount",
-          sortOrder: "asc",
+          sortOrder: "desc",
         }),
       );
     });
 
     it("should search with query parameter", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?query=tech%20creator");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           query: "tech creator",
         }),
@@ -84,25 +91,34 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should respect page parameter", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 3,
+      });
 
       const request = createRequest("?page=2");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      // Frontend page 2 becomes ES page 3 (1-based)
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
-          page: 2,
+          page: 3,
         }),
       );
     });
 
     it("should cap limit at 20", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?limit=100");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           limit: 20,
         }),
@@ -112,12 +128,16 @@ describe("Search Accounts API Route", () => {
 
   describe("Sorting", () => {
     it("should use custom sort by", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?sortBy=rating&sortOrder=desc");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           sortBy: "rating",
           sortOrder: "desc",
@@ -125,15 +145,19 @@ describe("Search Accounts API Route", () => {
       );
     });
 
-    it("should default to asc sort order", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+    it("should default to desc sort order", async () => {
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?sortBy=followerCount");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
-          sortOrder: "asc",
+          sortOrder: "desc",
         }),
       );
     });
@@ -141,12 +165,16 @@ describe("Search Accounts API Route", () => {
 
   describe("Platform Filter", () => {
     it("should filter by single platform", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[platform]=youtube");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             platform: ["youtube"],
@@ -156,14 +184,18 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should filter by multiple platforms", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest(
         "?filters[platform][0]=youtube&filters[platform][1]=twitter",
       );
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             platform: ["youtube", "twitter"],
@@ -175,130 +207,165 @@ describe("Search Accounts API Route", () => {
 
   describe("Followers Filter", () => {
     it("should filter by follower range (K)", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[followers]=100K-500K");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            followers: expect.stringContaining("followerCount"),
+            followers: "100K-500K",
           }),
         }),
       );
     });
 
     it("should filter by follower range (M)", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[followers]=1M-10M");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            followers:
-              "(followerCount >= 1000000 AND followerCount < 10000000)",
+            followers: "1M-10M",
           }),
         }),
       );
     });
 
     it("should filter by minimum followers (M+)", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[followers]=10M%2B");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            followers: "followerCount >= 10000000",
+            followers: "10M+",
           }),
         }),
       );
     });
 
     it("should ignore 'all' follower filter", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[followers]=all");
       await GET(request);
 
-      const callArgs = mockGetSearchAccounts.mock.calls[0][0];
+      const callArgs = mockSearchAccounts.mock.calls[0][0];
       expect(callArgs.filters.followers).toBeUndefined();
     });
   });
 
   describe("Rating Filter", () => {
     it("should filter by rating range", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[rating]=4-5");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            rating: expect.stringContaining("rating"),
+            rating: "4-5",
           }),
         }),
       );
     });
 
     it("should ignore 'all' rating filter", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[rating]=all");
       await GET(request);
 
-      const callArgs = mockGetSearchAccounts.mock.calls[0][0];
+      const callArgs = mockSearchAccounts.mock.calls[0][0];
       expect(callArgs.filters.rating).toBeUndefined();
     });
   });
 
   describe("Video Count Filter", () => {
     it("should filter by video count range", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[videoCount]=100-500");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            videoCount: "(videoCount >= 100 AND videoCount <= 500)",
+            videoCount: "100-500",
           }),
         }),
       );
     });
 
     it("should filter by zero video count", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[videoCount]=0");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            videoCount: "videoCount = 0",
+            videoCount: "0",
           }),
         }),
       );
     });
 
     it("should filter by minimum video count", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[videoCount]=1000%2B");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            videoCount: "videoCount >= 1000",
+            videoCount: "1000+",
           }),
         }),
       );
@@ -307,15 +374,19 @@ describe("Search Accounts API Route", () => {
 
   describe("Review Count Filter", () => {
     it("should filter by review count range", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[reviewCount]=5-20");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
-            reviewCount: "(reviewCount >= 5 AND reviewCount <= 20)",
+            reviewCount: "5-20",
           }),
         }),
       );
@@ -324,12 +395,16 @@ describe("Search Accounts API Route", () => {
 
   describe("Location Filters", () => {
     it("should filter by country", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[country]=US");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             country: ["US"],
@@ -339,12 +414,16 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should filter by language", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[language]=en");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             language: ["en"],
@@ -356,12 +435,16 @@ describe("Search Accounts API Route", () => {
 
   describe("Boolean Filters", () => {
     it("should filter by claimed status", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[claimed]=true");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             claimed: true,
@@ -371,12 +454,16 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should filter by madeForKids status", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[madeForKids]=false");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             madeForKids: false,
@@ -388,12 +475,16 @@ describe("Search Accounts API Route", () => {
 
   describe("Category Filter", () => {
     it("should filter by single category", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?filters[categories]=tech");
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             categories: ["tech"],
@@ -403,14 +494,18 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should filter by multiple categories", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest(
         "?filters[categories][0]=tech&filters[categories][1]=gaming",
       );
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: expect.objectContaining({
             categories: ["tech", "gaming"],
@@ -434,7 +529,11 @@ describe("Search Accounts API Route", () => {
 
     it("should allow unauthenticated users on page 0", async () => {
       mockGetAuth.mockReturnValueOnce({ userId: null });
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest("?page=0");
       const response = await GET(request);
@@ -444,7 +543,11 @@ describe("Search Accounts API Route", () => {
 
     it("should allow authenticated users on any page", async () => {
       mockGetAuth.mockReturnValueOnce({ userId: "user-123" });
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 6,
+      });
 
       const request = createRequest("?page=5");
       const response = await GET(request);
@@ -455,7 +558,7 @@ describe("Search Accounts API Route", () => {
 
   describe("Error Handling", () => {
     it("should return 500 on search error", async () => {
-      mockGetSearchAccounts.mockRejectedValueOnce(new Error("Search failed"));
+      mockSearchAccounts.mockRejectedValueOnce(new Error("Search failed"));
 
       const request = createRequest("");
       const response = await GET(request);
@@ -468,14 +571,18 @@ describe("Search Accounts API Route", () => {
 
   describe("Combined Filters", () => {
     it("should handle multiple filters together", async () => {
-      mockGetSearchAccounts.mockResolvedValueOnce({ hits: [], nbHits: 0 });
+      mockSearchAccounts.mockResolvedValueOnce({
+        hits: [],
+        nbHits: 0,
+        page: 1,
+      });
 
       const request = createRequest(
         "?query=tech&filters[platform]=youtube&filters[country]=US&filters[rating]=4-5&page=0",
       );
       await GET(request);
 
-      expect(mockGetSearchAccounts).toHaveBeenCalledWith(
+      expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           query: "tech",
           filters: expect.objectContaining({

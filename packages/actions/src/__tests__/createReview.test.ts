@@ -10,13 +10,15 @@ const {
   mockUserFindUnique,
   mockAccountFindUnique,
   mockReviewCreate,
-  mockKafkaSend,
+  mockPublishMessageWithKey,
+  mockRedisDel,
   mockPrismaInstance,
 } = vi.hoisted(() => {
   const mockUserFindUnique = vi.fn();
   const mockAccountFindUnique = vi.fn();
   const mockReviewCreate = vi.fn();
-  const mockKafkaSend = vi.fn().mockResolvedValue(undefined);
+  const mockPublishMessageWithKey = vi.fn().mockResolvedValue(undefined);
+  const mockRedisDel = vi.fn().mockResolvedValue(undefined);
   const mockPrismaInstance = {
     user: { findUnique: mockUserFindUnique },
     account: { findUnique: mockAccountFindUnique },
@@ -26,7 +28,8 @@ const {
     mockUserFindUnique,
     mockAccountFindUnique,
     mockReviewCreate,
-    mockKafkaSend,
+    mockPublishMessageWithKey,
+    mockRedisDel,
     mockPrismaInstance,
   };
 });
@@ -40,12 +43,14 @@ vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrismaInstance),
 }));
 
-vi.mock("@ratecreator/db/kafka-client", () => ({
-  getKafkaProducer: vi.fn(() =>
-    Promise.resolve({
-      send: mockKafkaSend,
-    }),
-  ),
+vi.mock("@ratecreator/db/pubsub-client", () => ({
+  publishMessageWithKey: mockPublishMessageWithKey,
+}));
+
+vi.mock("@ratecreator/db/redis-do", () => ({
+  getRedisClient: vi.fn(() => ({
+    del: mockRedisDel,
+  })),
 }));
 
 vi.mock("next/cache", () => ({
@@ -70,7 +75,7 @@ describe("createReview", () => {
     vi.clearAllMocks();
     mockAuth = auth as Mock;
     // Reset mock implementations
-    mockKafkaSend.mockResolvedValue(undefined);
+    mockPublishMessageWithKey.mockResolvedValue(undefined);
   });
 
   afterEach(() => {

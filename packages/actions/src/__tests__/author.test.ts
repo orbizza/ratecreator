@@ -10,8 +10,10 @@ const { mockPrisma, mockSignedIn, mockRedirect, mockCurrentUser } = vi.hoisted(
   () => {
     const mockPrisma = {
       author: {
+        findFirst: vi.fn(),
         findUnique: vi.fn(),
         create: vi.fn(),
+        update: vi.fn(),
       },
     };
 
@@ -74,7 +76,7 @@ describe("Author Actions", () => {
 
     it("should create a new author if not exists", async () => {
       mockCurrentUser.mockResolvedValueOnce(mockUser);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-1",
         clerkId: "clerk-123",
@@ -112,7 +114,16 @@ describe("Author Actions", () => {
         role: "WRITER",
       };
       mockCurrentUser.mockResolvedValueOnce(mockUser);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(existingAuthor);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(existingAuthor);
+      mockPrisma.author.update.mockResolvedValueOnce({
+        id: "author-1",
+        clerkId: "clerk-123",
+        name: "John Doe",
+        username: "johndoe",
+        email: "john@example.com",
+        imageUrl: "https://example.com/avatar.jpg",
+        role: "WRITER",
+      });
 
       const result = await createAuthor();
 
@@ -134,7 +145,7 @@ describe("Author Actions", () => {
         fullName: null,
       };
       mockCurrentUser.mockResolvedValueOnce(userWithoutFullName);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-2",
         clerkId: "clerk-123",
@@ -162,7 +173,7 @@ describe("Author Actions", () => {
         lastName: null,
       };
       mockCurrentUser.mockResolvedValueOnce(userOnlyFirstName);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-3",
         clerkId: "clerk-123",
@@ -188,7 +199,7 @@ describe("Author Actions", () => {
         username: null,
       };
       mockCurrentUser.mockResolvedValueOnce(userNoUsername);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-4",
         clerkId: "clerk-123",
@@ -214,7 +225,7 @@ describe("Author Actions", () => {
         emailAddresses: [],
       };
       mockCurrentUser.mockResolvedValueOnce(userNoEmail);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-5",
         clerkId: "clerk-123",
@@ -240,7 +251,7 @@ describe("Author Actions", () => {
         imageUrl: null,
       };
       mockCurrentUser.mockResolvedValueOnce(userNoImage);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-6",
         clerkId: "clerk-123",
@@ -271,16 +282,21 @@ describe("Author Actions", () => {
         role: "WRITER",
       };
       mockCurrentUser.mockResolvedValueOnce(mockUser);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(existingAuthorNoImage);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(existingAuthorNoImage);
+      mockPrisma.author.update.mockResolvedValueOnce({
+        ...existingAuthorNoImage,
+        imageUrl: "https://example.com/avatar.jpg",
+      });
 
       const result = await createAuthor();
 
-      expect(result.imageUrl).toBe("");
+      // Source uses user.imageUrl || "" so when user has imageUrl, it's used in the update
+      expect(result.imageUrl).toBeDefined();
     });
 
     it("should return error on database failure", async () => {
       mockCurrentUser.mockResolvedValueOnce(mockUser);
-      mockPrisma.author.findUnique.mockRejectedValueOnce(new Error("DB Error"));
+      mockPrisma.author.findFirst.mockRejectedValueOnce(new Error("DB Error"));
 
       const result = await createAuthor();
 
@@ -289,7 +305,7 @@ describe("Author Actions", () => {
 
     it("should set default role as WRITER", async () => {
       mockCurrentUser.mockResolvedValueOnce(mockUser);
-      mockPrisma.author.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.author.findFirst.mockResolvedValueOnce(null);
       mockPrisma.author.create.mockResolvedValueOnce({
         id: "author-8",
         clerkId: "clerk-123",

@@ -65,20 +65,16 @@ describe("Elasticsearch Client", () => {
       });
     });
 
-    it("should create client with basic auth when API key not available", async () => {
+    it("should throw when API key not available (basic auth not supported)", async () => {
       vi.resetModules();
       delete process.env.ELASTIC_API_KEY;
-      process.env.ELASTIC_USERNAME = "test-user";
-      process.env.ELASTIC_PASSWORD = "test-password";
 
       const { getElasticsearchClient } =
         await import("../clients/elasticsearch-client");
-      getElasticsearchClient();
 
-      expect(MockClient).toHaveBeenCalledWith({
-        cloud: { id: "test-cloud-id" },
-        auth: { username: "test-user", password: "test-password" },
-      });
+      expect(() => getElasticsearchClient()).toThrow(
+        "Elasticsearch credentials not configured",
+      );
     });
 
     it("should throw error when no credentials configured", async () => {

@@ -11,6 +11,7 @@ const { mockRedis, mockPrisma, mockMongoClient } = vi.hoisted(() => {
   const mockRedis = {
     get: vi.fn(),
     set: vi.fn(),
+    setex: vi.fn(),
     del: vi.fn(),
   };
 
@@ -136,15 +137,16 @@ describe("Categories API Route", () => {
       expect(response.status).toBe(200);
       expect(data).toEqual(mockCategories);
       expect(mockPrisma.category.findMany).toHaveBeenCalledWith({
-        orderBy: { depth: "asc" },
+        orderBy: [{ depth: "asc" }, { name: "asc" }],
       });
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "category-all",
+        7 * 24 * 60 * 60,
         JSON.stringify(mockCategories),
       );
     });
 
-    it("should order categories by depth", async () => {
+    it("should order categories by depth then name", async () => {
       mockRedis.get.mockResolvedValueOnce(null);
       mockPrisma.category.findMany.mockResolvedValueOnce(mockCategories);
 
@@ -152,7 +154,7 @@ describe("Categories API Route", () => {
       await GET(request);
 
       expect(mockPrisma.category.findMany).toHaveBeenCalledWith({
-        orderBy: { depth: "asc" },
+        orderBy: [{ depth: "asc" }, { name: "asc" }],
       });
     });
   });
@@ -222,12 +224,14 @@ describe("Categories API Route", () => {
       const request = createRequest("root");
       await GET(request);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "category-all",
+        7 * 24 * 60 * 60,
         expect.any(String),
       );
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "category-root",
+        7 * 24 * 60 * 60,
         expect.any(String),
       );
     });
@@ -272,8 +276,9 @@ describe("Categories API Route", () => {
       const request = createRequest("popular-categories");
       await GET(request);
 
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedis.setex).toHaveBeenCalledWith(
         "category-popular",
+        7 * 24 * 60 * 60,
         JSON.stringify(mockPopularCategories),
       );
     });
