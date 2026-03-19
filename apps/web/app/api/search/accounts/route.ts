@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchAccounts } from "@ratecreator/db/elasticsearch-client";
 import qs from "qs";
 import { SearchAccountsParams } from "@ratecreator/types/review";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // Parse the URL and query string using qs
     const url = new URL(request.url);
     const parsedQuery = qs.parse(url.search, { ignoreQueryPrefix: true });
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
 
     // Initialize the params object matching SearchAccountsParams interface
     // ES uses 1-based pages, so convert from 0-based (frontend) to 1-based (ES)

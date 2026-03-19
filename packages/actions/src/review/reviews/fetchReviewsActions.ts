@@ -16,7 +16,7 @@ export async function fetchReviewsAction(
   const pageSize = reviewsPerPage;
   const offset = currentPage * pageSize;
 
-  const { userId } = auth();
+  const { userId } = await auth();
 
   const user = await prisma.user.findUnique({
     where: {
@@ -89,7 +89,7 @@ export async function fetchSelfReviewsAction(
   accountId: string,
   platform: Platform,
 ) {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   const user = await prisma.user.findUnique({
     where: {
