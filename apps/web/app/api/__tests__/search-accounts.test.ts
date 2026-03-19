@@ -7,10 +7,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockSearchAccounts, mockGetAuth } = vi.hoisted(() => {
+const { mockSearchAccounts, mockAuth } = vi.hoisted(() => {
   const mockSearchAccounts = vi.fn();
-  const mockGetAuth = vi.fn();
-  return { mockSearchAccounts, mockGetAuth };
+  const mockAuth = vi.fn();
+  return { mockSearchAccounts, mockAuth };
 });
 
 // Mock modules
@@ -19,7 +19,7 @@ vi.mock("@ratecreator/db/elasticsearch-client", () => ({
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
-  getAuth: mockGetAuth,
+  auth: mockAuth,
 }));
 
 vi.mock("@ratecreator/types/review", () => ({
@@ -31,7 +31,7 @@ import { GET } from "../search/accounts/route";
 describe("Search Accounts API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetAuth.mockReturnValue({ userId: "user-123" });
+    mockAuth.mockResolvedValue({ userId: "user-123" });
   });
 
   afterEach(() => {
@@ -517,7 +517,7 @@ describe("Search Accounts API Route", () => {
 
   describe("Authentication for Pagination", () => {
     it("should return 401 for unauthenticated users on page > 0", async () => {
-      mockGetAuth.mockReturnValueOnce({ userId: null });
+      mockAuth.mockResolvedValueOnce({ userId: null });
 
       const request = createRequest("?page=1");
       const response = await GET(request);
@@ -528,7 +528,7 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should allow unauthenticated users on page 0", async () => {
-      mockGetAuth.mockReturnValueOnce({ userId: null });
+      mockAuth.mockResolvedValueOnce({ userId: null });
       mockSearchAccounts.mockResolvedValueOnce({
         hits: [],
         nbHits: 0,
@@ -542,7 +542,7 @@ describe("Search Accounts API Route", () => {
     });
 
     it("should allow authenticated users on any page", async () => {
-      mockGetAuth.mockReturnValueOnce({ userId: "user-123" });
+      mockAuth.mockResolvedValueOnce({ userId: "user-123" });
       mockSearchAccounts.mockResolvedValueOnce({
         hits: [],
         nbHits: 0,

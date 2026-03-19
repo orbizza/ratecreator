@@ -21,7 +21,7 @@ const ACCOUNT_CACHE_PREFIXES: Record<string, string> = {
 export async function createReview(formData: unknown) {
   try {
     // Get the current user
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       throw new Error("Unauthorized: You must be logged in to create a review");
     }
