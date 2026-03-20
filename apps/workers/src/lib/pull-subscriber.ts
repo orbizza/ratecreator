@@ -16,6 +16,7 @@ import { processYoutubeRefresh } from "../processors/youtube-refresh";
 import { processInstagramRefresh } from "../processors/instagram-refresh";
 import { processRedditRefresh } from "../processors/reddit-refresh";
 import { processTiktokRefresh } from "../processors/tiktok-refresh";
+import { processAccountProfileUpdate } from "../processors/account-profile-update";
 
 const SUBSCRIPTION_PROCESSORS: Record<
   string,
@@ -36,6 +37,8 @@ const SUBSCRIPTION_PROCESSORS: Record<
   [PUBSUB_SUBSCRIPTIONS.DATA_REFRESH_INSTAGRAM]: processInstagramRefresh,
   [PUBSUB_SUBSCRIPTIONS.DATA_REFRESH_REDDIT]: processRedditRefresh,
   [PUBSUB_SUBSCRIPTIONS.DATA_REFRESH_TIKTOK]: processTiktokRefresh,
+  [PUBSUB_SUBSCRIPTIONS.ACCOUNT_PROFILE_UPDATED]: (data, attrs) =>
+    processAccountProfileUpdate(data as any),
 };
 
 const MAX_DELIVERY_ATTEMPTS = 5;

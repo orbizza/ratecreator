@@ -2,6 +2,7 @@ import { getPrismaClient } from "@ratecreator/db/client";
 import { getMongoClient } from "@ratecreator/db/mongo-client";
 import { ObjectId } from "mongodb";
 import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
+import { createWorkerNotification } from "../lib/notifications";
 
 const prisma = getPrismaClient();
 
@@ -9,6 +10,7 @@ interface AccountAddedEvent {
   accountId: string;
   platform: string;
   platformAccountId: string;
+  submissionId?: string;
 }
 
 interface PlatformData {
@@ -434,6 +436,31 @@ export async function processDataFetch(
     });
 
     console.log(`Sent account-data-fetched event for account ${accountId}`);
+
+    // If this was triggered by a user submission, update status and notify
+    if (payload.submissionId) {
+      try {
+        const submission = await prisma.accountSubmission.update({
+          where: { id: payload.submissionId },
+          data: { status: "COMPLETED" },
+          select: { userId: true, identifier: true },
+        });
+
+        await createWorkerNotification({
+          userId: submission.userId,
+          type: "SUBMISSION_APPROVED",
+          title: "Creator profile is ready!",
+          message: `The creator "${platformData.name || submission.identifier}" has been added to Rate Creator.`,
+          metadata: {
+            submissionId: payload.submissionId,
+            accountId,
+            platform: platform.toUpperCase(),
+          },
+        });
+      } catch (err) {
+        console.error("Failed to update submission/send notification:", err);
+      }
+    }
   } catch (error) {
     console.error(
       `Error processing data fetch for account ${accountId}:`,

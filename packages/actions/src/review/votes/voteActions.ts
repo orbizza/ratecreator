@@ -3,8 +3,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { revalidatePath } from "next/cache";
+import { createNotification } from "../../notifications/notification-service";
 
 const prisma = getPrismaClient();
+
+const VOTE_MILESTONES = [10, 50, 100, 250, 500, 1000];
 
 export type VoteType = "UP" | "DOWN";
 
@@ -108,6 +111,34 @@ export async function voteOnReview(
       revalidatePath(
         `/profile/${review.platform.toLowerCase()}/${account.accountId}`,
       );
+    }
+
+    // Check for vote milestones (fire-and-forget)
+    if (voteType === "UP" && voteCounts.upvotes !== undefined) {
+      const upvotes = voteCounts.upvotes;
+      if (VOTE_MILESTONES.includes(upvotes)) {
+        const reviewData = await prisma.review.findUnique({
+          where: { id: reviewId },
+          select: { authorId: true, title: true },
+        });
+
+        if (reviewData && reviewData.authorId !== user.id) {
+          createNotification({
+            userId: reviewData.authorId,
+            type: "VOTE_MILESTONE",
+            title: `Your review hit ${upvotes} upvotes!`,
+            message: `"${reviewData.title}" just reached ${upvotes} upvotes`,
+            metadata: {
+              reviewId,
+              milestone: upvotes,
+              platform: review.platform,
+              accountId: account?.accountId || "",
+            },
+          }).catch((err) =>
+            console.error("Failed to create vote milestone notification:", err),
+          );
+        }
+      }
     }
 
     return {

@@ -29,6 +29,7 @@ export const PUBSUB_TOPICS = {
   DATA_REFRESH_INSTAGRAM: "data-refresh-instagram",
   DATA_REFRESH_REDDIT: "data-refresh-reddit",
   DATA_REFRESH_TIKTOK: "data-refresh-tiktok",
+  ACCOUNT_PROFILE_UPDATED: "account-profile-updated",
   DEAD_LETTER: "dead-letter",
 } as const;
 
@@ -45,6 +46,7 @@ export const PUBSUB_SUBSCRIPTIONS = {
   DATA_REFRESH_INSTAGRAM: "data-refresh-instagram-sub",
   DATA_REFRESH_REDDIT: "data-refresh-reddit-sub",
   DATA_REFRESH_TIKTOK: "data-refresh-tiktok-sub",
+  ACCOUNT_PROFILE_UPDATED: "account-profile-updated-sub",
 } as const;
 
 // ── Client ──────────────────────────────────────────────────

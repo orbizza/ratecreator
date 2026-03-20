@@ -80,6 +80,7 @@ model Account {
   linkedBy              UserLinkedAccount[]
   organizationAccounts  OrganizationAccount[]
   refreshLogs           DataRefreshLog[]
+  listItems             CreatorListItem[]
 
   @@unique([platform, accountId])
   @@index([platform])
@@ -137,15 +138,19 @@ model User {
   webhookPayload Json?
   role           UserRole[]     @default([USER])
 
-  reviews            Review[]
-  comments           Comment[]
-  votes              Vote[]
-  commentVotes       CommentVote[]
-  saveToMyList       SaveToMyList[]
-  newsletterAudience NewsletterAudience[]
-  claimedAccounts    ClaimedAccount[]
-  linkedAccounts     UserLinkedAccount[]
-  organizations      OrganizationMember[]
+  emailPreferences    Json?
+  reviews             Review[]
+  comments            Comment[]
+  votes               Vote[]
+  commentVotes        CommentVote[]
+  saveToMyList        SaveToMyList[]
+  newsletterAudience  NewsletterAudience[]
+  claimedAccounts     ClaimedAccount[]
+  linkedAccounts      UserLinkedAccount[]
+  organizations       OrganizationMember[]
+  notifications       Notification[]
+  creatorLists        CreatorList[]
+  accountSubmissions  AccountSubmission[]
 
   @@index([firstName])
   @@index([lastName])
@@ -303,6 +308,86 @@ model SaveToMyList {
   @@unique([userId, accountId])
   @@index([userId])
   @@index([accountId])
+}
+
+// -----------------------
+// Notification System
+// -----------------------
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // REVIEW_REPLY, COMMENT_REPLY, VOTE_MILESTONE, ACCOUNT_CLAIMED, ACCOUNT_SUBMITTED, SUBMISSION_APPROVED, NEWSLETTER_NEW, SYSTEM
+  title     String
+  message   String
+  metadata  Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// -----------------------
+// Creator Lists (replaces simple SaveToMyList)
+// -----------------------
+
+model CreatorList {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String           @db.ObjectId
+  user        User             @relation(fields: [userId], references: [id])
+  name        String
+  description String?
+  slug        String           @unique
+  isPublic    Boolean          @default(false)
+  isDefault   Boolean          @default(false)
+  items       CreatorListItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([isPublic])
+  @@map("creator_lists")
+}
+
+model CreatorListItem {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  listId    String      @db.ObjectId
+  list      CreatorList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  accountId String      @db.ObjectId
+  account   Account     @relation(fields: [accountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addedAt   DateTime    @default(now())
+
+  @@unique([listId, accountId])
+  @@index([listId])
+  @@index([accountId])
+  @@map("creator_list_items")
+}
+
+// -----------------------
+// Account Submissions (user-submitted new creators)
+// -----------------------
+
+model AccountSubmission {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String           @db.ObjectId
+  user            User             @relation(fields: [userId], references: [id])
+  platform        Platform
+  identifier      String           // URL or handle
+  status          SubmissionStatus @default(PENDING)
+  accountId       String?          @db.ObjectId  // filled after processing
+  previewData     Json?            // name, avatar, followers preview
+  rejectionReason String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("account_submissions")
 }
 
 model Review {
@@ -521,6 +606,15 @@ enum ClaimStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum SubmissionStatus {
+  PENDING
+  VALIDATING
+  PROCESSING
+  COMPLETED
+  REJECTED
+  DUPLICATE
 }
 
 enum OrgRole {

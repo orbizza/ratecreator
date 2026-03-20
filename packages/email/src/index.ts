@@ -68,6 +68,17 @@ export {
   verifyUnsubscribeToken,
 } from "./tokens";
 
+// Email preferences
+export {
+  shouldSendEmail,
+  buildUnsubscribeUrl,
+  verifyUnsubscribeCategory,
+  DEFAULT_EMAIL_PREFERENCES,
+  ALWAYS_SEND,
+  EMAIL_CATEGORY_MAP,
+} from "./preferences";
+export type { EmailPreferences } from "./preferences";
+
 // Content conversion
 export { blocknoteToEmailHtml } from "./blocknote-to-email";
 

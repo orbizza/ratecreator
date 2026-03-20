@@ -8,3 +8,6 @@ export * from "./date-picker";
 export * from "./select-component";
 export * from "./blocknote-editor/blocknote-to-markdown";
 export * from "./blocknote-editor/blocknote-render";
+export * from "./notifications/notification-bell";
+export * from "./notifications/notification-dropdown";
+export * from "./notifications/notification-item";

@@ -1,6 +1,7 @@
 export {
   createComment,
   getCommentsForReview,
+  getNestedReplies,
   editComment,
   deleteComment,
   getCommentCount,
@@ -10,4 +11,5 @@ export type {
   CommentInput,
   CommentResult,
   CommentWithReplies,
+  CommentSortBy,
 } from "./commentActions";

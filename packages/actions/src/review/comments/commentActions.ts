@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { revalidatePath } from "next/cache";
+import { createNotification } from "../../notifications/notification-service";
 
 const prisma = getPrismaClient();
 
@@ -135,6 +136,34 @@ export async function createComment(
       );
     }
 
+    // Send notification to parent comment author (fire-and-forget)
+    if (input.replyToId) {
+      const parentComment = await prisma.comment.findUnique({
+        where: { id: input.replyToId },
+        select: { authorId: true },
+      });
+
+      if (parentComment && parentComment.authorId !== user.id) {
+        createNotification({
+          userId: parentComment.authorId,
+          type: "COMMENT_REPLY",
+          title: "New reply to your comment",
+          message:
+            input.content.length > 100
+              ? input.content.substring(0, 100) + "..."
+              : input.content,
+          metadata: {
+            commentId: comment.id,
+            reviewId: input.reviewId,
+            platform: review.platform,
+            accountId: account?.accountId || "",
+          },
+        }).catch((err) =>
+          console.error("Failed to create comment reply notification:", err),
+        );
+      }
+    }
+
     return {
       success: true,
       data: {
@@ -157,12 +186,122 @@ export async function createComment(
   }
 }
 
+export type CommentSortBy = "new" | "top" | "controversial";
+
+/**
+ * Get nested replies for a single comment (for "continue thread" deep-link)
+ */
+export async function getNestedReplies(
+  commentId: string,
+  options: { page?: number; limit?: number } = {},
+): Promise<{
+  success: boolean;
+  comment?: CommentWithReplies;
+  error?: string;
+}> {
+  const { page = 1, limit = 20 } = options;
+
+  try {
+    const { userId: clerkUserId } = await auth();
+    let currentUserId: string | null = null;
+
+    if (clerkUserId) {
+      const user = await prisma.user.findUnique({
+        where: { clerkId: clerkUserId },
+        select: { id: true },
+      });
+      currentUserId = user?.id || null;
+    }
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId, isDeleted: false, status: "PUBLISHED" },
+      include: {
+        author: {
+          select: { id: true, firstName: true, lastName: true, username: true },
+        },
+        votes: { select: { type: true, userId: true } },
+        replies: {
+          where: { isDeleted: false, status: "PUBLISHED" },
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            author: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+            votes: { select: { type: true, userId: true } },
+            replies: {
+              where: { isDeleted: false, status: "PUBLISHED" },
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    username: true,
+                  },
+                },
+                votes: { select: { type: true, userId: true } },
+                _count: { select: { replies: true } },
+              },
+              orderBy: { createdAt: "asc" },
+            },
+            _count: { select: { replies: true } },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+        _count: { select: { replies: true } },
+      },
+    });
+
+    if (!comment) {
+      return { success: false, error: "Comment not found" };
+    }
+
+    const transformComment = (c: any): CommentWithReplies => {
+      const upvotes = c.votes.filter((v: any) => v.type === "UP").length;
+      const downvotes = c.votes.filter((v: any) => v.type === "DOWN").length;
+      const userVote = currentUserId
+        ? c.votes.find((v: any) => v.userId === currentUserId)?.type || null
+        : null;
+
+      return {
+        id: c.id,
+        content: c.content,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isEdited: c.isEdited,
+        author: c.author,
+        upvotes,
+        downvotes,
+        score: upvotes - downvotes,
+        userVote,
+        replies: c.replies?.map(transformComment) || [],
+        replyCount: c._count?.replies || 0,
+      };
+    };
+
+    return { success: true, comment: transformComment(comment) };
+  } catch (error) {
+    console.error("Error getting nested replies:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to get nested replies",
+    };
+  }
+}
+
 /**
  * Get comments for a review with nested replies
  */
 export async function getCommentsForReview(
   reviewId: string,
-  options: { page?: number; limit?: number } = {},
+  options: { page?: number; limit?: number; sortBy?: CommentSortBy } = {},
 ): Promise<{
   success: boolean;
   comments?: CommentWithReplies[];
@@ -171,7 +310,7 @@ export async function getCommentsForReview(
   totalPages?: number;
   error?: string;
 }> {
-  const { page = 1, limit = 20 } = options;
+  const { page = 1, limit = 20, sortBy = "new" } = options;
 
   try {
     const { userId: clerkUserId } = await auth();
@@ -302,7 +441,29 @@ export async function getCommentsForReview(
       };
     };
 
-    const transformedComments = comments.map(transformComment);
+    let transformedComments = comments.map(transformComment);
+
+    // Apply sort
+    if (sortBy === "top") {
+      transformedComments.sort((a, b) => b.score - a.score);
+    } else if (sortBy === "controversial") {
+      // Controversial: most total votes with close up/down ratio
+      transformedComments.sort((a, b) => {
+        const totalA = a.upvotes + a.downvotes;
+        const totalB = b.upvotes + b.downvotes;
+        if (totalA === 0 && totalB === 0) return 0;
+        if (totalA === 0) return 1;
+        if (totalB === 0) return -1;
+        const ratioA =
+          totalA > 0 ? Math.abs(a.upvotes - a.downvotes) / totalA : 1;
+        const ratioB =
+          totalB > 0 ? Math.abs(b.upvotes - b.downvotes) / totalB : 1;
+        // Lower ratio = more controversial, tie-break by total votes
+        if (ratioA !== ratioB) return ratioA - ratioB;
+        return totalB - totalA;
+      });
+    }
+    // sortBy === "new" uses default createdAt DESC from the query
 
     return {
       success: true,

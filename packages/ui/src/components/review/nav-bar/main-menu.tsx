@@ -40,6 +40,14 @@ import {
   ModeToggle,
   IconToggle,
 } from "@ratecreator/ui";
+import { NotificationBell } from "@ratecreator/ui/common";
+import {
+  getUnreadCountAction,
+  getNotificationsAction,
+  markAsReadAction,
+  markAllAsReadAction,
+  clearAllReadAction,
+} from "@ratecreator/actions";
 import { ny } from "@ratecreator/ui/utils";
 import { getInitials } from "@ratecreator/db/utils";
 
@@ -169,6 +177,14 @@ export function MainMenu() {
           </Button> */}
           <HelpCenterDropdown onNavigate={handleNavigation} />
 
+          <NotificationBell
+            getUnreadCount={getUnreadCountAction}
+            getNotifications={getNotificationsAction}
+            markAsRead={markAsReadAction}
+            markAllAsRead={markAllAsReadAction}
+            clearAllRead={clearAllReadAction}
+          />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -217,7 +233,7 @@ export function MainMenu() {
                   <span>My Reviews</span>
                   <DropdownMenuShortcut>MR</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigation("/wip")}>
+                <DropdownMenuItem onClick={() => handleNavigation("/my-lists")}>
                   <ClipboardList className="mr-2 size-4" />
                   <span>My Lists</span>
                   <DropdownMenuShortcut>ML</DropdownMenuShortcut>

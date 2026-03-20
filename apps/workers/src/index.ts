@@ -19,6 +19,8 @@ import { instagramRefreshRoute } from "./routes/instagram-refresh";
 import { redditRefreshRoute } from "./routes/reddit-refresh";
 import { tiktokRefreshRoute } from "./routes/tiktok-refresh";
 import { refreshSchedulerRoute } from "./routes/refresh-scheduler";
+import { newsletterSchedulerRoute } from "./routes/newsletter-scheduler";
+import { accountProfileUpdateRoute } from "./routes/account-profile-update";
 import { clerkWebhookRoute } from "./routes/clerk-webhook";
 
 // Pull subscriber for local dev
@@ -29,6 +31,8 @@ import {
 
 // Refresh scheduler processor (for cron)
 import { triggerRefresh } from "./processors/refresh-scheduler";
+// Newsletter scheduler processor (for cron)
+import { processScheduledNewsletters } from "./processors/newsletter-scheduler";
 
 const app = new Hono();
 
@@ -47,6 +51,8 @@ app.route("/jobs/instagram-refresh", instagramRefreshRoute);
 app.route("/jobs/reddit-refresh", redditRefreshRoute);
 app.route("/jobs/tiktok-refresh", tiktokRefreshRoute);
 app.route("/jobs/refresh-scheduler", refreshSchedulerRoute);
+app.route("/jobs/newsletter-scheduler", newsletterSchedulerRoute);
+app.route("/jobs/account-profile-update", accountProfileUpdateRoute);
 app.route("/webhook/clerk", clerkWebhookRoute);
 
 const port = parseInt(process.env.PORT || "8080");
@@ -98,6 +104,12 @@ cron.schedule("0 4 * * 2", () => {
 cron.schedule("0 5 * * 3", () => {
   console.log("Cron: Triggering TikTok refresh");
   triggerRefresh("TIKTOK").catch(console.error);
+});
+
+// Newsletter scheduler: every 5 minutes
+cron.schedule("*/5 * * * *", () => {
+  console.log("Cron: Processing scheduled newsletters");
+  processScheduledNewsletters().catch(console.error);
 });
 
 // Graceful shutdown

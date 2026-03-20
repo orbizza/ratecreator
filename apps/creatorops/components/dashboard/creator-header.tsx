@@ -2,6 +2,14 @@
 
 import { UserButton } from "@clerk/nextjs";
 import { Button } from "@ratecreator/ui";
+import { NotificationBell } from "@ratecreator/ui/common";
+import {
+  getUnreadCountAction,
+  getNotificationsAction,
+  markAsReadAction,
+  markAllAsReadAction,
+  clearAllReadAction,
+} from "@ratecreator/actions";
 import { useTheme } from "next-themes";
 
 export function CreatorHeader() {
@@ -14,6 +22,14 @@ export function CreatorHeader() {
       </div>
 
       <div className="flex items-center gap-4">
+        <NotificationBell
+          getUnreadCount={getUnreadCountAction}
+          getNotifications={getNotificationsAction}
+          markAsRead={markAsReadAction}
+          markAllAsRead={markAllAsReadAction}
+          clearAllRead={clearAllReadAction}
+        />
+
         <Button
           variant="ghost"
           size="icon"

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@ratecreator/ui";
+import { initiateOAuthVerification } from "@ratecreator/actions";
 
 type Platform =
   | "youtube"
@@ -61,11 +62,12 @@ const platforms: { value: Platform; label: string; placeholder: string }[] = [
 
 export default function ClaimAccountPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [platform, setPlatform] = useState<Platform | "">("");
   const [identifier, setIdentifier] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<"search" | "verify">("search");
+  const [step, setStep] = useState<"search" | "verify" | "success">("search");
   const [accountData, setAccountData] = useState<{
     id: string;
     name: string;
@@ -73,6 +75,21 @@ export default function ClaimAccountPage() {
     imageUrl: string;
     followerCount: number;
   } | null>(null);
+  const [claimId, setClaimId] = useState<string | null>(null);
+
+  // Handle redirect from OAuth callback
+  useEffect(() => {
+    const verified = searchParams.get("verified");
+    const callbackError = searchParams.get("error");
+    const returnedClaimId = searchParams.get("claimId");
+
+    if (verified === "true" && returnedClaimId) {
+      setClaimId(returnedClaimId);
+      setStep("success");
+    } else if (callbackError) {
+      setError(decodeURIComponent(callbackError));
+    }
+  }, [searchParams]);
 
   const handleSearch = async () => {
     if (!platform || !identifier) {
@@ -112,6 +129,7 @@ export default function ClaimAccountPage() {
     setError(null);
 
     try {
+      // Step 1: Create the claim
       const response = await fetch("/api/accounts/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,8 +142,25 @@ export default function ClaimAccountPage() {
         throw new Error(data.error || "Failed to claim account");
       }
 
-      // Redirect to verification flow or account page
-      router.push(`/accounts/${accountData.id}?claim=${data.claimId}`);
+      const newClaimId = data.claimId;
+      setClaimId(newClaimId);
+
+      // Step 2: Initiate OAuth verification (YouTube only for now)
+      if (platform === "youtube") {
+        const oauthResult = await initiateOAuthVerification(
+          newClaimId,
+          platform,
+        );
+        if ("redirectUrl" in oauthResult) {
+          window.location.href = oauthResult.redirectUrl;
+          return;
+        } else {
+          throw new Error(oauthResult.error);
+        }
+      }
+
+      // For other platforms, go to account page (verification TBD)
+      router.push(`/accounts/${accountData.id}?claim=${newClaimId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -197,6 +232,33 @@ export default function ClaimAccountPage() {
               className="w-full"
             >
               {isLoading ? "Searching..." : "Search Account"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "success" && (
+        <Card>
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <div className="mb-4 rounded-full bg-green-500/10 p-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-8 w-8 text-green-500"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold">Account Verified!</h2>
+            <p className="mt-2 text-muted-foreground">
+              Your account has been verified. You can now manage your profile
+              and respond to reviews.
+            </p>
+            <Button onClick={() => router.push("/accounts")} className="mt-6">
+              Go to My Accounts
             </Button>
           </CardContent>
         </Card>
