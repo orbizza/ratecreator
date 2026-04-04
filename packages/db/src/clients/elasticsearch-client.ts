@@ -20,8 +20,8 @@ let elasticClient: Client | null = null;
  * Get or create OpenSearch client.
  *
  * Connection modes:
- *   1. URL + basic auth (ELASTIC_URL + ELASTIC_USERNAME + ELASTIC_PASSWORD)
- *   2. URL only, no auth (ELASTIC_URL with security disabled)
+ *   1. URL + basic auth (ELASTIC_URL + ELASTIC_USERNAME + ELASTIC_PASSWORD) — self-hosted OpenSearch
+ *   2. URL only, no auth (ELASTIC_URL with security disabled) — local dev
  */
 export function getElasticsearchClient(): Client {
   if (!elasticClient) {
