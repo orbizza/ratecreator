@@ -137,25 +137,26 @@ export async function getMostPopularCategoryWithData(): Promise<
           (async () => {
             const categoryObjectId = new ObjectId(category.id);
 
-            // Use aggregation pipeline to avoid loading all mappings into memory
-            // Joins CategoryMapping → Account, sorts by followers, limits to 20
-            const accounts = await categoryMappingCollection
-              .aggregate([
-                { $match: { categoryId: categoryObjectId } },
-                {
-                  $lookup: {
-                    from: "Account",
-                    localField: "accountId",
-                    foreignField: "_id",
-                    as: "account",
-                  },
-                },
-                { $unwind: "$account" },
-                { $sort: { "account.followerCount": -1 } },
-                { $limit: 20 },
-                { $replaceRoot: { newRoot: "$account" } },
-              ])
+            // Two-step: get account IDs from mappings, then fetch top accounts
+            // Much faster than $lookup on 400K+ mappings
+            const mappings = await categoryMappingCollection
+              .find({ categoryId: categoryObjectId })
+              .project({ accountId: 1, _id: 0 })
+              .limit(5000)
               .toArray();
+
+            const accountIds = mappings.map(
+              (m) => new ObjectId(String(m.accountId)),
+            );
+
+            const accounts =
+              accountIds.length > 0
+                ? await accountCollection
+                    .find({ _id: { $in: accountIds } })
+                    .sort({ followerCount: -1 })
+                    .limit(20)
+                    .toArray()
+                : [];
 
             if (accounts.length === 0) {
               const emptyCategory = {
@@ -280,24 +281,23 @@ export async function getSingleCategoryWithAccounts(
 
     const categoryObjectId = new ObjectId(categoryId);
 
-    // Use aggregation to avoid loading all mappings into memory
-    const accounts = await categoryMappingCollection
-      .aggregate([
-        { $match: { categoryId: categoryObjectId } },
-        {
-          $lookup: {
-            from: "Account",
-            localField: "accountId",
-            foreignField: "_id",
-            as: "account",
-          },
-        },
-        { $unwind: "$account" },
-        { $sort: { "account.followerCount": -1 } },
-        { $limit: 20 },
-        { $replaceRoot: { newRoot: "$account" } },
-      ])
+    // Two-step: get account IDs, then fetch top accounts
+    const mappings = await categoryMappingCollection
+      .find({ categoryId: categoryObjectId })
+      .project({ accountId: 1, _id: 0 })
+      .limit(5000)
       .toArray();
+
+    const accountIds = mappings.map((m) => new ObjectId(String(m.accountId)));
+
+    const accounts =
+      accountIds.length > 0
+        ? await accountCollection
+            .find({ _id: { $in: accountIds } })
+            .sort({ followerCount: -1 })
+            .limit(20)
+            .toArray()
+        : [];
 
     if (accounts.length === 0) {
       const emptyCategory: PopularCategoryWithAccounts = {

@@ -284,17 +284,33 @@ describe("mostPopularCategoryActions", () => {
   describe("getMostPopularCategoryWithData", () => {
     /**
      * Helper: sets up the mongo collection mock so that:
-     *  - CategoryMapping.aggregate([...]).toArray() returns accounts (via aggregation pipeline)
+     *  - CategoryMapping.find().project().limit().toArray() returns mappings
+     *  - Account.find().sort().limit().toArray() returns accounts
      */
     function setupMongoMocks(
-      _categoryMappings: unknown[] = sampleCategoryMappings,
+      categoryMappings: unknown[] = sampleCategoryMappings,
       accounts: unknown[] = sampleAccounts,
     ) {
       mockMongoCollection.mockImplementation((name: string) => {
         if (name === "CategoryMapping") {
           return {
-            aggregate: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue(accounts),
+            find: vi.fn().mockReturnValue({
+              project: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(categoryMappings),
+                }),
+              }),
+            }),
+          };
+        }
+        if (name === "Account") {
+          return {
+            find: vi.fn().mockReturnValue({
+              sort: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(accounts),
+                }),
+              }),
             }),
           };
         }
@@ -486,14 +502,29 @@ describe("mostPopularCategoryActions", () => {
   // =========================================================================
   describe("getSingleCategoryWithAccounts", () => {
     function setupMongoMocksForSingle(
-      _categoryMappings: unknown[] = sampleCategoryMappings,
+      categoryMappings: unknown[] = sampleCategoryMappings,
       accounts: unknown[] = sampleAccounts,
     ) {
       mockMongoCollection.mockImplementation((name: string) => {
         if (name === "CategoryMapping") {
           return {
-            aggregate: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue(accounts),
+            find: vi.fn().mockReturnValue({
+              project: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(categoryMappings),
+                }),
+              }),
+            }),
+          };
+        }
+        if (name === "Account") {
+          return {
+            find: vi.fn().mockReturnValue({
+              sort: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(accounts),
+                }),
+              }),
             }),
           };
         }
