@@ -181,7 +181,10 @@ function buildDocument(account: any, categorySlugs: string[]) {
     rating: account.rating || 0,
     reviewCount: account.reviewCount || 0,
     madeForKids: pd?.status?.madeForKids ?? false,
-    videoCount: Number(pd?.statistics?.videoCount ?? 0),
+    videoCount:
+      Number(pd?.statistics?.videoCount ?? 0) ||
+      Number(account.xData?.public_metrics?.tweet_count ?? 0) ||
+      Number(account.tiktokData?.videos ?? 0),
     bannerUrl:
       account.bannerUrl ?? pd?.brandingSettings?.image?.bannerExternalUrl ?? "",
     categories: categorySlugs,
