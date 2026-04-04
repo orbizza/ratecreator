@@ -57,9 +57,9 @@ steps:
       - '--service-account'
       - 'rc-services@$PROJECT_ID.iam.gserviceaccount.com'
       - '--set-env-vars'
-      - 'NODE_ENV=production,GCP_LOCATION=us-central1,ELASTIC_ACCOUNTS_INDEX=accounts,ELASTIC_CATEGORIES_INDEX=categories,GCS_CONTENT_BUCKET=rc-content,GCS_PROFILES_BUCKET=rc-profiles,GCS_BANNERS_BUCKET=rc-banners,STORAGE_PROVIDER=do'
+      - 'NODE_ENV=production,GCP_LOCATION=us-central1,ELASTIC_ACCOUNTS_INDEX=accounts,ELASTIC_CATEGORIES_INDEX=categories,GCS_CONTENT_BUCKET=rc-content,GCS_PROFILES_BUCKET=rc-profiles,GCS_BANNERS_BUCKET=rc-banners,STORAGE_PROVIDER=do,REDIS_TLS=false'
       - '--set-secrets'
-      - 'DATABASE_URL_ONLINE=db-url:latest,REDIS_HOST=redis-host:latest,REDIS_PORT=redis-port:latest,REDIS_USERNAME=redis-username:latest,REDIS_PASSWORD=redis-password:latest,GCP_PROJECT_ID=gcp-project-id:latest,ELASTIC_URL=elastic-url:latest,ELASTIC_API_KEY=elastic-api-key:latest,YOUTUBE_API_KEY=youtube-api-key:latest,TWITTER_BEARER_TOKEN=twitter-bearer-token:latest,INSTAGRAM_ACCESS_TOKEN=instagram-access-token:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=instagram-business-account-id:latest,CLERK_WEBHOOK_SECRET=clerk-webhook-secret:latest'
+      - 'DATABASE_URL_ONLINE=db-url:latest,REDIS_HOST=redis-host:latest,REDIS_PORT=redis-port:latest,REDIS_USERNAME=redis-username:latest,REDIS_PASSWORD=redis-password:latest,GCP_PROJECT_ID=gcp-project-id:latest,ELASTIC_URL=elastic-url:latest,ELASTIC_USERNAME=elastic-username:latest,ELASTIC_PASSWORD=elastic-password:latest,YOUTUBE_API_KEY=youtube-api-key:latest,TWITTER_BEARER_TOKEN=twitter-bearer-token:latest,INSTAGRAM_ACCESS_TOKEN=instagram-access-token:latest,INSTAGRAM_BUSINESS_ACCOUNT_ID=instagram-business-account-id:latest,CLERK_WEBHOOK_SECRET=clerk-webhook-secret:latest'
 
 images:
   - 'gcr.io/$PROJECT_ID/ratecreator-workers:$COMMIT_SHA'

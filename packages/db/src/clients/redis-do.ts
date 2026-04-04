@@ -36,7 +36,7 @@ export const getRedisClient = (): Redis => {
       port,
       username: process.env.REDIS_USERNAME || "",
       password: process.env.REDIS_PASSWORD || "",
-      tls: {},
+      ...(process.env.REDIS_TLS === "false" ? {} : { tls: {} }),
     });
 
     redisClient.on("error", (err) => {

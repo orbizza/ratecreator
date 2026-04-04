@@ -6,8 +6,6 @@ import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getMongoClient } from "@ratecreator/db/mongo-client";
 
 import { Category } from "@ratecreator/types/review";
-import axios from "axios";
-
 const CACHE_ALL_CATEGORIES = "category-all";
 
 async function getSubcategories(
@@ -134,11 +132,6 @@ export async function getCategoryDetails(
           _id: new ObjectId(currentCategory.parentId),
         });
       }
-
-      //ToDo: Call the api to cache all the categories
-      await axios.get(
-        `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/categories?type=all`,
-      );
 
       return categories;
     }

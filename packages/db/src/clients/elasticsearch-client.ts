@@ -11,42 +11,37 @@
  *   - function_score: Popularity boost via followerCount
  */
 
-import { Client } from "@elastic/elasticsearch";
-import type { estypes } from "@elastic/elasticsearch";
+import { Client, type ClientOptions } from "@opensearch-project/opensearch";
 
 // Singleton client instance
 let elasticClient: Client | null = null;
 
 /**
- * Get or create Elasticsearch client.
+ * Get or create OpenSearch client.
  *
- * Supports two connection modes:
- *   1. Serverless (ELASTIC_URL + ELASTIC_API_KEY) — direct endpoint URL
- *   2. Hosted (ELASTIC_CLOUD_ID + ELASTIC_API_KEY) — Cloud ID based
+ * Connection modes:
+ *   1. URL + basic auth (ELASTIC_URL + ELASTIC_USERNAME + ELASTIC_PASSWORD) — self-hosted OpenSearch
+ *   2. URL only, no auth (ELASTIC_URL with security disabled) — local dev
  */
 export function getElasticsearchClient(): Client {
   if (!elasticClient) {
     const url = process.env.ELASTIC_URL;
-    const cloudId = process.env.ELASTIC_CLOUD_ID;
-    const apiKey = process.env.ELASTIC_API_KEY;
+    const username = process.env.ELASTIC_USERNAME;
+    const password = process.env.ELASTIC_PASSWORD;
 
-    if (url && apiKey) {
-      // Serverless: direct endpoint URL
-      elasticClient = new Client({
-        node: url,
-        auth: { apiKey },
-      });
-    } else if (cloudId && apiKey) {
-      // Hosted: Cloud ID based
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { apiKey },
-      });
-    } else {
+    if (!url) {
       throw new Error(
-        "Elasticsearch credentials not configured. Set ELASTIC_URL + ELASTIC_API_KEY (serverless) or ELASTIC_CLOUD_ID + ELASTIC_API_KEY (hosted)",
+        "OpenSearch not configured. Set ELASTIC_URL (and ELASTIC_USERNAME + ELASTIC_PASSWORD for auth)",
       );
     }
+
+    const opts: ClientOptions = {
+      node: url,
+      ssl: { rejectUnauthorized: false },
+      ...(username && password ? { auth: { username, password } } : {}),
+    };
+
+    elasticClient = new Client(opts);
   }
 
   return elasticClient;
@@ -487,7 +482,7 @@ function buildSort(params: SearchAccountsParams): any[] {
  * Transform Elasticsearch aggregations to Algolia-style facets
  */
 function transformAggregations(
-  aggregations: Record<string, estypes.AggregationsAggregate> | undefined,
+  aggregations: Record<string, unknown> | undefined,
 ): SearchAccountsResult["facets"] {
   if (!aggregations) return {};
 
@@ -502,7 +497,9 @@ function transformAggregations(
   ];
 
   for (const key of aggKeys) {
-    const agg = aggregations[key] as any;
+    const agg = aggregations[key] as
+      | { buckets: { key: string | boolean; doc_count: number }[] }
+      | undefined;
     if (agg?.buckets) {
       facets[key as keyof typeof facets] = {};
       for (const bucket of agg.buckets) {
@@ -531,7 +528,7 @@ export async function searchAccounts(
   const from = (page - 1) * limit;
 
   try {
-    const response: estypes.SearchResponse = await client.search({
+    const response = await client.search({
       index: ACCOUNTS_INDEX,
       body: {
         query: buildQuery(params),
@@ -549,15 +546,15 @@ export async function searchAccounts(
       },
     });
 
-    const totalHits =
-      typeof response.hits.total === "number"
-        ? response.hits.total
-        : response.hits.total?.value || 0;
+    const total = response.body.hits.total;
+    const totalHits = typeof total === "number" ? total : total?.value || 0;
 
-    const hits = response.hits.hits.map((hit) => ({
-      objectID: hit._id,
-      ...(hit._source as Record<string, unknown>),
-    }));
+    const hits = response.body.hits.hits.map(
+      (hit: { _id: string; _source?: Record<string, unknown> }) => ({
+        objectID: hit._id,
+        ...(hit._source ?? {}),
+      }),
+    );
 
     return {
       hits,
@@ -565,7 +562,7 @@ export async function searchAccounts(
       page,
       nbPages: Math.ceil(totalHits / limit),
       hitsPerPage: limit,
-      facets: transformAggregations(response.aggregations),
+      facets: transformAggregations(response.body.aggregations),
       processingTimeMS: Date.now() - startTime,
     };
   } catch (error) {
@@ -606,10 +603,10 @@ export async function bulkIndexAccounts(accounts: any[]): Promise<void> {
 
   const response = await client.bulk({ body: operations, refresh: true });
 
-  if (response.errors) {
-    const errors = response.items
-      .filter((item) => item.index?.error)
-      .map((item) => item.index?.error);
+  if (response.body.errors) {
+    const errors = response.body.items
+      .filter((item: Record<string, { error?: unknown }>) => item.index?.error)
+      .map((item: Record<string, { error?: unknown }>) => item.index?.error);
     console.error("Bulk indexing errors:", errors);
     throw new Error(`Bulk indexing failed with ${errors.length} errors`);
   }
@@ -677,10 +674,12 @@ export async function searchCategories(query: string): Promise<any[]> {
     },
   });
 
-  return response.hits.hits.map((hit) => ({
-    objectID: hit._id,
-    ...(hit._source as Record<string, unknown>),
-  }));
+  return response.body.hits.hits.map(
+    (hit: { _id: string; _source?: Record<string, unknown> }) => ({
+      objectID: hit._id,
+      ...(hit._source ?? {}),
+    }),
+  );
 }
 
 /**
@@ -849,8 +848,8 @@ export async function checkHealth(): Promise<{
     const client = getElasticsearchClient();
     const health = await client.cluster.health();
     return {
-      status: health.status,
-      available: health.status !== "red",
+      status: health.body.status,
+      available: health.body.status !== "red",
     };
   } catch (error) {
     return {

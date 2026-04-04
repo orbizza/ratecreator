@@ -35,13 +35,15 @@ const {
   const mockMongoLimit = vi.fn();
   const mockMongoSort = vi.fn();
   const mockMongoFind = vi.fn();
+  const mockMongoAggregate = vi.fn();
 
   // Build the fluent chain: find() -> sort() -> limit() -> toArray()
   mockMongoLimit.mockReturnValue({ toArray: mockMongoToArray });
   mockMongoSort.mockReturnValue({ limit: mockMongoLimit });
   // By default find() returns a chain with toArray (for CategoryMapping)
-  // We override per-test when Account collection needs sort/limit
   mockMongoFind.mockReturnValue({ toArray: mockMongoToArray });
+  // aggregate() returns { toArray }
+  mockMongoAggregate.mockReturnValue({ toArray: mockMongoToArray });
 
   const mockMongoCollection = vi.fn();
   const mockMongoDb = vi.fn(() => ({ collection: mockMongoCollection }));
@@ -70,6 +72,7 @@ const {
     mockMongoToArray,
     mockMongoSort,
     mockMongoLimit,
+    mockMongoAggregate,
     mockRedisClient,
     mockPrismaInstance,
     mockMongoCollection,
@@ -281,19 +284,22 @@ describe("mostPopularCategoryActions", () => {
   describe("getMostPopularCategoryWithData", () => {
     /**
      * Helper: sets up the mongo collection mock so that:
-     *  - CategoryMapping.find().toArray() returns categoryMappings
+     *  - CategoryMapping.find().project().limit().toArray() returns mappings
      *  - Account.find().sort().limit().toArray() returns accounts
      */
     function setupMongoMocks(
-      categoryMappings: any[] = sampleCategoryMappings,
-      accounts: any[] = sampleAccounts,
+      categoryMappings: unknown[] = sampleCategoryMappings,
+      accounts: unknown[] = sampleAccounts,
     ) {
-      let callCount = 0;
       mockMongoCollection.mockImplementation((name: string) => {
         if (name === "CategoryMapping") {
           return {
             find: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue(categoryMappings),
+              project: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(categoryMappings),
+                }),
+              }),
             }),
           };
         }
@@ -496,14 +502,18 @@ describe("mostPopularCategoryActions", () => {
   // =========================================================================
   describe("getSingleCategoryWithAccounts", () => {
     function setupMongoMocksForSingle(
-      categoryMappings: any[] = sampleCategoryMappings,
-      accounts: any[] = sampleAccounts,
+      categoryMappings: unknown[] = sampleCategoryMappings,
+      accounts: unknown[] = sampleAccounts,
     ) {
       mockMongoCollection.mockImplementation((name: string) => {
         if (name === "CategoryMapping") {
           return {
             find: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue(categoryMappings),
+              project: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue(categoryMappings),
+                }),
+              }),
             }),
           };
         }

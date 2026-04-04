@@ -12,7 +12,7 @@
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
-import { Client } from "@elastic/elasticsearch";
+import { Client, type ClientOptions } from "@opensearch-project/opensearch";
 import { MongoClient, ObjectId } from "mongodb";
 
 // Load env BEFORE any db client usage
@@ -43,18 +43,16 @@ let elasticClient: Client | null = null;
 function getElasticsearchClient(): Client {
   if (!elasticClient) {
     const url = process.env.ELASTIC_URL;
-    const cloudId = process.env.ELASTIC_CLOUD_ID;
-    const apiKey = process.env.ELASTIC_API_KEY;
+    const username = process.env.ELASTIC_USERNAME;
+    const password = process.env.ELASTIC_PASSWORD;
 
-    if (url && apiKey) {
-      elasticClient = new Client({ node: url, auth: { apiKey } });
-    } else if (cloudId && apiKey) {
-      elasticClient = new Client({ cloud: { id: cloudId }, auth: { apiKey } });
-    } else {
-      throw new Error(
-        "Set ELASTIC_URL + ELASTIC_API_KEY or ELASTIC_CLOUD_ID + ELASTIC_API_KEY",
-      );
-    }
+    if (!url) throw new Error("ELASTIC_URL not configured");
+    const opts: ClientOptions = {
+      node: url,
+      ssl: { rejectUnauthorized: false },
+      ...(username && password ? { auth: { username, password } } : {}),
+    };
+    elasticClient = new Client(opts);
   }
   return elasticClient;
 }
@@ -183,7 +181,10 @@ function buildDocument(account: any, categorySlugs: string[]) {
     rating: account.rating || 0,
     reviewCount: account.reviewCount || 0,
     madeForKids: pd?.status?.madeForKids ?? false,
-    videoCount: Number(pd?.statistics?.videoCount ?? 0),
+    videoCount:
+      Number(pd?.statistics?.videoCount ?? 0) ||
+      Number(account.xData?.public_metrics?.tweet_count ?? 0) ||
+      Number(account.tiktokData?.videos ?? 0),
     bannerUrl:
       account.bannerUrl ?? pd?.brandingSettings?.image?.bannerExternalUrl ?? "",
     categories: categorySlugs,
@@ -207,10 +208,10 @@ async function bulkIndex(
 
   const res = await client.bulk({ body: ops, refresh: false });
 
-  if (res.errors) {
+  if (res.body.errors) {
     let success = 0,
       failed = 0;
-    res.items.forEach((item) => {
+    res.body.items.forEach((item: Record<string, { error?: unknown }>) => {
       if (item.index?.error) failed++;
       else success++;
     });
@@ -223,8 +224,8 @@ async function bulkIndex(
 // ── Create Index ────────────────────────────────────────────
 
 async function createIndexIfNotExists(client: Client) {
-  const exists = await client.indices.exists({ index: ELASTIC_INDEX });
-  if (exists) {
+  const existsResp = await client.indices.exists({ index: ELASTIC_INDEX });
+  if (existsResp.body) {
     console.log(`Index ${ELASTIC_INDEX} already exists`);
     return;
   }

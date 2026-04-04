@@ -85,8 +85,8 @@ check_step_6() {
 }
 
 check_step_7() {
-  # Scheduler jobs exist?
-  gcloud scheduler jobs describe youtube-refresh --location="${REGION}" --project="${PROJECT_ID}" &>/dev/null
+  # Cloud Scheduler removed — refresh is manual-only now
+  return 0
 }
 
 check_step_8() {
@@ -124,7 +124,7 @@ STEPS=(
   "04-store-secrets.sh|Store secrets in Secret Manager|check_step_4"
   "05-deploy-workers.sh|Build + deploy workers to Cloud Run|check_step_5"
   "06-configure-push-subscriptions.sh|Configure Pub/Sub push endpoints|check_step_6"
-  "07-create-cloud-scheduler.sh|Create Cloud Scheduler jobs|check_step_7"
+  "07-create-cloud-scheduler.sh|REMOVED — Cloud Scheduler no longer used|check_step_7"
   "08-verify.sh|Verify entire setup|check_step_8"
   "09-create-storage-bucket.sh|Create GCS buckets (content + profiles)|check_step_9"
   "10-migrate-content-to-gcs.sh|Migrate DO Spaces content to GCS (optional)|check_step_10"

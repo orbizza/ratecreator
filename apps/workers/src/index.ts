@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import cron from "node-cron";
 import { closePubSubClient } from "@ratecreator/db/pubsub-client";
 import { getPrismaClient } from "@ratecreator/db/client";
 
@@ -26,9 +25,6 @@ import {
   startPullSubscribers,
   stopPullSubscribers,
 } from "./lib/pull-subscriber";
-
-// Refresh scheduler processor (for cron)
-import { triggerRefresh } from "./processors/refresh-scheduler";
 
 const app = new Hono();
 
@@ -64,7 +60,7 @@ const server = serve({ fetch: app.fetch, port }, () => {
 ║  Port: ${String(port).padEnd(37)}║
 ║  Environment: ${(process.env.NODE_ENV || "development").padEnd(30)}║
 ║  Pull Subscriber: ${(enablePull ? "ENABLED" : "disabled").padEnd(25)}║
-║  Endpoints: 13 job routes + webhook + sched   ║
+║  Endpoints: 13 job routes + webhook            ║
 ╚══════════════════════════════════════════════╝
   `);
 
@@ -73,31 +69,6 @@ const server = serve({ fetch: app.fetch, port }, () => {
       console.error("[pull-subscriber] Failed to start:", err),
     );
   }
-});
-
-// Cron schedules for refresh-scheduler
-// YouTube: Sunday 2 AM UTC
-cron.schedule("0 2 * * 0", () => {
-  console.log("Cron: Triggering YouTube refresh");
-  triggerRefresh("YOUTUBE").catch(console.error);
-});
-
-// Instagram: Monday 3 AM UTC
-cron.schedule("0 3 * * 1", () => {
-  console.log("Cron: Triggering Instagram refresh");
-  triggerRefresh("INSTAGRAM").catch(console.error);
-});
-
-// Reddit: Tuesday 4 AM UTC
-cron.schedule("0 4 * * 2", () => {
-  console.log("Cron: Triggering Reddit refresh");
-  triggerRefresh("REDDIT").catch(console.error);
-});
-
-// TikTok: Wednesday 5 AM UTC
-cron.schedule("0 5 * * 3", () => {
-  console.log("Cron: Triggering TikTok refresh");
-  triggerRefresh("TIKTOK").catch(console.error);
 });
 
 // Graceful shutdown

@@ -4,6 +4,7 @@ import {
   PopularCategory,
   PopularCategoryWithAccounts,
   Account,
+  Category,
 } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 import getRedisClient from "@ratecreator/db/redis-do";
@@ -135,11 +136,29 @@ export async function getMostPopularCategoryWithData(): Promise<
         pipeline.push(
           (async () => {
             const categoryObjectId = new ObjectId(category.id);
-            const categoryMappings = await categoryMappingCollection
+
+            // Two-step: get account IDs from mappings, then fetch top accounts
+            // Much faster than $lookup on 400K+ mappings
+            const mappings = await categoryMappingCollection
               .find({ categoryId: categoryObjectId })
+              .project({ accountId: 1, _id: 0 })
+              .limit(5000)
               .toArray();
 
-            if (categoryMappings.length === 0) {
+            const accountIds = mappings.map(
+              (m) => new ObjectId(String(m.accountId)),
+            );
+
+            const accounts =
+              accountIds.length > 0
+                ? await accountCollection
+                    .find({ _id: { $in: accountIds } })
+                    .sort({ followerCount: -1 })
+                    .limit(20)
+                    .toArray()
+                : [];
+
+            if (accounts.length === 0) {
               const emptyCategory = {
                 category: {
                   id: category.id,
@@ -156,18 +175,6 @@ export async function getMostPopularCategoryWithData(): Promise<
               setLocal(categoryCacheKey, emptyCategory);
               return emptyCategory;
             }
-
-            const accountObjectIds = categoryMappings.map(
-              (mapping) => new ObjectId(mapping.accountId),
-            );
-
-            const accounts = await accountCollection
-              .find({
-                _id: { $in: accountObjectIds },
-              })
-              .sort({ followerCount: -1 })
-              .limit(20)
-              .toArray();
 
             const categoryWithAccounts = {
               category: {
@@ -273,21 +280,35 @@ export async function getSingleCategoryWithAccounts(
     }
 
     const categoryObjectId = new ObjectId(categoryId);
-    const categoryMappings = await categoryMappingCollection
+
+    // Two-step: get account IDs, then fetch top accounts
+    const mappings = await categoryMappingCollection
       .find({ categoryId: categoryObjectId })
+      .project({ accountId: 1, _id: 0 })
+      .limit(5000)
       .toArray();
 
-    if (categoryMappings.length === 0) {
+    const accountIds = mappings.map((m) => new ObjectId(String(m.accountId)));
+
+    const accounts =
+      accountIds.length > 0
+        ? await accountCollection
+            .find({ _id: { $in: accountIds } })
+            .sort({ followerCount: -1 })
+            .limit(20)
+            .toArray()
+        : [];
+
+    if (accounts.length === 0) {
       const emptyCategory: PopularCategoryWithAccounts = {
         category: {
           id: category.id,
           name: category.name,
           slug: category.slug,
-        } as any, // Type assertion to satisfy the PopularCategory interface
+        } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
         accounts: [],
       };
 
-      // Cache with TTL
       await redis.setex(
         categoryCacheKey,
         REDIS_TTL.INDIVIDUAL_CATEGORY,
@@ -297,18 +318,6 @@ export async function getSingleCategoryWithAccounts(
 
       return emptyCategory;
     }
-
-    const accountObjectIds = categoryMappings.map(
-      (mapping) => new ObjectId(mapping.accountId),
-    );
-
-    const accounts = await accountCollection
-      .find({
-        _id: { $in: accountObjectIds },
-      })
-      .sort({ followerCount: -1 })
-      .limit(20)
-      .toArray();
 
     const categoryWithAccounts: PopularCategoryWithAccounts = {
       category: {
