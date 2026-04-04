@@ -8,13 +8,13 @@ import { VertexAI } from "@google-cloud/vertexai";
 const prisma = getPrismaClient();
 const redis = getRedisClient();
 
-// Initialize Vertex AI with Gemini 2.5 Pro for better category understanding
+// Initialize Vertex AI
 const vertexAI = new VertexAI({
   project: process.env.GCP_PROJECT_ID || "",
   location: process.env.GCP_LOCATION || "us-central1",
 });
 
-const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-pro" });
+const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 interface AccountTranslatedEvent {
   accountId: string;
