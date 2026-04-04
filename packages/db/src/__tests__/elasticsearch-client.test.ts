@@ -28,7 +28,7 @@ const { mockElasticClient, MockClient } = vi.hoisted(() => {
 });
 
 // Mock elasticsearch client
-vi.mock("@elastic/elasticsearch", () => ({
+vi.mock("@opensearch-project/opensearch", () => ({
   Client: MockClient,
 }));
 
@@ -40,8 +40,9 @@ describe("Elasticsearch Client", () => {
     vi.resetModules();
     process.env = {
       ...originalEnv,
-      ELASTIC_CLOUD_ID: "test-cloud-id",
-      ELASTIC_API_KEY: "test-api-key",
+      ELASTIC_URL: "https://localhost:9200",
+      ELASTIC_USERNAME: "admin",
+      ELASTIC_PASSWORD: "test-password",
       ELASTIC_ACCOUNTS_INDEX: "accounts",
       ELASTIC_CATEGORIES_INDEX: "categories",
     };
@@ -53,39 +54,44 @@ describe("Elasticsearch Client", () => {
   });
 
   describe("getElasticsearchClient", () => {
-    it("should create client with API key authentication", async () => {
+    it("should create client with basic auth", async () => {
       const { getElasticsearchClient } =
         await import("../clients/elasticsearch-client");
       const client = getElasticsearchClient();
 
       expect(client).toBeDefined();
       expect(MockClient).toHaveBeenCalledWith({
-        cloud: { id: "test-cloud-id" },
-        auth: { apiKey: "test-api-key" },
+        node: "https://localhost:9200",
+        ssl: { rejectUnauthorized: false },
+        auth: { username: "admin", password: "test-password" },
       });
     });
 
-    it("should throw when API key not available (basic auth not supported)", async () => {
+    it("should create client without auth when no credentials", async () => {
       vi.resetModules();
-      delete process.env.ELASTIC_API_KEY;
+      delete process.env.ELASTIC_USERNAME;
+      delete process.env.ELASTIC_PASSWORD;
 
       const { getElasticsearchClient } =
         await import("../clients/elasticsearch-client");
+      const client = getElasticsearchClient();
 
-      expect(() => getElasticsearchClient()).toThrow(
-        "Elasticsearch credentials not configured",
-      );
+      expect(client).toBeDefined();
+      expect(MockClient).toHaveBeenCalledWith({
+        node: "https://localhost:9200",
+        ssl: { rejectUnauthorized: false },
+      });
     });
 
-    it("should throw error when no credentials configured", async () => {
+    it("should throw error when ELASTIC_URL not configured", async () => {
       vi.resetModules();
-      delete process.env.ELASTIC_CLOUD_ID;
+      delete process.env.ELASTIC_URL;
 
       const { getElasticsearchClient } =
         await import("../clients/elasticsearch-client");
 
       expect(() => getElasticsearchClient()).toThrow(
-        "Elasticsearch credentials not configured",
+        "OpenSearch not configured",
       );
     });
 
@@ -104,21 +110,23 @@ describe("Elasticsearch Client", () => {
   describe("searchAccounts", () => {
     beforeEach(() => {
       mockElasticClient.search.mockResolvedValue({
-        hits: {
-          total: { value: 10 },
-          hits: [
-            {
-              _id: "1",
-              _source: { name: "Test Account", platform: "YOUTUBE" },
-            },
-          ],
-        },
-        aggregations: {
-          platform: { buckets: [{ key: "YOUTUBE", doc_count: 5 }] },
-          categories: { buckets: [{ key: "tech", doc_count: 3 }] },
-          country: { buckets: [] },
-          language_code: { buckets: [] },
-          madeForKids: { buckets: [{ key: false, doc_count: 8 }] },
+        body: {
+          hits: {
+            total: { value: 10 },
+            hits: [
+              {
+                _id: "1",
+                _source: { name: "Test Account", platform: "YOUTUBE" },
+              },
+            ],
+          },
+          aggregations: {
+            platform: { buckets: [{ key: "YOUTUBE", doc_count: 5 }] },
+            categories: { buckets: [{ key: "tech", doc_count: 3 }] },
+            country: { buckets: [] },
+            language_code: { buckets: [] },
+            madeForKids: { buckets: [{ key: false, doc_count: 8 }] },
+          },
         },
       });
     });
@@ -595,7 +603,9 @@ describe("Elasticsearch Client", () => {
 
   describe("bulkIndexAccounts", () => {
     beforeEach(() => {
-      mockElasticClient.bulk.mockResolvedValue({ errors: false, items: [] });
+      mockElasticClient.bulk.mockResolvedValue({
+        body: { errors: false, items: [] },
+      });
     });
 
     it("should bulk index multiple accounts", async () => {
@@ -620,8 +630,10 @@ describe("Elasticsearch Client", () => {
 
     it("should throw error on bulk indexing failure", async () => {
       mockElasticClient.bulk.mockResolvedValueOnce({
-        errors: true,
-        items: [{ index: { error: { reason: "Mapping error" } } }],
+        body: {
+          errors: true,
+          items: [{ index: { error: { reason: "Mapping error" } } }],
+        },
       });
 
       const { bulkIndexAccounts } =
@@ -724,7 +736,9 @@ describe("Elasticsearch Client", () => {
 
   describe("checkHealth", () => {
     it("should return healthy status when cluster is green", async () => {
-      mockElasticClient.cluster.health.mockResolvedValue({ status: "green" });
+      mockElasticClient.cluster.health.mockResolvedValue({
+        body: { status: "green" },
+      });
 
       const { checkHealth } = await import("../clients/elasticsearch-client");
 
@@ -737,7 +751,9 @@ describe("Elasticsearch Client", () => {
     });
 
     it("should return healthy status when cluster is yellow", async () => {
-      mockElasticClient.cluster.health.mockResolvedValue({ status: "yellow" });
+      mockElasticClient.cluster.health.mockResolvedValue({
+        body: { status: "yellow" },
+      });
 
       const { checkHealth } = await import("../clients/elasticsearch-client");
 
@@ -750,7 +766,9 @@ describe("Elasticsearch Client", () => {
     });
 
     it("should return unavailable when cluster is red", async () => {
-      mockElasticClient.cluster.health.mockResolvedValue({ status: "red" });
+      mockElasticClient.cluster.health.mockResolvedValue({
+        body: { status: "red" },
+      });
 
       const { checkHealth } = await import("../clients/elasticsearch-client");
 
@@ -783,12 +801,15 @@ describe("Elasticsearch Range Parsing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
-    process.env.ELASTIC_CLOUD_ID = "test-cloud-id";
-    process.env.ELASTIC_API_KEY = "test-api-key";
+    process.env.ELASTIC_URL = "https://localhost:9200";
+    process.env.ELASTIC_USERNAME = "admin";
+    process.env.ELASTIC_PASSWORD = "test-password";
 
     mockElasticClient.search.mockResolvedValue({
-      hits: { total: { value: 0 }, hits: [] },
-      aggregations: {},
+      body: {
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {},
+      },
     });
   });
 

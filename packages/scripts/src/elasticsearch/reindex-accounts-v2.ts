@@ -19,7 +19,7 @@
 
 import dotenv from "dotenv";
 import path from "path";
-import { Client } from "@elastic/elasticsearch";
+import { Client, type ClientOptions } from "@opensearch-project/opensearch";
 
 dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
@@ -31,21 +31,16 @@ let elasticClient: Client | null = null;
 function getElasticsearchClient(): Client {
   if (!elasticClient) {
     const url = process.env.ELASTIC_URL;
-    const cloudId = process.env.ELASTIC_CLOUD_ID;
-    const apiKey = process.env.ELASTIC_API_KEY;
+    const username = process.env.ELASTIC_USERNAME;
+    const password = process.env.ELASTIC_PASSWORD;
 
-    if (url && apiKey) {
-      elasticClient = new Client({ node: url, auth: { apiKey } });
-    } else if (cloudId && apiKey) {
-      elasticClient = new Client({
-        cloud: { id: cloudId },
-        auth: { apiKey },
-      });
-    } else {
-      throw new Error(
-        "Set ELASTIC_URL + ELASTIC_API_KEY or ELASTIC_CLOUD_ID + ELASTIC_API_KEY",
-      );
-    }
+    if (!url) throw new Error("ELASTIC_URL not configured");
+    const opts: ClientOptions = {
+      node: url,
+      ssl: { rejectUnauthorized: false },
+      ...(username && password ? { auth: { username, password } } : {}),
+    };
+    elasticClient = new Client(opts);
   }
   return elasticClient;
 }
