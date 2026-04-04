@@ -4,6 +4,7 @@ import {
   PopularCategory,
   PopularCategoryWithAccounts,
   Account,
+  Category,
 } from "@ratecreator/types/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 import getRedisClient from "@ratecreator/db/redis-do";
@@ -135,11 +136,28 @@ export async function getMostPopularCategoryWithData(): Promise<
         pipeline.push(
           (async () => {
             const categoryObjectId = new ObjectId(category.id);
-            const categoryMappings = await categoryMappingCollection
-              .find({ categoryId: categoryObjectId })
+
+            // Use aggregation pipeline to avoid loading all mappings into memory
+            // Joins CategoryMapping → Account, sorts by followers, limits to 20
+            const accounts = await categoryMappingCollection
+              .aggregate([
+                { $match: { categoryId: categoryObjectId } },
+                {
+                  $lookup: {
+                    from: "Account",
+                    localField: "accountId",
+                    foreignField: "_id",
+                    as: "account",
+                  },
+                },
+                { $unwind: "$account" },
+                { $sort: { "account.followerCount": -1 } },
+                { $limit: 20 },
+                { $replaceRoot: { newRoot: "$account" } },
+              ])
               .toArray();
 
-            if (categoryMappings.length === 0) {
+            if (accounts.length === 0) {
               const emptyCategory = {
                 category: {
                   id: category.id,
@@ -156,18 +174,6 @@ export async function getMostPopularCategoryWithData(): Promise<
               setLocal(categoryCacheKey, emptyCategory);
               return emptyCategory;
             }
-
-            const accountObjectIds = categoryMappings.map(
-              (mapping) => new ObjectId(mapping.accountId),
-            );
-
-            const accounts = await accountCollection
-              .find({
-                _id: { $in: accountObjectIds },
-              })
-              .sort({ followerCount: -1 })
-              .limit(20)
-              .toArray();
 
             const categoryWithAccounts = {
               category: {
@@ -273,21 +279,36 @@ export async function getSingleCategoryWithAccounts(
     }
 
     const categoryObjectId = new ObjectId(categoryId);
-    const categoryMappings = await categoryMappingCollection
-      .find({ categoryId: categoryObjectId })
+
+    // Use aggregation to avoid loading all mappings into memory
+    const accounts = await categoryMappingCollection
+      .aggregate([
+        { $match: { categoryId: categoryObjectId } },
+        {
+          $lookup: {
+            from: "Account",
+            localField: "accountId",
+            foreignField: "_id",
+            as: "account",
+          },
+        },
+        { $unwind: "$account" },
+        { $sort: { "account.followerCount": -1 } },
+        { $limit: 20 },
+        { $replaceRoot: { newRoot: "$account" } },
+      ])
       .toArray();
 
-    if (categoryMappings.length === 0) {
+    if (accounts.length === 0) {
       const emptyCategory: PopularCategoryWithAccounts = {
         category: {
           id: category.id,
           name: category.name,
           slug: category.slug,
-        } as any, // Type assertion to satisfy the PopularCategory interface
+        } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
         accounts: [],
       };
 
-      // Cache with TTL
       await redis.setex(
         categoryCacheKey,
         REDIS_TTL.INDIVIDUAL_CATEGORY,
@@ -297,18 +318,6 @@ export async function getSingleCategoryWithAccounts(
 
       return emptyCategory;
     }
-
-    const accountObjectIds = categoryMappings.map(
-      (mapping) => new ObjectId(mapping.accountId),
-    );
-
-    const accounts = await accountCollection
-      .find({
-        _id: { $in: accountObjectIds },
-      })
-      .sort({ followerCount: -1 })
-      .limit(20)
-      .toArray();
 
     const categoryWithAccounts: PopularCategoryWithAccounts = {
       category: {
