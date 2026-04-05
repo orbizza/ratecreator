@@ -79,6 +79,7 @@
     "mongodb": "^6.13.0",
     "next-sitemap": "^4.2.3",
     "posthog-js": "^1.335.2",
+    "posthog-node": "^5.28.11",
     "quill": "^2.0.3",
     "react-icons": "^5.4.0",
     "react-markdown": "^9.0.3",

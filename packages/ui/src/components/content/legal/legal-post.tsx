@@ -174,20 +174,15 @@ export const LegalPost = ({ postUrl: postUrlProp }: LegalPostProps = {}) => {
                   <tr className="border-b">
                     <td className="py-2 pr-4">Google Cloud Platform</td>
                     <td className="py-2 pr-4">
-                      Compute, AI, messaging, scheduling
+                      Compute, database, search, cache, AI, messaging, storage
                     </td>
                     <td className="py-2 pr-4">
-                      Creator profiles, translations, categorizations
+                      Creator profiles, search indices, cached data,
+                      translations, categorizations
                     </td>
-                    <td className="py-2 pr-4">US (us-central1)</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-2 pr-4">Elastic Cloud</td>
-                    <td className="py-2 pr-4">Search indexing &amp; queries</td>
                     <td className="py-2 pr-4">
-                      Creator profiles, ratings, categories
+                      India (asia-south1), US (us-central1)
                     </td>
-                    <td className="py-2 pr-4">US (us-central1)</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 pr-4">Vercel</td>
@@ -197,17 +192,7 @@ export const LegalPost = ({ postUrl: postUrlProp }: LegalPostProps = {}) => {
                     <td className="py-2 pr-4">
                       User sessions, page renders, API responses
                     </td>
-                    <td className="py-2 pr-4">US (Global Edge)</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-2 pr-4">DigitalOcean</td>
-                    <td className="py-2 pr-4">
-                      Managed MongoDB, managed Redis
-                    </td>
-                    <td className="py-2 pr-4">
-                      All persistent data, cached data
-                    </td>
-                    <td className="py-2 pr-4">US (NYC3)</td>
+                    <td className="py-2 pr-4">Global Edge</td>
                   </tr>
                 </tbody>
               </table>
