@@ -177,6 +177,30 @@ export async function processTiktokRefresh(
       await redis.set(cacheKey, JSON.stringify(updatedCacheData));
     }
 
+    // Update Elasticsearch
+    try {
+      const { updateAccount } =
+        await import("@ratecreator/db/elasticsearch-client");
+      const esUpdate: Record<string, unknown> = {};
+      if (updateData.followerCount !== undefined)
+        esUpdate.followerCount = updateData.followerCount;
+      if (updateData.name) esUpdate.name = updateData.name;
+      if (updateData.description) esUpdate.description = updateData.description;
+      if (updateData.imageUrl) esUpdate.imageUrl = updateData.imageUrl;
+      if (freshData.videos !== undefined)
+        esUpdate.videoCount = Number(freshData.videos);
+
+      if (Object.keys(esUpdate).length > 0) {
+        await updateAccount(account.accountId, esUpdate);
+        console.log(`Updated Elasticsearch for account ${accountId}`);
+      }
+    } catch (esError) {
+      console.error(
+        `Elasticsearch update failed for ${accountId} (non-fatal):`,
+        esError,
+      );
+    }
+
     console.log(`Successfully refreshed TikTok data for account ${accountId}`);
   } catch (error) {
     console.error(
