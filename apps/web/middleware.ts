@@ -1,12 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// API routes that require auth — return 401 (no modal possible for APIs)
+// API routes that require auth — return 401 (no modal possible for APIs).
+// Comment/vote mutations live as Server Actions, not as routes; the matchers
+// below cover only routes that actually exist on disk.
 const isApiProtectedRoute = createRouteMatcher([
   "/api/reviews(.*)",
-  "/api/comments(.*)",
-  "/api/votes(.*)",
   "/api/search/(.*)",
   "/api/accounts(.*)",
+  "/api/categories(.*)",
+  "/api/metadata(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

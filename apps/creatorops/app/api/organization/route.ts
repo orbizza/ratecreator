@@ -137,12 +137,31 @@ export async function GET(req: NextRequest) {
       orderBy: { joinedAt: "desc" },
     });
 
+    // Only OWNER/ADMIN members of an org see other members' emails — regular
+    // members get name + id but no email. Self always sees own email.
+    const PRIVILEGED_ROLES = new Set(["OWNER", "ADMIN"]);
+
     return NextResponse.json({
-      organizations: memberships.map((m) => ({
-        ...m.organization,
-        role: m.role,
-        joinedAt: m.joinedAt,
-      })),
+      organizations: memberships.map((m) => {
+        const isPrivileged = PRIVILEGED_ROLES.has(m.role);
+        return {
+          ...m.organization,
+          members: m.organization.members.map((member) => ({
+            ...member,
+            user: {
+              id: member.user.id,
+              firstName: member.user.firstName,
+              lastName: member.user.lastName,
+              email:
+                isPrivileged || member.user.id === user.id
+                  ? member.user.email
+                  : undefined,
+            },
+          })),
+          role: m.role,
+          joinedAt: m.joinedAt,
+        };
+      }),
     });
   } catch (error) {
     console.error("Error fetching organizations:", error);

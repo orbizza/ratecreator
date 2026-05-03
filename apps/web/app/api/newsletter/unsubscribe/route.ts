@@ -80,13 +80,26 @@ export async function GET(request: NextRequest) {
   }
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderHtmlPage(title: string, message: string): string {
+  // All callers pass static strings today, but escape defensively so this
+  // helper cannot become an XSS sink if a future caller wires user input.
+  const safeTitle = escapeHtml(title);
+  const safeMessage = escapeHtml(message);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - Rate Creator</title>
+  <title>${safeTitle} - Rate Creator</title>
   <style>
     body {
       margin: 0;
@@ -132,8 +145,8 @@ function renderHtmlPage(title: string, message: string): string {
 </head>
 <body>
   <div class="container">
-    <h1>${title}</h1>
-    <p>${message}</p>
+    <h1>${safeTitle}</h1>
+    <p>${safeMessage}</p>
     <a href="https://ratecreator.com">Go to Rate Creator</a>
   </div>
 </body>
