@@ -68,3 +68,6 @@ categories-updated.json
 
 # Migration checkpoints
 *checkpoint*.json
+
+# TypeScript incremental build artifacts (host-specific paths, noisy diffs)
+*.tsbuildinfo
