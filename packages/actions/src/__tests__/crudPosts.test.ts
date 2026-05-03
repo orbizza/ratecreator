@@ -6,33 +6,37 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockSignedIn, mockRedirect } = vi.hoisted(() => {
-  const mockPrisma = {
-    post: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-    },
-    tagOnPost: {
-      createMany: vi.fn(),
-      deleteMany: vi.fn(),
-      findMany: vi.fn(),
-    },
-  };
+const { mockPrisma, mockRedirect, mockAuth, mockClerkClient } = vi.hoisted(
+  () => {
+    const mockPrisma = {
+      post: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
+      tagOnPost: {
+        createMany: vi.fn(),
+        deleteMany: vi.fn(),
+        findMany: vi.fn(),
+      },
+    };
 
-  const mockSignedIn = vi.fn();
-  const mockRedirect = vi.fn();
+    const mockRedirect = vi.fn();
+    const mockAuth = vi.fn();
+    const mockClerkClient = vi.fn();
 
-  return { mockPrisma, mockSignedIn, mockRedirect };
-});
+    return { mockPrisma, mockRedirect, mockAuth, mockClerkClient };
+  },
+);
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
 }));
 
-vi.mock("@clerk/nextjs", () => ({
-  SignedIn: mockSignedIn,
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+  clerkClient: mockClerkClient,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -57,6 +61,16 @@ vi.mock("@ratecreator/types/content", () => ({
   UpdatePostType: {},
 }));
 
+// The email package is only used at publish time for newsletters; stub it
+// out so this test file doesn't pull in the full email runtime.
+vi.mock("@ratecreator/email", () => ({
+  blocknoteToEmailHtml: vi.fn(() => ""),
+  sendBroadcastToSegments: vi.fn(async () => []),
+  deleteBroadcast: vi.fn(async () => undefined),
+  NewsletterIssueEmail: () => null,
+  BASE_URL: "http://localhost",
+}));
+
 import {
   createPost,
   updatePost,
@@ -70,7 +84,21 @@ import {
 describe("Post CRUD Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignedIn.mockResolvedValue(true);
+    // Default: signed-in admin (deepshaswat@gmail.com is in ADMIN_EMAILS,
+    // so requireWriter() will accept this user without a roles array).
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {
@@ -171,6 +199,36 @@ describe("Post CRUD Actions", () => {
       const result = await createPost(mockPostData as any);
 
       expect(result.error).toBe("Error creating post");
+    });
+  });
+
+  describe("Authentication", () => {
+    it("should reject unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(createPost(mockPostData as any)).rejects.toThrow(
+        "Unauthorized",
+      );
+      expect(mockPrisma.post.create).not.toHaveBeenCalled();
+    });
+
+    it("should reject callers without writer/admin role", async () => {
+      mockClerkClient.mockResolvedValueOnce({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "clerk-user-1",
+            primaryEmailAddressId: "email-1",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "regular@example.com" },
+            ],
+            publicMetadata: { roles: ["USER"] },
+          }),
+        },
+      });
+
+      await expect(createPost(mockPostData as any)).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
     });
   });
 

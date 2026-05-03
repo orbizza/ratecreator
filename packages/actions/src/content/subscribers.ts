@@ -1,7 +1,6 @@
 "use server";
 
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import {
   syncSubscriberToAudience,
@@ -12,14 +11,16 @@ import {
   SEGMENT_AUDIENCE_MAP,
   type SegmentType,
 } from "@ratecreator/email";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
 
 async function authenticateUser() {
-  const sign = await SignedIn;
-  if (!sign) {
-    redirect("/sign-in");
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
+  await requireWriter(userId);
 }
 
 /**

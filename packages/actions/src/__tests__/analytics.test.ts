@@ -6,33 +6,41 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockInvalidateCache } = vi.hoisted(() => {
-  const mockPrisma = {
-    post: {
-      groupBy: vi.fn(),
-      findMany: vi.fn(),
-      count: vi.fn(),
-    },
-    newsletterAudience: {
-      count: vi.fn(),
-      findMany: vi.fn(),
-    },
-    idea: {
-      count: vi.fn(),
-    },
-    tag: {
-      count: vi.fn(),
-    },
-  };
+const { mockPrisma, mockInvalidateCache, mockAuth, mockClerkClient } =
+  vi.hoisted(() => {
+    const mockPrisma = {
+      post: {
+        groupBy: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn(),
+      },
+      newsletterAudience: {
+        count: vi.fn(),
+        findMany: vi.fn(),
+      },
+      idea: {
+        count: vi.fn(),
+      },
+      tag: {
+        count: vi.fn(),
+      },
+    };
 
-  const mockInvalidateCache = vi.fn().mockResolvedValue(undefined);
+    const mockInvalidateCache = vi.fn().mockResolvedValue(undefined);
+    const mockAuth = vi.fn();
+    const mockClerkClient = vi.fn();
 
-  return { mockPrisma, mockInvalidateCache };
-});
+    return { mockPrisma, mockInvalidateCache, mockAuth, mockClerkClient };
+  });
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
+}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+  clerkClient: mockClerkClient,
 }));
 
 // Mock cache module: withCache passes through to fetcher
@@ -64,10 +72,53 @@ import {
 describe("Analytics Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: signed-in admin (deepshaswat@gmail.com is in ADMIN_EMAILS,
+    // so requireWriter() will accept this user without a roles array).
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            {
+              id: "email-1",
+              emailAddress: "deepshaswat@gmail.com",
+            },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe("Authentication", () => {
+    it("should reject unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+      await expect(fetchAnalyticsData()).rejects.toThrow("Unauthorized");
+    });
+
+    it("should reject non-writer authenticated callers", async () => {
+      mockClerkClient.mockResolvedValueOnce({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "clerk-user-1",
+            primaryEmailAddressId: "email-1",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "user@example.com" },
+            ],
+            publicMetadata: { roles: ["USER"] },
+          }),
+        },
+      });
+      await expect(fetchAnalyticsData()).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
+    });
   });
 
   describe("fetchAnalyticsData", () => {

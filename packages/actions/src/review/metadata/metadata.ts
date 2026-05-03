@@ -253,25 +253,6 @@ const getRedditMetadata = async (postId: string): Promise<Metadata> => {
   }
 };
 
-async function getGenericMetadata(url: string): Promise<Metadata> {
-  try {
-    const response = await axios.get(url);
-    const $ = load(response.data);
-
-    return {
-      title:
-        $('meta[property="og:title"]').attr("content") || $("title").text(),
-      description:
-        $('meta[property="og:description"]').attr("content") ||
-        $('meta[name="description"]').attr("content"),
-      image: $('meta[property="og:image"]').attr("content"),
-    };
-  } catch (error) {
-    console.error("Error fetching generic metadata:", error);
-    return {};
-  }
-}
-
 const getInstagramPostId = (url: string) => {
   const patterns = [
     /instagram\.com\/p\/([^/?#]+)/,
@@ -387,9 +368,9 @@ export const getMetadata = async (url: string): Promise<Metadata> => {
     else if (url.includes("instagram.com") || url.includes("instagr.am")) {
       metadata = await getInstagramMetadata(url);
     }
-    // Generic URL
+    // Unknown host — refuse rather than fetch arbitrary URLs server-side.
     else {
-      metadata = await getGenericMetadata(url);
+      throw new Error("URL host not supported");
     }
 
     return metadata;

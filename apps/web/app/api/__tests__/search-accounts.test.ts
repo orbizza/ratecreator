@@ -59,9 +59,7 @@ describe("Search Accounts API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.hits).toBeDefined();
-      expect(response.headers.get("Cache-Control")).toBe(
-        "public, s-maxage=60, stale-while-revalidate=120",
-      );
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
       expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           query: "",
@@ -515,7 +513,7 @@ describe("Search Accounts API Route", () => {
     });
   });
 
-  describe("Authentication for Pagination", () => {
+  describe("Authentication", () => {
     it("should return 401 for unauthenticated users on page > 0", async () => {
       mockAuth.mockResolvedValueOnce({ userId: null });
 
@@ -527,18 +525,27 @@ describe("Search Accounts API Route", () => {
       expect(data.error).toBe("Unauthorized");
     });
 
-    it("should allow unauthenticated users on page 0", async () => {
+    it("should return 401 for unauthenticated users on page 0", async () => {
+      // Security fix: search now requires auth on every request, not just
+      // pagination, to prevent anonymous data scraping.
       mockAuth.mockResolvedValueOnce({ userId: null });
-      mockSearchAccounts.mockResolvedValueOnce({
-        hits: [],
-        nbHits: 0,
-        page: 1,
-      });
 
       const request = createRequest("?page=0");
       const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+      expect(mockSearchAccounts).not.toHaveBeenCalled();
+    });
+
+    it("should not call elasticsearch for unauthenticated requests", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      const request = createRequest("?query=anything");
+      await GET(request);
+
+      expect(mockSearchAccounts).not.toHaveBeenCalled();
     });
 
     it("should allow authenticated users on any page", async () => {

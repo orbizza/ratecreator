@@ -6,21 +6,24 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockRedisClient, mockPrismaInstance, mockFetch } = vi.hoisted(() => {
-  const mockRedisClient = {
-    incr: vi.fn(),
-    expire: vi.fn(),
-    decr: vi.fn(),
-    del: vi.fn(),
-  };
-  const mockPrismaInstance = {
-    account: {
-      updateMany: vi.fn(),
-    },
-  };
-  const mockFetch = vi.fn();
-  return { mockRedisClient, mockPrismaInstance, mockFetch };
-});
+const { mockRedisClient, mockPrismaInstance, mockFetch, mockAuth } = vi.hoisted(
+  () => {
+    const mockRedisClient = {
+      incr: vi.fn(),
+      expire: vi.fn(),
+      decr: vi.fn(),
+      del: vi.fn(),
+    };
+    const mockPrismaInstance = {
+      account: {
+        updateMany: vi.fn(),
+      },
+    };
+    const mockFetch = vi.fn();
+    const mockAuth = vi.fn();
+    return { mockRedisClient, mockPrismaInstance, mockFetch, mockAuth };
+  },
+);
 
 // Mock modules
 vi.mock("@ratecreator/db/redis-do", () => ({
@@ -29,6 +32,10 @@ vi.mock("@ratecreator/db/redis-do", () => ({
 
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrismaInstance),
+}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
 }));
 
 import { refreshYoutubeData } from "../review/creators/youtubeRefresh";
@@ -73,6 +80,10 @@ describe("refreshYoutubeData", () => {
     vi.clearAllMocks();
     process.env.YOUTUBE_API_KEY = "test-api-key-123";
 
+    // Default: signed-in caller (refreshYoutubeData refuses unauthenticated
+    // calls and silently returns).
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+
     // Default: rate limit is fine (first call)
     mockRedisClient.incr.mockResolvedValue(1);
     mockRedisClient.expire.mockResolvedValue(1);
@@ -86,6 +97,24 @@ describe("refreshYoutubeData", () => {
   afterEach(() => {
     delete process.env.YOUTUBE_API_KEY;
     vi.restoreAllMocks();
+  });
+
+  // ---------------------------------------------------------------
+  // Auth gate
+  // ---------------------------------------------------------------
+
+  it("should silently return when caller is unauthenticated", async () => {
+    mockAuth.mockResolvedValueOnce({ userId: null });
+    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await expect(refreshYoutubeData(ACCOUNT_ID)).resolves.toBeUndefined();
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[youtube-refresh] Refusing unauthenticated refresh",
+    );
+    expect(mockRedisClient.incr).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockPrismaInstance.account.updateMany).not.toHaveBeenCalled();
   });
 
   // ---------------------------------------------------------------

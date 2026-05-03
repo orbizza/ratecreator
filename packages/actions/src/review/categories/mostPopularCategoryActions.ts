@@ -42,20 +42,56 @@ function setLocal<T>(key: string, data: T): void {
 const redis = getRedisClient();
 const prisma = getPrismaClient();
 
+const POPULAR_FALLBACK_LIMIT = 12;
+
+async function fetchPopularFallback(): Promise<PopularCategory[]> {
+  // Fallback when no Category.popular === true rows exist:
+  // pick top categories by mapped account count so the homepage is never empty.
+  const client = await getMongoClient();
+  const database = client.db("ratecreator");
+  const mappingCollection = database.collection("CategoryMapping");
+
+  const topCategoryIds = await mappingCollection
+    .aggregate([
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: POPULAR_FALLBACK_LIMIT },
+    ])
+    .toArray();
+
+  if (topCategoryIds.length === 0) return [];
+
+  const ids = topCategoryIds.map((row) => String(row._id));
+  const categories = await prisma.category.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, slug: true },
+  });
+
+  // Preserve the count-desc order from the aggregation.
+  const order = new Map(ids.map((id, idx) => [id, idx]));
+  return categories.sort(
+    (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+  );
+}
+
 export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   try {
     // Check local cache first
     const local = getLocal<PopularCategory[]>(CACHE_POPULAR_CATEGORIES);
-    if (local) return local;
+    if (local && local.length > 0) return local;
 
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
     if (cachedCategories) {
-      const parsed = JSON.parse(cachedCategories);
-      setLocal(CACHE_POPULAR_CATEGORIES, parsed);
-      return parsed;
+      const parsed = JSON.parse(cachedCategories) as PopularCategory[];
+      // Don't trust empty cached results — they're probably stale negatives
+      // from before any Category.popular was set true.
+      if (parsed.length > 0) {
+        setLocal(CACHE_POPULAR_CATEGORIES, parsed);
+        return parsed;
+      }
     }
 
-    const popularCategories = await prisma.category.findMany({
+    let popularCategories = await prisma.category.findMany({
       where: { popular: true },
       select: {
         id: true,
@@ -63,15 +99,26 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
         slug: true,
       },
     });
-    // console.log(popularCategories);
-    // console.log("Returning popular categories");
 
-    await redis.set(
+    if (popularCategories.length === 0) {
+      console.warn(
+        "[mostPopularCategories] No Category rows with popular=true; using account-count fallback",
+      );
+      popularCategories = await fetchPopularFallback();
+    }
+
+    if (popularCategories.length === 0) {
+      // Don't poison the cache with an empty array — let the next caller retry.
+      return [];
+    }
+
+    // Cache with TTL so a transient empty DB doesn't stick forever.
+    await redis.setex(
       CACHE_POPULAR_CATEGORIES,
+      REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
       JSON.stringify(popularCategories),
     );
     setLocal(CACHE_POPULAR_CATEGORIES, popularCategories);
-    console.log("Popular Categories cached in Redis");
 
     return popularCategories;
   } catch (error) {
@@ -95,9 +142,14 @@ export async function getMostPopularCategoryWithData(): Promise<
     // Try to get cached full response from Redis
     const cachedFullResponse = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedFullResponse) {
-      const parsed = JSON.parse(cachedFullResponse);
-      setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
-      return parsed;
+      const parsed = JSON.parse(
+        cachedFullResponse,
+      ) as PopularCategoryWithAccounts[];
+      // Discard cached empty arrays — they're probably stale negatives.
+      if (parsed.length > 0) {
+        setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
+        return parsed;
+      }
     }
 
     const popularCategoriesResponse = await getMostPopularCategories();
@@ -224,13 +276,15 @@ export async function getMostPopularCategoryWithData(): Promise<
     const results = await Promise.all(pipeline);
     accountsByCategory.push(...results);
 
-    // Cache the full response with TTL
-    await redis.setex(
-      CACHE_POPULAR_CATEGORY_ACCOUNTS,
-      REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
-      JSON.stringify(accountsByCategory),
-    );
-    setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
+    // Only cache non-empty results to avoid pinning a broken-render state.
+    if (accountsByCategory.length > 0) {
+      await redis.setex(
+        CACHE_POPULAR_CATEGORY_ACCOUNTS,
+        REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
+        JSON.stringify(accountsByCategory),
+      );
+      setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
+    }
 
     return accountsByCategory;
   } catch (error) {

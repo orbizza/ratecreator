@@ -11,6 +11,7 @@ const {
   mockAccountCreate,
   mockPublishMessageWithKey,
   mockPrismaInstance,
+  mockAuth,
 } = vi.hoisted(() => {
   const mockAccountFindFirst = vi.fn();
   const mockAccountCreate = vi.fn();
@@ -21,11 +22,13 @@ const {
       create: mockAccountCreate,
     },
   };
+  const mockAuth = vi.fn();
   return {
     mockAccountFindFirst,
     mockAccountCreate,
     mockPublishMessageWithKey,
     mockPrismaInstance,
+    mockAuth,
   };
 });
 
@@ -38,6 +41,10 @@ vi.mock("@ratecreator/db/pubsub-client", () => ({
   publishMessageWithKey: mockPublishMessageWithKey,
 }));
 
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+}));
+
 // Import after mocks
 import { addAccount } from "../account/addAccount";
 
@@ -45,10 +52,49 @@ describe("addAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPublishMessageWithKey.mockResolvedValue(undefined);
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe("Authentication", () => {
+    it("should refuse unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      const result = await addAccount({
+        platform: "youtube",
+        identifier: "@test",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+      expect(mockAccountCreate).not.toHaveBeenCalled();
+      expect(mockPublishMessageWithKey).not.toHaveBeenCalled();
+    });
+
+    it("should ignore client-supplied addedByUserId and use the session", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: "session-user" });
+      mockAccountFindFirst.mockResolvedValue(null);
+      mockAccountCreate.mockResolvedValue({
+        id: "acc-1",
+        accountId: "test",
+        handle: "test",
+      });
+
+      await addAccount({
+        platform: "youtube",
+        identifier: "@test",
+        addedByUserId: "spoofed-user",
+      });
+
+      expect(mockPublishMessageWithKey).toHaveBeenCalledWith(
+        "account-added",
+        "acc-1",
+        expect.objectContaining({ addedByUserId: "session-user" }),
+      );
+    });
   });
 
   describe("Identifier Parsing", () => {

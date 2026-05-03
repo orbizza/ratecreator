@@ -1,8 +1,18 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
+
+async function authenticateUser() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await requireWriter(userId);
+}
 
 export type IdeaStatus = "NEW" | "IN_PROGRESS" | "DRAFT_CREATED" | "ARCHIVED";
 export type IdeaStage = "ROUGH_IDEA" | "OUTLINE" | "SCRIPT" | "READY";
@@ -46,6 +56,7 @@ export interface IdeaInput {
 }
 
 export async function createIdea(data: IdeaInput): Promise<IdeaType> {
+  await authenticateUser();
   const idea = await prisma.idea.create({
     data: {
       title: data.title,
@@ -68,6 +79,7 @@ export async function fetchIdeas(
   status?: IdeaStatus,
   contentPlatform?: ContentPlatformType,
 ): Promise<IdeaType[]> {
+  await authenticateUser();
   const where: { status?: IdeaStatus; contentPlatform?: ContentPlatformType } =
     {};
   if (status) where.status = status;
@@ -85,6 +97,7 @@ export async function fetchIdeas(
 }
 
 export async function fetchIdeaById(id: string): Promise<IdeaType | null> {
+  await authenticateUser();
   const idea = await prisma.idea.findUnique({
     where: { id },
     include: {
@@ -109,6 +122,7 @@ export async function updateIdea(
     targetDate: Date | null;
   }>,
 ): Promise<IdeaType> {
+  await authenticateUser();
   const idea = await prisma.idea.update({
     where: { id },
     data,
@@ -121,6 +135,7 @@ export async function updateIdea(
 }
 
 export async function deleteIdea(id: string): Promise<void> {
+  await authenticateUser();
   await prisma.idea.delete({
     where: { id },
   });
@@ -136,6 +151,7 @@ export async function convertIdeaToDraft(
     | "DOCUMENTATION" = "RATECREATOR",
   contentType: "BLOG" | "GLOSSARY" | "NEWSLETTER" = "BLOG",
 ): Promise<{ postId: string }> {
+  await authenticateUser();
   const idea = await prisma.idea.findUnique({
     where: { id: ideaId },
   });
@@ -180,6 +196,7 @@ export async function fetchIdeasCount(
   status?: IdeaStatus,
   contentPlatform?: ContentPlatformType,
 ): Promise<number> {
+  await authenticateUser();
   const where: { status?: IdeaStatus; contentPlatform?: ContentPlatformType } =
     {};
   if (status) where.status = status;

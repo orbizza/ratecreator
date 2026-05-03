@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { VertexAI } from "@google-cloud/vertexai";
+import { auth } from "@clerk/nextjs/server";
+import { requireWriter } from "@ratecreator/actions/content";
 
 interface ScriptRequest {
   title: string;
@@ -33,6 +35,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let requestData: ScriptRequest = { title: "" };
 
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    await requireWriter(userId);
+
     requestData = (await request.json()) as ScriptRequest;
     const {
       title,

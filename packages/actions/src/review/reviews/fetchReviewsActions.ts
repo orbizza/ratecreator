@@ -48,7 +48,15 @@ export async function fetchReviewsAction(
     skip: offset,
     take: pageSize,
     include: {
-      author: true,
+      author: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          webhookPayload: true,
+        },
+      },
     },
   });
 
@@ -67,11 +75,9 @@ export async function fetchReviewsAction(
           firstName: review.author.firstName || "",
           lastName: review.author.lastName || "",
           username: review.author.username || "",
-          clerkId: review.author.clerkId,
           imageUrl:
             (review.author.webhookPayload as { image_url?: string })
               ?.image_url || "",
-          email: review.author.email || "",
         }
       : undefined,
     status: review.status,

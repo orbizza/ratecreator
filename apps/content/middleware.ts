@@ -56,6 +56,10 @@ function extractRoles(
   return roles.length > 0 ? roles : ["USER"];
 }
 
+function isApiRequest(request: Request): boolean {
+  return new URL(request.url).pathname.startsWith("/api/");
+}
+
 export default clerkMiddleware(async (auth, request) => {
   // Allow public routes
   if (publicRoutes(request)) {
@@ -64,8 +68,14 @@ export default clerkMiddleware(async (auth, request) => {
 
   const { userId } = await auth();
 
-  // Redirect to sign-in if not authenticated
+  // Refuse unauthenticated requests
   if (!userId) {
+    if (isApiRequest(request)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const signInUrl = new URL("/sign-in", request.url);
     signInUrl.searchParams.set("redirect_url", request.url);
     return NextResponse.redirect(signInUrl);
@@ -93,7 +103,12 @@ export default clerkMiddleware(async (auth, request) => {
     const hasAccess = userRoles.some((role) => ALLOWED_ROLES.includes(role));
 
     if (!hasAccess) {
-      // User doesn't have required role - redirect to unauthorized page
+      if (isApiRequest(request)) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
       const unauthorizedUrl = new URL("/unauthorized", request.url);
       return NextResponse.redirect(unauthorizedUrl);
     }
@@ -101,7 +116,12 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   } catch (error) {
     console.error("Error checking user roles:", error);
-    // On error, deny access
+    if (isApiRequest(request)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const unauthorizedUrl = new URL("/unauthorized", request.url);
     return NextResponse.redirect(unauthorizedUrl);
   }

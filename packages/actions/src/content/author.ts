@@ -1,23 +1,18 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
-import { currentUser } from "@clerk/nextjs/server";
-
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { getInitials } from "@ratecreator/db/utils";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
 
-async function authenticateUser() {
-  const sign = await SignedIn;
-  if (!sign) {
-    redirect("/sign-in");
-  }
-}
-
 export async function createAuthor() {
-  await authenticateUser();
+  const { userId } = await auth();
+  if (!userId) {
+    return { error: "Unauthorized" };
+  }
+  await requireWriter(userId);
   const user = await currentUser();
 
   if (!user) {

@@ -249,9 +249,11 @@ const PopularCategories = () => {
         const data = await getMostPopularCategoryWithData();
         setCategories(data);
         setLoading(false);
-        setCache("popularCategoryData", data);
 
         if (data.length > 0) {
+          // Only cache non-empty results so a transient miss doesn't pin
+          // an empty UI for 5 minutes.
+          setCache("popularCategoryData", data);
           setSelectedCategory(data[0].category.name);
         }
       } catch (error) {
@@ -365,7 +367,14 @@ const PopularCategories = () => {
                 View All Categories
               </Button>
             </>
-          ) : null}
+          ) : (
+            <div className="flex flex-col items-start justify-center gap-3 px-3 py-10 text-sm text-muted-foreground">
+              <p>No popular creators to show right now.</p>
+              <Button onClick={() => router.push("/categories")}>
+                Browse all categories
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <div className="my-[5rem]">

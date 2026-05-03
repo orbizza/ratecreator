@@ -7,11 +7,11 @@
 
 "use server";
 
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
 import { invalidateCache } from "./cache";
+import { requireWriter } from "./roles";
 
 import {
   ContentPlatform,
@@ -40,15 +40,15 @@ import React from "react";
 const prisma = getPrismaClient();
 
 /**
- * Authenticates the current user and redirects to sign-in if not authenticated
- * @private
- * @throws {Error} If user is not authenticated
+ * Verifies the current user is signed in and has WRITER/ADMIN role.
+ * @throws {Error} If user is not authenticated or lacks the required role.
  */
 async function authenticateUser() {
-  const sign = await SignedIn;
-  if (!sign) {
-    redirect("/sign-in");
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
+  await requireWriter(userId);
 }
 
 /**

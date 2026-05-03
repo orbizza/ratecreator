@@ -214,16 +214,66 @@ describe("fetchReviewsActions", () => {
       );
     });
 
-    it("should include author in the response", async () => {
+    it("should include author with selected fields only (no email/clerkId leak)", async () => {
       await fetchReviewsAction("channel-id", "YOUTUBE", 0, 10);
 
+      // Security fix: previously `author: true` returned email, clerkId,
+      // webhookPayload (with imageUrl), etc. We now select only the fields
+      // the UI needs.
       expect(mockReviewFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           include: {
-            author: true,
+            author: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                webhookPayload: true,
+              },
+            },
           },
         }),
       );
+    });
+
+    it("should NOT return author email or clerkId in the response payload", async () => {
+      mockReviewFindMany.mockResolvedValueOnce([
+        {
+          id: "r1",
+          stars: 5,
+          platform: "YOUTUBE",
+          accountId: "account-db-id",
+          content: {},
+          title: "t",
+          contentUrl: null,
+          authorId: "u1",
+          status: "PUBLISHED",
+          verificationStatus: "UNVERIFIED",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isEdited: false,
+          editHistory: [],
+          lastActivityAt: new Date(),
+          viewCount: 0,
+          author: {
+            id: "u1",
+            firstName: "Test",
+            lastName: "User",
+            username: "tu",
+            webhookPayload: { image_url: "https://img" },
+          },
+        },
+      ]);
+
+      const reviews = await fetchReviewsAction("channel-id", "YOUTUBE", 0, 10);
+
+      const author = reviews[0]?.author as Record<string, unknown> | undefined;
+      expect(author).toBeDefined();
+      expect(author?.email).toBeUndefined();
+      expect(author?.clerkId).toBeUndefined();
+      expect(author?.firstName).toBe("Test");
+      expect(author?.imageUrl).toBe("https://img");
     });
   });
 

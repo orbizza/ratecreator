@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
@@ -16,6 +17,11 @@ export async function GET(request: NextRequest) {
   const redis = getRedisClient();
 
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const platform = request.nextUrl.searchParams.get("platform");
     const accountId = request.nextUrl.searchParams.get("accountId") || "";
 
@@ -64,10 +70,7 @@ async function handleYoutubeAccount(
     const cachedData = await redis.get(`${CACHE_YOUTUBE_CREATOR}${accountId}`);
     if (cachedData) {
       const response = NextResponse.json(JSON.parse(cachedData));
-      response.headers.set(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      response.headers.set("Cache-Control", "private, no-store");
       return response;
     }
 
@@ -128,10 +131,7 @@ async function handleYoutubeAccount(
     );
 
     const response = NextResponse.json(responseData);
-    response.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
+    response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
     console.error("Error fetching YouTube account:", error);
@@ -151,10 +151,7 @@ async function handleTwitterAccount(
     const cachedData = await redis.get(`${CACHE_TWITTER_CREATOR}${accountId}`);
     if (cachedData) {
       const response = NextResponse.json(JSON.parse(cachedData));
-      response.headers.set(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      response.headers.set("Cache-Control", "private, no-store");
       return response;
     }
 
@@ -213,10 +210,7 @@ async function handleTwitterAccount(
     );
 
     const response = NextResponse.json(responseData);
-    response.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
+    response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
     console.error("Error fetching Twitter account:", error);
@@ -236,10 +230,7 @@ async function handleTiktokAccount(
     const cachedData = await redis.get(`${CACHE_TIKTOK_CREATOR}${accountId}`);
     if (cachedData) {
       const response = NextResponse.json(JSON.parse(cachedData));
-      response.headers.set(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      response.headers.set("Cache-Control", "private, no-store");
       return response;
     }
 
@@ -298,10 +289,7 @@ async function handleTiktokAccount(
     );
 
     const response = NextResponse.json(responseData);
-    response.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
+    response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
     console.error("Error fetching Tiktok account:", error);
@@ -321,10 +309,7 @@ async function handleRedditAccount(
     const cachedData = await redis.get(`${CACHE_REDDIT_CREATOR}${accountId}`);
     if (cachedData) {
       const response = NextResponse.json(JSON.parse(cachedData));
-      response.headers.set(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      response.headers.set("Cache-Control", "private, no-store");
       return response;
     }
 
@@ -383,10 +368,7 @@ async function handleRedditAccount(
     );
 
     const response = NextResponse.json(responseData);
-    response.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
+    response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
     console.error("Error fetching Reddit account:", error);

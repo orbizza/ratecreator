@@ -52,7 +52,38 @@ import {
   updateUserRoles,
   getUserRolesByEmail,
   syncUserRolesFromClerk,
+  requireWriter,
 } from "../content/roles";
+
+function setupAdminAuth() {
+  mockAuth.mockResolvedValue({ userId: "admin-clerk-id" });
+  mockClerkClient.mockResolvedValue({
+    users: {
+      getUser: vi.fn().mockResolvedValue({
+        id: "admin-clerk-id",
+        emailAddresses: [{ id: "email-1", emailAddress: "hi@deepshaswat.com" }],
+        primaryEmailAddressId: "email-1",
+        publicMetadata: { roles: ["ADMIN"] },
+      }),
+    },
+  });
+}
+
+function setupNonAdminAuth() {
+  mockAuth.mockResolvedValue({ userId: "regular-clerk-id" });
+  mockClerkClient.mockResolvedValue({
+    users: {
+      getUser: vi.fn().mockResolvedValue({
+        id: "regular-clerk-id",
+        emailAddresses: [
+          { id: "email-1", emailAddress: "regular@example.com" },
+        ],
+        primaryEmailAddressId: "email-1",
+        publicMetadata: {},
+      }),
+    },
+  });
+}
 
 describe("Role Management Actions", () => {
   beforeEach(() => {
@@ -349,7 +380,18 @@ describe("Role Management Actions", () => {
   });
 
   describe("getUserRolesByEmail", () => {
-    it("should return roles for existing user", async () => {
+    // Now admin-only — calls isCurrentUserAdmin() first.
+    it("should throw when caller is not admin", async () => {
+      setupNonAdminAuth();
+
+      await expect(getUserRolesByEmail("user@example.com")).rejects.toThrow(
+        "Unauthorized: Admin access required",
+      );
+      expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it("should return roles for existing user when caller is admin", async () => {
+      setupAdminAuth();
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         role: ["USER", "WRITER"],
       });
@@ -363,7 +405,8 @@ describe("Role Management Actions", () => {
       });
     });
 
-    it("should return null for non-existent user", async () => {
+    it("should return null for non-existent user when caller is admin", async () => {
+      setupAdminAuth();
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
       const result = await getUserRolesByEmail("nonexistent@example.com");
@@ -373,7 +416,28 @@ describe("Role Management Actions", () => {
   });
 
   describe("syncUserRolesFromClerk", () => {
+    // Now requires the clerkId arg to match auth().userId.
+    it("should refuse unauthenticated callers", async () => {
+      mockAuth.mockResolvedValue({ userId: null });
+
+      const result = await syncUserRolesFromClerk("admin-clerk-id");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+    });
+
+    it("should refuse syncing another user's roles", async () => {
+      mockAuth.mockResolvedValue({ userId: "session-user" });
+
+      const result = await syncUserRolesFromClerk("other-user");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Forbidden: cannot sync another user's roles");
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+    });
+
     it("should sync admin role for protected admin email", async () => {
+      mockAuth.mockResolvedValue({ userId: "admin-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockResolvedValue({
@@ -399,6 +463,7 @@ describe("Role Management Actions", () => {
     });
 
     it("should sync roles from Clerk metadata", async () => {
+      mockAuth.mockResolvedValue({ userId: "user-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockResolvedValue({
@@ -420,6 +485,7 @@ describe("Role Management Actions", () => {
     });
 
     it("should default to USER role when no roles in metadata", async () => {
+      mockAuth.mockResolvedValue({ userId: "user-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockResolvedValue({
@@ -441,6 +507,7 @@ describe("Role Management Actions", () => {
     });
 
     it("should filter out invalid roles", async () => {
+      mockAuth.mockResolvedValue({ userId: "user-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockResolvedValue({
@@ -462,6 +529,7 @@ describe("Role Management Actions", () => {
     });
 
     it("should default to USER when all roles are invalid", async () => {
+      mockAuth.mockResolvedValue({ userId: "user-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockResolvedValue({
@@ -483,6 +551,7 @@ describe("Role Management Actions", () => {
     });
 
     it("should handle errors gracefully", async () => {
+      mockAuth.mockResolvedValue({ userId: "bad-clerk-id" });
       mockClerkClient.mockResolvedValue({
         users: {
           getUser: vi.fn().mockRejectedValue(new Error("Clerk error")),
@@ -493,6 +562,150 @@ describe("Role Management Actions", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Failed to sync roles from Clerk");
+    });
+  });
+
+  describe("requireWriter", () => {
+    it("should not throw for protected admin email", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "admin-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "hi@deepshaswat.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: {},
+          }),
+        },
+      });
+
+      await expect(requireWriter("admin-clerk-id")).resolves.toBeUndefined();
+    });
+
+    it("should not throw for second protected admin email", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "admin-clerk-id-2",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: {},
+          }),
+        },
+      });
+
+      await expect(requireWriter("admin-clerk-id-2")).resolves.toBeUndefined();
+    });
+
+    it("should not throw for users with WRITER role", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "writer-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "writer@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: { roles: ["WRITER"] },
+          }),
+        },
+      });
+
+      await expect(requireWriter("writer-clerk-id")).resolves.toBeUndefined();
+    });
+
+    it("should not throw for users with ADMIN role in metadata", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "admin-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "admin@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: { roles: ["ADMIN"] },
+          }),
+        },
+      });
+
+      await expect(requireWriter("admin-clerk-id")).resolves.toBeUndefined();
+    });
+
+    it("should normalize lowercase roles before checking", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "writer-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "writer@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: { roles: ["writer"] },
+          }),
+        },
+      });
+
+      await expect(requireWriter("writer-clerk-id")).resolves.toBeUndefined();
+    });
+
+    it("should throw for users with only USER role", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "regular-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "regular@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: { roles: ["USER"] },
+          }),
+        },
+      });
+
+      await expect(requireWriter("regular-clerk-id")).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
+    });
+
+    it("should throw for users with only CREATOR role", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "creator-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "creator@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: { roles: ["CREATOR"] },
+          }),
+        },
+      });
+
+      await expect(requireWriter("creator-clerk-id")).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
+    });
+
+    it("should throw for users with no roles metadata", async () => {
+      mockClerkClient.mockResolvedValue({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "norole-clerk-id",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "norole@example.com" },
+            ],
+            primaryEmailAddressId: "email-1",
+            publicMetadata: {},
+          }),
+        },
+      });
+
+      await expect(requireWriter("norole-clerk-id")).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
     });
   });
 });

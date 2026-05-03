@@ -52,31 +52,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify based on method
-    let isVerified = false;
-
+    // NOTE: OAuth verification must be performed server-side via the platform's
+    // OAuth handshake — never trust a client-supplied platformUserId. The
+    // earlier implementation accepted any caller who echoed the claim's
+    // accountId as `verificationData.platformUserId`, which let any signed-in
+    // user verify any unverified claim. Verification methods are disabled
+    // until proper server-side flows are implemented.
     switch (verificationMethod) {
       case "oauth":
-        // OAuth verification - check if the OAuth user ID matches the account ID
-        if (verificationData?.platformUserId === claim.account.accountId) {
-          isVerified = true;
-        }
-        break;
-
       case "bio_link":
-        // Bio link verification - would need to fetch the profile and check for verification code
-        // This is a placeholder for future implementation
-        break;
-
       case "dns":
-        // DNS verification - would need to check DNS TXT record
-        // This is a placeholder for future implementation
-        break;
-
       case "meta_tag":
-        // Meta tag verification - would need to fetch the website and check meta tag
-        // This is a placeholder for future implementation
-        break;
+        return NextResponse.json(
+          {
+            error:
+              "Verification flow not yet implemented. Please contact support.",
+          },
+          { status: 501 },
+        );
 
       default:
         return NextResponse.json(
@@ -84,46 +77,6 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
     }
-
-    if (isVerified) {
-      // Update the claim to verified
-      await prisma.claimedAccount.update({
-        where: { id: claimId },
-        data: {
-          status: "VERIFIED",
-          verifiedAt: new Date(),
-          verificationMethod,
-        },
-      });
-
-      // Also create a linked account entry for convenience
-      await prisma.userLinkedAccount.upsert({
-        where: {
-          userId_accountId: {
-            userId: user.id,
-            accountId: claim.accountId,
-          },
-        },
-        create: {
-          userId: user.id,
-          accountId: claim.accountId,
-          platform: claim.platform,
-          isPrimary: true,
-        },
-        update: {},
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: "Account verified successfully",
-        status: "VERIFIED",
-      });
-    }
-
-    return NextResponse.json(
-      { error: "Verification failed. Please try again." },
-      { status: 400 },
-    );
   } catch (error) {
     console.error("Error verifying claim:", error);
     return NextResponse.json(

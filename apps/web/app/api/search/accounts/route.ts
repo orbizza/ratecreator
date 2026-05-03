@@ -8,10 +8,14 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Parse the URL and query string using qs
     const url = new URL(request.url);
     const parsedQuery = qs.parse(url.search, { ignoreQueryPrefix: true });
-    const { userId } = await auth();
 
     // Initialize the params object matching SearchAccountsParams interface
     // ES uses 1-based pages, so convert from 0-based (frontend) to 1-based (ES)
@@ -27,10 +31,6 @@ export async function GET(request: NextRequest) {
       sortOrder: (parsedQuery.sortOrder as "asc" | "desc") || "desc",
       filters: {}, // Initialize filters as an empty object
     };
-
-    if (!userId && frontendPage > 0) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     if (params.limit && params.limit > 20) {
       params.limit = 20;
@@ -127,10 +127,7 @@ export async function GET(request: NextRequest) {
     };
 
     const jsonResponse = NextResponse.json(response);
-    jsonResponse.headers.set(
-      "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=120",
-    );
+    jsonResponse.headers.set("Cache-Control", "private, no-store");
     return jsonResponse;
   } catch (error) {
     console.error("Search error:", error);

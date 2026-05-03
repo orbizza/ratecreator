@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { VertexAI } from "@google-cloud/vertexai";
+import { auth } from "@clerk/nextjs/server";
+import { requireWriter } from "@ratecreator/actions/content";
 
 interface ImageGenerationRequest {
   prompt: string;
@@ -31,6 +33,12 @@ function getVertexAI(): VertexAI | null {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    await requireWriter(userId);
+
     const requestData = (await request.json()) as ImageGenerationRequest;
     const { prompt, style = "photorealistic" } = requestData;
 

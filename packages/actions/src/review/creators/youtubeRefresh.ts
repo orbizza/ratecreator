@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 
@@ -24,6 +25,13 @@ async function checkRateLimit(): Promise<boolean> {
  * Rate-limited to 125 calls/hour via Redis.
  */
 export async function refreshYoutubeData(accountId: string): Promise<void> {
+  const { userId } = await auth();
+  if (!userId) {
+    // Reachable from outside the trusted call path — refuse.
+    console.warn("[youtube-refresh] Refusing unauthenticated refresh");
+    return;
+  }
+
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
     console.error("[youtube-refresh] YOUTUBE_API_KEY not configured");

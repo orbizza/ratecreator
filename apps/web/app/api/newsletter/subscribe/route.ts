@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getPrismaClient } from "@ratecreator/db/client";
+import { getRedisClient } from "@ratecreator/db/redis-do";
 import {
   generateVerifyToken,
   sendEmail,
@@ -9,28 +10,24 @@ import {
 } from "@ratecreator/email";
 
 const prisma = getPrismaClient();
+const redis = getRedisClient();
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().optional(),
 });
 
-// Simple in-memory rate limiter
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+// Redis-backed rate limiter so it works behind multiple processes.
 const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60 * 1000;
+const RATE_WINDOW_SEC = 60;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return false;
+async function isRateLimited(ip: string): Promise<boolean> {
+  const key = `rl:newsletter:subscribe:${ip}`;
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, RATE_WINDOW_SEC);
   }
-
-  entry.count++;
-  return entry.count > RATE_LIMIT;
+  return count > RATE_LIMIT;
 }
 
 export async function POST(request: NextRequest) {
@@ -39,7 +36,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
 
-    if (isRateLimited(ip)) {
+    if (await isRateLimited(ip)) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { status: 429 },

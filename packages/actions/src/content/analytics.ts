@@ -1,9 +1,19 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { withCache, invalidateCache, CACHE_TTL, CacheKeys } from "./cache";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
+
+async function authenticateUser() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await requireWriter(userId);
+}
 
 export interface PostsByStatus {
   status: string;
@@ -48,6 +58,7 @@ export interface AnalyticsData {
 export async function fetchAnalyticsData(
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<AnalyticsData> {
+  await authenticateUser();
   const cacheKey = CacheKeys.analytics(contentPlatform);
 
   return withCache(cacheKey, CACHE_TTL.ANALYTICS, async () => {
@@ -160,6 +171,7 @@ async function fetchSubscriberGrowth(): Promise<SubscriberGrowth[]> {
 export async function fetchContentStats(
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ) {
+  await authenticateUser();
   const cacheKey = CacheKeys.contentStats(contentPlatform);
 
   return withCache(cacheKey, CACHE_TTL.CONTENT_STATS, async () => {
@@ -193,6 +205,7 @@ export async function fetchContentStats(
 export async function fetchIdeasStats(
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ) {
+  await authenticateUser();
   const cacheKey = CacheKeys.ideasStats(contentPlatform);
 
   return withCache(cacheKey, CACHE_TTL.IDEAS_STATS, async () => {
@@ -230,6 +243,7 @@ export async function fetchIdeasStats(
  * Invalidate analytics cache after data changes
  */
 export async function invalidateAnalyticsCache(): Promise<void> {
+  await authenticateUser();
   await invalidateCache("analytics:*");
   await invalidateCache("content:stats:*");
   await invalidateCache("ideas:stats:*");

@@ -6,8 +6,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockSignedIn, mockRedirect, mockDeleteFile } = vi.hoisted(
-  () => {
+const { mockPrisma, mockRedirect, mockDeleteFile, mockAuth, mockClerkClient } =
+  vi.hoisted(() => {
     const mockPrisma = {
       tag: {
         findUnique: vi.fn(),
@@ -21,21 +21,28 @@ const { mockPrisma, mockSignedIn, mockRedirect, mockDeleteFile } = vi.hoisted(
       },
     };
 
-    const mockSignedIn = vi.fn();
     const mockRedirect = vi.fn();
     const mockDeleteFile = vi.fn();
+    const mockAuth = vi.fn();
+    const mockClerkClient = vi.fn();
 
-    return { mockPrisma, mockSignedIn, mockRedirect, mockDeleteFile };
-  },
-);
+    return {
+      mockPrisma,
+      mockRedirect,
+      mockDeleteFile,
+      mockAuth,
+      mockClerkClient,
+    };
+  });
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
 }));
 
-vi.mock("@clerk/nextjs", () => ({
-  SignedIn: mockSignedIn,
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+  clerkClient: mockClerkClient,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -44,6 +51,16 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../upload-crud", () => ({
   deleteFileFromBucket: mockDeleteFile,
+}));
+
+// roles.ts (transitively pulled in via requireWriter) imports cache.ts which
+// pulls in the Redis client. Stub the cache module so the test doesn't try
+// to instantiate Redis.
+vi.mock("../content/cache", () => ({
+  invalidateCache: vi.fn(),
+  withCache: vi.fn(),
+  CACHE_TTL: {},
+  CacheKeys: {},
 }));
 
 vi.mock("@ratecreator/types/content", () => ({
@@ -85,7 +102,21 @@ import {
 describe("Tag CRUD Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignedIn.mockResolvedValue(true);
+    // Default: signed-in admin (deepshaswat@gmail.com is in ADMIN_EMAILS,
+    // so requireWriter() will accept this user without a roles array).
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {
@@ -171,6 +202,49 @@ describe("Tag CRUD Actions", () => {
       const result = await createTagAction({ slug: "new-tag" });
 
       expect(result.error).toBe("Failed to create tag.");
+    });
+  });
+
+  describe("Authentication", () => {
+    it("should reject unauthenticated callers from fetchTagDetails", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchTagDetails("tech")).rejects.toThrow("Unauthorized");
+      // Auth check runs before the try/catch, so prisma is never hit.
+      expect(mockPrisma.tag.findUnique).not.toHaveBeenCalled();
+    });
+
+    it("should reject non-writer callers from createTagAction", async () => {
+      mockClerkClient.mockResolvedValueOnce({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "clerk-user-1",
+            primaryEmailAddressId: "email-1",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "regular@example.com" },
+            ],
+            publicMetadata: { roles: ["USER"] },
+          }),
+        },
+      });
+
+      await expect(createTagAction({ slug: "tech" })).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
+    });
+
+    it("should reject unauthenticated callers from fetchAllTagsWithPostCount", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchAllTagsWithPostCount()).rejects.toThrow("Unauthorized");
+    });
+
+    it("should reject unauthenticated callers from fetchTagsFromTagOnPost", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(
+        fetchTagsFromTagOnPost({ postId: "post-1" }),
+      ).rejects.toThrow("Unauthorized");
     });
   });
 
@@ -434,7 +508,9 @@ describe("Tag CRUD Actions", () => {
   });
 
   describe("fetchAllTagsFromTagOnPost", () => {
-    it("should fetch all tag-post associations", async () => {
+    // This is a public read, but it now restricts to PUBLISHED posts so
+    // draft titles/excerpts don't leak through tag joins.
+    it("should fetch all tag-post associations restricted to PUBLISHED posts", async () => {
       const mockAssociations = [
         { post: { id: "post-1" }, tag: { id: "tag-1", slug: "tech" } },
         { post: { id: "post-2" }, tag: { id: "tag-1", slug: "tech" } },
@@ -445,6 +521,7 @@ describe("Tag CRUD Actions", () => {
 
       expect(result.length).toBe(2);
       expect(mockPrisma.tagOnPost.findMany).toHaveBeenCalledWith({
+        where: { post: { status: "PUBLISHED" } },
         include: { post: true, tag: true },
         orderBy: { tag: { slug: "asc" } },
       });

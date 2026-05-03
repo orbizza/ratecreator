@@ -280,15 +280,13 @@ describe("Account Claiming Actions", () => {
       expect(result.status).toBe("VERIFIED");
     });
 
-    it("should verify claim with matching oauth data", async () => {
+    it("should refuse oauth verification (flow not yet implemented)", async () => {
+      // verifyClaim no longer trusts client-supplied oauth data — the
+      // verification handshake must happen server-side via the platform's
+      // OAuth flow. Until that is implemented, oauth always fails.
       mockAuth.mockResolvedValueOnce({ userId: "clerk-123" });
       mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
       mockPrisma.claimedAccount.findFirst.mockResolvedValueOnce(mockClaim);
-      mockPrisma.claimedAccount.update.mockResolvedValueOnce({
-        ...mockClaim,
-        status: "VERIFIED",
-      });
-      mockPrisma.userLinkedAccount.upsert.mockResolvedValueOnce({});
 
       const result = await verifyClaim({
         claimId: "claim-123",
@@ -296,27 +294,19 @@ describe("Account Claiming Actions", () => {
         verificationData: { platformUserId: "yt-channel-123" },
       });
 
-      expect(result.success).toBe(true);
-      expect(result.status).toBe("VERIFIED");
-      expect(mockPrisma.claimedAccount.update).toHaveBeenCalledWith({
-        where: { id: "claim-123" },
-        data: {
-          status: "VERIFIED",
-          verifiedAt: expect.any(Date),
-          verificationMethod: "oauth",
-        },
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Verification flow not yet implemented");
+      // No update should happen
+      expect(mockPrisma.claimedAccount.update).not.toHaveBeenCalled();
+      expect(mockPrisma.userLinkedAccount.upsert).not.toHaveBeenCalled();
     });
 
-    it("should create linked account after successful verification", async () => {
+    it("should not link account when oauth verification is disabled", async () => {
+      // Even with "matching" oauth data, no linked account is created
+      // because the verification path now short-circuits.
       mockAuth.mockResolvedValueOnce({ userId: "clerk-123" });
       mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
       mockPrisma.claimedAccount.findFirst.mockResolvedValueOnce(mockClaim);
-      mockPrisma.claimedAccount.update.mockResolvedValueOnce({
-        ...mockClaim,
-        status: "VERIFIED",
-      });
-      mockPrisma.userLinkedAccount.upsert.mockResolvedValueOnce({});
 
       await verifyClaim({
         claimId: "claim-123",
@@ -324,24 +314,13 @@ describe("Account Claiming Actions", () => {
         verificationData: { platformUserId: "yt-channel-123" },
       });
 
-      expect(mockPrisma.userLinkedAccount.upsert).toHaveBeenCalledWith({
-        where: {
-          userId_accountId: {
-            userId: "user-123",
-            accountId: "account-123",
-          },
-        },
-        create: {
-          userId: "user-123",
-          accountId: "account-123",
-          platform: "youtube",
-          isPrimary: true,
-        },
-        update: {},
-      });
+      expect(mockPrisma.userLinkedAccount.upsert).not.toHaveBeenCalled();
     });
 
-    it("should fail verification with non-matching oauth data", async () => {
+    it("should refuse oauth verification regardless of client-supplied data", async () => {
+      // The earlier behavior trusted whatever platformUserId the caller sent
+      // and would have "succeeded" when it matched. The new behavior never
+      // trusts client-supplied oauth identity.
       mockAuth.mockResolvedValueOnce({ userId: "clerk-123" });
       mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
       mockPrisma.claimedAccount.findFirst.mockResolvedValueOnce(mockClaim);
@@ -353,7 +332,7 @@ describe("Account Claiming Actions", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Verification failed");
+      expect(result.error).toBe("Verification flow not yet implemented");
     });
 
     it("should return error for invalid verification method", async () => {
@@ -381,7 +360,7 @@ describe("Account Claiming Actions", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Verification failed");
+      expect(result.error).toBe("Verification flow not yet implemented");
     });
 
     it("should not verify with dns method (placeholder)", async () => {
@@ -395,7 +374,7 @@ describe("Account Claiming Actions", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Verification failed");
+      expect(result.error).toBe("Verification flow not yet implemented");
     });
 
     it("should not verify with meta_tag method (placeholder)", async () => {
@@ -409,7 +388,7 @@ describe("Account Claiming Actions", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Verification failed");
+      expect(result.error).toBe("Verification flow not yet implemented");
     });
 
     it("should handle database errors gracefully", async () => {

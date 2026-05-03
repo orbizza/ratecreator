@@ -2,6 +2,7 @@
 
 import axios from "axios";
 
+import { auth } from "@clerk/nextjs/server";
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
@@ -36,6 +37,11 @@ export async function getCreatorData({
   platform,
 }: GetCreatorDataProps): Promise<CreatorData> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
     if (!platform) {
       throw new Error("Platform is required");
     }

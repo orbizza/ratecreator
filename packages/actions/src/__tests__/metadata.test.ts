@@ -391,22 +391,14 @@ describe("Metadata Actions", () => {
       expect(result.description).toContain("CxYz123AbC");
     });
 
-    it("should fetch generic metadata for unknown URLs", async () => {
-      const mockHtml = "<html></html>";
-      mockAxiosGet.mockResolvedValueOnce({ data: mockHtml });
-
-      const $ = createMockCheerio({
-        "og:title": "Generic Page Title",
-        "og:description": "Page description",
-        "og:image": "https://example.com/image.jpg",
-      });
-      mockCheerioLoad.mockReturnValueOnce($);
-
-      const result = await getMetadata("https://example.com/some/page");
-
-      expect(result.title).toBe("Generic Page Title");
-      expect(result.description).toBe("Page description");
-      expect(result.image).toBe("https://example.com/image.jpg");
+    it("should refuse to fetch metadata for non-allowlisted hosts", async () => {
+      // example.com is not in the platform allowlist, so the function
+      // refuses rather than fetching arbitrary URLs server-side.
+      await expect(
+        getMetadata("https://example.com/some/page"),
+      ).rejects.toThrow("URL host not supported");
+      // No HTTP request should ever be made for an unsupported host.
+      expect(mockAxiosGet).not.toHaveBeenCalled();
     });
 
     it("should handle YouTube short URLs", async () => {
@@ -457,12 +449,15 @@ describe("Metadata Actions", () => {
       expect(result.title).toBe("Instagram Short URL");
     });
 
-    it("should return empty object on generic fetch error", async () => {
+    it("should throw for unsupported hosts even when network fails", async () => {
+      // The host check happens before any HTTP call — the rejection
+      // value below should never be observed.
       mockAxiosGet.mockRejectedValueOnce(new Error("Network error"));
 
-      const result = await getMetadata("https://example.com/page");
-
-      expect(result).toEqual({});
+      await expect(getMetadata("https://example.com/page")).rejects.toThrow(
+        "URL host not supported",
+      );
+      expect(mockAxiosGet).not.toHaveBeenCalled();
     });
 
     it("should handle YouTube error gracefully", async () => {

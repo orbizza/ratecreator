@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockSignedIn, mockRedirect, mockCurrentUser } = vi.hoisted(
+const { mockPrisma, mockCurrentUser, mockAuth, mockClerkClient } = vi.hoisted(
   () => {
     const mockPrisma = {
       author: {
@@ -17,11 +17,11 @@ const { mockPrisma, mockSignedIn, mockRedirect, mockCurrentUser } = vi.hoisted(
       },
     };
 
-    const mockSignedIn = vi.fn();
-    const mockRedirect = vi.fn();
     const mockCurrentUser = vi.fn();
+    const mockAuth = vi.fn();
+    const mockClerkClient = vi.fn();
 
-    return { mockPrisma, mockSignedIn, mockRedirect, mockCurrentUser };
+    return { mockPrisma, mockCurrentUser, mockAuth, mockClerkClient };
   },
 );
 
@@ -30,16 +30,10 @@ vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
 }));
 
-vi.mock("@clerk/nextjs", () => ({
-  SignedIn: mockSignedIn,
-}));
-
 vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
   currentUser: mockCurrentUser,
-}));
-
-vi.mock("next/navigation", () => ({
-  redirect: mockRedirect,
+  clerkClient: mockClerkClient,
 }));
 
 vi.mock("@ratecreator/db/utils", () => ({
@@ -51,12 +45,35 @@ vi.mock("@ratecreator/db/utils", () => ({
   ),
 }));
 
+// Stub the cache module which transitively pulls in `@ratecreator/db/redis-do`
+// via roles.ts (now imported by author.ts for the requireWriter() helper).
+vi.mock("../content/cache", () => ({
+  invalidateCache: vi.fn().mockResolvedValue(undefined),
+  withCache: vi.fn(async (_k: string, _t: number, fn: () => Promise<unknown>) =>
+    fn(),
+  ),
+  CACHE_TTL: {},
+  CacheKeys: {},
+}));
+
 import { createAuthor } from "../content/author";
 
 describe("Author Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignedIn.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {

@@ -6,22 +6,27 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockClerkClient } = vi.hoisted(() => {
-  const mockPrisma = {
-    user: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-  };
+const { mockPrisma, mockAuth, mockClerkClientFn, mockClerkClient } = vi.hoisted(
+  () => {
+    const mockPrisma = {
+      user: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+    };
 
-  const mockClerkClient = {
-    users: {
-      updateUserMetadata: vi.fn(),
-    },
-  };
+    const mockClerkClient = {
+      users: {
+        updateUserMetadata: vi.fn(),
+      },
+    };
 
-  return { mockPrisma, mockClerkClient };
-});
+    const mockClerkClientFn = vi.fn(() => Promise.resolve(mockClerkClient));
+    const mockAuth = vi.fn();
+
+    return { mockPrisma, mockAuth, mockClerkClientFn, mockClerkClient };
+  },
+);
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
@@ -29,8 +34,8 @@ vi.mock("@ratecreator/db/client", () => ({
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
-  auth: vi.fn(),
-  clerkClient: vi.fn(() => Promise.resolve(mockClerkClient)),
+  auth: mockAuth,
+  clerkClient: mockClerkClientFn,
 }));
 
 vi.mock("../content/cache", () => ({
@@ -48,6 +53,8 @@ describe("ensureCreatorRole", () => {
   });
 
   it("should add CREATOR role to user with only USER role", async () => {
+    // The clerkId arg must match the session userId — both are "clerk-123"
+    mockAuth.mockResolvedValue({ userId: "clerk-123" });
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-1",
       role: ["USER"],
@@ -71,6 +78,7 @@ describe("ensureCreatorRole", () => {
   });
 
   it("should not modify user who already has CREATOR role", async () => {
+    mockAuth.mockResolvedValue({ userId: "clerk-456" });
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-2",
       role: ["USER", "CREATOR"],
@@ -84,6 +92,7 @@ describe("ensureCreatorRole", () => {
   });
 
   it("should not modify user who already has WRITER role", async () => {
+    mockAuth.mockResolvedValue({ userId: "clerk-789" });
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-3",
       role: ["WRITER"],
@@ -97,6 +106,7 @@ describe("ensureCreatorRole", () => {
   });
 
   it("should not modify user who already has ADMIN role", async () => {
+    mockAuth.mockResolvedValue({ userId: "clerk-admin" });
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-4",
       role: ["ADMIN"],
@@ -110,11 +120,30 @@ describe("ensureCreatorRole", () => {
   });
 
   it("should return early without error for non-existent user", async () => {
+    mockAuth.mockResolvedValue({ userId: "clerk-nonexistent" });
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
     await ensureCreatorRole("clerk-nonexistent");
 
     expect(mockClerkClient.users.updateUserMetadata).not.toHaveBeenCalled();
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it("should throw Unauthorized for unauthenticated callers", async () => {
+    mockAuth.mockResolvedValue({ userId: null });
+
+    await expect(ensureCreatorRole("clerk-123")).rejects.toThrow(
+      "Unauthorized",
+    );
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("should throw Forbidden when clerkId arg doesn't match session", async () => {
+    mockAuth.mockResolvedValue({ userId: "session-user" });
+
+    await expect(ensureCreatorRole("other-user")).rejects.toThrow(
+      "Forbidden: cannot modify another user's role",
+    );
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
   });
 });

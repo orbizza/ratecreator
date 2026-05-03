@@ -1,9 +1,19 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { withCache, invalidateCache, CACHE_TTL, CacheKeys } from "./cache";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
+
+async function authenticateUser() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await requireWriter(userId);
+}
 
 export type CalendarEventType =
   | "scheduled"
@@ -26,6 +36,7 @@ export async function fetchCalendarEvents(
   endDate: Date,
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<CalendarEvent[]> {
+  await authenticateUser();
   // Create cache key based on month range
   const startMonth = `${startDate.getFullYear()}-${startDate.getMonth()}`;
   const endMonth = `${endDate.getFullYear()}-${endDate.getMonth()}`;
@@ -129,6 +140,7 @@ export async function updateIdeaTargetDate(
   ideaId: string,
   targetDate: Date | null,
 ): Promise<void> {
+  await authenticateUser();
   await prisma.idea.update({
     where: { id: ideaId },
     data: { targetDate },
@@ -146,6 +158,7 @@ export async function fetchIdeasWithTargetDates(): Promise<
     status: string;
   }>
 > {
+  await authenticateUser();
   const ideas = await prisma.idea.findMany({
     where: {
       status: { not: "ARCHIVED" },
@@ -166,6 +179,7 @@ export async function updatePostSchedule(
   postId: string,
   publishDate: Date | null,
 ): Promise<void> {
+  await authenticateUser();
   await prisma.post.update({
     where: { id: postId },
     data: {
@@ -183,5 +197,6 @@ export async function updatePostSchedule(
  * Invalidate calendar cache
  */
 export async function invalidateCalendarCache(): Promise<void> {
+  await authenticateUser();
   await invalidateCache("calendar:*");
 }

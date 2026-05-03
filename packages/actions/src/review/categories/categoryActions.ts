@@ -1,6 +1,7 @@
 "use server";
 
 import axios from "axios";
+import { auth } from "@clerk/nextjs/server";
 
 import { Category, GlossaryCategory } from "@ratecreator/types/review";
 import { getRedisClient } from "@ratecreator/db/redis-do";
@@ -9,6 +10,11 @@ const CACHE_ROOT_CATEGORIES = "category-root";
 const CACHE_ALL_CATEGORIES = "category-all";
 
 export async function getCategoryData(): Promise<Category[]> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   // No TTL — categories cached indefinitely until manually flushed
