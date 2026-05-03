@@ -59,7 +59,11 @@ async function getAccountDetails(accountId: string, clerkUserId: string) {
     return null;
   }
 
-  // Check if user has claimed or linked this account
+  // Check if user has claimed or linked this account.
+  // SECURITY: hasAccess gates the analytics + settings tabs and unlocks
+  // creator-side features. A `userLinkedAccount` row alone is just a
+  // user-side bookmark — it is not proof of ownership, so it must NOT
+  // grant access. Only a VERIFIED claim does.
   const claimedAccount = await prisma.claimedAccount.findFirst({
     where: { userId: user.id, accountId },
   });
@@ -68,11 +72,13 @@ async function getAccountDetails(accountId: string, clerkUserId: string) {
     where: { userId: user.id, accountId },
   });
 
+  const hasAccess = claimedAccount?.status === "VERIFIED";
+
   return {
     account,
     claimedAccount,
     linkedAccount,
-    hasAccess: !!claimedAccount || !!linkedAccount,
+    hasAccess,
   };
 }
 

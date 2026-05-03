@@ -54,7 +54,11 @@ describe("Elasticsearch Client", () => {
   });
 
   describe("getElasticsearchClient", () => {
-    it("should create client with basic auth", async () => {
+    it("should create client with basic auth and verify TLS by default", async () => {
+      // The TLS-bypass fix makes `ssl: { rejectUnauthorized: false }` an
+      // explicit opt-in via ELASTIC_INSECURE_TLS=true. With it unset, no
+      // `ssl` key should be passed at all so the underlying client falls
+      // back to its safe (verify-the-cert) default.
       const { getElasticsearchClient } =
         await import("../clients/elasticsearch-client");
       const client = getElasticsearchClient();
@@ -62,9 +66,12 @@ describe("Elasticsearch Client", () => {
       expect(client).toBeDefined();
       expect(MockClient).toHaveBeenCalledWith({
         node: "https://localhost:9200",
-        ssl: { rejectUnauthorized: false },
         auth: { username: "admin", password: "test-password" },
       });
+      // Belt and braces: confirm the call object has NO `ssl` key — that
+      // would re-introduce the MITM hole.
+      const opts = MockClient.mock.calls[0][0];
+      expect(opts).not.toHaveProperty("ssl");
     });
 
     it("should create client without auth when no credentials", async () => {
@@ -79,8 +86,46 @@ describe("Elasticsearch Client", () => {
       expect(client).toBeDefined();
       expect(MockClient).toHaveBeenCalledWith({
         node: "https://localhost:9200",
-        ssl: { rejectUnauthorized: false },
       });
+      const opts = MockClient.mock.calls[0][0];
+      expect(opts).not.toHaveProperty("ssl");
+      expect(opts).not.toHaveProperty("auth");
+    });
+
+    it("should disable TLS verification only when ELASTIC_INSECURE_TLS=true", async () => {
+      vi.resetModules();
+      process.env.ELASTIC_INSECURE_TLS = "true";
+
+      const { getElasticsearchClient } =
+        await import("../clients/elasticsearch-client");
+      const client = getElasticsearchClient();
+
+      expect(client).toBeDefined();
+      expect(MockClient).toHaveBeenCalledWith({
+        node: "https://localhost:9200",
+        ssl: { rejectUnauthorized: false },
+        auth: { username: "admin", password: "test-password" },
+      });
+
+      delete process.env.ELASTIC_INSECURE_TLS;
+    });
+
+    it("should NOT disable TLS verification for any other ELASTIC_INSECURE_TLS value", async () => {
+      // Only the literal string "true" toggles insecure mode — any other
+      // string (including "1", "yes", "TRUE") MUST leave TLS on.
+      for (const v of ["1", "yes", "TRUE", "True", " true"]) {
+        vi.resetModules();
+        MockClient.mockClear();
+        process.env.ELASTIC_INSECURE_TLS = v;
+
+        const { getElasticsearchClient } =
+          await import("../clients/elasticsearch-client");
+        getElasticsearchClient();
+        const opts = MockClient.mock.calls[0][0];
+        expect(opts, `value ${JSON.stringify(v)}`).not.toHaveProperty("ssl");
+
+        delete process.env.ELASTIC_INSECURE_TLS;
+      }
     });
 
     it("should throw error when ELASTIC_URL not configured", async () => {

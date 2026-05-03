@@ -11,7 +11,7 @@ import {
   SEGMENT_AUDIENCE_MAP,
   type SegmentType,
 } from "@ratecreator/email";
-import { requireWriter } from "./roles";
+import { requireWriter, isCurrentUserAdmin } from "./roles";
 
 const prisma = getPrismaClient();
 
@@ -21,6 +21,13 @@ async function authenticateUser() {
     throw new Error("Unauthorized");
   }
   await requireWriter(userId);
+}
+
+async function authenticateAdmin() {
+  const isAdmin = await isCurrentUserAdmin();
+  if (!isAdmin) {
+    throw new Error("Forbidden: Admin role required");
+  }
 }
 
 /**
@@ -153,10 +160,12 @@ async function unsubscribeSubscriber(subscriberId: string) {
 }
 
 /**
- * Export active subscribers as CSV string
+ * Export active subscribers as CSV string. ADMIN only — single compromised
+ * writer should not be able to dump every subscriber's PII.
  */
 async function exportSubscribersCSV() {
   await authenticateUser();
+  await authenticateAdmin();
 
   try {
     const subscribers = await prisma.newsletterSubscriber.findMany({
@@ -220,10 +229,18 @@ async function updateSubscriberStatus(
 }
 
 /**
- * Admin action: manually add a subscriber (skip verification)
+ * Admin action: manually add a subscriber.
+ *
+ * SECURITY: This previously created subscribers with `status: ACTIVE` and
+ * pushed them straight to Resend, letting any WRITER add arbitrary emails to
+ * the broadcast list without consent. We now (a) require ADMIN role and
+ * (b) leave the row in PENDING status so the standard double-opt-in path
+ * applies. UNSUBSCRIBED users are NOT silently re-activated — they must be
+ * re-confirmed.
  */
 async function addSubscriberManually(email: string, name?: string) {
   await authenticateUser();
+  await authenticateAdmin();
 
   try {
     const existing = await prisma.newsletterSubscriber.findUnique({
@@ -231,47 +248,30 @@ async function addSubscriberManually(email: string, name?: string) {
     });
 
     if (existing) {
-      // Reactivate if unsubscribed
-      if (existing.status === "UNSUBSCRIBED" || existing.status === "PENDING") {
-        const updated = await prisma.newsletterSubscriber.update({
-          where: { email },
-          data: {
-            status: "ACTIVE",
-            name: name || existing.name,
-            subscribedAt: new Date(),
-            unsubscribedAt: null,
-            verifyToken: null,
-            source: "admin",
-            segments: existing.segments?.length
-              ? existing.segments
-              : ["all-users"],
-          },
-        });
-        syncSubscriberToAudience(
-          updated.email,
-          updated.name || undefined,
-        ).catch((err) => console.error("Failed to sync to Resend:", err));
-        return { success: true, subscriber: updated };
+      if (existing.status === "ACTIVE") {
+        return { error: "Subscriber already active" };
       }
-      return { error: "Subscriber already active" };
+      // For PENDING/UNSUBSCRIBED, refuse. The user-facing /subscribe flow
+      // is the only path that should activate a subscription.
+      return {
+        error:
+          "Subscriber exists with status " +
+          existing.status +
+          ". They must opt in via the public newsletter form.",
+      };
     }
 
     const subscriber = await prisma.newsletterSubscriber.create({
       data: {
         email,
         name,
-        status: "ACTIVE",
-        subscribedAt: new Date(),
+        // Created in PENDING with no verifyToken — admin should still
+        // trigger a verify email (or the user must opt in themselves).
+        status: "PENDING",
         source: "admin",
         segments: ["all-users"],
       },
     });
-
-    // Sync to Resend
-    syncSubscriberToAudience(
-      subscriber.email,
-      subscriber.name || undefined,
-    ).catch((err) => console.error("Failed to sync to Resend:", err));
 
     return { success: true, subscriber };
   } catch (error) {
@@ -285,6 +285,7 @@ async function addSubscriberManually(email: string, name?: string) {
  */
 async function deleteSubscriber(subscriberId: string) {
   await authenticateUser();
+  await authenticateAdmin();
 
   try {
     const subscriber = await prisma.newsletterSubscriber.delete({

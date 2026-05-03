@@ -330,22 +330,98 @@ describe("removeNormalSuffix", () => {
 });
 
 describe("convertToEmbeddedUrl", () => {
-  it("should convert watch URL to embed URL", () => {
-    expect(convertToEmbeddedUrl("https://www.youtube.com/watch?v=abc123")).toBe(
-      "https://www.youtube.com/embed/abc123",
-    );
-  });
+  // The new implementation extracts the canonical 11-char YouTube video ID and
+  // rebuilds a privacy-safe `youtube-nocookie.com/embed/<id>` URL. Anything we
+  // can't recognise (non-YouTube host, missing/invalid id, non-https scheme,
+  // unparsable string) is rejected with `""` so callers don't render an iframe
+  // pointing at attacker-controlled content.
 
-  it("should handle URL with additional parameters", () => {
+  it("should convert watch URL to nocookie embed URL", () => {
     expect(
-      convertToEmbeddedUrl("https://www.youtube.com/watch?v=abc123&t=100"),
-    ).toBe("https://www.youtube.com/embed/abc123&t=100");
+      convertToEmbeddedUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
   });
 
-  it("should not modify already embedded URL", () => {
-    expect(convertToEmbeddedUrl("https://www.youtube.com/embed/abc123")).toBe(
-      "https://www.youtube.com/embed/abc123",
+  it("should canonicalise an already-embedded URL to nocookie", () => {
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/embed/dQw4w9WgXcQ"),
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  });
+
+  it("should convert youtu.be short URL to nocookie embed", () => {
+    expect(convertToEmbeddedUrl("https://youtu.be/dQw4w9WgXcQ")).toBe(
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
     );
+  });
+
+  it("should convert /shorts URL to nocookie embed", () => {
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/shorts/abc123abc12"),
+    ).toBe("https://www.youtube-nocookie.com/embed/abc123abc12");
+  });
+
+  it("should canonicalise nocookie watch URL", () => {
+    // Already-on-nocookie host watch links should still flow through.
+    expect(
+      convertToEmbeddedUrl(
+        "https://www.youtube-nocookie.com/watch?v=dQw4w9WgXcQ",
+      ),
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  });
+
+  it("should accept m.youtube.com host", () => {
+    expect(
+      convertToEmbeddedUrl("https://m.youtube.com/watch?v=dQw4w9WgXcQ"),
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  });
+
+  it("should ignore extra query parameters and rebuild a clean URL", () => {
+    // The previous string-replace fallthrough leaked `&t=100` straight into
+    // the iframe src; the new builder discards everything except the id.
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=100"),
+    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  });
+
+  it("should reject a non-YouTube host", () => {
+    expect(convertToEmbeddedUrl("https://example.com/foo")).toBe("");
+  });
+
+  it("should reject an unparsable string", () => {
+    expect(convertToEmbeddedUrl("not-a-url")).toBe("");
+  });
+
+  it("should reject empty input", () => {
+    expect(convertToEmbeddedUrl("")).toBe("");
+  });
+
+  it("should reject javascript: pseudo-URL", () => {
+    expect(convertToEmbeddedUrl("javascript:alert(1)")).toBe("");
+  });
+
+  it("should reject a YouTube URL with a malformed id", () => {
+    // Length must be exactly 11 chars from the [A-Za-z0-9_-] alphabet.
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/watch?v=tooshort"),
+    ).toBe("");
+    expect(
+      convertToEmbeddedUrl(
+        "https://www.youtube.com/watch?v=way_too_long_id_12345",
+      ),
+    ).toBe("");
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/watch?v=invalid!chars"),
+    ).toBe("");
+  });
+
+  it("should reject watch URL missing the v param", () => {
+    expect(convertToEmbeddedUrl("https://www.youtube.com/watch")).toBe("");
+  });
+
+  it("should reject unrecognised path on a YouTube host", () => {
+    expect(
+      convertToEmbeddedUrl("https://www.youtube.com/playlist?list=PLxyz"),
+    ).toBe("");
   });
 });
 

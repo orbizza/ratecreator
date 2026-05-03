@@ -11,7 +11,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
 import { invalidateCache } from "./cache";
-import { requireWriter } from "./roles";
+import { requireWriter, isCurrentUserAdmin } from "./roles";
 
 import {
   ContentPlatform,
@@ -41,14 +41,37 @@ const prisma = getPrismaClient();
 
 /**
  * Verifies the current user is signed in and has WRITER/ADMIN role.
+ * Returns the session userId for downstream ownership checks.
  * @throws {Error} If user is not authenticated or lacks the required role.
  */
-async function authenticateUser() {
+async function authenticateUser(): Promise<string> {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
   }
   await requireWriter(userId);
+  return userId;
+}
+
+/**
+ * Confirms the calling user owns the post (matches Author.clerkId) or is
+ * ADMIN. Returns the post or throws Forbidden.
+ */
+async function requirePostOwnership(postId: string, sessionClerkId: string) {
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: { author: { select: { id: true, clerkId: true } } },
+  });
+  if (!post) {
+    throw new Error("Post not found");
+  }
+  if (post.author?.clerkId === sessionClerkId) {
+    return post;
+  }
+  if (await isCurrentUserAdmin()) {
+    return post;
+  }
+  throw new Error("Forbidden: you do not own this post");
 }
 
 /**
@@ -57,7 +80,7 @@ async function authenticateUser() {
  * @returns {Promise<{post?: any; success?: boolean; error?: string}>} Result of the operation
  */
 async function createPost(data: PostType) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
   try {
     const existingPost = await prisma.post.findUnique({
       where: { postUrl: data.postUrl },
@@ -65,6 +88,19 @@ async function createPost(data: PostType) {
 
     if (existingPost) {
       return { error: "Post URL already exists" };
+    }
+
+    // Resolve the Author record from the session, never trust client-supplied
+    // `data.author.id` — that lets a writer attribute a new post to anyone.
+    const author = await prisma.author.findUnique({
+      where: { clerkId: sessionClerkId },
+      select: { id: true },
+    });
+    if (!author) {
+      return {
+        error:
+          "No Author record for the current user. Call createAuthor() first.",
+      };
     }
 
     const newPost = await prisma.post.create({
@@ -77,7 +113,7 @@ async function createPost(data: PostType) {
         isFeatured: data.isFeatured,
         featureImage: data.featureImage,
         author: {
-          connect: { id: data.author.id },
+          connect: { id: author.id },
         },
         metadataTitle: data.metadataTitle,
         metadataDescription: data.metadataDescription,
@@ -127,7 +163,8 @@ async function createPost(data: PostType) {
  * @returns {Promise<{post?: any; success?: boolean; error?: string}>} Result of the operation
  */
 async function updatePost(data: PostType, postId: string) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
   const post: UpdatePostType = {
     title: data.title,
     content: data.content,
@@ -168,6 +205,9 @@ async function updatePost(data: PostType, postId: string) {
       where: { postId },
     });
 
+    // Don't allow re-assigning authorship via update — author is immutable
+    // after creation. This blocks the IDOR where a writer reassigns a post
+    // they own onto another writer's identity.
     const updatedPost = await prisma.post.update({
       where: { id: postId },
       data: {
@@ -178,9 +218,6 @@ async function updatePost(data: PostType, postId: string) {
         excerpt: post.excerpt,
         isFeatured: post.isFeatured,
         featureImage: post.featureImage,
-        author: {
-          connect: { id: post.author.id },
-        },
         metadataTitle: post.metadataTitle,
         metadataDescription: post.metadataDescription,
         metadataImageUrl: post.metadataImageUrl,
@@ -228,7 +265,8 @@ async function updatePost(data: PostType, postId: string) {
  * @returns {Promise<{error?: string}>} Result of the operation
  */
 async function deletePost(postId: string) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
   try {
     await prisma.post.update({
       where: { id: postId },
@@ -249,7 +287,8 @@ async function deletePost(postId: string) {
  * @returns {Promise<{error?: string}>} Result of the operation
  */
 async function restorePost(postId: string) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
   try {
     await prisma.post.update({
       where: { id: postId },
@@ -295,20 +334,23 @@ async function publishPost(
     data = { status: PostStatus.PUBLISHED, publishDate: new Date() };
   }
 
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
   try {
     await prisma.post.update({
       where: { id: postId },
       data,
     });
 
-    // Send broadcast newsletter when publishing immediately
+    // Send broadcast newsletter when publishing immediately. Pass the postId
+    // only — sendNewsletterBroadcast re-fetches from the DB so the email
+    // body cannot diverge from what's actually stored as the post content.
     if (
       postData.contentType === ContentType.NEWSLETTER &&
       scheduleType !== "later"
     ) {
-      sendNewsletterBroadcast(postId, postData, selectedSegments).catch((err) =>
-        console.error("Newsletter broadcast error:", err),
+      sendNewsletterBroadcast(postId, selectedSegments, sessionClerkId).catch(
+        (err) => console.error("Newsletter broadcast error:", err),
       );
     }
 
@@ -322,18 +364,32 @@ async function publishPost(
 }
 
 /**
- * Broadcast a newsletter to selected audience segments using React templates
+ * Broadcast a newsletter to selected audience segments using React templates.
+ *
+ * SECURITY: re-fetches the post + author from the DB so the email body cannot
+ * diverge from what's stored. The previous signature accepted a caller-
+ * supplied `postData` which let any writer broadcast arbitrary content (and
+ * impersonate any author) regardless of what was actually persisted.
  */
 async function sendNewsletterBroadcast(
   postId: string,
-  postData: FetchedPostType,
   segments: SegmentType[],
+  triggeredByClerkId?: string,
 ) {
   try {
-    const emailHtml = blocknoteToEmailHtml(postData.content);
-    const postUrl = `${BASE_URL}/newsletter/${postData.postUrl}`;
-    const publishDate = postData.publishDate
-      ? new Date(postData.publishDate).toLocaleDateString("en-US", {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { author: true },
+    });
+    if (!post) {
+      console.error(`sendNewsletterBroadcast: post ${postId} not found`);
+      return;
+    }
+
+    const emailHtml = blocknoteToEmailHtml(post.content);
+    const postUrl = `${BASE_URL}/newsletter/${post.postUrl}`;
+    const publishDate = post.publishDate
+      ? new Date(post.publishDate).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -342,19 +398,19 @@ async function sendNewsletterBroadcast(
 
     const results = await sendBroadcastToSegments({
       segments,
-      subject: postData.title,
-      name: postData.title,
+      subject: post.title,
+      name: post.title,
       buildReact: (segment: SegmentType) =>
         React.createElement(NewsletterIssueEmail, {
-          title: postData.title,
+          title: post.title,
           contentHtml: emailHtml,
-          featureImage: postData.featureImage || undefined,
-          authorName: postData.author?.name || undefined,
-          authorImageUrl: postData.author?.imageUrl || undefined,
+          featureImage: post.featureImage || undefined,
+          authorName: post.author?.name || undefined,
+          authorImageUrl: post.author?.imageUrl || undefined,
           publishDate,
           postUrl,
           hideUnsubscribe: segment === "security",
-          previewText: postData.excerpt || postData.title,
+          previewText: post.excerpt || post.title,
         }),
     });
 
@@ -363,15 +419,19 @@ async function sendNewsletterBroadcast(
     for (const result of results) {
       broadcastIds.push(result.id);
 
-      // Log success
+      // Log success — include the actor for audit.
       await prisma.emailLog.create({
         data: {
           to: `broadcast:${result.segment}`,
-          subject: postData.title,
+          subject: post.title,
           template: "newsletter-issue",
           status: "SENT",
           resendId: result.id,
-          metadata: { postId, segment: result.segment },
+          metadata: {
+            postId,
+            segment: result.segment,
+            ...(triggeredByClerkId ? { triggeredBy: triggeredByClerkId } : {}),
+          },
         },
       });
     }
@@ -383,11 +443,17 @@ async function sendNewsletterBroadcast(
         await prisma.emailLog.create({
           data: {
             to: `broadcast:${segment}`,
-            subject: postData.title,
+            subject: post.title,
             template: "newsletter-issue",
             status: "FAILED",
             error: "Broadcast creation returned null",
-            metadata: { postId, segment },
+            metadata: {
+              postId,
+              segment,
+              ...(triggeredByClerkId
+                ? { triggeredBy: triggeredByClerkId }
+                : {}),
+            },
           },
         });
       }
@@ -409,12 +475,13 @@ async function sendNewsletterBroadcast(
  * Resend a previously published newsletter to selected segments
  */
 async function resendNewsletter(postId: string, segments?: string[]) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
 
   try {
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      include: { author: true },
+      select: { status: true, contentType: true },
     });
     if (!post || post.status !== PostStatus.PUBLISHED) {
       return { error: "Post not found or not published" };
@@ -424,11 +491,7 @@ async function resendNewsletter(postId: string, segments?: string[]) {
     }
 
     const selectedSegments = (segments || ["all-users"]) as SegmentType[];
-    await sendNewsletterBroadcast(
-      postId,
-      post as unknown as FetchedPostType,
-      selectedSegments,
-    );
+    await sendNewsletterBroadcast(postId, selectedSegments, sessionClerkId);
 
     return { success: true };
   } catch (error) {
@@ -443,7 +506,8 @@ async function resendNewsletter(postId: string, segments?: string[]) {
  * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
  */
 async function unpublishPost(postId: string) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
   try {
     await prisma.post.update({
       where: { id: postId },
@@ -469,7 +533,8 @@ async function unpublishPost(postId: string) {
  * @returns {Promise<{success?: boolean; error?: string}>} Result of the operation
  */
 async function unschedulePost(postData: FetchedPostType, postId: string) {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requirePostOwnership(postId, sessionClerkId);
 
   try {
     if (

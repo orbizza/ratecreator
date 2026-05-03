@@ -7,14 +7,36 @@ import { getPrismaClient } from "@ratecreator/db/client";
 
 const prisma = getPrismaClient();
 
+const MAX_PAGE_SIZE = 50;
+
+function clampPage(currentPage: number, reviewsPerPage: number) {
+  const pageSize = Math.max(
+    1,
+    Math.min(
+      MAX_PAGE_SIZE,
+      Number.isFinite(reviewsPerPage) ? reviewsPerPage : 10,
+    ),
+  );
+  const page = Math.max(
+    0,
+    Math.min(10000, Number.isFinite(currentPage) ? currentPage : 0),
+  );
+  return { pageSize, offset: page * pageSize };
+}
+
+function extractImageUrl(payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const v = (payload as Record<string, unknown>).image_url;
+  return typeof v === "string" ? v : "";
+}
+
 export async function fetchReviewsAction(
   accountId: string,
   platform: Platform,
   currentPage: number,
   reviewsPerPage: number,
 ) {
-  const pageSize = reviewsPerPage;
-  const offset = currentPage * pageSize;
+  const { pageSize, offset } = clampPage(currentPage, reviewsPerPage);
 
   const { userId } = await auth();
 
@@ -32,8 +54,12 @@ export async function fetchReviewsAction(
         accountId,
       },
     },
-    select: { id: true },
+    select: { id: true, isSuspended: true, isDeleted: true },
   });
+
+  if (!account || account.isDeleted) {
+    return [] as ReviewType[];
+  }
 
   const reviews = await prisma.review.findMany({
     where: {
@@ -75,9 +101,7 @@ export async function fetchReviewsAction(
           firstName: review.author.firstName || "",
           lastName: review.author.lastName || "",
           username: review.author.username || "",
-          imageUrl:
-            (review.author.webhookPayload as { image_url?: string })
-              ?.image_url || "",
+          imageUrl: extractImageUrl(review.author.webhookPayload),
         }
       : undefined,
     status: review.status,

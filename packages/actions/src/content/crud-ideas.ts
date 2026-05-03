@@ -2,16 +2,41 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
-import { requireWriter } from "./roles";
+import { requireWriter, isCurrentUserAdmin } from "./roles";
 
 const prisma = getPrismaClient();
 
-async function authenticateUser() {
+async function authenticateUser(): Promise<string> {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
   }
   await requireWriter(userId);
+  return userId;
+}
+
+async function requireIdeaOwnership(ideaId: string, sessionClerkId: string) {
+  const idea = await prisma.idea.findUnique({
+    where: { id: ideaId },
+    include: { author: { select: { id: true, clerkId: true } } },
+  });
+  if (!idea) throw new Error("Idea not found");
+  if (idea.author?.clerkId === sessionClerkId) return idea;
+  if (await isCurrentUserAdmin()) return idea;
+  throw new Error("Forbidden: you do not own this idea");
+}
+
+async function getAuthorIdForSession(sessionClerkId: string): Promise<string> {
+  const author = await prisma.author.findUnique({
+    where: { clerkId: sessionClerkId },
+    select: { id: true },
+  });
+  if (!author) {
+    throw new Error(
+      "No Author record for the current user. Call createAuthor() first.",
+    );
+  }
+  return author.id;
 }
 
 export type IdeaStatus = "NEW" | "IN_PROGRESS" | "DRAFT_CREATED" | "ARCHIVED";
@@ -56,14 +81,16 @@ export interface IdeaInput {
 }
 
 export async function createIdea(data: IdeaInput): Promise<IdeaType> {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  // Ignore client-supplied authorId — derive from session.
+  const authorId = await getAuthorIdForSession(sessionClerkId);
   const idea = await prisma.idea.create({
     data: {
       title: data.title,
       description: data.description || null,
       topics: data.topics || [],
       targetDate: data.targetDate || null,
-      authorId: data.authorId,
+      authorId,
       contentPlatform: data.contentPlatform || "RATECREATOR",
       status: "NEW",
     },
@@ -122,7 +149,8 @@ export async function updateIdea(
     targetDate: Date | null;
   }>,
 ): Promise<IdeaType> {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requireIdeaOwnership(id, sessionClerkId);
   const idea = await prisma.idea.update({
     where: { id },
     data,
@@ -135,7 +163,8 @@ export async function updateIdea(
 }
 
 export async function deleteIdea(id: string): Promise<void> {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requireIdeaOwnership(id, sessionClerkId);
   await prisma.idea.delete({
     where: { id },
   });
@@ -144,14 +173,15 @@ export async function deleteIdea(id: string): Promise<void> {
 export async function convertIdeaToDraft(
   ideaId: string,
   outline: string,
-  authorId: string,
+  _authorId: string, // ignored — derived from session below
   contentPlatform:
     | "RATECREATOR"
     | "CREATOROPS"
     | "DOCUMENTATION" = "RATECREATOR",
   contentType: "BLOG" | "GLOSSARY" | "NEWSLETTER" = "BLOG",
 ): Promise<{ postId: string }> {
-  await authenticateUser();
+  const sessionClerkId = await authenticateUser();
+  await requireIdeaOwnership(ideaId, sessionClerkId);
   const idea = await prisma.idea.findUnique({
     where: { id: ideaId },
   });
@@ -159,6 +189,10 @@ export async function convertIdeaToDraft(
   if (!idea) {
     throw new Error("Idea not found");
   }
+
+  // Always attribute the new post to the calling session, not the
+  // client-supplied authorId.
+  const authorId = await getAuthorIdForSession(sessionClerkId);
 
   const postUrl = idea.title
     .toLowerCase()
@@ -173,7 +207,7 @@ export async function convertIdeaToDraft(
       title: idea.title,
       content: outline,
       postUrl: uniquePostUrl,
-      authorId: authorId,
+      authorId,
       status: "DRAFT",
       excerpt: idea.description || "",
       contentPlatform: contentPlatform,

@@ -35,9 +35,19 @@ export function getElasticsearchClient(): Client {
       );
     }
 
+    // Validate certs by default. Only disable for local development against
+    // self-signed clusters by setting ELASTIC_INSECURE_TLS=true. Disabling in
+    // production sends ELASTIC_USERNAME/ELASTIC_PASSWORD over the network
+    // without confirming the peer's identity, which is a MITM hole.
+    const insecure = process.env.ELASTIC_INSECURE_TLS === "true";
+    if (insecure && process.env.NODE_ENV === "production") {
+      console.warn(
+        "[elastic] ELASTIC_INSECURE_TLS=true is set in production — TLS verification disabled. This is unsafe.",
+      );
+    }
     const opts: ClientOptions = {
       node: url,
-      ssl: { rejectUnauthorized: false },
+      ...(insecure ? { ssl: { rejectUnauthorized: false } } : {}),
       ...(username && password ? { auth: { username, password } } : {}),
     };
 

@@ -6,7 +6,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockGenerateContent, MockVertexAI } = vi.hoisted(() => {
+const {
+  mockGenerateContent,
+  MockVertexAI,
+  mockAuth,
+  mockRedisIncr,
+  mockRedisExpire,
+  mockGetRedisClient,
+} = vi.hoisted(() => {
   const mockGenerateContent = vi.fn();
 
   const MockVertexAI = vi.fn().mockImplementation(() => ({
@@ -15,12 +22,38 @@ const { mockGenerateContent, MockVertexAI } = vi.hoisted(() => {
     }),
   }));
 
-  return { mockGenerateContent, MockVertexAI };
+  const mockAuth = vi.fn();
+  const mockRedisIncr = vi.fn();
+  const mockRedisExpire = vi.fn();
+  const mockGetRedisClient = vi.fn(() => ({
+    incr: mockRedisIncr,
+    expire: mockRedisExpire,
+  }));
+
+  return {
+    mockGenerateContent,
+    MockVertexAI,
+    mockAuth,
+    mockRedisIncr,
+    mockRedisExpire,
+    mockGetRedisClient,
+  };
 });
 
 // Mock modules
 vi.mock("@google-cloud/vertexai", () => ({
   VertexAI: MockVertexAI,
+}));
+
+// translate.ts now requires auth + per-user Redis rate limit. We default to
+// signed-in `u1` with a fresh counter so the existing happy-path tests keep
+// passing; per-test overrides cover the unauth/over-limit/over-size paths.
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+}));
+
+vi.mock("@ratecreator/db/redis-do", () => ({
+  getRedisClient: mockGetRedisClient,
 }));
 
 import {
@@ -32,6 +65,10 @@ import {
 describe("Translation Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: signed-in user with fresh rate-limit counter (under threshold).
+    mockAuth.mockResolvedValue({ userId: "u1" });
+    mockRedisIncr.mockResolvedValue(1);
+    mockRedisExpire.mockResolvedValue(1);
   });
 
   afterEach(() => {
@@ -130,7 +167,9 @@ describe("Translation Actions", () => {
       expect(result.translatedText).toBe("Thank you");
     });
 
-    it("should return error on API failure", async () => {
+    it("should return generic error on API failure (does not leak provider message)", async () => {
+      // Source now scrubs unknown errors and returns the generic
+      // "Translation failed" string so we don't leak Vertex AI internals.
       mockGenerateContent.mockRejectedValueOnce(
         new Error("API quota exceeded"),
       );
@@ -138,10 +177,10 @@ describe("Translation Actions", () => {
       const result = await translateToEnglish("Test text");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("API quota exceeded");
+      expect(result.error).toBe("Translation failed");
     });
 
-    it("should return error on invalid JSON response", async () => {
+    it("should return generic error on invalid JSON response", async () => {
       mockGenerateContent.mockResolvedValueOnce({
         response: {
           candidates: [
@@ -157,7 +196,7 @@ describe("Translation Actions", () => {
       const result = await translateToEnglish("Test text");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("JSON");
+      expect(result.error).toBe("Translation failed");
     });
 
     it("should handle empty response from API", async () => {
@@ -170,6 +209,76 @@ describe("Translation Actions", () => {
       const result = await translateToEnglish("Test text");
 
       expect(result.success).toBe(false);
+    });
+
+    it("should reject unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+      const result = await translateToEnglish("Hello");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+      // Vertex AI must NOT have been called — that's the whole point of the
+      // auth gate (we pay per call).
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject input over MAX_INPUT_BYTES (4 KiB)", async () => {
+      const big = "a".repeat(4097);
+      const result = await translateToEnglish(big);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Input too large");
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject when per-user rate limit is exceeded", async () => {
+      // 61st call within the same window — gateTranslationCall throws
+      // RateLimitedError which we surface verbatim to the caller.
+      mockRedisIncr.mockResolvedValueOnce(61);
+      const result = await translateToEnglish("Hola");
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/rate limit/i);
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should set the per-user expire only on the first hit of the window", async () => {
+      // First call: count=1 → expire is set.
+      mockRedisIncr.mockResolvedValueOnce(1);
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  { text: '{"lang":"en","confidence":0.99,"text_en":"hi"}' },
+                ],
+              },
+            },
+          ],
+        },
+      });
+      await translateToEnglish("hi");
+      expect(mockRedisExpire).toHaveBeenCalledWith(
+        "rl:translate:single:u1",
+        60,
+      );
+
+      // Second call: count=2 → expire NOT touched.
+      mockRedisExpire.mockClear();
+      mockRedisIncr.mockResolvedValueOnce(2);
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  { text: '{"lang":"en","confidence":0.99,"text_en":"hi"}' },
+                ],
+              },
+            },
+          ],
+        },
+      });
+      await translateToEnglish("hi");
+      expect(mockRedisExpire).not.toHaveBeenCalled();
     });
   });
 
@@ -243,16 +352,16 @@ describe("Translation Actions", () => {
       expect(result.results?.key1.text_en).toBe("Hello");
     });
 
-    it("should return error on API failure", async () => {
+    it("should return generic error on API failure", async () => {
       mockGenerateContent.mockRejectedValueOnce(new Error("Network error"));
 
       const result = await batchTranslate({ key: "value" });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error");
+      expect(result.error).toBe("Batch translation failed");
     });
 
-    it("should return error on invalid JSON response", async () => {
+    it("should return generic error on invalid JSON response", async () => {
       mockGenerateContent.mockResolvedValueOnce({
         response: {
           candidates: [
@@ -268,7 +377,47 @@ describe("Translation Actions", () => {
       const result = await batchTranslate({ key: "value" });
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("JSON");
+      expect(result.error).toBe("Batch translation failed");
+    });
+
+    it("should reject unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+      const result = await batchTranslate({ a: "x" });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject batch larger than 50 items", async () => {
+      const items: Record<string, string> = {};
+      for (let i = 0; i < 51; i++) items[`k${i}`] = "x";
+      const result = await batchTranslate(items);
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/too many items/i);
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject when total payload exceeds the byte cap", async () => {
+      // 4 keys * 4097 bytes = ~16 KiB, well over MAX_INPUT_BYTES * 4.
+      const items: Record<string, string> = {
+        a: "a".repeat(4097),
+        b: "b".repeat(4097),
+        c: "c".repeat(4097),
+        d: "d".repeat(4097),
+        e: "e".repeat(4097),
+      };
+      const result = await batchTranslate(items);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Input too large");
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject when batch rate limit is exceeded", async () => {
+      mockRedisIncr.mockResolvedValueOnce(61);
+      const result = await batchTranslate({ a: "hola" });
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/rate limit/i);
+      expect(mockGenerateContent).not.toHaveBeenCalled();
     });
   });
 
@@ -350,7 +499,7 @@ describe("Translation Actions", () => {
       expect(result.language).toBe("ko");
     });
 
-    it("should return error on API failure", async () => {
+    it("should return generic error on API failure", async () => {
       mockGenerateContent.mockRejectedValueOnce(
         new Error("Service unavailable"),
       );
@@ -358,10 +507,10 @@ describe("Translation Actions", () => {
       const result = await detectLanguage("Test text");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Service unavailable");
+      expect(result.error).toBe("Language detection failed");
     });
 
-    it("should return error on invalid JSON response", async () => {
+    it("should return generic error on invalid JSON response", async () => {
       mockGenerateContent.mockResolvedValueOnce({
         response: {
           candidates: [
@@ -377,6 +526,7 @@ describe("Translation Actions", () => {
       const result = await detectLanguage("Test text");
 
       expect(result.success).toBe(false);
+      expect(result.error).toBe("Language detection failed");
     });
 
     it("should handle empty candidates array", async () => {
@@ -389,6 +539,30 @@ describe("Translation Actions", () => {
       const result = await detectLanguage("Test text");
 
       expect(result.success).toBe(false);
+    });
+
+    it("should reject unauthenticated callers", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+      const result = await detectLanguage("hello");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject input over MAX_INPUT_BYTES", async () => {
+      const big = "a".repeat(4097);
+      const result = await detectLanguage(big);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Input too large");
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should reject when rate limit is exceeded", async () => {
+      mockRedisIncr.mockResolvedValueOnce(61);
+      const result = await detectLanguage("Hola");
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/rate limit/i);
+      expect(mockGenerateContent).not.toHaveBeenCalled();
     });
   });
 });

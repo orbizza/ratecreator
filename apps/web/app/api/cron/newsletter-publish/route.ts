@@ -8,6 +8,7 @@ import {
   BASE_URL,
   type SegmentType,
 } from "@ratecreator/email";
+import { isAuthorizedCronRequest } from "../../../../lib/cron-auth";
 
 const prisma = getPrismaClient();
 
@@ -21,8 +22,7 @@ const prisma = getPrismaClient();
  * 3. Store broadcast IDs on the post
  */
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCronRequest(request.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
