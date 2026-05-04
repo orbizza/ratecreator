@@ -127,33 +127,47 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   }
 }
 
+function hasAtLeastOneAccount(rows: PopularCategoryWithAccounts[]): boolean {
+  return rows.some((r) => Array.isArray(r.accounts) && r.accounts.length > 0);
+}
+
 export async function getMostPopularCategoryWithData(): Promise<
   PopularCategoryWithAccounts[]
 > {
   const client = await getMongoClient();
 
   try {
-    // Check local cache first
+    // Check local cache first. CRITICAL: must reject empty / no-account
+    // results — `[]` is truthy and would pin the empty render for 60s on
+    // any warm function instance (the bug that kept reproducing in preview).
     const local = getLocal<PopularCategoryWithAccounts[]>(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
     );
-    if (local) return local;
+    if (local && hasAtLeastOneAccount(local)) return local;
 
-    // Try to get cached full response from Redis
+    // Same defense for Redis: an old deploy may have written an empty (or
+    // all-categories-with-empty-accounts) snapshot for 7 days; ignore it.
     const cachedFullResponse = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedFullResponse) {
       const parsed = JSON.parse(
         cachedFullResponse,
       ) as PopularCategoryWithAccounts[];
-      // Discard cached empty arrays — they're probably stale negatives.
-      if (parsed.length > 0) {
+      if (hasAtLeastOneAccount(parsed)) {
         setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
         return parsed;
       }
+      // Poisoned snapshot — drop it so the next caller doesn't hit it again.
+      await redis.del(CACHE_POPULAR_CATEGORY_ACCOUNTS);
+      console.warn(
+        "[mostPopularCategories] Discarded empty cached snapshot from Redis",
+      );
     }
 
     const popularCategoriesResponse = await getMostPopularCategories();
     const popularCategories: PopularCategory[] = popularCategoriesResponse;
+    console.log(
+      `[mostPopularCategories] Resolved ${popularCategories.length} categories to populate`,
+    );
 
     const database = client.db("ratecreator");
     const categoryMappingCollection = database.collection("CategoryMapping");
@@ -167,10 +181,15 @@ export async function getMostPopularCategoryWithData(): Promise<
       try {
         const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${category.id}`;
 
-        // Try local cache for individual category
+        // Try local cache for individual category. Reject empty-account
+        // entries the same way as the aggregate cache check above.
         const localCat =
           getLocal<PopularCategoryWithAccounts>(categoryCacheKey);
-        if (localCat) {
+        if (
+          localCat &&
+          Array.isArray(localCat.accounts) &&
+          localCat.accounts.length > 0
+        ) {
           accountsByCategory.push(localCat);
           continue;
         }
@@ -178,10 +197,16 @@ export async function getMostPopularCategoryWithData(): Promise<
         // Try to get cached category data from Redis
         const cachedCategoryAccounts = await redis.get(categoryCacheKey);
         if (cachedCategoryAccounts) {
-          const parsed = JSON.parse(cachedCategoryAccounts);
-          setLocal(categoryCacheKey, parsed);
-          accountsByCategory.push(parsed);
-          continue;
+          const parsed = JSON.parse(
+            cachedCategoryAccounts,
+          ) as PopularCategoryWithAccounts;
+          if (Array.isArray(parsed.accounts) && parsed.accounts.length > 0) {
+            setLocal(categoryCacheKey, parsed);
+            accountsByCategory.push(parsed);
+            continue;
+          }
+          // Drop the poisoned per-category key so the next call re-queries.
+          await redis.del(categoryCacheKey);
         }
 
         // If not cached, prepare fetch operation
@@ -211,7 +236,12 @@ export async function getMostPopularCategoryWithData(): Promise<
                 : [];
 
             if (accounts.length === 0) {
-              const emptyCategory = {
+              // Don't cache empty-account results — caching for 7d would pin
+              // the empty UI even if the category later gets accounts.
+              console.warn(
+                `[mostPopularCategories] Category ${category.slug} (${category.id}) has 0 mapped accounts`,
+              );
+              return {
                 category: {
                   id: category.id,
                   name: category.name,
@@ -219,13 +249,6 @@ export async function getMostPopularCategoryWithData(): Promise<
                 },
                 accounts: [],
               };
-              await redis.setex(
-                categoryCacheKey,
-                REDIS_TTL.INDIVIDUAL_CATEGORY,
-                JSON.stringify(emptyCategory),
-              );
-              setLocal(categoryCacheKey, emptyCategory);
-              return emptyCategory;
             }
 
             const categoryWithAccounts = {
@@ -276,14 +299,23 @@ export async function getMostPopularCategoryWithData(): Promise<
     const results = await Promise.all(pipeline);
     accountsByCategory.push(...results);
 
-    // Only cache non-empty results to avoid pinning a broken-render state.
-    if (accountsByCategory.length > 0) {
+    // Only cache when AT LEAST ONE category has at least one account.
+    // Caching the wrapper when every category is empty would pin the broken
+    // render for 7 days (the bug we keep hitting in preview).
+    if (hasAtLeastOneAccount(accountsByCategory)) {
       await redis.setex(
         CACHE_POPULAR_CATEGORY_ACCOUNTS,
         REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
         JSON.stringify(accountsByCategory),
       );
       setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
+      console.log(
+        `[mostPopularCategories] Cached aggregate (${accountsByCategory.length} categories, first has ${accountsByCategory[0]?.accounts.length ?? 0} accounts)`,
+      );
+    } else {
+      console.warn(
+        "[mostPopularCategories] Refusing to cache aggregate — no category has any accounts",
+      );
     }
 
     return accountsByCategory;
