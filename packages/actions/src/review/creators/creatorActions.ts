@@ -1,5 +1,7 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorData } from "@ratecreator/types/review";
@@ -29,15 +31,19 @@ interface GetCreatorDataProps {
   platform: string;
 }
 
-// Public profile lookup — powers the public /profile/[platform]/[accountId]
-// page. Same rationale as the search and category endpoints: this is the
-// data that's already indexed in Elasticsearch and rendered in the public
-// search results. Auth-gating it broke the profile page for anonymous
-// visitors and for SSR paths whose Clerk cookies don't propagate.
+// Auth-gated. /profile/[platform]/[accountId] is middleware-protected, so
+// any browser navigation to a profile is already redirected to /sign-in
+// before this runs. The auth() check here is defense-in-depth against
+// direct Server Action invocation from DevTools — without it, a curious
+// user could `fetch` the action with a forged payload and read the full
+// account record (including platform-specific JSON blobs) anonymously.
 export async function getCreatorData({
   accountId,
   platform,
 }: GetCreatorDataProps): Promise<CreatorData> {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
   if (!platform) throw new Error("Platform is required");
   if (!accountId) throw new Error("Account ID is required");
 

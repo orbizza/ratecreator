@@ -6,10 +6,9 @@ import { getPrismaClient } from "@ratecreator/db/client";
 const CACHE_ROOT_CATEGORIES = "category-root";
 const CACHE_ALL_CATEGORIES = "category-all";
 
-// Public catalog read. Same rationale as the search endpoints: the category
-// hierarchy is rendered to anonymous visitors on /categories and is part of
-// the public site map. Auth-gating it broke the page; per-IP rate limiting
-// belongs in the Cloudflare/Vercel edge, not in a Server Action.
+// Public catalog read — same data is exposed via /api/search/categories and
+// rendered on the homepage. Anonymous callers are fine here; auth gating
+// would break the public /categories page without protecting anything new.
 export async function getCategoryData(): Promise<Category[]> {
   const redis = getRedisClient();
   const prisma = getPrismaClient();
