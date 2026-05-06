@@ -15,26 +15,24 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 //     visitors into the sign-in flow.
 //
 // What stays PUBLIC:
-//   - `/categories(/[slug])?` — discovery pages. The page itself renders for
-//     anonymous visitors (wrapped in <AuthGateModal>), but the data fetch
-//     happens via the gated /api/search/* below — modal blocks the UI, the
-//     middleware blocks the underlying request. Belt and suspenders.
-//   - Homepage Most Popular Categories — uses the `getMostPopularCategoryWithData`
-//     Server Action which already returns a tight whitelist (no internal
-//     fields), unrelated to /api/search.
+//   - `/api/search/*` — Elasticsearch catalog browsing for the global
+//     command-bar autocomplete. Returns ONLY the whitelisted fields
+//     defined in elasticsearch-client (`PUBLIC_ACCOUNT_FIELDS` /
+//     `PUBLIC_CATEGORY_FIELDS`) — no internal pipeline state leaks. The
+//     full search-results page (/search) and creator profile pages
+//     (/profile/*) remain gated at the page layer; only the lightweight
+//     dropdown is reachable anonymously.
+//   - `/categories(/[slug])?` — discovery pages render an aria-hidden
+//     backdrop for anonymous visitors (see each page's auth() check),
+//     so the actual data never enters the DOM.
+//   - Homepage Most Popular Categories — uses `getMostPopularCategoryWithData`
+//     which returns its own tight whitelist.
 //   - `/sign-in`, `/sign-up`, marketing pages, `/legal/*`, etc.
-//
-// /api/search/* IS gated: the data leak the security PR was filed for came
-// from anonymous DevTools requests against this endpoint. Defense-in-depth
-// is layered with the _source whitelist inside searchAccounts/searchCategories
-// so even if a future caller bypasses this matcher, response can't leak
-// internal pipeline state (isSeeded, lastIndexedAt, claimed, etc.).
 const isProtectedApi = createRouteMatcher([
   "/api/reviews(.*)",
   "/api/accounts(.*)",
   "/api/categories(.*)",
   "/api/metadata(.*)",
-  "/api/search/(.*)",
 ]);
 
 // /profile/* deliberately uses the in-page <AuthGateModal> pattern (see
