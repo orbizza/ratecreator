@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
 import { CreatorProfile } from "@ratecreator/ui/review";
@@ -117,11 +118,23 @@ export async function generateMetadata({
   };
 }
 
-export default function ReviewProfile({
+export default async function ReviewProfile({
   params: { accountId, platform },
 }: {
   params: { accountId: string; platform: string };
 }) {
+  const { userId } = await auth();
+
+  // Anonymous: render an empty backdrop. The (public)/profile/layout.tsx
+  // wraps every profile page in <AuthGateModal>, which paints the Clerk
+  // sign-in over a blurred copy of `children`. We deliberately skip
+  // <CreatorProfile> here because it triggers the auth-gated
+  // getCreatorData Server Action — invoking it for anonymous users would
+  // surface a 500, AND would let DevTools observe the response shape.
+  if (!userId) {
+    return <main aria-hidden className="min-h-[calc(100vh-20vh)]" />;
+  }
+
   return (
     <main className="min-h-[calc(100vh-20vh)]">
       <CreatorProfile accountId={accountId} platform={platform} />

@@ -29,8 +29,13 @@ const isProtectedApi = createRouteMatcher([
   "/api/metadata(.*)",
 ]);
 
+// /profile/* deliberately uses the in-page <AuthGateModal> pattern (see
+// apps/web/app/(public)/profile/layout.tsx) — the page renders behind a
+// blurred overlay with the Clerk <SignIn> component on top, and Clerk's
+// forceRedirectUrl returns the user to the same profile URL after sign-in.
+// /review/* and /user-profile have no public preview to render behind a
+// modal, so they get the hard redirect.
 const isProtectedPage = createRouteMatcher([
-  "/profile/(.*)",
   "/review/(.*)",
   "/user-profile(.*)",
 ]);
