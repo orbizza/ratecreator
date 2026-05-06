@@ -12,20 +12,9 @@ import { MongoClient } from "mongodb";
  * @private
  */
 declare global {
-  var _mongoClientPromise: Promise<MongoClient>;
+  // Allow undefined so we can lazy-init without forcing a connect at boot.
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
-
-/**
- * MongoDB client instance
- * @private
- */
-let client: MongoClient;
-
-/**
- * Promise resolving to MongoDB client instance
- * @private
- */
-let clientPromise: Promise<MongoClient>;
 
 /**
  * Gets the MongoDB connection URI from environment variables
@@ -66,21 +55,37 @@ function createMongoClient(): Promise<MongoClient> {
     });
 }
 
-// Initialize client based on environment
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    // console.log("Initializing global MongoDB client for development");
-    global._mongoClientPromise = createMongoClient(); // Force initialization
-  } else {
-    // console.log("MongoDB client already initialized globally");
+// Lazy initialization. Connecting eagerly at module-import time turns any
+// transient outage (e.g. a dev machine that's not on the prod Mongo IP
+// allowlist) into an unhandled rejection that kills `turbo dev`. Defer the
+// connect until something actually awaits the promise.
+function getClientPromise(): Promise<MongoClient> {
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoClientPromise) {
+      global._mongoClientPromise = createMongoClient();
+    }
+    return global._mongoClientPromise;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  // console.log("Initializing MongoDB client for production");
-  clientPromise = createMongoClient();
+  // In production we reuse the lifetime of the module: the first call seeds
+  // the promise, subsequent calls reuse it.
+  if (!cachedClientPromise) {
+    cachedClientPromise = createMongoClient();
+  }
+  return cachedClientPromise;
 }
 
-export default clientPromise;
+let cachedClientPromise: Promise<MongoClient> | undefined;
+
+// Default export retained for backwards compatibility — but it's now a
+// thenable proxy that defers the connect. Awaiting it triggers the connect;
+// merely importing it does not.
+const lazyDefault: PromiseLike<MongoClient> = {
+  then(onFulfilled, onRejected) {
+    return getClientPromise().then(onFulfilled, onRejected);
+  },
+};
+
+export default lazyDefault;
 
 /**
  * Checks the MongoDB connection status
@@ -88,9 +93,8 @@ export default clientPromise;
  */
 export async function checkMongoConnection() {
   try {
-    const client = await clientPromise;
+    const client = await getClientPromise();
     await client.db().command({ ping: 1 });
-    // console.log("MongoDB connection check successful");
     return true;
   } catch (error) {
     console.error("MongoDB connection check failed:", error);
