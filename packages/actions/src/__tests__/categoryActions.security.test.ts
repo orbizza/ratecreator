@@ -60,12 +60,22 @@ import {
   getSingleGlossaryCategory,
 } from "../review/categories/categoryActions";
 
-describe("getCategoryData (real source) — public read", () => {
+describe("getCategoryData (real source) — auth gate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns cached data without consulting auth() for anonymous callers", async () => {
+  it("throws Unauthorized for anonymous callers and never queries Redis/Prisma", async () => {
+    mockAuth.mockResolvedValueOnce({ userId: null });
+
+    await expect(getCategoryData()).rejects.toThrow("Unauthorized");
+
+    expect(mockRedisGet).not.toHaveBeenCalled();
+    expect(mockCategoryFindMany).not.toHaveBeenCalled();
+  });
+
+  it("returns cached data for signed-in callers", async () => {
+    mockAuth.mockResolvedValueOnce({ userId: "user-1" });
     const cached = [
       { id: "c1", name: "Tech", slug: "tech", subcategories: [] },
     ];
@@ -73,23 +83,6 @@ describe("getCategoryData (real source) — public read", () => {
 
     const result = await getCategoryData();
     expect(result).toEqual(cached);
-    // Critical: the action must not call auth() — that's how it stays
-    // usable from anonymous SSR paths where no Clerk cookie is present.
-    expect(mockAuth).not.toHaveBeenCalled();
-  });
-
-  it("falls through to Prisma + caches when Redis is empty", async () => {
-    mockRedisGet.mockResolvedValueOnce(null);
-    mockCategoryFindMany.mockResolvedValueOnce([
-      { id: "c1", name: "Tech", slug: "tech", parentId: null },
-    ]);
-    mockRedisSet.mockResolvedValue("OK");
-
-    const result = await getCategoryData();
-    expect(result).toHaveLength(1);
-    expect(result[0]?.id).toBe("c1");
-    expect(mockAuth).not.toHaveBeenCalled();
-    expect(mockCategoryFindMany).toHaveBeenCalled();
   });
 });
 
