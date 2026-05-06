@@ -25,10 +25,12 @@ const {
   mockMongoCollection,
   mockMongoDb,
   mockMongoClient,
+  mockRedisDel,
 } = vi.hoisted(() => {
   const mockRedisGet = vi.fn();
   const mockRedisSet = vi.fn();
   const mockRedisSetex = vi.fn();
+  const mockRedisDel = vi.fn();
   const mockCategoryFindMany = vi.fn();
   const mockCategoryFindUnique = vi.fn();
   const mockMongoToArray = vi.fn();
@@ -53,6 +55,7 @@ const {
     get: mockRedisGet,
     set: mockRedisSet,
     setex: mockRedisSetex,
+    del: mockRedisDel,
   };
 
   const mockPrismaInstance = {
@@ -66,6 +69,7 @@ const {
     mockRedisGet,
     mockRedisSet,
     mockRedisSetex,
+    mockRedisDel,
     mockCategoryFindMany,
     mockCategoryFindUnique,
     mockMongoFind,
@@ -118,7 +122,10 @@ vi.mock("mongodb", () => {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const SEVEN_DAYS = 7 * 24 * 3600;
+// Cache TTL bumped to 1 year per product call — flushed manually when the
+// popular set or its per-category accounts change. Variable name kept for
+// minimal churn across the existing assertions.
+const SEVEN_DAYS = 365 * 24 * 3600;
 
 const sampleCategories = [
   { id: "cat-1", name: "Gaming", slug: "gaming" },
@@ -178,6 +185,9 @@ describe("mostPopularCategoryActions", () => {
     mockMongoFind.mockReturnValue({ toArray: mockMongoToArray });
     mockMongoSort.mockReturnValue({ limit: mockMongoLimit });
     mockMongoLimit.mockReturnValue({ toArray: mockMongoToArray });
+
+    // del() is invoked when the action evicts a poisoned (empty) snapshot.
+    mockRedisDel.mockResolvedValue(1);
   });
 
   // =========================================================================
@@ -246,7 +256,7 @@ describe("mostPopularCategoryActions", () => {
       // Use setex with TTL — previous behavior cached empty arrays forever.
       expect(mockRedisSetex).toHaveBeenCalledWith(
         "category-popular",
-        7 * 24 * 3600,
+        SEVEN_DAYS,
         JSON.stringify(sampleCategories),
       );
     });
@@ -323,10 +333,24 @@ describe("mostPopularCategoryActions", () => {
     }
 
     it("should return from local cache if available", async () => {
+      // Cached payload MUST have at least one account — the new code
+      // intentionally drops empty cached aggregates as poisoned.
       const cachedData = [
         {
           category: { id: "cat-1", name: "Gaming", slug: "gaming" },
-          accounts: [],
+          accounts: [
+            {
+              id: "acc-1",
+              name: "Creator One",
+              handle: "creator1",
+              platform: "YOUTUBE",
+              accountId: "UC001",
+              followerCount: 500000,
+              rating: 4.5,
+              reviewCount: 10,
+              imageUrl: "",
+            },
+          ],
         },
       ];
 
@@ -428,7 +452,7 @@ describe("mostPopularCategoryActions", () => {
       );
     });
 
-    it("should handle empty category mappings", async () => {
+    it("should handle empty category mappings without caching the empty per-category", async () => {
       mockRedisGet.mockResolvedValue(null);
       mockCategoryFindMany.mockResolvedValue([sampleCategories[0]!]);
       mockRedisSet.mockResolvedValue("OK");
@@ -442,10 +466,18 @@ describe("mostPopularCategoryActions", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].accounts).toEqual([]);
-      // Should still cache the empty result
-      expect(mockRedisSetex).toHaveBeenCalledWith(
+      // Per-category empty results MUST NOT be cached — caching them for 1y
+      // would pin the empty UI even after the category gains accounts.
+      expect(mockRedisSetex).not.toHaveBeenCalledWith(
         "category-accounts:cat-1",
-        SEVEN_DAYS,
+        expect.anything(),
+        expect.any(String),
+      );
+      // The aggregate wrapper also must not be cached when no category has
+      // any accounts.
+      expect(mockRedisSetex).not.toHaveBeenCalledWith(
+        "category-popular-accounts",
+        expect.anything(),
         expect.any(String),
       );
     });

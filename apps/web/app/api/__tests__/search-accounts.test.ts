@@ -7,10 +7,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockSearchAccounts, mockAuth } = vi.hoisted(() => {
+const { mockSearchAccounts, mockRateLimitOk } = vi.hoisted(() => {
   const mockSearchAccounts = vi.fn();
-  const mockAuth = vi.fn();
-  return { mockSearchAccounts, mockAuth };
+  const mockRateLimitOk = vi.fn();
+  return { mockSearchAccounts, mockRateLimitOk };
 });
 
 // Mock modules
@@ -18,8 +18,8 @@ vi.mock("@ratecreator/db/elasticsearch-client", () => ({
   searchAccounts: mockSearchAccounts,
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: mockAuth,
+vi.mock("../../../lib/search-rate-limit", () => ({
+  searchRateLimitOk: mockRateLimitOk,
 }));
 
 vi.mock("@ratecreator/types/review", () => ({
@@ -31,7 +31,7 @@ import { GET } from "../search/accounts/route";
 describe("Search Accounts API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue({ userId: "user-123" });
+    mockRateLimitOk.mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -59,7 +59,9 @@ describe("Search Accounts API Route", () => {
 
       expect(response.status).toBe(200);
       expect(data.hits).toBeDefined();
-      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+      expect(response.headers.get("Cache-Control")).toBe(
+        "public, max-age=0, s-maxage=30",
+      );
       expect(mockSearchAccounts).toHaveBeenCalledWith(
         expect.objectContaining({
           query: "",
@@ -513,53 +515,32 @@ describe("Search Accounts API Route", () => {
     });
   });
 
-  describe("Authentication", () => {
-    it("should return 401 for unauthenticated users on page > 0", async () => {
-      mockAuth.mockResolvedValueOnce({ userId: null });
-
-      const request = createRequest("?page=1");
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
-    });
-
-    it("should return 401 for unauthenticated users on page 0", async () => {
-      // Security fix: search now requires auth on every request, not just
-      // pagination, to prevent anonymous data scraping.
-      mockAuth.mockResolvedValueOnce({ userId: null });
-
-      const request = createRequest("?page=0");
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(401);
-      expect(data.error).toBe("Unauthorized");
-      expect(mockSearchAccounts).not.toHaveBeenCalled();
-    });
-
-    it("should not call elasticsearch for unauthenticated requests", async () => {
-      mockAuth.mockResolvedValueOnce({ userId: null });
+  describe("Rate Limiting", () => {
+    it("should return 429 when rate limit exceeded", async () => {
+      mockRateLimitOk.mockResolvedValueOnce(false);
 
       const request = createRequest("?query=anything");
-      await GET(request);
+      const response = await GET(request);
+      const data = await response.json();
 
+      expect(response.status).toBe(429);
+      expect(data.error).toBe("Too many requests");
       expect(mockSearchAccounts).not.toHaveBeenCalled();
     });
 
-    it("should allow authenticated users on any page", async () => {
-      mockAuth.mockResolvedValueOnce({ userId: "user-123" });
+    it("should allow anonymous requests within rate limit", async () => {
+      mockRateLimitOk.mockResolvedValueOnce(true);
       mockSearchAccounts.mockResolvedValueOnce({
         hits: [],
         nbHits: 0,
-        page: 6,
+        page: 1,
       });
 
-      const request = createRequest("?page=5");
+      const request = createRequest("?page=0");
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+      expect(mockSearchAccounts).toHaveBeenCalled();
     });
   });
 

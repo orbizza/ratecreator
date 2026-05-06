@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { searchCategories } from "@ratecreator/db/elasticsearch-client";
+import { searchRateLimitOk } from "../../../../lib/search-rate-limit";
 
 export const dynamic = "force-dynamic";
 
+// Category list is fully public — used by the search bar autocomplete on
+// the landing page for anonymous visitors. Per-IP rate limit only.
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await searchRateLimitOk(request, "categories"))) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
     const url = new URL(request.url);
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const results = await searchCategories(query);
     const response = NextResponse.json({ hits: results.slice(0, limit) });
-    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("Cache-Control", "public, max-age=0, s-maxage=60");
     return response;
   } catch (error) {
     console.error("Category search error:", error);

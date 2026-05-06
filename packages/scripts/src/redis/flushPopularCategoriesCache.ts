@@ -1,3 +1,9 @@
+// Load monorepo root .env so REDIS_HOST / REDIS_PASSWORD are available when
+// the script is invoked via `tsx` directly (not through Next.js).
+import { config as loadEnv } from "dotenv";
+import { resolve } from "node:path";
+loadEnv({ path: resolve(__dirname, "../../../../.env") });
+
 import { getRedisClient } from "@ratecreator/db/redis-do";
 
 const KEYS = [

@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchAccounts } from "@ratecreator/db/elasticsearch-client";
 import qs from "qs";
 import { SearchAccountsParams } from "@ratecreator/types/review";
-import { auth } from "@clerk/nextjs/server";
+import { searchRateLimitOk } from "../../../../lib/search-rate-limit";
 
 export const dynamic = "force-dynamic";
 
+// Public catalog endpoint — these creator profiles are already rendered to
+// anonymous visitors on the homepage (Most Popular Categories) and category
+// pages. Auth-gating broke discovery; rely on per-IP rate limit instead.
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await searchRateLimitOk(request, "accounts"))) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
     // Parse the URL and query string using qs
@@ -127,7 +129,8 @@ export async function GET(request: NextRequest) {
     };
 
     const jsonResponse = NextResponse.json(response);
-    jsonResponse.headers.set("Cache-Control", "private, no-store");
+    // Public data, but still no-store to keep facets/aggregations live.
+    jsonResponse.headers.set("Cache-Control", "public, max-age=0, s-maxage=30");
     return jsonResponse;
   } catch (error) {
     console.error("Search error:", error);

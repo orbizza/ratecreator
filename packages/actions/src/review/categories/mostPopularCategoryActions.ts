@@ -15,10 +15,15 @@ const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
 
 // Redis TTLs in seconds
+// Per product call: pin Most Popular Categories for 1 year. The component is
+// flushed manually whenever categories or their accounts change (the
+// `flushPopularCategoriesCache` script). Keeping it long-lived avoids the
+// expensive Mongo aggregate on every cold start.
+const ONE_YEAR_SEC = 365 * 24 * 3600;
 const REDIS_TTL = {
-  POPULAR_CATEGORIES: 0, // No expiry — flush manually when categories change
-  POPULAR_CATEGORY_ACCOUNTS: 7 * 24 * 3600, // 7 days unless revalidated
-  INDIVIDUAL_CATEGORY: 7 * 24 * 3600, // 7 days
+  POPULAR_CATEGORIES: ONE_YEAR_SEC,
+  POPULAR_CATEGORY_ACCOUNTS: ONE_YEAR_SEC,
+  INDIVIDUAL_CATEGORY: ONE_YEAR_SEC,
 };
 
 // In-memory local cache — reduces Redis round-trips for repeated calls
@@ -112,10 +117,11 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
       return [];
     }
 
-    // Cache with TTL so a transient empty DB doesn't stick forever.
+    // 1y TTL — flush manually via flushPopularCategoriesCache when the
+    // popular set or per-category accounts change.
     await redis.setex(
       CACHE_POPULAR_CATEGORIES,
-      REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
+      REDIS_TTL.POPULAR_CATEGORIES,
       JSON.stringify(popularCategories),
     );
     setLocal(CACHE_POPULAR_CATEGORIES, popularCategories);
@@ -173,8 +179,8 @@ export async function getMostPopularCategoryWithData(): Promise<
     const categoryMappingCollection = database.collection("CategoryMapping");
     const accountCollection = database.collection<Account>("Account");
 
-    const accountsByCategory = [];
-    const pipeline = [];
+    const accountsByCategory: PopularCategoryWithAccounts[] = [];
+    const pipeline: Promise<PopularCategoryWithAccounts>[] = [];
 
     // Process each category, potentially in parallel
     for (const category of popularCategories) {
@@ -246,17 +252,17 @@ export async function getMostPopularCategoryWithData(): Promise<
                   id: category.id,
                   name: category.name,
                   slug: category.slug,
-                },
+                } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
                 accounts: [],
               };
             }
 
-            const categoryWithAccounts = {
+            const categoryWithAccounts: PopularCategoryWithAccounts = {
               category: {
                 id: category.id,
                 name: category.name,
                 slug: category.slug,
-              },
+              } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
               accounts: accounts.map((account) => ({
                 id: account._id.toString(),
                 name: account.name || "",
@@ -289,7 +295,7 @@ export async function getMostPopularCategoryWithData(): Promise<
             id: category.id,
             name: category.name,
             slug: category.slug,
-          },
+          } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
           accounts: [],
         });
       }

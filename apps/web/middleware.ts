@@ -3,9 +3,14 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // API routes that require auth — return 401 (no modal possible for APIs).
 // Comment/vote mutations live as Server Actions, not as routes; the matchers
 // below cover only routes that actually exist on disk.
+//
+// /api/search/* is intentionally NOT gated. It exposes only public catalog
+// data already rendered to anonymous visitors on the homepage (Most Popular
+// Categories) and on /categories/[slug]. Gating it here broke discovery for
+// anonymous visitors AND for SSR paths where axios doesn't forward Clerk
+// cookies. Per-IP rate limit applied inside the route handlers instead.
 const isApiProtectedRoute = createRouteMatcher([
   "/api/reviews(.*)",
-  "/api/search/(.*)",
   "/api/accounts(.*)",
   "/api/categories(.*)",
   "/api/metadata(.*)",
