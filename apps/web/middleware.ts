@@ -15,18 +15,26 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 //     visitors into the sign-in flow.
 //
 // What stays PUBLIC:
-//   - `/api/search/*` — Elasticsearch catalog browsing. The homepage's Most
-//     Popular Categories already renders to anonymous visitors; gating
-//     search broke that without protecting any data the homepage doesn't
-//     also expose. Per-IP rate limit inside the route handler.
-//   - `/categories(/[slug])?` — public discovery pages. Calls `/api/search`
-//     under the hood.
+//   - `/categories(/[slug])?` — discovery pages. The page itself renders for
+//     anonymous visitors (wrapped in <AuthGateModal>), but the data fetch
+//     happens via the gated /api/search/* below — modal blocks the UI, the
+//     middleware blocks the underlying request. Belt and suspenders.
+//   - Homepage Most Popular Categories — uses the `getMostPopularCategoryWithData`
+//     Server Action which already returns a tight whitelist (no internal
+//     fields), unrelated to /api/search.
 //   - `/sign-in`, `/sign-up`, marketing pages, `/legal/*`, etc.
+//
+// /api/search/* IS gated: the data leak the security PR was filed for came
+// from anonymous DevTools requests against this endpoint. Defense-in-depth
+// is layered with the _source whitelist inside searchAccounts/searchCategories
+// so even if a future caller bypasses this matcher, response can't leak
+// internal pipeline state (isSeeded, lastIndexedAt, claimed, etc.).
 const isProtectedApi = createRouteMatcher([
   "/api/reviews(.*)",
   "/api/accounts(.*)",
   "/api/categories(.*)",
   "/api/metadata(.*)",
+  "/api/search/(.*)",
 ]);
 
 // /profile/* deliberately uses the in-page <AuthGateModal> pattern (see
