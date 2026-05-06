@@ -45,6 +45,10 @@ describe("Elasticsearch Client", () => {
       ELASTIC_PASSWORD: "test-password",
       ELASTIC_ACCOUNTS_INDEX: "accounts",
       ELASTIC_CATEGORIES_INDEX: "categories",
+      // Tests assert TLS-strict-by-default behavior, which matches prod.
+      // Dev defaults to permissive (so self-signed clusters Just Work) and
+      // is covered by its own test below.
+      NODE_ENV: "production",
     };
   });
 
@@ -110,9 +114,9 @@ describe("Elasticsearch Client", () => {
       delete process.env.ELASTIC_INSECURE_TLS;
     });
 
-    it("should NOT disable TLS verification for any other ELASTIC_INSECURE_TLS value", async () => {
+    it("should NOT disable TLS verification for any other ELASTIC_INSECURE_TLS value (in prod)", async () => {
       // Only the literal string "true" toggles insecure mode — any other
-      // string (including "1", "yes", "TRUE") MUST leave TLS on.
+      // string (including "1", "yes", "TRUE") MUST leave TLS on in prod.
       for (const v of ["1", "yes", "TRUE", "True", " true"]) {
         vi.resetModules();
         MockClient.mockClear();
@@ -126,6 +130,38 @@ describe("Elasticsearch Client", () => {
 
         delete process.env.ELASTIC_INSECURE_TLS;
       }
+    });
+
+    it("should default to permissive TLS in non-production (dev convenience)", async () => {
+      // Dev/test against self-hosted clusters with self-signed certs is the
+      // common case. Force-requiring devs to set ELASTIC_INSECURE_TLS=true
+      // turned into an undocumented gotcha; flip the default so dev Just
+      // Works while prod stays strict (covered by the tests above).
+      vi.resetModules();
+      MockClient.mockClear();
+      process.env.NODE_ENV = "development";
+      delete process.env.ELASTIC_INSECURE_TLS;
+
+      const { getElasticsearchClient } =
+        await import("../clients/elasticsearch-client");
+      getElasticsearchClient();
+      const opts = MockClient.mock.calls[0][0];
+      expect(opts).toMatchObject({ ssl: { rejectUnauthorized: false } });
+    });
+
+    it("should honor ELASTIC_INSECURE_TLS=false in non-production (opt-out)", async () => {
+      vi.resetModules();
+      MockClient.mockClear();
+      process.env.NODE_ENV = "development";
+      process.env.ELASTIC_INSECURE_TLS = "false";
+
+      const { getElasticsearchClient } =
+        await import("../clients/elasticsearch-client");
+      getElasticsearchClient();
+      const opts = MockClient.mock.calls[0][0];
+      expect(opts).not.toHaveProperty("ssl");
+
+      delete process.env.ELASTIC_INSECURE_TLS;
     });
 
     it("should throw error when ELASTIC_URL not configured", async () => {

@@ -1,8 +1,10 @@
 /**
- * Tests for the real categoryActions implementation — auth gate verification.
- * The neighboring categoryActions.test.ts simulates behavior inline; this
- * file imports the actual exported `getCategoryData` to confirm the security
- * boundary added on the public `/categories` page.
+ * Tests for the real categoryActions implementation.
+ *
+ * `/categories` is a public discovery page (same pattern as the search
+ * endpoints), so getCategoryData no longer auth-gates anonymous reads. The
+ * gate broke the page for both anonymous visitors and SSR paths whose
+ * Clerk cookies don't propagate. This file pins the *new* contract.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -58,22 +60,12 @@ import {
   getSingleGlossaryCategory,
 } from "../review/categories/categoryActions";
 
-describe("getCategoryData (real source) — auth gate", () => {
+describe("getCategoryData (real source) — public read", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("throws Unauthorized for signed-out callers and never queries Redis/Prisma", async () => {
-    mockAuth.mockResolvedValueOnce({ userId: null });
-
-    await expect(getCategoryData()).rejects.toThrow("Unauthorized");
-
-    expect(mockRedisGet).not.toHaveBeenCalled();
-    expect(mockCategoryFindMany).not.toHaveBeenCalled();
-  });
-
-  it("returns cached data for signed-in callers", async () => {
-    mockAuth.mockResolvedValueOnce({ userId: "user-1" });
+  it("returns cached data without consulting auth() for anonymous callers", async () => {
     const cached = [
       { id: "c1", name: "Tech", slug: "tech", subcategories: [] },
     ];
@@ -81,6 +73,23 @@ describe("getCategoryData (real source) — auth gate", () => {
 
     const result = await getCategoryData();
     expect(result).toEqual(cached);
+    // Critical: the action must not call auth() — that's how it stays
+    // usable from anonymous SSR paths where no Clerk cookie is present.
+    expect(mockAuth).not.toHaveBeenCalled();
+  });
+
+  it("falls through to Prisma + caches when Redis is empty", async () => {
+    mockRedisGet.mockResolvedValueOnce(null);
+    mockCategoryFindMany.mockResolvedValueOnce([
+      { id: "c1", name: "Tech", slug: "tech", parentId: null },
+    ]);
+    mockRedisSet.mockResolvedValue("OK");
+
+    const result = await getCategoryData();
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe("c1");
+    expect(mockAuth).not.toHaveBeenCalled();
+    expect(mockCategoryFindMany).toHaveBeenCalled();
   });
 });
 
