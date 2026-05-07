@@ -1,15 +1,16 @@
 /**
  * Tests for Metadata API Route
- * Tests URL metadata fetching
+ * Tests URL metadata fetching, auth gate, and host allowlist (anti-SSRF).
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockGetMetadata } = vi.hoisted(() => {
+const { mockGetMetadata, mockAuth } = vi.hoisted(() => {
   const mockGetMetadata = vi.fn();
-  return { mockGetMetadata };
+  const mockAuth = vi.fn();
+  return { mockGetMetadata, mockAuth };
 });
 
 // Mock modules
@@ -17,11 +18,17 @@ vi.mock("@ratecreator/actions/review", () => ({
   getMetadata: mockGetMetadata,
 }));
 
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+}));
+
 import { GET } from "../metadata/route";
 
 describe("Metadata API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default to authenticated; individual tests override.
+    mockAuth.mockResolvedValue({ userId: "user-123" });
   });
 
   afterEach(() => {
@@ -35,6 +42,20 @@ describe("Metadata API Route", () => {
     }
     return new NextRequest(requestUrl);
   };
+
+  describe("Authentication", () => {
+    it("should return 401 when unauthenticated", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      const request = createRequest("https://www.youtube.com/watch?v=abc");
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+      expect(mockGetMetadata).not.toHaveBeenCalled();
+    });
+  });
 
   describe("Parameter Validation", () => {
     it("should return 400 when URL is missing", async () => {
@@ -57,90 +78,113 @@ describe("Metadata API Route", () => {
     });
   });
 
-  describe("Successful Metadata Fetch", () => {
-    it("should fetch metadata for a valid URL", async () => {
-      const mockMetadataResult = {
-        title: "Test Page",
-        description: "A test page description",
-        image: "https://example.com/image.jpg",
-        url: "https://example.com",
-      };
-
-      mockGetMetadata.mockResolvedValueOnce(mockMetadataResult);
-
+  describe("Host Allowlist (anti-SSRF)", () => {
+    it("should reject arbitrary hosts (blocks SSRF)", async () => {
       const request = createRequest("https://example.com");
       const response = await GET(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockMetadataResult);
-      expect(mockGetMetadata).toHaveBeenCalledWith("https://example.com");
+      expect(response.status).toBe(400);
+      expect(data.error).toBe("URL host not allowed");
+      expect(mockGetMetadata).not.toHaveBeenCalled();
     });
 
-    it("should handle metadata with all fields", async () => {
-      const fullMetadata = {
-        title: "Full Metadata Page",
-        description: "A complete description",
-        image: "https://example.com/og-image.jpg",
-        url: "https://example.com/page",
-        siteName: "Example Site",
-        type: "article",
-        favicon: "https://example.com/favicon.ico",
-      };
-
-      mockGetMetadata.mockResolvedValueOnce(fullMetadata);
-
-      const request = createRequest("https://example.com/page");
+    it("should reject internal/private hosts", async () => {
+      const request = createRequest("http://localhost:3000/admin");
       const response = await GET(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data).toEqual(fullMetadata);
+      expect(response.status).toBe(400);
+      expect(data.error).toBe("URL host not allowed");
     });
 
-    it("should handle metadata with missing optional fields", async () => {
-      const minimalMetadata = {
-        title: "Minimal Page",
-        url: "https://example.com",
-      };
-
-      mockGetMetadata.mockResolvedValueOnce(minimalMetadata);
-
-      const request = createRequest("https://example.com");
+    it("should reject metadata service IPs", async () => {
+      const request = createRequest("http://169.254.169.254/latest/meta-data/");
       const response = await GET(request);
       const data = await response.json();
 
+      expect(response.status).toBe(400);
+      expect(data.error).toBe("URL host not allowed");
+    });
+
+    it("should reject file:// scheme", async () => {
+      const request = createRequest("file:///etc/passwd");
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe("URL host not allowed");
+    });
+
+    it("should reject malformed URLs", async () => {
+      const request = createRequest("not-a-valid-url");
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe("URL host not allowed");
+    });
+
+    it("should accept YouTube URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "YouTube Video" });
+
+      const request = createRequest("https://www.youtube.com/watch?v=abc123");
+      const response = await GET(request);
+
       expect(response.status).toBe(200);
-      expect(data.title).toBe("Minimal Page");
-      expect(data.description).toBeUndefined();
+      expect(mockGetMetadata).toHaveBeenCalled();
+    });
+
+    it("should accept Twitter URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "Tweet" });
+
+      const request = createRequest("https://twitter.com/user/status/123456");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("should accept x.com URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "Tweet" });
+
+      const request = createRequest("https://x.com/user/status/123456");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("should accept TikTok URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "TikTok" });
+
+      const request = createRequest("https://www.tiktok.com/@user/video/123");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("should accept Reddit URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "Reddit Post" });
+
+      const request = createRequest(
+        "https://www.reddit.com/r/test/comments/abc/title/",
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("should accept Instagram URLs", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "Instagram Post" });
+
+      const request = createRequest("https://www.instagram.com/p/abc123/");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
     });
   });
 
-  describe("URL Formats", () => {
-    it("should handle URL with query parameters", async () => {
-      mockGetMetadata.mockResolvedValueOnce({ title: "Test" });
-
-      const request = createRequest(
-        "https://example.com/page?param=value&other=test",
-      );
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
-      expect(mockGetMetadata).toHaveBeenCalledWith(
-        "https://example.com/page?param=value&other=test",
-      );
-    });
-
-    it("should handle URL with hash fragment", async () => {
-      mockGetMetadata.mockResolvedValueOnce({ title: "Test" });
-
-      const request = createRequest("https://example.com/page#section");
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
-    });
-
-    it("should handle YouTube video URL", async () => {
+  describe("Successful Metadata Fetch", () => {
+    it("should fetch metadata for a YouTube URL", async () => {
       const youtubeMetadata = {
         title: "YouTube Video",
         description: "Video description",
@@ -154,23 +198,24 @@ describe("Metadata API Route", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.title).toBe("YouTube Video");
+      expect(data).toEqual(youtubeMetadata);
+      expect(mockGetMetadata).toHaveBeenCalledWith(
+        "https://www.youtube.com/watch?v=abc123",
+      );
     });
 
-    it("should handle Twitter URL", async () => {
-      const twitterMetadata = {
-        title: "Tweet by @user",
-        description: "Tweet content",
-      };
+    it("should handle URL with query parameters", async () => {
+      mockGetMetadata.mockResolvedValueOnce({ title: "Test" });
 
-      mockGetMetadata.mockResolvedValueOnce(twitterMetadata);
-
-      const request = createRequest("https://twitter.com/user/status/123456");
+      const request = createRequest(
+        "https://www.youtube.com/watch?v=abc123&t=10s",
+      );
       const response = await GET(request);
-      const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.title).toContain("Tweet");
+      expect(mockGetMetadata).toHaveBeenCalledWith(
+        "https://www.youtube.com/watch?v=abc123&t=10s",
+      );
     });
   });
 
@@ -178,72 +223,12 @@ describe("Metadata API Route", () => {
     it("should return 500 when getMetadata throws an error", async () => {
       mockGetMetadata.mockRejectedValueOnce(new Error("Failed to fetch"));
 
-      const request = createRequest("https://example.com");
+      const request = createRequest("https://www.youtube.com/watch?v=abc");
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);
       expect(data.error).toBe("Failed to fetch metadata");
-    });
-
-    it("should return 500 when getMetadata returns null", async () => {
-      mockGetMetadata.mockResolvedValueOnce(null);
-
-      const request = createRequest("https://example.com");
-      const response = await GET(request);
-
-      // Depending on implementation, this might return 200 with null or handle differently
-      expect(response.status).toBeLessThanOrEqual(500);
-    });
-
-    it("should handle network timeout errors", async () => {
-      mockGetMetadata.mockRejectedValueOnce(new Error("ETIMEDOUT"));
-
-      const request = createRequest("https://slow-site.example.com");
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.error).toBe("Failed to fetch metadata");
-    });
-
-    it("should handle invalid URL format gracefully", async () => {
-      mockGetMetadata.mockRejectedValueOnce(new Error("Invalid URL"));
-
-      const request = createRequest("not-a-valid-url");
-      const response = await GET(request);
-
-      expect(response.status).toBe(500);
-    });
-  });
-
-  describe("Edge Cases", () => {
-    it("should handle URL with encoded characters", async () => {
-      mockGetMetadata.mockResolvedValueOnce({ title: "Test" });
-
-      const request = createRequest("https://example.com/path%20with%20spaces");
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
-    });
-
-    it("should handle international domain names", async () => {
-      mockGetMetadata.mockResolvedValueOnce({ title: "International" });
-
-      const request = createRequest("https://例え.jp/page");
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
-    });
-
-    it("should handle very long URLs", async () => {
-      const longPath = "a".repeat(500);
-      mockGetMetadata.mockResolvedValueOnce({ title: "Long URL" });
-
-      const request = createRequest(`https://example.com/${longPath}`);
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
     });
   });
 });

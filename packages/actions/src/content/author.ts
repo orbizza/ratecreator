@@ -1,23 +1,18 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
-import { currentUser } from "@clerk/nextjs/server";
-
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { getInitials } from "@ratecreator/db/utils";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
 
-async function authenticateUser() {
-  const sign = await SignedIn;
-  if (!sign) {
-    redirect("/sign-in");
-  }
-}
-
 export async function createAuthor() {
-  await authenticateUser();
+  const { userId } = await auth();
+  if (!userId) {
+    return { error: "Unauthorized" };
+  }
+  await requireWriter(userId);
   const user = await currentUser();
 
   if (!user) {
@@ -31,24 +26,19 @@ export async function createAuthor() {
     user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim();
 
   try {
-    // Check by clerkId first, then by email to avoid P2002 unique constraint
-    const existingAuthor = await prisma.author.findFirst({
-      where: {
-        OR: [{ clerkId: user.id }, ...(email ? [{ email }] : [])],
-      },
+    // Match ONLY by clerkId. Matching by email lets a fresh Clerk account
+    // that registers a victim's email take over the victim's Author row
+    // (and inherit every Post.authorId pointing to it).
+    const existingByClerkId = await prisma.author.findUnique({
+      where: { clerkId: user.id },
     });
 
-    if (existingAuthor) {
-      // Update existing author's clerkId and details if needed
+    if (existingByClerkId) {
       const updatedAuthor = await prisma.author.update({
-        where: { id: existingAuthor.id },
+        where: { id: existingByClerkId.id },
         data: {
-          clerkId: user.id,
           name,
-          username:
-            existingAuthor.username && existingAuthor.clerkId !== user.id
-              ? existingAuthor.username
-              : username,
+          username: existingByClerkId.username || username,
           email,
           imageUrl: user.imageUrl || "",
         },
@@ -62,6 +52,20 @@ export async function createAuthor() {
         imageUrl: updatedAuthor.imageUrl || "",
         role: updatedAuthor.role,
       };
+    }
+
+    // No existing Author for this clerkId. Make sure the email isn't already
+    // owned by a different clerkId — refuse rather than silently steal.
+    if (email) {
+      const collision = await prisma.author.findUnique({
+        where: { email },
+      });
+      if (collision && collision.clerkId !== user.id) {
+        return {
+          error:
+            "An author record with this email already exists under a different account",
+        };
+      }
     }
 
     // Create new author

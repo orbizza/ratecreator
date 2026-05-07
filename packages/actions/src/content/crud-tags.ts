@@ -1,25 +1,31 @@
 "use server";
 
 import { getPrismaClient } from "@ratecreator/db/client";
-import { SignedIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 // Import your validation schema
 import { tagSchema, updateTagSchema } from "@ratecreator/types/content";
 import { Tags } from "@ratecreator/types/content";
 import { deleteFileFromBucket } from "../upload-crud";
+import { requireWriter } from "./roles";
 const prisma = getPrismaClient();
 
 async function authenticateUser() {
-  const sign = await SignedIn;
-  if (!sign) {
-    redirect("/sign-in");
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
+  await requireWriter(userId);
 }
 
 async function fetchAllTagsFromTagOnPost() {
+  // Public read — used by the blog list. Restrict to PUBLISHED posts so
+  // draft titles/excerpts don't leak through tag joins.
   try {
     const tags = await prisma.tagOnPost.findMany({
+      where: {
+        post: { status: "PUBLISHED" },
+      },
       include: {
         post: true,
         tag: true,
@@ -38,6 +44,7 @@ async function fetchAllTagsFromTagOnPost() {
 }
 
 async function fetchTagsFromTagOnPost({ postId }: { postId: string }) {
+  await authenticateUser();
   try {
     const tags = await prisma.tagOnPost.findMany({
       where: {
@@ -68,6 +75,7 @@ async function fetchTagsFromTagOnPost({ postId }: { postId: string }) {
 }
 
 async function fetchAllTagsWithPostCount(): Promise<Tags[]> {
+  await authenticateUser();
   try {
     const tags = await prisma.tag.findMany({
       include: {
@@ -111,6 +119,7 @@ interface TagIterface {
 }
 
 async function fetchTagDetails(slug: string) {
+  await authenticateUser();
   try {
     const existingTag = await prisma.tag.findUnique({
       where: { slug },

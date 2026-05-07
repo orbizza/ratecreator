@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockRedis, mockPrisma } = vi.hoisted(() => {
+const { mockRedis, mockPrisma, mockAuth } = vi.hoisted(() => {
   const mockRedis = {
     get: vi.fn(),
     setex: vi.fn(),
@@ -22,7 +22,8 @@ const { mockRedis, mockPrisma } = vi.hoisted(() => {
     },
   };
 
-  return { mockRedis, mockPrisma };
+  const mockAuth = vi.fn();
+  return { mockRedis, mockPrisma, mockAuth };
 });
 
 // Mock modules
@@ -34,6 +35,10 @@ vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
 }));
 
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+}));
+
 vi.mock("@ratecreator/types/review", () => ({
   CreatorData: {},
 }));
@@ -43,6 +48,8 @@ import { GET } from "../accounts/route";
 describe("Accounts API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default to authenticated; individual tests override.
+    mockAuth.mockResolvedValue({ userId: "user-123" });
   });
 
   afterEach(() => {
@@ -56,6 +63,24 @@ describe("Accounts API Route", () => {
     });
     return new NextRequest(url);
   };
+
+  describe("Authentication", () => {
+    it("should return 401 when unauthenticated", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      const request = createRequest({
+        platform: "youtube",
+        accountId: "UC123",
+      });
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+      expect(mockPrisma.account.findFirst).not.toHaveBeenCalled();
+      expect(mockRedis.get).not.toHaveBeenCalled();
+    });
+  });
 
   describe("Parameter Validation", () => {
     it("should return 400 when platform is missing", async () => {
@@ -127,9 +152,7 @@ describe("Accounts API Route", () => {
       expect(response.status).toBe(200);
       expect(data.account).toBeDefined();
       expect(mockPrisma.account.findFirst).not.toHaveBeenCalled();
-      expect(response.headers.get("Cache-Control")).toBe(
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     });
 
     it("should fetch from database when cache miss", async () => {
@@ -203,9 +226,7 @@ describe("Accounts API Route", () => {
       expect(data.account.platform).toBe("YOUTUBE");
       expect(data.account.ytData).toBeDefined();
       expect(data.categories).toEqual([]);
-      expect(response.headers.get("Cache-Control")).toBe(
-        "public, s-maxage=300, stale-while-revalidate=600",
-      );
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     });
   });
 

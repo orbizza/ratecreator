@@ -46,14 +46,30 @@ export async function createReview(formData: unknown) {
           accountId: validatedData.accountId,
         },
       },
-      select: { platform: true, id: true },
+      select: { platform: true, id: true, isSuspended: true, isDeleted: true },
     });
 
-    if (!account) {
+    if (!account || account.isDeleted) {
       throw new Error("Account not found");
     }
+    if (account.isSuspended) {
+      throw new Error("Reviews are disabled for suspended accounts");
+    }
 
-    // Create the review in the database
+    // Refuse duplicate review by the same author against the same account.
+    // (Edit support would replace this with an `update` flow.)
+    const existing = await prisma.review.findFirst({
+      where: { accountId: account.id, authorId: user.id, isDeleted: false },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new Error(
+        "You have already reviewed this creator. Edit your existing review instead.",
+      );
+    }
+
+    // Create the review. Trust the session for authorId; never trust caller-
+    // supplied status/verificationStatus (would let a user self-mark VERIFIED).
     const review = await prisma.review.create({
       data: {
         title: validatedData.title,
@@ -61,8 +77,8 @@ export async function createReview(formData: unknown) {
         platform: account.platform as Platform,
         accountId: account.id,
         stars: validatedData.stars,
-        status: validatedData.status,
-        verificationStatus: validatedData.verificationStatus,
+        status: "PUBLISHED",
+        verificationStatus: "IN_PROGRESS",
         content: validatedData.content,
         contentUrl: validatedData.contentUrl,
         redditMetadata:

@@ -1,6 +1,6 @@
 "use server";
 
-import axios from "axios";
+import { auth } from "@clerk/nextjs/server";
 
 import { getRedisClient } from "@ratecreator/db/redis-do";
 import { getPrismaClient } from "@ratecreator/db/client";
@@ -31,17 +31,23 @@ interface GetCreatorDataProps {
   platform: string;
 }
 
+// Auth-gated. /profile/[platform]/[accountId] is middleware-protected, so
+// any browser navigation to a profile is already redirected to /sign-in
+// before this runs. The auth() check here is defense-in-depth against
+// direct Server Action invocation from DevTools — without it, a curious
+// user could `fetch` the action with a forged payload and read the full
+// account record (including platform-specific JSON blobs) anonymously.
 export async function getCreatorData({
   accountId,
   platform,
 }: GetCreatorDataProps): Promise<CreatorData> {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  if (!platform) throw new Error("Platform is required");
+  if (!accountId) throw new Error("Account ID is required");
+
   try {
-    if (!platform) {
-      throw new Error("Platform is required");
-    }
-    if (!accountId) {
-      throw new Error("Account ID is required");
-    }
     switch (platform) {
       case "youtube":
         return await handleYoutubeAccount(redis, accountId);
@@ -56,10 +62,6 @@ export async function getCreatorData({
       default:
         throw new Error("Invalid platform");
     }
-    // const response = await axios.get(
-    //   `${process.env.NEXT_PUBLIC_RATECREATOR_API_URL}/api/accounts?accountId=${accountId}&platform=${platform}`
-    // );
-    // return response.data;
   } catch (error) {
     console.error("Failed to fetch creator data:", error);
     throw new Error("Failed to fetch creator data");

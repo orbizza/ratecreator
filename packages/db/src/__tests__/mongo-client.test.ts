@@ -69,7 +69,10 @@ describe("MongoDB Client", () => {
       vi.resetModules();
       delete process.env.DATABASE_URL_ONLINE;
 
-      await expect(import("../clients/mongo-client")).rejects.toThrow(
+      // Lazy init: importing the module no longer triggers the connect.
+      // The error surfaces only when the lazy thenable is awaited.
+      const mod = await import("../clients/mongo-client");
+      await expect(Promise.resolve(mod.default)).rejects.toThrow(
         "DATABASE_URL_ONLINE is not set",
       );
     });
@@ -100,7 +103,9 @@ describe("MongoDB Client", () => {
 
       mockMongoClient.connect.mockResolvedValue(mockMongoClient);
 
-      await import("../clients/mongo-client");
+      const mod = await import("../clients/mongo-client");
+      // Lazy init: trigger the connect by awaiting the thenable.
+      await Promise.resolve(mod.default);
 
       expect((global as any)._mongoClientPromise).toBeDefined();
     });
@@ -117,8 +122,11 @@ describe("MongoDB Client", () => {
       const { default: clientPromise } =
         await import("../clients/mongo-client");
 
-      expect(clientPromise).toBe(mockClientPromise);
-      // Should not create new client since global exists
+      // Default export is now a thenable proxy that resolves via the
+      // cached global promise. Awaiting it should yield the global's value
+      // without invoking the MongoClient constructor.
+      const resolved = await Promise.resolve(clientPromise);
+      expect(resolved).toBe(mockMongoClient);
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
   });
@@ -131,7 +139,8 @@ describe("MongoDB Client", () => {
 
       mockMongoClient.connect.mockResolvedValue(mockMongoClient);
 
-      await import("../clients/mongo-client");
+      const mod = await import("../clients/mongo-client");
+      await Promise.resolve(mod.default);
 
       expect(MockMongoClient).toHaveBeenCalled();
     });
@@ -289,7 +298,9 @@ describe("MongoDB Error Handling", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     delete process.env.DATABASE_URL_ONLINE;
 
-    await expect(import("../clients/mongo-client")).rejects.toThrow();
+    // Lazy init: error fires on first await, not at module import time.
+    const mod = await import("../clients/mongo-client");
+    await expect(Promise.resolve(mod.default)).rejects.toThrow();
 
     expect(consoleSpy).toHaveBeenCalledWith("DATABASE_URL_ONLINE is not set.");
 

@@ -1,5 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
+
 import { CategoriesSearchResults } from "@ratecreator/ui/review";
 import { getPrismaClient } from "@ratecreator/db/client";
 
@@ -60,7 +62,19 @@ export async function generateMetadata({
   };
 }
 
-export default function CategoriesList() {
+export default async function CategoriesList() {
+  const { userId } = await auth();
+
+  // Anonymous: render an empty backdrop so the parent <AuthGateModal>
+  // (apps/web/app/(public)/categories/layout.tsx) has a placeholder to
+  // paint the Clerk sign-in over. Skipping <CategoriesSearchResults>
+  // means we never call getCategoryDetails / searchCreators for anonymous,
+  // so the category accounts list never enters the DOM and DevTools
+  // sees nothing to scrape.
+  if (!userId) {
+    return <div aria-hidden className="min-h-[calc(100vh-20vh)]" />;
+  }
+
   return (
     <div className="min-h-[calc(100vh-20vh)]">
       <CategoriesSearchResults />

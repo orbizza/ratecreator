@@ -25,10 +25,12 @@ const {
   mockMongoCollection,
   mockMongoDb,
   mockMongoClient,
+  mockRedisDel,
 } = vi.hoisted(() => {
   const mockRedisGet = vi.fn();
   const mockRedisSet = vi.fn();
   const mockRedisSetex = vi.fn();
+  const mockRedisDel = vi.fn();
   const mockCategoryFindMany = vi.fn();
   const mockCategoryFindUnique = vi.fn();
   const mockMongoToArray = vi.fn();
@@ -53,6 +55,7 @@ const {
     get: mockRedisGet,
     set: mockRedisSet,
     setex: mockRedisSetex,
+    del: mockRedisDel,
   };
 
   const mockPrismaInstance = {
@@ -66,6 +69,7 @@ const {
     mockRedisGet,
     mockRedisSet,
     mockRedisSetex,
+    mockRedisDel,
     mockCategoryFindMany,
     mockCategoryFindUnique,
     mockMongoFind,
@@ -118,7 +122,10 @@ vi.mock("mongodb", () => {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const SEVEN_DAYS = 7 * 24 * 3600;
+// Cache TTL bumped to 1 year per product call — flushed manually when the
+// popular set or its per-category accounts change. Variable name kept for
+// minimal churn across the existing assertions.
+const SEVEN_DAYS = 365 * 24 * 3600;
 
 const sampleCategories = [
   { id: "cat-1", name: "Gaming", slug: "gaming" },
@@ -178,6 +185,9 @@ describe("mostPopularCategoryActions", () => {
     mockMongoFind.mockReturnValue({ toArray: mockMongoToArray });
     mockMongoSort.mockReturnValue({ limit: mockMongoLimit });
     mockMongoLimit.mockReturnValue({ toArray: mockMongoToArray });
+
+    // del() is invoked when the action evicts a poisoned (empty) snapshot.
+    mockRedisDel.mockResolvedValue(1);
   });
 
   // =========================================================================
@@ -235,20 +245,20 @@ describe("mostPopularCategoryActions", () => {
       });
     });
 
-    it("should cache in Redis with no TTL (redis.set, not setex)", async () => {
+    it("should cache in Redis with TTL via setex (security fix: no permanent cache poisoning)", async () => {
       mockRedisGet.mockResolvedValue(null);
       mockCategoryFindMany.mockResolvedValue(sampleCategories);
-      mockRedisSet.mockResolvedValue("OK");
+      mockRedisSetex.mockResolvedValue("OK");
 
       const mod = await loadModule();
       await mod.getMostPopularCategories();
 
-      // Should use set (no TTL), not setex
-      expect(mockRedisSet).toHaveBeenCalledWith(
+      // Use setex with TTL — previous behavior cached empty arrays forever.
+      expect(mockRedisSetex).toHaveBeenCalledWith(
         "category-popular",
+        SEVEN_DAYS,
         JSON.stringify(sampleCategories),
       );
-      expect(mockRedisSetex).not.toHaveBeenCalled();
     });
 
     it("should populate local cache after fetching from Prisma", async () => {
@@ -323,10 +333,24 @@ describe("mostPopularCategoryActions", () => {
     }
 
     it("should return from local cache if available", async () => {
+      // Cached payload MUST have at least one account — the new code
+      // intentionally drops empty cached aggregates as poisoned.
       const cachedData = [
         {
           category: { id: "cat-1", name: "Gaming", slug: "gaming" },
-          accounts: [],
+          accounts: [
+            {
+              id: "acc-1",
+              name: "Creator One",
+              handle: "creator1",
+              platform: "YOUTUBE",
+              accountId: "UC001",
+              followerCount: 500000,
+              rating: 4.5,
+              reviewCount: 10,
+              imageUrl: "",
+            },
+          ],
         },
       ];
 
@@ -428,7 +452,7 @@ describe("mostPopularCategoryActions", () => {
       );
     });
 
-    it("should handle empty category mappings", async () => {
+    it("should handle empty category mappings without caching the empty per-category", async () => {
       mockRedisGet.mockResolvedValue(null);
       mockCategoryFindMany.mockResolvedValue([sampleCategories[0]!]);
       mockRedisSet.mockResolvedValue("OK");
@@ -442,10 +466,18 @@ describe("mostPopularCategoryActions", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].accounts).toEqual([]);
-      // Should still cache the empty result
-      expect(mockRedisSetex).toHaveBeenCalledWith(
+      // Per-category empty results MUST NOT be cached — caching them for 1y
+      // would pin the empty UI even after the category gains accounts.
+      expect(mockRedisSetex).not.toHaveBeenCalledWith(
         "category-accounts:cat-1",
-        SEVEN_DAYS,
+        expect.anything(),
+        expect.any(String),
+      );
+      // The aggregate wrapper also must not be cached when no category has
+      // any accounts.
+      expect(mockRedisSetex).not.toHaveBeenCalledWith(
+        "category-popular-accounts",
+        expect.anything(),
         expect.any(String),
       );
     });
@@ -674,6 +706,130 @@ describe("mostPopularCategoryActions", () => {
       await expect(mod.getSingleCategoryWithAccounts("cat-1")).rejects.toThrow(
         "Failed to fetch category cat-1",
       );
+    });
+  });
+
+  // =========================================================================
+  // SECURITY/RESILIENCE FIXES
+  // =========================================================================
+  describe("Security & resilience fixes", () => {
+    it("getMostPopularCategories should ignore an empty cached array (no negative cache poisoning)", async () => {
+      // Redis has cached [] from a prior failed warmup; the action must not
+      // serve that to the homepage forever — it should fall through to DB.
+      mockRedisGet.mockResolvedValueOnce(JSON.stringify([]));
+      mockCategoryFindMany.mockResolvedValue(sampleCategories);
+      mockRedisSetex.mockResolvedValue("OK");
+
+      const mod = await loadModule();
+      const result = await mod.getMostPopularCategories();
+
+      expect(result).toEqual(sampleCategories);
+      expect(mockCategoryFindMany).toHaveBeenCalled();
+    });
+
+    it("getMostPopularCategories should fall back to top-by-account-count when no popular=true rows exist", async () => {
+      mockRedisGet.mockResolvedValue(null);
+      // No Category.popular=true rows in DB (first call returns []).
+      mockCategoryFindMany
+        .mockResolvedValueOnce([]) // popular=true query
+        .mockResolvedValueOnce(sampleCategories); // fallback id-in query
+
+      mockMongoCollection.mockImplementation((name: string) => {
+        if (name === "CategoryMapping") {
+          return {
+            aggregate: vi.fn().mockReturnValue({
+              toArray: vi.fn().mockResolvedValue([
+                { _id: "cat-1", count: 100 },
+                { _id: "cat-2", count: 50 },
+              ]),
+            }),
+          };
+        }
+        return { find: vi.fn() };
+      });
+
+      mockRedisSetex.mockResolvedValue("OK");
+
+      const mod = await loadModule();
+      const result = await mod.getMostPopularCategories();
+
+      expect(result.length).toBeGreaterThan(0);
+      // Fallback path should fetch the categories whose ids came back from
+      // the aggregation, ordered by descending mapping count.
+      expect(mockCategoryFindMany).toHaveBeenCalledTimes(2);
+    });
+
+    it("getMostPopularCategories should NOT cache an empty result (avoid poisoning the next caller)", async () => {
+      mockRedisGet.mockResolvedValue(null);
+      // Both popular=true and the fallback aggregation return empty.
+      mockCategoryFindMany.mockResolvedValue([]);
+      mockMongoCollection.mockImplementation(() => ({
+        aggregate: vi.fn().mockReturnValue({
+          toArray: vi.fn().mockResolvedValue([]),
+        }),
+      }));
+
+      const mod = await loadModule();
+      const result = await mod.getMostPopularCategories();
+
+      expect(result).toEqual([]);
+      // Critically: must not write the empty result back to Redis.
+      expect(mockRedisSetex).not.toHaveBeenCalled();
+      expect(mockRedisSet).not.toHaveBeenCalled();
+    });
+
+    it("getMostPopularCategoryWithData should ignore an empty cached aggregate", async () => {
+      // First Redis lookup (full response) returns []; should fall through.
+      mockRedisGet.mockResolvedValueOnce(JSON.stringify([]));
+      // Subsequent lookups return null so we hit Prisma + Mongo.
+      mockRedisGet.mockResolvedValue(null);
+      mockCategoryFindMany.mockResolvedValue([sampleCategories[0]!]);
+      mockRedisSetex.mockResolvedValue("OK");
+
+      mockMongoCollection.mockImplementation((name: string) => {
+        if (name === "CategoryMapping") {
+          return {
+            find: vi.fn().mockReturnValue({
+              project: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  toArray: vi.fn().mockResolvedValue([{ accountId: "acc-1" }]),
+                }),
+              }),
+            }),
+          };
+        }
+        return {
+          find: vi.fn().mockReturnValue({
+            sort: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                toArray: vi.fn().mockResolvedValue(sampleAccounts),
+              }),
+            }),
+          }),
+        };
+      });
+
+      const mod = await loadModule();
+      const result = await mod.getMostPopularCategoryWithData();
+
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it("getMostPopularCategoryWithData should NOT cache an empty aggregate", async () => {
+      mockRedisGet.mockResolvedValue(null);
+      // No popular categories AND no fallback rows → result stays empty.
+      mockCategoryFindMany.mockResolvedValue([]);
+      mockMongoCollection.mockImplementation(() => ({
+        aggregate: vi.fn().mockReturnValue({
+          toArray: vi.fn().mockResolvedValue([]),
+        }),
+      }));
+
+      const mod = await loadModule();
+      const result = await mod.getMostPopularCategoryWithData();
+
+      expect(result).toEqual([]);
+      expect(mockRedisSetex).not.toHaveBeenCalled();
     });
   });
 });

@@ -35,9 +35,30 @@ export function getElasticsearchClient(): Client {
       );
     }
 
+    // TLS handling. Production: strict by default — disabling sends creds
+    // without verifying the peer (MITM hole). Dev: default to permissive so
+    // self-signed self-hosted clusters Just Work without every dev needing
+    // to remember a magic env var. Either default can be overridden by
+    // explicitly setting ELASTIC_INSECURE_TLS to "true" or "false".
+    const explicit = process.env.ELASTIC_INSECURE_TLS;
+    const isProd = process.env.NODE_ENV === "production";
+    let insecure: boolean;
+    if (explicit === "true") insecure = true;
+    else if (explicit === "false") insecure = false;
+    else insecure = !isProd;
+
+    if (insecure && isProd) {
+      console.warn(
+        "[elastic] ELASTIC_INSECURE_TLS=true in production — TLS verification disabled. This is unsafe.",
+      );
+    } else if (insecure) {
+      console.warn(
+        "[elastic] TLS verification disabled (dev default). Set ELASTIC_INSECURE_TLS=false to opt out.",
+      );
+    }
     const opts: ClientOptions = {
       node: url,
-      ssl: { rejectUnauthorized: false },
+      ...(insecure ? { ssl: { rejectUnauthorized: false } } : {}),
       ...(username && password ? { auth: { username, password } } : {}),
     };
 
@@ -517,6 +538,32 @@ function transformAggregations(
  * Search accounts - main search function
  * Drop-in replacement for Algolia's getSearchAccounts
  */
+// Whitelist of fields returned to API clients. _source defaults to "all
+// indexed fields", which leaks internal pipeline state (isSeeded,
+// lastIndexedAt, claimed) and inflates response size. List is the union of
+// what the search results UI, the command-bar autocomplete, and the
+// homepage Most Popular Categories actually render — anything not here is
+// dropped server-side before the response leaves the cluster.
+const PUBLIC_ACCOUNT_FIELDS = [
+  "accountId",
+  "platform",
+  "name",
+  "handle",
+  "imageUrl",
+  "bannerUrl",
+  "followerCount",
+  "country",
+  "language_code",
+  "rating",
+  "reviewCount",
+  "categories",
+  "madeForKids",
+  "videoCount",
+  "viewCount",
+  "description",
+  "createdDate",
+];
+
 export async function searchAccounts(
   params: SearchAccountsParams,
 ): Promise<SearchAccountsResult> {
@@ -535,6 +582,8 @@ export async function searchAccounts(
         sort: buildSort(params),
         from,
         size: limit,
+        // Drop internal flags before they leave Elasticsearch.
+        _source: { includes: PUBLIC_ACCOUNT_FIELDS },
         aggs: {
           platform: { terms: { field: "platform", size: 10 } },
           categories: { terms: { field: "categories", size: 50 } },
@@ -647,6 +696,17 @@ export async function deleteAccount(accountId: string): Promise<void> {
   });
 }
 
+// Public surface for the category autocomplete: the search bar shows
+// name + slug + parent crumb; nothing else is rendered. Drop everything
+// else server-side.
+const PUBLIC_CATEGORY_FIELDS = [
+  "name",
+  "slug",
+  "shortDescription",
+  "parentCategory",
+  "depth",
+];
+
 /**
  * Search categories
  */
@@ -670,6 +730,7 @@ export async function searchCategories(query: string): Promise<any[]> {
           fuzziness: "AUTO",
         },
       },
+      _source: { includes: PUBLIC_CATEGORY_FIELDS },
       size: 20,
     },
   });

@@ -4,11 +4,19 @@ import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 
 const clerkWebhookRoute = new Hono();
 
+const MAX_BODY_BYTES = 1024 * 100; // 100 KiB — Clerk webhooks are typically <10 KiB
+
 clerkWebhookRoute.post("/", async (c) => {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
     console.error("CLERK_WEBHOOK_SECRET is not set");
     return c.json({ error: "Webhook secret not configured" }, 500);
+  }
+
+  // Refuse oversized bodies before reading them — protects worker memory.
+  const contentLength = Number(c.req.header("content-length") || "0");
+  if (contentLength > MAX_BODY_BYTES) {
+    return c.json({ error: "Payload too large" }, 413);
   }
 
   // Extract Svix headers
@@ -20,14 +28,14 @@ clerkWebhookRoute.post("/", async (c) => {
     return c.json({ error: "Missing Svix headers" }, 400);
   }
 
-  // Parse payload
-  const payload = await c.req.json();
-  const body = JSON.stringify(payload);
+  // CRITICAL: Svix verifies the *raw* HTTP body. JSON.parse + JSON.stringify
+  // does NOT preserve byte-equality (whitespace, key ordering, BigInt, unicode
+  // escapes), so verify against the raw text and only then parse.
+  const rawBody = await c.req.text();
 
-  // Verify the webhook
   const wh = new Webhook(WEBHOOK_SECRET);
   try {
-    wh.verify(body, {
+    wh.verify(rawBody, {
       "svix-id": svixId,
       "svix-timestamp": svixTimestamp,
       "svix-signature": svixSignature,
@@ -35,6 +43,13 @@ clerkWebhookRoute.post("/", async (c) => {
   } catch (err) {
     console.error("Webhook verification failed:", err);
     return c.json({ error: "Webhook verification failed" }, 400);
+  }
+
+  let payload: { type?: string; data?: { id?: string } };
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return c.json({ error: "Invalid JSON" }, 400);
   }
 
   const { type, data } = payload;

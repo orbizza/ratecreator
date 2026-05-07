@@ -1,5 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
+
 import SearchResults from "./search-results";
 
 export async function generateMetadata({
@@ -43,7 +45,17 @@ export async function generateMetadata({
   };
 }
 
-export default function SearchPage() {
+export default async function SearchPage() {
+  const { userId } = await auth();
+
+  // Anonymous: render an empty backdrop. The (public)/search/layout.tsx
+  // wraps every search page in <AuthGateModal>; skipping <SearchResults>
+  // means we never call getCategoryData / searchCreators for anonymous,
+  // so the result list never enters the DOM and DevTools sees nothing.
+  if (!userId) {
+    return <main aria-hidden className="min-h-[calc(100vh-20vh)]" />;
+  }
+
   return (
     <main className="min-h-[calc(100vh-20vh)]">
       <SearchResults />

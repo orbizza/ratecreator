@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Use vi.hoisted for mocks
-const { mockRedis, mockPrisma, mockMongoClient } = vi.hoisted(() => {
+const { mockRedis, mockPrisma, mockMongoClient, mockAuth } = vi.hoisted(() => {
   const mockRedis = {
     get: vi.fn(),
     set: vi.fn(),
@@ -35,7 +35,16 @@ const { mockRedis, mockPrisma, mockMongoClient } = vi.hoisted(() => {
     db: vi.fn(() => mockDb),
   };
 
-  return { mockRedis, mockPrisma, mockMongoClient, mockCollection, mockDb };
+  const mockAuth = vi.fn();
+
+  return {
+    mockRedis,
+    mockPrisma,
+    mockMongoClient,
+    mockCollection,
+    mockDb,
+    mockAuth,
+  };
 });
 
 // Mock modules
@@ -49,6 +58,10 @@ vi.mock("@ratecreator/db/client", () => ({
 
 vi.mock("@ratecreator/db/mongo-client", () => ({
   getMongoClient: vi.fn(() => Promise.resolve(mockMongoClient)),
+}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
 }));
 
 vi.mock("@ratecreator/types/review", () => ({
@@ -66,6 +79,7 @@ import { GET } from "../categories/route";
 describe("Categories API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuth.mockResolvedValue({ userId: "user-1" });
   });
 
   afterEach(() => {
@@ -77,6 +91,19 @@ describe("Categories API Route", () => {
     url.searchParams.set("type", type);
     return new NextRequest(url);
   };
+
+  describe("Authentication", () => {
+    it("should return 401 when unauthenticated", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      const response = await GET(createRequest("all"));
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+      expect(mockRedis.get).not.toHaveBeenCalled();
+    });
+  });
 
   describe("Parameter Validation", () => {
     it("should return 400 for invalid category type", async () => {

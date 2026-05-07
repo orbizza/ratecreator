@@ -1,6 +1,12 @@
 /**
  * Tests for createReview action
- * Tests review creation with authentication, validation, and Kafka publishing
+ *
+ * The verification-spoofing fix means the validator no longer accepts
+ * `status` / `verificationStatus` / `authorId` from the caller. The action
+ * always writes `status: "PUBLISHED"` + `verificationStatus: "IN_PROGRESS"`
+ * and pulls authorId from the session, never the payload. It also refuses
+ * a duplicate review by the same author against the same account, and
+ * refuses any review against a suspended or deleted account.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
@@ -10,6 +16,7 @@ const {
   mockUserFindUnique,
   mockAccountFindUnique,
   mockReviewCreate,
+  mockReviewFindFirst,
   mockPublishMessageWithKey,
   mockRedisDel,
   mockPrismaInstance,
@@ -17,17 +24,19 @@ const {
   const mockUserFindUnique = vi.fn();
   const mockAccountFindUnique = vi.fn();
   const mockReviewCreate = vi.fn();
+  const mockReviewFindFirst = vi.fn();
   const mockPublishMessageWithKey = vi.fn().mockResolvedValue(undefined);
   const mockRedisDel = vi.fn().mockResolvedValue(undefined);
   const mockPrismaInstance = {
     user: { findUnique: mockUserFindUnique },
     account: { findUnique: mockAccountFindUnique },
-    review: { create: mockReviewCreate },
+    review: { create: mockReviewCreate, findFirst: mockReviewFindFirst },
   };
   return {
     mockUserFindUnique,
     mockAccountFindUnique,
     mockReviewCreate,
+    mockReviewFindFirst,
     mockPublishMessageWithKey,
     mockRedisDel,
     mockPrismaInstance,
@@ -68,6 +77,24 @@ vi.mock("@ratecreator/types/review", () => ({
 import { createReview } from "../review/reviews/createReview";
 import { auth } from "@clerk/nextjs/server";
 
+// The validator now strips status/verificationStatus/authorId, so the test
+// payloads don't carry them — the action always writes "PUBLISHED" /
+// "IN_PROGRESS" itself.
+const baseReview = {
+  title: "Test Review",
+  stars: 5,
+  platform: "youtube",
+  accountId: "test-account-id",
+  content: "Test content",
+};
+
+const liveAccount = (platform = "YOUTUBE") => ({
+  id: "account-db-id",
+  platform,
+  isSuspended: false,
+  isDeleted: false,
+});
+
 describe("createReview", () => {
   let mockAuth: Mock;
 
@@ -76,6 +103,8 @@ describe("createReview", () => {
     mockAuth = auth as Mock;
     // Reset mock implementations
     mockPublishMessageWithKey.mockResolvedValue(undefined);
+    // Default: no prior review by this author for this account.
+    mockReviewFindFirst.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -87,13 +116,8 @@ describe("createReview", () => {
       mockAuth.mockReturnValue({ userId: null });
 
       const result = await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
+        ...baseReview,
         accountId: "test-account-id",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(result.success).toBe(false);
@@ -104,15 +128,7 @@ describe("createReview", () => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue(null);
 
-      const result = await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
-        accountId: "test-account-id",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
-      });
+      const result = await createReview(baseReview);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("User not found");
@@ -129,34 +145,51 @@ describe("createReview", () => {
       mockAccountFindUnique.mockResolvedValue(null);
 
       const result = await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
+        ...baseReview,
         accountId: "non-existent-account",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("Account not found");
     });
 
-    it("should query account with platform and accountId", async () => {
+    it("should refuse to create a review for a deleted account", async () => {
       mockAccountFindUnique.mockResolvedValue({
         id: "account-db-id",
         platform: "YOUTUBE",
+        isSuspended: false,
+        isDeleted: true,
       });
+
+      const result = await createReview(baseReview);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Account not found");
+      expect(mockReviewCreate).not.toHaveBeenCalled();
+    });
+
+    it("should refuse to create a review for a suspended account", async () => {
+      mockAccountFindUnique.mockResolvedValue({
+        id: "account-db-id",
+        platform: "YOUTUBE",
+        isSuspended: true,
+        isDeleted: false,
+      });
+
+      const result = await createReview(baseReview);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/disabled.*suspended/i);
+      expect(mockReviewCreate).not.toHaveBeenCalled();
+    });
+
+    it("should query account with platform, accountId, and the suspension flags", async () => {
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
       mockReviewCreate.mockResolvedValue({ id: "review-id" });
 
       await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
+        ...baseReview,
         accountId: "channel-123",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(mockAccountFindUnique).toHaveBeenCalledWith({
@@ -166,7 +199,33 @@ describe("createReview", () => {
             accountId: "channel-123",
           },
         },
-        select: { platform: true, id: true },
+        select: {
+          platform: true,
+          id: true,
+          isSuspended: true,
+          isDeleted: true,
+        },
+      });
+    });
+
+    it("should refuse a duplicate review from the same author for the same account", async () => {
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
+      mockReviewFindFirst.mockResolvedValueOnce({ id: "existing-review-id" });
+
+      const result = await createReview(baseReview);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/already reviewed/i);
+      expect(mockReviewCreate).not.toHaveBeenCalled();
+      // Make sure the duplicate check is keyed on account+author+isDeleted=false
+      // (an admin-soft-deleted prior review should not block a fresh one).
+      expect(mockReviewFindFirst).toHaveBeenCalledWith({
+        where: {
+          accountId: "account-db-id",
+          authorId: "user-db-id",
+          isDeleted: false,
+        },
+        select: { id: true },
       });
     });
   });
@@ -178,17 +237,12 @@ describe("createReview", () => {
       platform: "youtube",
       accountId: "channel-123",
       content: { text: "Amazing content!" },
-      status: "PUBLISHED",
-      verificationStatus: "UNVERIFIED",
     };
 
     beforeEach(() => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue({ id: "user-db-id" });
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "YOUTUBE",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
     });
 
     it("should create review successfully with valid data", async () => {
@@ -207,20 +261,27 @@ describe("createReview", () => {
       expect(result.data).toEqual(createdReview);
     });
 
-    it("should call prisma.review.create with correct data", async () => {
+    it("should always write status PUBLISHED + verificationStatus IN_PROGRESS, ignoring caller payload", async () => {
       mockReviewCreate.mockResolvedValue({ id: "review-123" });
 
-      await createReview(validReviewData);
+      // Caller tries to self-mark VERIFIED. Source must IGNORE both fields.
+      await createReview({
+        ...validReviewData,
+        // @ts-expect-error — these fields no longer exist on the schema
+        status: "DELETED",
+        verificationStatus: "VERIFIED",
+        authorId: "victim-user-id",
+      });
 
       expect(mockReviewCreate).toHaveBeenCalledWith({
         data: {
           title: "Great Creator!",
-          authorId: "user-db-id",
+          authorId: "user-db-id", // from session, not payload
           platform: "YOUTUBE",
           accountId: "account-db-id",
           stars: 5,
           status: "PUBLISHED",
-          verificationStatus: "UNVERIFIED",
+          verificationStatus: "IN_PROGRESS",
           content: { text: "Amazing content!" },
           contentUrl: undefined,
           redditMetadata: undefined,
@@ -244,10 +305,7 @@ describe("createReview", () => {
     beforeEach(() => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue({ id: "user-db-id" });
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "YOUTUBE",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
       mockReviewCreate.mockResolvedValue({ id: "review-123" });
     });
 
@@ -255,13 +313,9 @@ describe("createReview", () => {
 
     it.each(starRatings)("should accept star rating of %i", async (stars) => {
       const result = await createReview({
-        title: "Test Review",
+        ...baseReview,
         stars,
-        platform: "youtube",
         accountId: "channel-123",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(result.success).toBe(true);
@@ -275,10 +329,7 @@ describe("createReview", () => {
     beforeEach(() => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue({ id: "user-db-id" });
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "REDDIT",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount("REDDIT"));
       mockReviewCreate.mockResolvedValue({ id: "review-123" });
     });
 
@@ -290,8 +341,6 @@ describe("createReview", () => {
         accountId: "reddit-user-123",
         content: "Test content",
         contentUrl: "https://reddit.com/r/test/comments/abc123/test_post",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
         redditMetadata: {
           title: "Test Post Title",
           author: "testuser",
@@ -314,10 +363,7 @@ describe("createReview", () => {
     });
 
     it("should not include redditMetadata for non-Reddit platforms", async () => {
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "YOUTUBE",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount("YOUTUBE"));
 
       await createReview({
         title: "YouTube Review",
@@ -325,8 +371,6 @@ describe("createReview", () => {
         platform: "youtube",
         accountId: "channel-123",
         content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(mockReviewCreate).toHaveBeenCalledWith({
@@ -341,10 +385,7 @@ describe("createReview", () => {
     beforeEach(() => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue({ id: "user-db-id" });
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "YOUTUBE",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
     });
 
     it("should handle database errors gracefully", async () => {
@@ -352,15 +393,7 @@ describe("createReview", () => {
         new Error("Database connection error"),
       );
 
-      const result = await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
-        accountId: "channel-123",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
-      });
+      const result = await createReview(baseReview);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Database connection error");
@@ -369,15 +402,7 @@ describe("createReview", () => {
     it("should handle unexpected errors", async () => {
       mockReviewCreate.mockRejectedValue("Unexpected error type");
 
-      const result = await createReview({
-        title: "Test Review",
-        stars: 5,
-        platform: "youtube",
-        accountId: "channel-123",
-        content: "Test content",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
-      });
+      const result = await createReview(baseReview);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("An unexpected error occurred");
@@ -403,10 +428,7 @@ describe("createReview", () => {
     it.each(platforms)(
       "should convert $input platform to $expected",
       async ({ input, expected }) => {
-        mockAccountFindUnique.mockResolvedValue({
-          id: "account-db-id",
-          platform: expected,
-        });
+        mockAccountFindUnique.mockResolvedValue(liveAccount(expected));
 
         await createReview({
           title: "Test Review",
@@ -414,8 +436,6 @@ describe("createReview", () => {
           platform: input,
           accountId: "account-123",
           content: "Test content",
-          status: "PUBLISHED",
-          verificationStatus: "UNVERIFIED",
         });
 
         expect(mockAccountFindUnique).toHaveBeenCalledWith({
@@ -425,7 +445,12 @@ describe("createReview", () => {
               accountId: "account-123",
             },
           },
-          select: { platform: true, id: true },
+          select: {
+            platform: true,
+            id: true,
+            isSuspended: true,
+            isDeleted: true,
+          },
         });
       },
     );
@@ -435,10 +460,7 @@ describe("createReview", () => {
     beforeEach(() => {
       mockAuth.mockReturnValue({ userId: "clerk-user-123" });
       mockUserFindUnique.mockResolvedValue({ id: "user-db-id" });
-      mockAccountFindUnique.mockResolvedValue({
-        id: "account-db-id",
-        platform: "YOUTUBE",
-      });
+      mockAccountFindUnique.mockResolvedValue(liveAccount());
       mockReviewCreate.mockResolvedValue({ id: "review-123" });
     });
 
@@ -450,8 +472,6 @@ describe("createReview", () => {
         accountId: "channel-123",
         content: "Great video!",
         contentUrl: "https://youtube.com/watch?v=abc123",
-        status: "PUBLISHED",
-        verificationStatus: "UNVERIFIED",
       });
 
       expect(mockReviewCreate).toHaveBeenCalledWith({

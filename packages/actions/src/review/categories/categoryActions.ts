@@ -1,6 +1,6 @@
 "use server";
 
-import axios from "axios";
+import { auth } from "@clerk/nextjs/server";
 
 import { Category, GlossaryCategory } from "@ratecreator/types/review";
 import { getRedisClient } from "@ratecreator/db/redis-do";
@@ -8,7 +8,16 @@ import { getPrismaClient } from "@ratecreator/db/client";
 const CACHE_ROOT_CATEGORIES = "category-root";
 const CACHE_ALL_CATEGORIES = "category-all";
 
+// Auth-gated. The /categories page renders an empty backdrop for anonymous
+// visitors (apps/web/app/(public)/categories/page.tsx), so this Server
+// Action is only ever invoked by signed-in callers in the normal flow. The
+// auth() check here is defense-in-depth against forged Server Action POSTs
+// from DevTools — without it a curious user could `fetch` the action and
+// scrape the full category tree.
 export async function getCategoryData(): Promise<Category[]> {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
   const redis = getRedisClient();
   const prisma = getPrismaClient();
   // No TTL — categories cached indefinitely until manually flushed

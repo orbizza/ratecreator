@@ -7,26 +7,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma, mockInvalidateCache } = vi.hoisted(() => {
-  const mockPrisma = {
-    post: {
-      findMany: vi.fn(),
-      update: vi.fn(),
-    },
-    idea: {
-      findMany: vi.fn(),
-      update: vi.fn(),
-    },
-  };
+const { mockPrisma, mockInvalidateCache, mockAuth, mockClerkClient } =
+  vi.hoisted(() => {
+    const mockPrisma = {
+      post: {
+        findMany: vi.fn(),
+        update: vi.fn(),
+      },
+      idea: {
+        findMany: vi.fn(),
+        update: vi.fn(),
+      },
+    };
 
-  const mockInvalidateCache = vi.fn().mockResolvedValue(undefined);
+    const mockInvalidateCache = vi.fn().mockResolvedValue(undefined);
+    const mockAuth = vi.fn();
+    const mockClerkClient = vi.fn();
 
-  return { mockPrisma, mockInvalidateCache };
-});
+    return { mockPrisma, mockInvalidateCache, mockAuth, mockClerkClient };
+  });
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
+}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+  clerkClient: mockClerkClient,
 }));
 
 // Mock cache module: withCache passes through to fetcher
@@ -59,6 +67,19 @@ describe("Calendar Actions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {

@@ -1,9 +1,19 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { withCache, invalidateCache, CACHE_TTL, CacheKeys } from "./cache";
+import { requireWriter } from "./roles";
 
 const prisma = getPrismaClient();
+
+async function authenticateUser() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await requireWriter(userId);
+}
 
 export interface DashboardStats {
   totalPosts: number;
@@ -35,6 +45,7 @@ export interface PostListType {
 export async function fetchDashboardStats(
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<DashboardStats> {
+  await authenticateUser();
   const cacheKey = CacheKeys.dashboardStats(contentPlatform);
 
   return withCache(cacheKey, CACHE_TTL.DASHBOARD_STATS, async () => {
@@ -92,6 +103,7 @@ export async function fetchRecentPosts(
   limit: number = 5,
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<PostListType[]> {
+  await authenticateUser();
   const cacheKey = CacheKeys.recentPosts(limit, contentPlatform);
 
   return withCache(cacheKey, CACHE_TTL.RECENT_POSTS, async () => {
@@ -129,6 +141,7 @@ export async function fetchRecentPosts(
 export async function invalidateDashboardCache(
   contentPlatform?: "RATECREATOR" | "CREATOROPS" | "DOCUMENTATION",
 ): Promise<void> {
+  await authenticateUser();
   await invalidateCache("dashboard:*");
   await invalidateCache("posts:recent:*");
 }

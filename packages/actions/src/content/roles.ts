@@ -128,11 +128,17 @@ export async function updateUserRoles(
 }
 
 /**
- * Get a user's roles by email
+ * Get a user's roles by email — admin-only, since it lets a caller enumerate
+ * roles for any account by guessing emails.
  */
 export async function getUserRolesByEmail(
   email: string,
 ): Promise<UserRole[] | null> {
+  const isAdmin = await isCurrentUserAdmin();
+  if (!isAdmin) {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
     select: { role: true },
@@ -142,13 +148,22 @@ export async function getUserRolesByEmail(
 }
 
 /**
- * Ensure a user has at least CREATOR role for CreatorOps access.
- * If user already has CREATOR, WRITER, or ADMIN role, this is a no-op.
- * Otherwise, adds CREATOR to their existing roles in both Clerk and MongoDB.
+ * Ensure the **currently authenticated** user has at least CREATOR role for
+ * CreatorOps access. Refuses to operate on any other user's account — the
+ * `clerkId` parameter is kept for callsite ergonomics but is verified to match
+ * the session.
  */
 export async function ensureCreatorRole(clerkId: string): Promise<void> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  if (clerkId !== userId) {
+    throw new Error("Forbidden: cannot modify another user's role");
+  }
+
   const user = await prisma.user.findUnique({
-    where: { clerkId },
+    where: { clerkId: userId },
     select: { id: true, role: true, email: true },
   });
 
@@ -163,13 +178,13 @@ export async function ensureCreatorRole(clerkId: string): Promise<void> {
 
   // Update Clerk publicMetadata
   const client = await clerkClient();
-  await client.users.updateUserMetadata(clerkId, {
+  await client.users.updateUserMetadata(userId, {
     publicMetadata: { roles: newRoles },
   });
 
   // Update MongoDB
   await prisma.user.update({
-    where: { clerkId },
+    where: { clerkId: userId },
     data: { role: newRoles },
   });
 
@@ -178,14 +193,27 @@ export async function ensureCreatorRole(clerkId: string): Promise<void> {
 }
 
 /**
- * Sync a user's roles from Clerk to database
+ * Sync the **currently authenticated** user's roles from Clerk to database.
+ * The `clerkId` parameter is kept for callsite ergonomics but must match
+ * the session — admins use `updateUserRoles` to operate on others.
  */
 export async function syncUserRolesFromClerk(
   clerkId: string,
 ): Promise<{ success: boolean; roles?: UserRole[]; error?: string }> {
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Unauthorized" };
+  }
+  if (clerkId !== userId) {
+    return {
+      success: false,
+      error: "Forbidden: cannot sync another user's roles",
+    };
+  }
+
   try {
     const client = await clerkClient();
-    const clerkUser = await client.users.getUser(clerkId);
+    const clerkUser = await client.users.getUser(userId);
 
     const primaryEmail = clerkUser.emailAddresses.find(
       (e) => e.id === clerkUser.primaryEmailAddressId,
@@ -212,7 +240,7 @@ export async function syncUserRolesFromClerk(
 
     // Update database
     await prisma.user.update({
-      where: { clerkId },
+      where: { clerkId: userId },
       data: { role: roles },
     });
 
@@ -220,5 +248,28 @@ export async function syncUserRolesFromClerk(
   } catch (error) {
     console.error("Error syncing user roles from Clerk:", error);
     return { success: false, error: "Failed to sync roles from Clerk" };
+  }
+}
+
+/**
+ * Throw if the given clerkId is not a WRITER or ADMIN.
+ * Used by content actions (post/tag/idea/subscriber CRUD) that require a
+ * staff-level user.
+ */
+export async function requireWriter(clerkId: string): Promise<void> {
+  const client = await clerkClient();
+  const user = await client.users.getUser(clerkId);
+
+  const primaryEmail = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId,
+  )?.emailAddress;
+
+  if (primaryEmail && ADMIN_EMAILS.includes(primaryEmail)) return;
+
+  const metadata = user.publicMetadata as { roles?: string[] } | undefined;
+  const roles = (metadata?.roles || []).map((r) => r.toUpperCase());
+
+  if (!roles.includes("WRITER") && !roles.includes("ADMIN")) {
+    throw new Error("Forbidden: Writer or Admin role required");
   }
 }

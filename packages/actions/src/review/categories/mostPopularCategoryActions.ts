@@ -15,10 +15,15 @@ const CACHE_POPULAR_CATEGORY_ACCOUNTS = "category-popular-accounts";
 const CACHE_CATEGORY_ACCOUNTS_PREFIX = "category-accounts:";
 
 // Redis TTLs in seconds
+// Per product call: pin Most Popular Categories for 1 year. The component is
+// flushed manually whenever categories or their accounts change (the
+// `flushPopularCategoriesCache` script). Keeping it long-lived avoids the
+// expensive Mongo aggregate on every cold start.
+const ONE_YEAR_SEC = 365 * 24 * 3600;
 const REDIS_TTL = {
-  POPULAR_CATEGORIES: 0, // No expiry — flush manually when categories change
-  POPULAR_CATEGORY_ACCOUNTS: 7 * 24 * 3600, // 7 days unless revalidated
-  INDIVIDUAL_CATEGORY: 7 * 24 * 3600, // 7 days
+  POPULAR_CATEGORIES: ONE_YEAR_SEC,
+  POPULAR_CATEGORY_ACCOUNTS: ONE_YEAR_SEC,
+  INDIVIDUAL_CATEGORY: ONE_YEAR_SEC,
 };
 
 // In-memory local cache — reduces Redis round-trips for repeated calls
@@ -42,20 +47,56 @@ function setLocal<T>(key: string, data: T): void {
 const redis = getRedisClient();
 const prisma = getPrismaClient();
 
+const POPULAR_FALLBACK_LIMIT = 12;
+
+async function fetchPopularFallback(): Promise<PopularCategory[]> {
+  // Fallback when no Category.popular === true rows exist:
+  // pick top categories by mapped account count so the homepage is never empty.
+  const client = await getMongoClient();
+  const database = client.db("ratecreator");
+  const mappingCollection = database.collection("CategoryMapping");
+
+  const topCategoryIds = await mappingCollection
+    .aggregate([
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: POPULAR_FALLBACK_LIMIT },
+    ])
+    .toArray();
+
+  if (topCategoryIds.length === 0) return [];
+
+  const ids = topCategoryIds.map((row) => String(row._id));
+  const categories = await prisma.category.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, slug: true },
+  });
+
+  // Preserve the count-desc order from the aggregation.
+  const order = new Map(ids.map((id, idx) => [id, idx]));
+  return categories.sort(
+    (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+  );
+}
+
 export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   try {
     // Check local cache first
     const local = getLocal<PopularCategory[]>(CACHE_POPULAR_CATEGORIES);
-    if (local) return local;
+    if (local && local.length > 0) return local;
 
     const cachedCategories = await redis.get(CACHE_POPULAR_CATEGORIES);
     if (cachedCategories) {
-      const parsed = JSON.parse(cachedCategories);
-      setLocal(CACHE_POPULAR_CATEGORIES, parsed);
-      return parsed;
+      const parsed = JSON.parse(cachedCategories) as PopularCategory[];
+      // Don't trust empty cached results — they're probably stale negatives
+      // from before any Category.popular was set true.
+      if (parsed.length > 0) {
+        setLocal(CACHE_POPULAR_CATEGORIES, parsed);
+        return parsed;
+      }
     }
 
-    const popularCategories = await prisma.category.findMany({
+    let popularCategories = await prisma.category.findMany({
       where: { popular: true },
       select: {
         id: true,
@@ -63,15 +104,27 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
         slug: true,
       },
     });
-    // console.log(popularCategories);
-    // console.log("Returning popular categories");
 
-    await redis.set(
+    if (popularCategories.length === 0) {
+      console.warn(
+        "[mostPopularCategories] No Category rows with popular=true; using account-count fallback",
+      );
+      popularCategories = await fetchPopularFallback();
+    }
+
+    if (popularCategories.length === 0) {
+      // Don't poison the cache with an empty array — let the next caller retry.
+      return [];
+    }
+
+    // 1y TTL — flush manually via flushPopularCategoriesCache when the
+    // popular set or per-category accounts change.
+    await redis.setex(
       CACHE_POPULAR_CATEGORIES,
+      REDIS_TTL.POPULAR_CATEGORIES,
       JSON.stringify(popularCategories),
     );
     setLocal(CACHE_POPULAR_CATEGORIES, popularCategories);
-    console.log("Popular Categories cached in Redis");
 
     return popularCategories;
   } catch (error) {
@@ -80,45 +133,69 @@ export async function getMostPopularCategories(): Promise<PopularCategory[]> {
   }
 }
 
+function hasAtLeastOneAccount(rows: PopularCategoryWithAccounts[]): boolean {
+  return rows.some((r) => Array.isArray(r.accounts) && r.accounts.length > 0);
+}
+
 export async function getMostPopularCategoryWithData(): Promise<
   PopularCategoryWithAccounts[]
 > {
   const client = await getMongoClient();
 
   try {
-    // Check local cache first
+    // Check local cache first. CRITICAL: must reject empty / no-account
+    // results — `[]` is truthy and would pin the empty render for 60s on
+    // any warm function instance (the bug that kept reproducing in preview).
     const local = getLocal<PopularCategoryWithAccounts[]>(
       CACHE_POPULAR_CATEGORY_ACCOUNTS,
     );
-    if (local) return local;
+    if (local && hasAtLeastOneAccount(local)) return local;
 
-    // Try to get cached full response from Redis
+    // Same defense for Redis: an old deploy may have written an empty (or
+    // all-categories-with-empty-accounts) snapshot for 7 days; ignore it.
     const cachedFullResponse = await redis.get(CACHE_POPULAR_CATEGORY_ACCOUNTS);
     if (cachedFullResponse) {
-      const parsed = JSON.parse(cachedFullResponse);
-      setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
-      return parsed;
+      const parsed = JSON.parse(
+        cachedFullResponse,
+      ) as PopularCategoryWithAccounts[];
+      if (hasAtLeastOneAccount(parsed)) {
+        setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, parsed);
+        return parsed;
+      }
+      // Poisoned snapshot — drop it so the next caller doesn't hit it again.
+      await redis.del(CACHE_POPULAR_CATEGORY_ACCOUNTS);
+      console.warn(
+        "[mostPopularCategories] Discarded empty cached snapshot from Redis",
+      );
     }
 
     const popularCategoriesResponse = await getMostPopularCategories();
     const popularCategories: PopularCategory[] = popularCategoriesResponse;
+    console.log(
+      `[mostPopularCategories] Resolved ${popularCategories.length} categories to populate`,
+    );
 
     const database = client.db("ratecreator");
     const categoryMappingCollection = database.collection("CategoryMapping");
     const accountCollection = database.collection<Account>("Account");
 
-    const accountsByCategory = [];
-    const pipeline = [];
+    const accountsByCategory: PopularCategoryWithAccounts[] = [];
+    const pipeline: Promise<PopularCategoryWithAccounts>[] = [];
 
     // Process each category, potentially in parallel
     for (const category of popularCategories) {
       try {
         const categoryCacheKey = `${CACHE_CATEGORY_ACCOUNTS_PREFIX}${category.id}`;
 
-        // Try local cache for individual category
+        // Try local cache for individual category. Reject empty-account
+        // entries the same way as the aggregate cache check above.
         const localCat =
           getLocal<PopularCategoryWithAccounts>(categoryCacheKey);
-        if (localCat) {
+        if (
+          localCat &&
+          Array.isArray(localCat.accounts) &&
+          localCat.accounts.length > 0
+        ) {
           accountsByCategory.push(localCat);
           continue;
         }
@@ -126,10 +203,16 @@ export async function getMostPopularCategoryWithData(): Promise<
         // Try to get cached category data from Redis
         const cachedCategoryAccounts = await redis.get(categoryCacheKey);
         if (cachedCategoryAccounts) {
-          const parsed = JSON.parse(cachedCategoryAccounts);
-          setLocal(categoryCacheKey, parsed);
-          accountsByCategory.push(parsed);
-          continue;
+          const parsed = JSON.parse(
+            cachedCategoryAccounts,
+          ) as PopularCategoryWithAccounts;
+          if (Array.isArray(parsed.accounts) && parsed.accounts.length > 0) {
+            setLocal(categoryCacheKey, parsed);
+            accountsByCategory.push(parsed);
+            continue;
+          }
+          // Drop the poisoned per-category key so the next call re-queries.
+          await redis.del(categoryCacheKey);
         }
 
         // If not cached, prepare fetch operation
@@ -159,29 +242,27 @@ export async function getMostPopularCategoryWithData(): Promise<
                 : [];
 
             if (accounts.length === 0) {
-              const emptyCategory = {
+              // Don't cache empty-account results — caching for 7d would pin
+              // the empty UI even if the category later gets accounts.
+              console.warn(
+                `[mostPopularCategories] Category ${category.slug} (${category.id}) has 0 mapped accounts`,
+              );
+              return {
                 category: {
                   id: category.id,
                   name: category.name,
                   slug: category.slug,
-                },
+                } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
                 accounts: [],
               };
-              await redis.setex(
-                categoryCacheKey,
-                REDIS_TTL.INDIVIDUAL_CATEGORY,
-                JSON.stringify(emptyCategory),
-              );
-              setLocal(categoryCacheKey, emptyCategory);
-              return emptyCategory;
             }
 
-            const categoryWithAccounts = {
+            const categoryWithAccounts: PopularCategoryWithAccounts = {
               category: {
                 id: category.id,
                 name: category.name,
                 slug: category.slug,
-              },
+              } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
               accounts: accounts.map((account) => ({
                 id: account._id.toString(),
                 name: account.name || "",
@@ -214,7 +295,7 @@ export async function getMostPopularCategoryWithData(): Promise<
             id: category.id,
             name: category.name,
             slug: category.slug,
-          },
+          } as Pick<PopularCategory, "id" | "name" | "slug"> as Category,
           accounts: [],
         });
       }
@@ -224,13 +305,24 @@ export async function getMostPopularCategoryWithData(): Promise<
     const results = await Promise.all(pipeline);
     accountsByCategory.push(...results);
 
-    // Cache the full response with TTL
-    await redis.setex(
-      CACHE_POPULAR_CATEGORY_ACCOUNTS,
-      REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
-      JSON.stringify(accountsByCategory),
-    );
-    setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
+    // Only cache when AT LEAST ONE category has at least one account.
+    // Caching the wrapper when every category is empty would pin the broken
+    // render for 7 days (the bug we keep hitting in preview).
+    if (hasAtLeastOneAccount(accountsByCategory)) {
+      await redis.setex(
+        CACHE_POPULAR_CATEGORY_ACCOUNTS,
+        REDIS_TTL.POPULAR_CATEGORY_ACCOUNTS,
+        JSON.stringify(accountsByCategory),
+      );
+      setLocal(CACHE_POPULAR_CATEGORY_ACCOUNTS, accountsByCategory);
+      console.log(
+        `[mostPopularCategories] Cached aggregate (${accountsByCategory.length} categories, first has ${accountsByCategory[0]?.accounts.length ?? 0} accounts)`,
+      );
+    } else {
+      console.warn(
+        "[mostPopularCategories] Refusing to cache aggregate — no category has any accounts",
+      );
+    }
 
     return accountsByCategory;
   } catch (error) {

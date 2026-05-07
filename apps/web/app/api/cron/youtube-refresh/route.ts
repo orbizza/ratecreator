@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { getRedisClient } from "@ratecreator/db/redis-do";
+import { isAuthorizedCronRequest } from "../../../../lib/cron-auth";
 
 const prisma = getPrismaClient();
 const redis = getRedisClient();
@@ -51,9 +52,7 @@ async function fetchYouTubeBatch(
 }
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCronRequest(request.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

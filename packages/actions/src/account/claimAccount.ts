@@ -166,21 +166,21 @@ export async function verifyClaim(input: {
       };
     }
 
-    // Verify based on method
-    let isVerified = false;
-
+    // NOTE: OAuth verification must be performed server-side via the platform's
+    // OAuth handshake — never trust a client-supplied platformUserId. The
+    // earlier implementation accepted any caller who echoed the claim's
+    // accountId as `verificationData.platformUserId`, which let any signed-in
+    // user verify any unverified claim. Verification methods are disabled
+    // until proper server-side flows are implemented.
     switch (verificationMethod) {
       case "oauth":
-        if (verificationData?.platformUserId === claim.account.accountId) {
-          isVerified = true;
-        }
-        break;
-
       case "bio_link":
       case "dns":
       case "meta_tag":
-        // Placeholder for future implementation
-        break;
+        return {
+          success: false,
+          error: "Verification flow not yet implemented",
+        };
 
       default:
         return {
@@ -188,45 +188,6 @@ export async function verifyClaim(input: {
           error: "Invalid verification method",
         };
     }
-
-    if (isVerified) {
-      await prisma.claimedAccount.update({
-        where: { id: claimId },
-        data: {
-          status: "VERIFIED",
-          verifiedAt: new Date(),
-          verificationMethod,
-        },
-      });
-
-      // Create linked account entry
-      await prisma.userLinkedAccount.upsert({
-        where: {
-          userId_accountId: {
-            userId: user.id,
-            accountId: claim.accountId,
-          },
-        },
-        create: {
-          userId: user.id,
-          accountId: claim.accountId,
-          platform: claim.platform,
-          isPrimary: true,
-        },
-        update: {},
-      });
-
-      return {
-        success: true,
-        claimId,
-        status: "VERIFIED",
-      };
-    }
-
-    return {
-      success: false,
-      error: "Verification failed",
-    };
   } catch (error) {
     console.error("Error verifying claim:", error);
     return {

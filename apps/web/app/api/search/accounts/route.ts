@@ -2,16 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchAccounts } from "@ratecreator/db/elasticsearch-client";
 import qs from "qs";
 import { SearchAccountsParams } from "@ratecreator/types/review";
-import { auth } from "@clerk/nextjs/server";
+import { searchRateLimitOk } from "../../../../lib/search-rate-limit";
 
 export const dynamic = "force-dynamic";
 
+// Public catalog endpoint — these creator profiles are already rendered to
+// anonymous visitors on the homepage (Most Popular Categories) and category
+// pages. Auth-gating broke discovery; rely on per-IP rate limit instead.
 export async function GET(request: NextRequest) {
   try {
+    if (!(await searchRateLimitOk(request, "accounts"))) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     // Parse the URL and query string using qs
     const url = new URL(request.url);
     const parsedQuery = qs.parse(url.search, { ignoreQueryPrefix: true });
-    const { userId } = await auth();
 
     // Initialize the params object matching SearchAccountsParams interface
     // ES uses 1-based pages, so convert from 0-based (frontend) to 1-based (ES)
@@ -27,10 +33,6 @@ export async function GET(request: NextRequest) {
       sortOrder: (parsedQuery.sortOrder as "asc" | "desc") || "desc",
       filters: {}, // Initialize filters as an empty object
     };
-
-    if (!userId && frontendPage > 0) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     if (params.limit && params.limit > 20) {
       params.limit = 20;
@@ -127,10 +129,8 @@ export async function GET(request: NextRequest) {
     };
 
     const jsonResponse = NextResponse.json(response);
-    jsonResponse.headers.set(
-      "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=120",
-    );
+    // Public data, but still no-store to keep facets/aggregations live.
+    jsonResponse.headers.set("Cache-Control", "public, max-age=0, s-maxage=30");
     return jsonResponse;
   } catch (error) {
     console.error("Search error:", error);

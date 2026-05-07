@@ -22,6 +22,7 @@
   },
   "scripts": {
     "flush-redis-cache": "tsx src/redis/flushRedisCache.ts",
+    "flush-popular-categories-cache": "tsx src/redis/flushPopularCategoriesCache.ts",
     "migrate-accounts-elastic": "tsx src/elasticsearch/migrate-accounts-batch.ts",
     "migrate-accounts-elastic:youtube": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform youtube",
     "migrate-accounts-elastic:twitter": "tsx src/elasticsearch/migrate-accounts-batch.ts --platform x",

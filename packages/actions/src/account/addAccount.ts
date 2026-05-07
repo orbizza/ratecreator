@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { publishMessageWithKey } from "@ratecreator/db/pubsub-client";
 
@@ -78,7 +79,14 @@ function platformToEnum(
 export async function addAccount(
   input: AddAccountInput,
 ): Promise<AddAccountResult> {
-  const { platform, identifier, addedByUserId } = input;
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  // Trust the session for attribution; ignore the client-provided value.
+  const { platform, identifier } = input;
+  const addedByUserId = userId;
 
   try {
     const prisma = getPrismaClient();

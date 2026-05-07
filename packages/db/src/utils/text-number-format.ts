@@ -116,12 +116,47 @@ export const removeNormalSuffix = (url: string) => {
 };
 
 /**
- * Converts a YouTube watch URL to an embed URL
- * @param {string} youtubeUrl - The YouTube watch URL
- * @returns {string} YouTube embed URL
+ * Converts a YouTube URL to a safe `youtube-nocookie.com/embed/<id>` URL.
+ *
+ * SECURITY: previous version was a no-op string replace and let arbitrary
+ * URLs flow into `<iframe src>` for review embeds, allowing XSS / phishing
+ * via attacker-controlled hosts. We now extract the 11-char video ID from
+ * any common YouTube URL form and rebuild a known-safe embed URL; returns
+ * an empty string for anything we don't recognise so the consumer simply
+ * doesn't render the iframe.
  */
 export const convertToEmbeddedUrl = (youtubeUrl: string): string => {
-  return youtubeUrl.replace("watch?v=", "embed/");
+  if (typeof youtubeUrl !== "string" || !youtubeUrl) return "";
+  let parsed: URL;
+  try {
+    parsed = new URL(youtubeUrl.trim());
+  } catch {
+    return "";
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+
+  const host = parsed.hostname.toLowerCase();
+  const isYouTube =
+    host === "youtube.com" ||
+    host === "www.youtube.com" ||
+    host === "m.youtube.com" ||
+    host === "youtube-nocookie.com" ||
+    host === "www.youtube-nocookie.com";
+  const isShort = host === "youtu.be";
+  if (!isYouTube && !isShort) return "";
+
+  let id: string | null = null;
+  if (isShort) {
+    id = parsed.pathname.replace(/^\//, "").split("/")[0] || null;
+  } else if (parsed.pathname.startsWith("/watch")) {
+    id = parsed.searchParams.get("v");
+  } else if (parsed.pathname.startsWith("/embed/")) {
+    id = parsed.pathname.replace(/^\/embed\//, "").split("/")[0] || null;
+  } else if (parsed.pathname.startsWith("/shorts/")) {
+    id = parsed.pathname.replace(/^\/shorts\//, "").split("/")[0] || null;
+  }
+  if (!id || !/^[A-Za-z0-9_-]{11}$/.test(id)) return "";
+  return `https://www.youtube-nocookie.com/embed/${id}`;
 };
 
 /**

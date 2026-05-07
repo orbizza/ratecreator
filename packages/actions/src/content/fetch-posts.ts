@@ -1,7 +1,9 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { getPrismaClient } from "@ratecreator/db/client";
 import { withCache, CACHE_TTL } from "./cache";
+import { requireWriter } from "./roles";
 
 import {
   ContentType,
@@ -12,12 +14,21 @@ import {
 
 const prisma = getPrismaClient();
 
+async function authenticateWriter() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await requireWriter(userId);
+}
+
 export async function fetchAllPostsCount(
   tagOption?: string,
   contentType?: string,
   platformType: string = "ratecreator",
   postStatus?: string,
 ) {
+  await authenticateWriter();
   const cacheKey = `posts:count:${platformType}:${contentType || "all"}:${postStatus || "all"}:${tagOption || "all"}`;
 
   return withCache(cacheKey, CACHE_TTL.RECENT_POSTS, async () => {
@@ -54,6 +65,7 @@ export async function fetchAllPosts(
   platformType: string = "ratecreator",
   postStatus?: string,
 ) {
+  await authenticateWriter();
   const pageSize = 10;
   const offset = pageNumber * pageSize;
 
@@ -299,6 +311,8 @@ export async function fetchAllGlossaryPosts() {
 }
 
 export async function fetchPostById(id: string) {
+  // Returns drafts/scheduled — staff-only.
+  await authenticateWriter();
   const post = await prisma.post.findUnique({
     where: { id },
     include: {
@@ -314,6 +328,7 @@ export async function fetchPostById(id: string) {
 }
 
 export async function fetchPostTitleById(id: string) {
+  await authenticateWriter();
   const post = await prisma.post.findUnique({
     where: { id },
     select: {
@@ -328,8 +343,9 @@ export async function fetchPostTitleById(id: string) {
 }
 
 export async function fetchPostByPostUrl(postUrl: string) {
-  const post = await prisma.post.findUnique({
-    where: { postUrl },
+  // Public read — restrict to PUBLISHED so drafts/scheduled never leak.
+  const post = await prisma.post.findFirst({
+    where: { postUrl, status: "PUBLISHED" },
     include: {
       tags: true,
       author: true,

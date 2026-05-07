@@ -93,6 +93,45 @@ export interface UploadResult {
   provider: string;
 }
 
+// Allowlists prevent (a) path traversal in the bucket key and (b) writers
+// uploading text/html with public-read ACL — which would let them host XSS
+// payloads on the *.digitaloceanspaces.com / storage.googleapis.com origin.
+const ALLOWED_FOLDERS = new Set([
+  "editor-images",
+  "blog",
+  "youtube",
+  "tags",
+  "feature",
+  "newsletter",
+  "glossary",
+  "profile",
+]);
+
+const ALLOWED_MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/avif": "avif",
+};
+
+export class UploadValidationError extends Error {}
+
+function validateUpload(folderName: string, fileType: string): string {
+  if (!folderName || typeof folderName !== "string") {
+    throw new UploadValidationError("folderName is required");
+  }
+  if (!ALLOWED_FOLDERS.has(folderName)) {
+    throw new UploadValidationError(`folderName not allowed: ${folderName}`);
+  }
+  const ext = ALLOWED_MIME_TO_EXT[fileType?.toLowerCase()];
+  if (!ext) {
+    throw new UploadValidationError(`fileType not allowed: ${fileType}`);
+  }
+  return ext;
+}
+
 /**
  * Generate a presigned upload URL.
  *
@@ -105,8 +144,8 @@ export async function generateUploadUrl(
   fileType: string,
   bucketType: BucketType = "content",
 ): Promise<UploadResult> {
+  const ext = validateUpload(folderName, fileType);
   const provider = getProvider();
-  const ext = fileType.split("/")[1] || "bin";
   const fileName = `${folderName}/${uuidv4()}.${ext}`;
 
   if (provider === "gcs") {

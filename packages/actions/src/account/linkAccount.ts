@@ -130,25 +130,17 @@ export async function unlinkAccount(
       };
     }
 
-    await prisma.userLinkedAccount.delete({
-      where: {
-        userId_accountId: {
-          userId: user.id,
-          accountId,
-        },
-      },
+    // Use deleteMany so a non-existent link is not distinguishable from a
+    // successful delete (prevents linked-account enumeration).
+    await prisma.userLinkedAccount.deleteMany({
+      where: { userId: user.id, accountId },
     });
 
-    return {
-      success: true,
-    };
+    return { success: true };
   } catch (error) {
     console.error("Error unlinking account:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to unlink account",
-    };
+    // Generic message — never echo the Prisma error to the client.
+    return { success: false, error: "Failed to unlink account" };
   }
 }
 

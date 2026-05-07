@@ -6,21 +6,30 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Use vi.hoisted for mocks
-const { mockPrisma } = vi.hoisted(() => {
+const { mockPrisma, mockAuth, mockClerkClient } = vi.hoisted(() => {
   const mockPrisma = {
     post: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       findMany: vi.fn(),
       count: vi.fn(),
     },
   };
 
-  return { mockPrisma };
+  const mockAuth = vi.fn();
+  const mockClerkClient = vi.fn();
+
+  return { mockPrisma, mockAuth, mockClerkClient };
 });
 
 // Mock modules
 vi.mock("@ratecreator/db/client", () => ({
   getPrismaClient: vi.fn(() => mockPrisma),
+}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: mockAuth,
+  clerkClient: mockClerkClient,
 }));
 
 vi.mock("../content/cache", () => ({
@@ -57,10 +66,72 @@ import {
 describe("Post Fetch Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: signed-in admin (deepshaswat@gmail.com is in ADMIN_EMAILS,
+    // so requireWriter() will accept this user without a roles array).
+    mockAuth.mockResolvedValue({ userId: "clerk-user-1" });
+    mockClerkClient.mockResolvedValue({
+      users: {
+        getUser: vi.fn().mockResolvedValue({
+          id: "clerk-user-1",
+          primaryEmailAddressId: "email-1",
+          emailAddresses: [
+            { id: "email-1", emailAddress: "deepshaswat@gmail.com" },
+          ],
+          publicMetadata: {},
+        }),
+      },
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe("Authentication", () => {
+    it("should reject unauthenticated callers from fetchAllPostsCount", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchAllPostsCount()).rejects.toThrow("Unauthorized");
+    });
+
+    it("should reject unauthenticated callers from fetchAllPosts", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchAllPosts("all", 0)).rejects.toThrow("Unauthorized");
+    });
+
+    it("should reject unauthenticated callers from fetchPostById", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchPostById("post-1")).rejects.toThrow("Unauthorized");
+    });
+
+    it("should reject unauthenticated callers from fetchPostTitleById", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: null });
+
+      await expect(fetchPostTitleById("post-1")).rejects.toThrow(
+        "Unauthorized",
+      );
+    });
+
+    it("should reject non-writer callers", async () => {
+      mockClerkClient.mockResolvedValueOnce({
+        users: {
+          getUser: vi.fn().mockResolvedValue({
+            id: "clerk-user-1",
+            primaryEmailAddressId: "email-1",
+            emailAddresses: [
+              { id: "email-1", emailAddress: "regular@example.com" },
+            ],
+            publicMetadata: { roles: ["USER"] },
+          }),
+        },
+      });
+
+      await expect(fetchAllPostsCount()).rejects.toThrow(
+        "Forbidden: Writer or Admin role required",
+      );
+    });
   });
 
   describe("fetchAllPostsCount", () => {
@@ -419,7 +490,8 @@ describe("Post Fetch Actions", () => {
   });
 
   describe("fetchPostByPostUrl", () => {
-    it("should fetch post by URL with tags and author", async () => {
+    it("should fetch published post by URL with tags and author", async () => {
+      // Public read — restricted to PUBLISHED so drafts/scheduled never leak.
       const mockPost = {
         id: "post-1",
         postUrl: "test-post",
@@ -427,15 +499,25 @@ describe("Post Fetch Actions", () => {
         tags: [],
         author: {},
       };
-      mockPrisma.post.findUnique.mockResolvedValueOnce(mockPost);
+      mockPrisma.post.findFirst.mockResolvedValueOnce(mockPost);
 
       const result = await fetchPostByPostUrl("test-post");
 
       expect(result).toEqual(mockPost);
-      expect(mockPrisma.post.findUnique).toHaveBeenCalledWith({
-        where: { postUrl: "test-post" },
+      expect(mockPrisma.post.findFirst).toHaveBeenCalledWith({
+        where: { postUrl: "test-post", status: "PUBLISHED" },
         include: { tags: true, author: true },
       });
+    });
+
+    it("should not require auth (public read)", async () => {
+      // Even unauthenticated callers can read published posts.
+      mockAuth.mockResolvedValueOnce({ userId: null });
+      mockPrisma.post.findFirst.mockResolvedValueOnce(null);
+
+      const result = await fetchPostByPostUrl("test-post");
+
+      expect(result).toBeNull();
     });
   });
 });

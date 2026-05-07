@@ -20,6 +20,9 @@ import { tiktokRefreshRoute } from "./routes/tiktok-refresh";
 import { refreshSchedulerRoute } from "./routes/refresh-scheduler";
 import { clerkWebhookRoute } from "./routes/clerk-webhook";
 
+// Auth middleware for /jobs/* — verifies Pub/Sub OIDC token (or dev token).
+import { requireWorkerAuth } from "./lib/auth-middleware";
+
 // Pull subscriber for local dev
 import {
   startPullSubscribers,
@@ -28,8 +31,15 @@ import {
 
 const app = new Hono();
 
-// Routes
+// Health check is public (used by Cloud Run probes).
 app.route("/health", healthRoute);
+
+// Clerk webhook: verifies Svix signature inside the route — keep public.
+app.route("/webhook/clerk", clerkWebhookRoute);
+
+// Every /jobs/* route requires a verified Pub/Sub OIDC token.
+app.use("/jobs/*", requireWorkerAuth);
+
 app.route("/jobs/user-sync", userSyncRoute);
 app.route("/jobs/data-fetch", dataFetchRoute);
 app.route("/jobs/translate", translateRoute);
@@ -43,7 +53,6 @@ app.route("/jobs/instagram-refresh", instagramRefreshRoute);
 app.route("/jobs/reddit-refresh", redditRefreshRoute);
 app.route("/jobs/tiktok-refresh", tiktokRefreshRoute);
 app.route("/jobs/refresh-scheduler", refreshSchedulerRoute);
-app.route("/webhook/clerk", clerkWebhookRoute);
 
 const port = parseInt(process.env.PORT || "8080");
 
