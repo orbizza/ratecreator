@@ -54,9 +54,14 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    // Skip Next.js internals, static files, and the public ES catalog
+    // endpoints. /api/search/* is intentionally exempted from Clerk
+    // entirely — see the comment block above for the security model
+    // (whitelisted fields, per-IP rate limit). Excluding here avoids
+    // Clerk's dev-browser handshake (v6+) and any future cookie/version
+    // changes silently breaking anonymous discovery.
+    "/((?!_next|api/search/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes EXCEPT /api/search/*
+    "/(api(?!/search/)|trpc)(.*)",
   ],
 };
